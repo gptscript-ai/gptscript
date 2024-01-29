@@ -1,0 +1,49 @@
+Tools: ls, count, summarize, compare
+
+Find the top 10 go files that have to most lines of code. Then summarize each one and provide an overview of what this go program does. I don't want a file by file summary, just one overall summary.
+
+---
+name: compare
+description: Sorts a list of number from smallest to biggest
+arg: list: A comma separated list of numbers to sort
+
+#!/bin/bash
+
+for i in $(echo "${ARG_LIST}" | sed 's/[[,\]]/ /g'); do
+    echo $i
+done | sort -n
+
+---
+name: ls
+description: Recursively lists all go files
+
+#!/bin/bash
+
+find . -name '*.go'
+
+---
+name: count
+description: Count the lines a file
+arg: file: The filename to count the lines of
+
+#!/bin/bash
+
+wc -l "${ARG_FILE}"
+
+---
+name: summarize
+tools: cat
+description: Read a go file
+arg: file: The filename to read
+
+First read the passed file and then summarize it's content into no more than 100 words
+
+
+---
+name: cat
+description: Read a files content
+arg: file: The filename to count the lines of
+
+#!/bin/bash
+
+cat "${ARG_FILE}" </dev/null

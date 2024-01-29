@@ -1,0 +1,20 @@
+tools: ls, cat
+
+Read all gpt files and then write a README that describes the syntax of the gpt files
+
+---
+name: ls
+description: list all gpt files
+
+#!/bin/bash
+
+find -name '*.gpt'
+
+---
+name: cat
+description: Reads the contents of a file
+arg: file: The filename to read
+
+#!/bin/bash
+
+cat ${ARG_FILE} </dev/null
