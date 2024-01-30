@@ -8,7 +8,7 @@ description: list all gpt files
 
 #!/bin/bash
 
-find -name '*.gpt'
+find . -name '*.gpt'
 
 ---
 name: cat
