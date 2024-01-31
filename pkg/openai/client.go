@@ -58,6 +58,25 @@ func (c *Client) cacheKey(request openai.ChatCompletionRequest) string {
 	return hash.Encode(request)
 }
 
+func (c *Client) seed(request openai.ChatCompletionRequest) int {
+	newRequest := request
+	newRequest.Messages = nil
+
+	for _, msg := range request.Messages {
+		newMsg := msg
+		newMsg.ToolCalls = nil
+		newMsg.ToolCallID = ""
+
+		for _, tool := range msg.ToolCalls {
+			tool.ID = ""
+			newMsg.ToolCalls = append(newMsg.ToolCalls, tool)
+		}
+
+		newRequest.Messages = append(newRequest.Messages, newMsg)
+	}
+	return hash.Seed(newRequest)
+}
+
 func (c *Client) fromCache(ctx context.Context, messageRequest types.CompletionRequest, request openai.ChatCompletionRequest) (result []openai.ChatCompletionStreamResponse, _ bool, _ error) {
 	if messageRequest.Cache != nil && !*messageRequest.Cache {
 		return nil, false, nil
@@ -210,7 +229,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		}
 	}
 
-	request.Seed = ptr(hash.Seed(request))
+	request.Seed = ptr(c.seed(request))
 	response, ok, err := c.fromCache(ctx, messageRequest, request)
 	if err != nil {
 		return nil, err

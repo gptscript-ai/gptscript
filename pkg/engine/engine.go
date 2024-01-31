@@ -267,12 +267,12 @@ func (e *Engine) Continue(ctx context.Context, state *State, results ...CallResu
 	}
 
 	var (
-		added      bool
-		pendingIDs []string
+		added            bool
+		pendingToolCalls []types.CompletionToolCall
 	)
 
 	for id, pending := range state.Pending {
-		pendingIDs = append(pendingIDs, id)
+		pendingToolCalls = append(pendingToolCalls, pending)
 		if _, ok := state.Results[id]; !ok {
 			ret.Calls[id] = Call{
 				ToolName: pending.Function.Name,
@@ -285,11 +285,18 @@ func (e *Engine) Continue(ctx context.Context, state *State, results ...CallResu
 		return &ret, nil
 	}
 
-	sort.Strings(pendingIDs)
+	sort.Slice(pendingToolCalls, func(i, j int) bool {
+		left := pendingToolCalls[i].Function.Name + pendingToolCalls[i].Function.Arguments
+		right := pendingToolCalls[j].Function.Name + pendingToolCalls[j].Function.Arguments
+		if left == right {
+			return pendingToolCalls[i].ID < pendingToolCalls[j].ID
+		}
+		return left < right
+	})
 
-	for _, id := range pendingIDs {
-		pending := state.Pending[id]
-		if result, ok := state.Results[id]; ok {
+	for _, pending := range pendingToolCalls {
+		pending := pending
+		if result, ok := state.Results[pending.ID]; ok {
 			added = true
 			state.Completion.Messages = append(state.Completion.Messages, types.CompletionMessage{
 				Role:     types.CompletionMessageRoleTypeTool,

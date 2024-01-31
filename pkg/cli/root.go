@@ -13,21 +13,22 @@ import (
 	"golang.org/x/term"
 )
 
-type Root struct {
+type GPTScript struct {
 	runner.Options
+	Output string `usage:"Save output to a file" short:"o"`
 }
 
 func New() *cobra.Command {
-	return cmd.Command(&Root{})
+	return cmd.Command(&GPTScript{})
 }
 
-func (r *Root) Customize(cmd *cobra.Command) {
+func (r *GPTScript) Customize(cmd *cobra.Command) {
 	cmd.Use = version.ProgramName
 	cmd.Args = cobra.MinimumNArgs(1)
 	cmd.Flags().SetInterspersed(false)
 }
 
-func (r *Root) Run(cmd *cobra.Command, args []string) error {
+func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 	in, err := os.Open(args[0])
 	if err != nil {
 		return err
@@ -55,9 +56,17 @@ func (r *Root) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Print(s)
-	if !strings.HasSuffix(s, "\n") {
-		fmt.Println()
+	if r.Output != "" {
+		err = os.WriteFile(r.Output, []byte(s), 0644)
+		if err != nil {
+			return err
+		}
+	} else {
+		fmt.Print(s)
+		if !strings.HasSuffix(s, "\n") {
+			fmt.Println()
+		}
 	}
-	return err
+
+	return nil
 }
