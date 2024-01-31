@@ -333,11 +333,14 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 	msg := ""
 	if len(request.Messages) > 0 {
 		msg = request.Messages[len(request.Messages)-1].Content
+		if msg != "" {
+			msg = "Sent content:\n\n" + msg + "\n"
+		}
 	}
 
 	partial <- types.CompletionMessage{
 		Role:    types.CompletionMessageRoleTypeAssistant,
-		Content: types.Text("Waiting for model response...\n" + msg),
+		Content: types.Text(msg + "Waiting for model response..."),
 	}
 
 	slog.Debug("calling openai", "message", request.Messages)
