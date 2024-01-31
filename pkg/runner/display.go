@@ -110,6 +110,10 @@ func multiLineWrite(out io.StringWriter, prefix, lines string) {
 }
 
 func (d *display) printState(s state, depth int) string {
+	if !s.Running {
+		return ""
+	}
+
 	buf := &strings.Builder{}
 	prefix := strings.Repeat("  ", depth)
 	inPrefix := prefix + "  |<- "
@@ -122,13 +126,22 @@ func (d *display) printState(s state, depth int) string {
 	}
 	if s.Running {
 		buf.WriteString("(running ")
+		buf.WriteString(name)
+		buf.WriteString(")\n")
+		if s.Input != "" {
+			multiLineWrite(buf, inPrefix, "args: "+s.Input)
+		}
 	} else {
 		buf.WriteString("(done ")
-	}
-	buf.WriteString(name)
-	buf.WriteString(")\n")
-	if s.Input != "" {
-		multiLineWrite(buf, inPrefix, "args: "+s.Input)
+		buf.WriteString(name)
+		buf.WriteString(") ")
+		buf.WriteString("args: ")
+		head, tail := splitCount(s.Input, 40)
+		buf.WriteString(head)
+		if tail != "" {
+			buf.WriteString("...")
+		}
+		buf.WriteString("\n")
 	}
 
 	childRunning := false
