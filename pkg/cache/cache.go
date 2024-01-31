@@ -12,9 +12,16 @@ import (
 )
 
 type Client struct {
-	dir string
+	dir  string
+	noop bool
 }
 
+func NoCache() *Client {
+	return &Client{
+		noop: true,
+	}
+
+}
 func New() (*Client, error) {
 	dir := filepath.Join(xdg.CacheHome, version.ProgramName)
 	if err := os.MkdirAll(dir, 0755); err != nil {
@@ -26,14 +33,14 @@ func New() (*Client, error) {
 }
 
 func (c *Client) Store(ctx context.Context, key string, content []byte) error {
-	if c == nil {
+	if c == nil || c.noop {
 		return nil
 	}
 	return os.WriteFile(filepath.Join(c.dir, key), content, 0644)
 }
 
 func (c *Client) Get(ctx context.Context, key string) ([]byte, bool, error) {
-	if c == nil {
+	if c == nil || c.noop {
 		return nil, false, nil
 	}
 	data, err := os.ReadFile(filepath.Join(c.dir, key))

@@ -2,115 +2,135 @@ package runner
 
 import (
 	"context"
-	"fmt"
-	"strings"
+	"os"
 	"sync"
+	"time"
 
 	"github.com/acorn-io/gptscript/pkg/cache"
 	"github.com/acorn-io/gptscript/pkg/engine"
 	"github.com/acorn-io/gptscript/pkg/openai"
 	"github.com/acorn-io/gptscript/pkg/types"
-	"github.com/pterm/pterm"
 	"golang.org/x/sync/errgroup"
 )
 
-type Runner struct {
-	Quiet bool
-	c     *openai.Client
-	mw    pterm.MultiPrinter
+type Options struct {
+	Quiet     bool   `usage:"Do not print status" short:"q"`
+	DumpState string `usage:"Dump the internal execution state to a file"`
+	Cache     *bool  `usage:"Disable caching" default:"true"`
 }
 
-func New() (*Runner, error) {
-	cache, err := cache.New()
-	if err != nil {
-		return nil, err
+func complete(opts ...Options) (result Options) {
+	for _, opt := range opts {
+		if opt.DumpState != "" {
+			result.DumpState = opt.DumpState
+		}
+		if opt.Quiet {
+			result.Quiet = true
+		}
+		if opt.Cache != nil {
+			result.Cache = opt.Cache
+		}
 	}
-	c, err := openai.NewClient(cache)
+	if result.Cache == nil {
+		result.Cache = &[]bool{true}[0]
+	}
+	return
+}
+
+type Runner struct {
+	Quiet     bool
+	c         *openai.Client
+	display   *display
+	dumpState string
+}
+
+func New(opts ...Options) (*Runner, error) {
+	opt := complete(opts...)
+
+	cacheBackend := cache.NoCache()
+	if *opt.Cache {
+		var err error
+		cacheBackend, err = cache.New()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	c, err := openai.NewClient(cacheBackend)
 	if err != nil {
 		return nil, err
 	}
 	return &Runner{
-		c:  c,
-		mw: pterm.DefaultMultiPrinter,
+		c:         c,
+		display:   newDisplay(opt.Quiet),
+		dumpState: opt.DumpState,
 	}, nil
 }
 
 func (r *Runner) Run(ctx context.Context, tool types.Tool, toolSet types.ToolSet, input string) (string, error) {
-	progress := make(chan types.CompletionMessage)
-	go func() {
-		for next := range progress {
-			fmt.Print(next.String())
-		}
-		fmt.Println()
-	}()
-
-	if !r.Quiet {
-		r.mw.Start()
-		defer func() {
-			r.mw.Stop()
-			fmt.Println()
-		}()
-	}
-
-	return r.call(ctx, nil, tool, toolSet, input)
-}
-
-func prefix(parent *engine.Context) string {
-	if parent == nil {
-		return ""
-	}
-	return ".." + prefix(parent.Parent)
-}
-
-func infoMsg(prefix string, tool types.Tool, input, output string) string {
-	if len(input) > 20 {
-		input = input[:20]
-	}
-	prefix = fmt.Sprintf("%sCall (%s): %s -> ", prefix, tool.Name, input)
-	maxLen := pterm.GetTerminalWidth() - len(prefix) - 8
-	str := fmt.Sprintf("%s", output)
-	if len(str) > maxLen && maxLen > 0 {
-		str = str[len(str)-maxLen:]
-	}
-
-	return strings.ReplaceAll(prefix+str, "\n", " ")
-}
-
-func (r *Runner) call(ctx context.Context, parent *engine.Context, tool types.Tool, toolSet types.ToolSet, input string) (string, error) {
-	prefix := prefix(parent)
-	spinner, err := pterm.DefaultSpinner.WithWriter(r.mw.NewWriter()).Start(fmt.Sprintf("%sCall (%s): %s", prefix, tool.Name, input))
-	if err != nil {
+	if err := r.display.Start(ctx); err != nil {
 		return "", err
 	}
-	defer spinner.Stop()
 
-	progress := make(chan types.CompletionMessage)
-	progressBuffer := &strings.Builder{}
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	defer wg.Wait()
-
-	go func() {
-		defer wg.Done()
-		for message := range progress {
-			progressBuffer.WriteString(message.String())
-			spinner.Info(infoMsg(prefix, tool, input, progressBuffer.String()))
+	defer func() {
+		_ = r.display.Stop()
+		if r.dumpState != "" {
+			f, err := os.Create(r.dumpState)
+			if err == nil {
+				r.display.Dump(f)
+				f.Close()
+			}
 		}
 	}()
-	defer close(progress)
+
+	callCtx := engine.NewContext(ctx, nil, tool, toolSet)
+	return r.call(callCtx, input)
+}
+
+type Event struct {
+	Time    time.Time
+	Context *engine.Context
+	Type    EventType
+	Content string
+}
+
+type EventType string
+
+var (
+	EventTypeStart  = EventType("start")
+	EventTypeUpdate = EventType("progress")
+	EventTypeStop   = EventType("stop")
+)
+
+func (r *Runner) call(callCtx engine.Context, input string) (string, error) {
+	progress := make(chan types.CompletionMessage)
 
 	e := engine.Engine{
 		Client:   r.c,
 		Progress: progress,
 	}
 
-	callCtx := engine.Context{
-		Ctx:    ctx,
-		Parent: parent,
-		Tool:   tool,
-	}
-	for _, toolName := range tool.Tools {
-		callCtx.Tools = append(callCtx.Tools, toolSet[toolName])
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for message := range progress {
+			r.display.progress <- Event{
+				Time:    time.Now(),
+				Context: &callCtx,
+				Type:    EventTypeUpdate,
+				Content: message.String(),
+			}
+		}
+	}()
+	defer wg.Wait()
+	defer close(progress)
+
+	r.display.progress <- Event{
+		Time:    time.Now(),
+		Context: &callCtx,
+		Type:    EventTypeStart,
+		Content: input,
 	}
 
 	result, err := e.Start(callCtx, input)
@@ -120,7 +140,12 @@ func (r *Runner) call(ctx context.Context, parent *engine.Context, tool types.To
 
 	for {
 		if result.Result != nil {
-			spinner.Info(infoMsg(prefix, tool, input, *result.Result))
+			r.display.progress <- Event{
+				Time:    time.Now(),
+				Context: &callCtx,
+				Type:    EventTypeStop,
+				Content: *result.Result,
+			}
 			return *result.Result, nil
 		}
 
@@ -129,13 +154,14 @@ func (r *Runner) call(ctx context.Context, parent *engine.Context, tool types.To
 			resultLock  sync.Mutex
 		)
 
-		eg, subCtx := errgroup.WithContext(ctx)
+		eg, subCtx := errgroup.WithContext(callCtx.Ctx)
 		for id, call := range result.Calls {
 			id := id
 			call := call
-			tool := toolSet[call.ToolName]
+			callCtx := engine.NewContext(subCtx, &callCtx, callCtx.Tools[call.ToolName], callCtx.Tools)
+			callCtx.ID = id
 			eg.Go(func() error {
-				result, err := r.call(subCtx, &callCtx, tool, toolSet, call.Input)
+				result, err := r.call(callCtx, call.Input)
 				if err != nil {
 					return err
 				}
@@ -155,7 +181,7 @@ func (r *Runner) call(ctx context.Context, parent *engine.Context, tool types.To
 			return "", err
 		}
 
-		result, err = e.Continue(ctx, result.State, callResults...)
+		result, err = e.Continue(callCtx.Ctx, result.State, callResults...)
 		if err != nil {
 			return "", err
 		}

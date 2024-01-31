@@ -67,22 +67,11 @@ func Text(text string) []ContentPart {
 }
 
 func (in CompletionMessage) String() string {
-	if !in.HasContent() {
-		return ""
-	}
 	buf := strings.Builder{}
-	if in.Role == CompletionMessageRoleTypeUser {
-		buf.WriteString("input -> ")
-	} else if in.Role == CompletionMessageRoleTypeTool && in.ToolCall != nil {
-		buf.WriteString(fmt.Sprintf("tool return %s -> ", in.ToolCall.Function.Name))
-	}
-	for i, content := range in.Content {
-		if i > 0 {
-			buf.WriteString("\n -> ")
-		}
+	for _, content := range in.Content {
 		buf.WriteString(content.Text)
 		if content.ToolCall != nil {
-			buf.WriteString(fmt.Sprintf("tool call %s -> %s", content.ToolCall.Function.Name, content.ToolCall.Function.Arguments))
+			buf.WriteString(fmt.Sprintf("tool call %s -> %s\n", content.ToolCall.Function.Name, content.ToolCall.Function.Arguments))
 		}
 		if content.Image != nil {
 			buf.WriteString("image: ")
@@ -103,14 +92,6 @@ type ContentPart struct {
 	Text     string              `json:"text,omitempty"`
 	ToolCall *CompletionToolCall `json:"toolCall,omitempty"`
 	Image    *ImageURL           `json:"image,omitempty"`
-}
-
-func (in ContentPart) HasContent() bool {
-	return in.Text != "" || in.ToolCall != nil || in.Image != nil
-}
-
-func (in CompletionMessage) HasContent() bool {
-	return len(in.Content) > 0 && in.Content[0].HasContent()
 }
 
 type ImageURLDetail string

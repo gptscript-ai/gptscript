@@ -10,9 +10,11 @@ import (
 	"github.com/acorn-io/gptscript/pkg/runner"
 	"github.com/acorn-io/gptscript/pkg/version"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 type Root struct {
+	runner.Options
 }
 
 func New() *cobra.Command {
@@ -37,7 +39,13 @@ func (r *Root) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	runner, err := runner.New()
+	if !r.Quiet {
+		if !term.IsTerminal(int(os.Stdout.Fd())) {
+			r.Quiet = true
+		}
+	}
+
+	runner, err := runner.New(r.Options)
 	if err != nil {
 		return err
 	}

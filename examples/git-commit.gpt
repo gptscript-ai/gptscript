@@ -1,0 +1,17 @@
+tools: gitstatus
+
+Create well formed git commit message based of off the currently stated file
+contents. The message should convey why something was changed and not what
+changed. Use the well known format that has the prefix chore, fix, etc.
+
+Only include changed to *.go files and any change to the go.mod file. Exclude
+the go.sum file.
+
+Do not use markdown format for the output.
+
+---
+name: gitstatus
+
+#!/bin/sh
+
+git diff --staged

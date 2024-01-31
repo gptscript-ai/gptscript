@@ -311,6 +311,16 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 	cacheKey := c.cacheKey(request)
 	request.Stream = true
 
+	msg := ""
+	if len(request.Messages) > 0 {
+		msg = request.Messages[len(request.Messages)-1].Content
+	}
+
+	partial <- types.CompletionMessage{
+		Role:    types.CompletionMessageRoleTypeAssistant,
+		Content: types.Text("Waiting for model response...\n" + msg),
+	}
+
 	slog.Debug("calling openai", "message", request.Messages)
 	stream, err := c.c.CreateChatCompletionStream(ctx, request)
 	if err != nil {
@@ -318,6 +328,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 	}
 	defer stream.Close()
 
+	var partialMessage types.CompletionMessage
 	for {
 		response, err := stream.Recv()
 		if err == io.EOF {
@@ -325,14 +336,12 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 		} else if err != nil {
 			return nil, err
 		}
-		if len(response.Choices) > 0 {
-			slog.Debug("stream", "content", response.Choices[0].Delta.Content)
-			if partial != nil {
-				partial <- types.CompletionMessage{
-					Role:    types.CompletionMessageRoleType(response.Choices[0].Delta.Role),
-					Content: types.Text(response.Choices[0].Delta.Content),
-				}
-			}
+		slog.Debug("stream", "content", response.Choices[0].Delta.Content)
+		if partial != nil {
+			partialMessage = appendMessage(partialMessage, response)
+			//d, _ := json.MarshalIndent(partialMessage, "", "  ")
+			//fmt.Println(string(d))
+			partial <- partialMessage
 		}
 		responses = append(responses, response)
 	}

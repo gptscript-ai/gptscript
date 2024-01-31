@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/acorn-io/gptscript/pkg/openai"
 	"github.com/acorn-io/gptscript/pkg/types"
@@ -54,10 +55,24 @@ type CallResult struct {
 }
 
 type Context struct {
-	Ctx    context.Context
-	Parent *Context
-	Tool   types.Tool
-	Tools  []types.Tool
+	ID     string                `json:"id,omitempty"`
+	Ctx    context.Context       `json:"-"`
+	Parent *Context              `json:"parent,omitempty"`
+	Tool   types.Tool            `json:"tool,omitempty"`
+	Tools  map[string]types.Tool `json:"tools,omitempty"`
+}
+
+var execID int32
+
+func NewContext(ctx context.Context, parent *Context, tool types.Tool, tools map[string]types.Tool) Context {
+	callCtx := Context{
+		ID:     fmt.Sprint(atomic.AddInt32(&execID, 1)),
+		Ctx:    ctx,
+		Parent: parent,
+		Tool:   tool,
+		Tools:  tools,
+	}
+	return callCtx
 }
 
 func (c *Context) getTool(name string) (types.Tool, error) {
