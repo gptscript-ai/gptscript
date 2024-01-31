@@ -3,6 +3,7 @@ package runner
 import (
 	"context"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -115,11 +116,15 @@ func (r *Runner) call(callCtx engine.Context, input string) (string, error) {
 	go func() {
 		defer wg.Done()
 		for message := range progress {
+			content := message.String()
+			if strings.TrimSpace(content) != "" && !strings.Contains(content, "Sent content:") {
+				content += "\n\nModel responding..."
+			}
 			r.display.progress <- Event{
 				Time:    time.Now(),
 				Context: &callCtx,
 				Type:    EventTypeUpdate,
-				Content: message.String(),
+				Content: content,
 			}
 		}
 	}()
