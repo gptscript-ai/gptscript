@@ -15,9 +15,10 @@ import (
 )
 
 type Options struct {
-	Quiet     bool   `usage:"Do not print status" short:"q"`
-	DumpState string `usage:"Dump the internal execution state to a file"`
-	Cache     *bool  `usage:"Disable caching" default:"true"`
+	Quiet        bool   `usage:"Do not print status" short:"q"`
+	DumpState    string `usage:"Dump the internal execution state to a file"`
+	Cache        *bool  `usage:"Disable caching" default:"true"`
+	ShowFinished bool   `usage:"Show finished calls results"`
 }
 
 func complete(opts ...Options) (result Options) {
@@ -30,6 +31,9 @@ func complete(opts ...Options) (result Options) {
 		}
 		if opt.Cache != nil {
 			result.Cache = opt.Cache
+		}
+		if opt.ShowFinished {
+			result.ShowFinished = opt.ShowFinished
 		}
 	}
 	if result.Cache == nil {
@@ -63,12 +67,12 @@ func New(opts ...Options) (*Runner, error) {
 	}
 	return &Runner{
 		c:         c,
-		display:   newDisplay(opt.Quiet),
+		display:   newDisplay(opt.Quiet, opt.ShowFinished),
 		dumpState: opt.DumpState,
 	}, nil
 }
 
-func (r *Runner) Run(ctx context.Context, tool types.Tool, toolSet types.ToolSet, input string) (string, error) {
+func (r *Runner) Run(ctx context.Context, tool types.Tool, input string) (string, error) {
 	if err := r.display.Start(ctx); err != nil {
 		return "", err
 	}
@@ -84,7 +88,7 @@ func (r *Runner) Run(ctx context.Context, tool types.Tool, toolSet types.ToolSet
 		}
 	}()
 
-	callCtx := engine.NewContext(ctx, nil, tool, toolSet)
+	callCtx := engine.NewContext(ctx, nil, tool)
 	return r.call(callCtx, input)
 }
 
@@ -92,6 +96,7 @@ type Event struct {
 	Time    time.Time
 	Context *engine.Context
 	Type    EventType
+	Debug   any
 	Content string
 }
 
@@ -100,11 +105,12 @@ type EventType string
 var (
 	EventTypeStart  = EventType("start")
 	EventTypeUpdate = EventType("progress")
+	EventTypeDebug  = EventType("debug")
 	EventTypeStop   = EventType("stop")
 )
 
 func (r *Runner) call(callCtx engine.Context, input string) (string, error) {
-	progress := make(chan types.CompletionMessage)
+	progress := make(chan openai.Status)
 
 	e := engine.Engine{
 		Client:   r.c,
@@ -115,16 +121,25 @@ func (r *Runner) call(callCtx engine.Context, input string) (string, error) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		for message := range progress {
-			content := message.String()
-			if strings.TrimSpace(content) != "" && !strings.Contains(content, "Sent content:") {
-				content += "\n\nModel responding..."
-			}
-			r.display.progress <- Event{
-				Time:    time.Now(),
-				Context: &callCtx,
-				Type:    EventTypeUpdate,
-				Content: content,
+		for status := range progress {
+			if message := status.PartialResponse; message != nil {
+				content := message.String()
+				if strings.TrimSpace(content) != "" && !strings.Contains(content, "Sent content:") {
+					content += "\n\nModel responding..."
+				}
+				r.display.progress <- Event{
+					Time:    time.Now(),
+					Context: &callCtx,
+					Type:    EventTypeUpdate,
+					Content: content,
+				}
+			} else {
+				r.display.progress <- Event{
+					Time:    time.Now(),
+					Context: &callCtx,
+					Type:    EventTypeDebug,
+					Debug:   status,
+				}
 			}
 		}
 	}()
@@ -163,7 +178,7 @@ func (r *Runner) call(callCtx engine.Context, input string) (string, error) {
 		for id, call := range result.Calls {
 			id := id
 			call := call
-			callCtx := engine.NewContext(subCtx, &callCtx, callCtx.Tools[call.ToolName], callCtx.Tools)
+			callCtx := engine.NewContext(subCtx, &callCtx, callCtx.Tool.ToolSet[call.ToolName])
 			callCtx.ID = id
 			eg.Go(func() error {
 				result, err := r.call(callCtx, call.Input)

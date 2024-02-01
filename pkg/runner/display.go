@@ -13,16 +13,18 @@ import (
 )
 
 type display struct {
-	progress chan Event
-	states   []state
-	done     chan struct{}
-	area     *pterm.AreaPrinter
-	quiet    bool
+	progress     chan Event
+	states       []state
+	done         chan struct{}
+	area         *pterm.AreaPrinter
+	quiet        bool
+	showFinished bool
 }
 
-func newDisplay(quiet bool) *display {
+func newDisplay(quiet, showFinished bool) *display {
 	return &display{
-		quiet: quiet,
+		quiet:        quiet,
+		showFinished: showFinished,
 	}
 }
 
@@ -30,7 +32,7 @@ func (d *display) Start(ctx context.Context) (err error) {
 	if !d.quiet {
 		d.area, err = pterm.DefaultArea.
 			//WithFullscreen(true).
-			WithRemoveWhenDone(true).
+			//WithRemoveWhenDone(true).
 			Start("Starting...")
 		if err != nil {
 			return err
@@ -110,7 +112,7 @@ func multiLineWrite(out io.StringWriter, prefix, lines string) {
 }
 
 func (d *display) printState(s state, depth int) string {
-	if !s.Running {
+	if !d.showFinished && !s.Running {
 		return ""
 	}
 
@@ -195,6 +197,8 @@ func (d *display) addEvent(msg Event) {
 			state.Running = false
 			state.Output = msg.Content
 			state.End = msg.Time
+		case EventTypeDebug:
+			state.Debug = append(state.Debug, msg.Debug)
 		}
 		d.states[i] = state
 	}
@@ -215,6 +219,7 @@ func (d *display) addEvent(msg Event) {
 
 type state struct {
 	Context *engine.Context `json:"context,omitempty"`
+	Debug   []any           `json:"debug,omitempty"`
 	Running bool            `json:"running,omitempty"`
 	Start   time.Time       `json:"start,omitempty"`
 	End     time.Time       `json:"end,omitempty"`

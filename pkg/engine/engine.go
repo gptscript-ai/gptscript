@@ -17,6 +17,21 @@ import (
 	"github.com/acorn-io/gptscript/pkg/version"
 )
 
+// InternalSystemPrompt is added to all threads. Changing this is very dangerous as it has a
+// terrible global effect and changes the behavior of all scripts.
+var InternalSystemPrompt = `
+You are task oriented system.
+You receive input from a user, process the input from the give instructions, and then output the result.
+Your objective is to provide consist and correct results.
+You are referred to as a tool.
+`
+
+func init() {
+	if p := os.Getenv("GPTSCRIPT_INTERNAL_SYSTEM_PROMPT"); p != "" {
+		InternalSystemPrompt = p
+	}
+}
+
 type ErrToolNotFound struct {
 	ToolName string
 }
@@ -27,7 +42,7 @@ func (e *ErrToolNotFound) Error() string {
 
 type Engine struct {
 	Client   *openai.Client
-	Progress chan<- types.CompletionMessage
+	Progress chan<- openai.Status
 }
 
 // +k8s:deepcopy-gen=true
@@ -55,36 +70,48 @@ type CallResult struct {
 }
 
 type Context struct {
-	ID     string                `json:"id,omitempty"`
-	Ctx    context.Context       `json:"-"`
-	Parent *Context              `json:"parent,omitempty"`
-	Tool   types.Tool            `json:"tool,omitempty"`
-	Tools  map[string]types.Tool `json:"tools,omitempty"`
+	ID     string
+	Ctx    context.Context
+	Parent *Context
+	Tool   types.Tool
+}
+
+func (c *Context) UnmarshalJSON(data []byte) error {
+	panic("this data struct is circular by design and can not be read from json")
+}
+
+func (c *Context) MarshalJSON() ([]byte, error) {
+	var parentID string
+	if c.Parent != nil {
+		parentID = c.Parent.ID
+	}
+	return json.Marshal(map[string]any{
+		"id":       c.ID,
+		"parentID": parentID,
+		"tool":     c.Tool,
+	})
 }
 
 var execID int32
 
-func NewContext(ctx context.Context, parent *Context, tool types.Tool, tools map[string]types.Tool) Context {
+func NewContext(ctx context.Context, parent *Context, tool types.Tool) Context {
 	callCtx := Context{
 		ID:     fmt.Sprint(atomic.AddInt32(&execID, 1)),
 		Ctx:    ctx,
 		Parent: parent,
 		Tool:   tool,
-		Tools:  tools,
 	}
 	return callCtx
 }
 
 func (c *Context) getTool(name string) (types.Tool, error) {
-	for _, tool := range c.Tools {
-		if tool.Name == name {
-			return tool, nil
+	tool, ok := c.Tool.ToolSet[name]
+	if !ok {
+		return types.Tool{}, &ErrToolNotFound{
+			ToolName: name,
 		}
 	}
-
-	return types.Tool{}, &ErrToolNotFound{
-		ToolName: name,
-	}
+	return tool, nil
 }
 
 func (e *Engine) runCommand(tool types.Tool, input string) (string, error) {
@@ -156,11 +183,16 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 	completion := types.CompletionRequest{
 		Model:        tool.ModelName,
 		Vision:       tool.Vision,
-		Tools:        nil,
-		Messages:     nil,
 		MaxToken:     tool.MaxTokens,
 		JSONResponse: tool.JSONResponse,
 		Cache:        tool.Cache,
+	}
+
+	if InternalSystemPrompt != "" {
+		completion.Messages = append(completion.Messages, types.CompletionMessage{
+			Role:    types.CompletionMessageRoleTypeSystem,
+			Content: types.Text(InternalSystemPrompt),
+		})
 	}
 
 	for _, subToolName := range tool.Tools {
@@ -203,7 +235,7 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 
 func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 	var (
-		progress = make(chan types.CompletionMessage)
+		progress = make(chan openai.Status)
 		ret      = Return{
 			State: state,
 			Calls: map[string]Call{},

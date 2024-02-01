@@ -18,6 +18,14 @@ type Tool struct {
 	ModelName    string `json:"modelName,omitempty"`
 	JSONResponse bool   `json:"jsonResponse,omitempty"`
 	Cache        *bool  `json:"cache,omitempty"`
+
+	ToolSet ToolSet    `json:"-"`
+	Source  ToolSource `json:"source,omitempty"`
+}
+
+type ToolSource struct {
+	File   string `json:"file,omitempty"`
+	LineNo int    `json:"lineNo,omitempty"`
 }
 
 func (t Tool) IsCommand() bool {

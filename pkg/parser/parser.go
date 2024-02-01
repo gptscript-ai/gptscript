@@ -9,7 +9,6 @@ import (
 
 	"github.com/acorn-io/gptscript/pkg/openai"
 	"github.com/acorn-io/gptscript/pkg/types"
-	"golang.org/x/exp/maps"
 )
 
 var defaultToolSchema = types.JSONSchema{
@@ -84,7 +83,7 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 	case "description":
 		tool.Description = value
 	case "tools":
-		tool.Tools = csv(strings.ToLower(value))
+		tool.Tools = append(tool.Tools, csv(strings.ToLower(value))...)
 	case "args":
 		fallthrough
 	case "arg":
@@ -96,6 +95,8 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		if err != nil {
 			return false, err
 		}
+	case "maxtoken":
+		fallthrough
 	case "maxtokens":
 		tool.MaxTokens, err = strconv.Atoi(value)
 		if err != nil {
@@ -132,7 +133,7 @@ func (e *ErrLine) Error() string {
 	return fmt.Sprintf("line %d: %v", e.Line, e.Err)
 }
 
-func errLine(lineNo int, err error) error {
+func NewErrLine(lineNo int, err error) error {
 	return &ErrLine{
 		Line: lineNo,
 		Err:  err,
@@ -156,7 +157,7 @@ func (c *context) finish(tools *[]types.Tool) {
 	*c = context{}
 }
 
-func Parse(input io.Reader) (types.Tool, types.ToolSet, error) {
+func Parse(input io.Reader) ([]types.Tool, error) {
 	scan := bufio.NewScanner(input)
 
 	var (
@@ -167,6 +168,10 @@ func Parse(input io.Reader) (types.Tool, types.ToolSet, error) {
 
 	for scan.Scan() {
 		lineNo++
+		if context.tool.Source.LineNo == 0 {
+			context.tool.Source.LineNo = lineNo
+		}
+
 		line := scan.Text() + "\n"
 
 		if line == "---\n" {
@@ -175,14 +180,19 @@ func Parse(input io.Reader) (types.Tool, types.ToolSet, error) {
 		}
 
 		if !context.inBody {
+			// This is a comment
 			if strings.HasPrefix(line, "#") && !strings.HasPrefix(line, "#!") {
 				continue
 			}
+
+			// Blank line
 			if strings.TrimSpace(line) == "" {
 				continue
 			}
+
+			// Look for params
 			if isParam, err := isParam(line, &context.tool); err != nil {
-				return types.Tool{}, nil, errLine(lineNo, err)
+				return nil, NewErrLine(lineNo, err)
 			} else if isParam {
 				continue
 			}
@@ -193,31 +203,5 @@ func Parse(input io.Reader) (types.Tool, types.ToolSet, error) {
 	}
 
 	context.finish(&tools)
-
-	var (
-		mainTool types.Tool
-		toolSet  = types.ToolSet{}
-	)
-
-	for i, tool := range tools {
-		if i == 0 {
-			mainTool = tool
-		}
-		if tool.Name != "" {
-			if _, ok := toolSet[tool.Name]; ok {
-				return mainTool, nil, fmt.Errorf("duplicate tool named %s", tool.Name)
-			}
-			toolSet[tool.Name] = tool
-		}
-	}
-
-	for _, tool := range append(maps.Values(toolSet), mainTool) {
-		for _, tool := range tool.Tools {
-			if _, ok := toolSet[tool]; !ok {
-				return mainTool, nil, fmt.Errorf("missing reference to tool named: %s", tool)
-			}
-		}
-	}
-
-	return mainTool, toolSet, nil
+	return tools, nil
 }

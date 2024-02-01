@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/acorn-io/cmd"
-	"github.com/acorn-io/gptscript/pkg/parser"
+	"github.com/acorn-io/gptscript/pkg/loader"
 	"github.com/acorn-io/gptscript/pkg/runner"
 	"github.com/acorn-io/gptscript/pkg/version"
 	"github.com/spf13/cobra"
@@ -15,7 +15,8 @@ import (
 
 type GPTScript struct {
 	runner.Options
-	Output string `usage:"Save output to a file" short:"o"`
+	Output  string `usage:"Save output to a file" short:"o"`
+	SubTool string `usage:"Target tool name in file to run"`
 }
 
 func New() *cobra.Command {
@@ -25,17 +26,10 @@ func New() *cobra.Command {
 func (r *GPTScript) Customize(cmd *cobra.Command) {
 	cmd.Use = version.ProgramName
 	cmd.Args = cobra.MinimumNArgs(1)
-	cmd.Flags().SetInterspersed(false)
 }
 
 func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
-	in, err := os.Open(args[0])
-	if err != nil {
-		return err
-	}
-	defer in.Close()
-
-	mainTool, toolSet, err := parser.Parse(in)
+	tool, err := loader.Tool(cmd.Context(), args[0], r.SubTool)
 	if err != nil {
 		return err
 	}
@@ -51,7 +45,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	s, err := runner.Run(cmd.Context(), mainTool, toolSet, "")
+	s, err := runner.Run(cmd.Context(), *tool, "")
 	if err != nil {
 		return err
 	}

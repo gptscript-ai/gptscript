@@ -178,7 +178,14 @@ func toMessages(ctx context.Context, cache *cache.Client, request types.Completi
 	return
 }
 
-func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionMessage) (*types.CompletionMessage, error) {
+type Status struct {
+	DebugRequest    any                      `json:"request,omitempty"`
+	DebugResponse   any                      `json:"response,omitempty"`
+	DebugChunks     any                      `json:"-"`
+	PartialResponse *types.CompletionMessage `json:"partialResponse,omitempty"`
+}
+
+func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- Status) (*types.CompletionMessage, error) {
 	msgs, err := toMessages(ctx, c.cache, messageRequest)
 	if err != nil {
 		return nil, err
@@ -243,6 +250,12 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	result := types.CompletionMessage{}
 	for _, response := range response {
 		result = appendMessage(result, response)
+	}
+
+	status <- Status{
+		DebugRequest:  request,
+		DebugChunks:   response,
+		DebugResponse: result,
 	}
 
 	return &result, nil
@@ -326,7 +339,7 @@ func (c *Client) store(ctx context.Context, key string, responses []openai.ChatC
 	return c.cache.Store(ctx, key, buf.Bytes())
 }
 
-func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest, partial chan<- types.CompletionMessage) (responses []openai.ChatCompletionStreamResponse, _ error) {
+func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest, partial chan<- Status) (responses []openai.ChatCompletionStreamResponse, _ error) {
 	cacheKey := c.cacheKey(request)
 	request.Stream = true
 
@@ -338,9 +351,11 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 		}
 	}
 
-	partial <- types.CompletionMessage{
-		Role:    types.CompletionMessageRoleTypeAssistant,
-		Content: types.Text(msg + "Waiting for model response..."),
+	partial <- Status{
+		PartialResponse: &types.CompletionMessage{
+			Role:    types.CompletionMessageRoleTypeAssistant,
+			Content: types.Text(msg + "Waiting for model response..."),
+		},
 	}
 
 	slog.Debug("calling openai", "message", request.Messages)
@@ -361,9 +376,9 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 		slog.Debug("stream", "content", response.Choices[0].Delta.Content)
 		if partial != nil {
 			partialMessage = appendMessage(partialMessage, response)
-			//d, _ := json.MarshalIndent(partialMessage, "", "  ")
-			//fmt.Println(string(d))
-			partial <- partialMessage
+			partial <- Status{
+				PartialResponse: &partialMessage,
+			}
 		}
 		responses = append(responses, response)
 	}
