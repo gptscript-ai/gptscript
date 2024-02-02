@@ -179,9 +179,9 @@ func toMessages(ctx context.Context, cache *cache.Client, request types.Completi
 }
 
 type Status struct {
-	DebugRequest    any                      `json:"request,omitempty"`
-	DebugResponse   any                      `json:"response,omitempty"`
-	DebugChunks     any                      `json:"-"`
+	Request         any                      `json:"request,omitempty"`
+	Response        any                      `json:"response,omitempty"`
+	Chunks          any                      `json:"-"`
 	PartialResponse *types.CompletionMessage `json:"partialResponse,omitempty"`
 }
 
@@ -253,9 +253,9 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	}
 
 	status <- Status{
-		DebugRequest:  request,
-		DebugChunks:   response,
-		DebugResponse: result,
+		Request:  request,
+		Chunks:   response,
+		Response: result,
 	}
 
 	return &result, nil

@@ -33,7 +33,22 @@ type Logger struct {
 	fields logrus.Fields
 }
 
-func (l *Logger) Fields(kv ...any) Logger {
+func (l *Logger) FieldsMap(kv map[string]any) *Logger {
+	newFields := map[string]any{}
+	for k, v := range l.fields {
+		newFields[k] = v
+	}
+	for k, v := range kv {
+		newFields[k] = v
+	}
+	return &Logger{
+		prefix: l.prefix,
+		log:    l.log,
+		fields: newFields,
+	}
+}
+
+func (l *Logger) Fields(kv ...any) *Logger {
 	newFields := map[string]any{}
 	for k, v := range l.fields {
 		newFields[k] = v
@@ -43,7 +58,7 @@ func (l *Logger) Fields(kv ...any) Logger {
 			newFields[kv[i-1].(string)] = v
 		}
 	}
-	return Logger{
+	return &Logger{
 		prefix: l.prefix,
 		log:    l.log,
 		fields: newFields,

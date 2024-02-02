@@ -1,22 +1,28 @@
 package loader
 
 import (
+	"bytes"
 	"context"
+	"crypto/md5"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/fs"
 	"net/http"
+	url2 "net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
+	"github.com/acorn-io/gptscript/pkg/assemble"
 	"github.com/acorn-io/gptscript/pkg/parser"
 	"github.com/acorn-io/gptscript/pkg/types"
 )
 
 const (
-	Suffix       = ".gpt"
 	GithubPrefix = "github.com/"
 	githubRawURL = "https://raw.githubusercontent.com/"
 )
@@ -24,7 +30,6 @@ const (
 type Source struct {
 	Content io.ReadCloser
 	Remote  bool
-	Root    string
 	Path    string
 	Name    string
 	File    string
@@ -38,7 +43,7 @@ func (s *Source) String() string {
 }
 
 func openFile(path string) (io.ReadCloser, bool, error) {
-	f, err := os.Open(path + Suffix)
+	f, err := os.Open(path)
 	if errors.Is(err, fs.ErrNotExist) {
 		return nil, false, nil
 	} else if err != nil {
@@ -54,30 +59,22 @@ func loadLocal(base *Source, name string) (*Source, bool, error) {
 	if err != nil {
 		return nil, false, err
 	} else if !ok {
-		path = filepath.Join(base.Root, "vendor", path)
-		content, ok, err = openFile(path)
-		if err != nil {
-			return nil, false, err
-		} else if !ok {
-			return nil, false, nil
-		}
+		return nil, false, nil
 	}
-	log.Debugf("opened %s%s for %s", path, Suffix, path)
+	log.Debugf("opened %s", path)
 
 	return &Source{
 		Content: content,
 		Remote:  false,
-		Root:    base.Root,
 		Path:    filepath.Dir(path),
 		Name:    filepath.Base(path),
-		File:    name + Suffix,
+		File:    path,
 	}, true, nil
 }
 
-func loadGithub(ctx context.Context, base *Source, name string) (*Source, bool, error) {
-	urlName := filepath.Join(base.Path, name)
+func githubURL(urlName string) (string, bool) {
 	if !strings.HasPrefix(urlName, GithubPrefix) {
-		return nil, false, nil
+		return "", false
 	}
 
 	url, version, _ := strings.Cut(urlName, "@")
@@ -88,10 +85,25 @@ func loadGithub(ctx context.Context, base *Source, name string) (*Source, bool, 
 	parts := strings.Split(url, "/")
 	// Must be at least 4 parts github.com/ACCOUNT/REPO/FILE
 	if len(parts) < 4 {
-		return nil, false, fmt.Errorf("invalid github URL, must be at least 4 parts github.com/ACCOUNT/REPO/FILE: %s", url)
+		return "", false
 	}
 
-	url = githubRawURL + parts[1] + "/" + parts[2] + "/" + version + "/" + strings.Join(parts[3:], "/") + Suffix
+	url = githubRawURL + parts[1] + "/" + parts[2] + "/" + version + "/" + strings.Join(parts[3:], "/")
+	return url, true
+}
+
+func loadURL(ctx context.Context, base *Source, name string) (*Source, bool, error) {
+	url := name
+	if base.Path != "" {
+		url = base.Path + "/" + name
+	}
+	if githubURL, ok := githubURL(url); ok {
+		url = githubURL
+	}
+	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
+		return nil, false, nil
+	}
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, false, err
@@ -104,39 +116,38 @@ func loadGithub(ctx context.Context, base *Source, name string) (*Source, bool, 
 		return nil, false, fmt.Errorf("error loading %s: %s", url, resp.Status)
 	}
 
-	log.Debugf("opened %s for %s", url, urlName)
+	log.Debugf("opened %s", url)
+
+	parsed, err := url2.Parse(url)
+	if err != nil {
+		return nil, false, err
+	}
+
+	pathURL := *parsed
+	pathURL.Path = filepath.Dir(parsed.Path)
 
 	return &Source{
 		Content: resp.Body,
 		Remote:  true,
-		Path:    filepath.Dir(urlName),
-		Name:    filepath.Base(urlName),
+		Path:    pathURL.String(),
+		Name:    filepath.Base(parsed.Path),
 		File:    url,
 	}, true, nil
 }
 
-func lookupRoot(path string) (string, error) {
-	current := path
-	for {
-		parent := filepath.Dir(current)
-		if parent == current {
-			break
-		}
-		if s, err := os.Stat(filepath.Join(parent, "vendor")); err == nil && s.IsDir() {
-			return parent, nil
-		} else if !errors.Is(err, fs.ErrNotExist) {
-			return "", err
-		}
-		current = parent
+func ReadTool(ctx context.Context, base *Source, targetToolName string) (*types.Tool, error) {
+	data, err := io.ReadAll(base.Content)
+	if err != nil {
+		return nil, err
+	}
+	_ = base.Content.Close()
+
+	if bytes.HasPrefix(data, assemble.Header) {
+		var tool types.Tool
+		return &tool, json.Unmarshal(data[len(assemble.Header):], &tool)
 	}
 
-	return filepath.Dir(path), nil
-}
-
-func ReadTool(ctx context.Context, base *Source, targetToolName string) (*types.Tool, error) {
-	defer base.Content.Close()
-
-	tools, err := parser.Parse(base.Content)
+	tools, err := parser.Parse(bytes.NewReader(data))
 	if err != nil {
 		return nil, err
 	}
@@ -170,52 +181,90 @@ func ReadTool(ctx context.Context, base *Source, targetToolName string) (*types.
 	return link(ctx, base, mainTool, toolSet)
 }
 
+var (
+	validToolName = regexp.MustCompile("^[a-zA-Z0-9_-]{1,64}$")
+	invalidChars  = regexp.MustCompile("[^a-zA-Z0-9_-]+")
+)
+
+func toolNormalizer(tool string) string {
+	if validToolName.MatchString(tool) {
+		return tool
+	}
+
+	name := invalidChars.ReplaceAllString(tool, "-")
+	if len(name) > 55 {
+		name = name[:55]
+	}
+
+	hash := md5.Sum([]byte(tool))
+	hexed := hex.EncodeToString(hash[:])
+
+	return name + "-" + hexed[:8]
+}
+
+func pickToolName(toolName string, existing map[string]struct{}) string {
+	newName, suffix, ok := strings.Cut(toolName, "/")
+	if ok {
+		newName = suffix
+	}
+	newName = strings.TrimSuffix(newName, filepath.Ext(newName))
+	if newName == "" {
+		newName = "external"
+	}
+
+	for {
+		testName := toolNormalizer(newName)
+		if _, ok := existing[testName]; !ok {
+			existing[testName] = struct{}{}
+			return testName
+		}
+		newName += "0"
+	}
+}
+
 func link(ctx context.Context, base *Source, tool types.Tool, toolSet types.ToolSet) (*types.Tool, error) {
 	tool.ToolSet = types.ToolSet{}
+	toolNames := map[string]struct{}{}
+
 	for _, targetToolName := range tool.Tools {
 		targetTool, ok := toolSet[targetToolName]
-		if ok {
-			linkedTool, err := link(ctx, base, targetTool, toolSet)
-			if err != nil {
-				return nil, fmt.Errorf("failed linking %s at %s: %w", targetToolName, base, err)
-			}
-			tool.ToolSet[targetToolName] = *linkedTool
-		} else {
-			resolvedTool, err := Resolve(ctx, base, targetToolName, "")
-			if err != nil {
-				return nil, fmt.Errorf("failed resolving %s at %s: %w", targetToolName, base, err)
-			}
-			tool.ToolSet[targetToolName] = *resolvedTool
+		if !ok {
+			continue
 		}
+
+		linkedTool, err := link(ctx, base, targetTool, toolSet)
+		if err != nil {
+			return nil, fmt.Errorf("failed linking %s at %s: %w", targetToolName, base, err)
+		}
+		tool.ToolSet[targetToolName] = *linkedTool
+		toolNames[targetToolName] = struct{}{}
+	}
+
+	for i, targetToolName := range tool.Tools {
+		_, ok := toolSet[targetToolName]
+		if ok {
+			continue
+		}
+
+		toolName, subTool, ok := strings.Cut(targetToolName, " from ")
+		if ok {
+			toolName = strings.TrimSpace(toolName)
+			subTool = strings.TrimSpace(subTool)
+		}
+		resolvedTool, err := Resolve(ctx, base, toolName, subTool)
+		if err != nil {
+			return nil, fmt.Errorf("failed resolving %s at %s: %w", targetToolName, base, err)
+		}
+		newToolName := pickToolName(toolName, toolNames)
+		tool.ToolSet[newToolName] = *resolvedTool
+		tool.Tools[i] = newToolName
 	}
 
 	return &tool, nil
 }
 
 func Tool(ctx context.Context, name, subToolName string) (*types.Tool, error) {
-	var base Source
-
-	name = strings.TrimSuffix(name, Suffix)
-
-	f, ok, err := openFile(name)
-	if errors.Is(err, fs.ErrNotExist) || !ok {
-		base = Source{
-			Remote: true,
-		}
-	} else if err != nil {
-		return nil, err
-	} else {
-		_ = f.Close()
-		root, err := lookupRoot(name)
-		if err != nil {
-			return nil, err
-		}
-		base = Source{
-			Root: root,
-		}
-	}
-
-	return Resolve(ctx, &base, name, subToolName)
+	return Resolve(ctx, &Source{}, name, subToolName)
 }
 
 func Resolve(ctx context.Context, base *Source, name, subTool string) (*types.Tool, error) {
@@ -228,8 +277,6 @@ func Resolve(ctx context.Context, base *Source, name, subTool string) (*types.To
 }
 
 func Input(ctx context.Context, base *Source, name string) (*Source, error) {
-	name = strings.TrimSuffix(name, Suffix)
-
 	if !base.Remote {
 		s, ok, err := loadLocal(base, name)
 		if err != nil || ok {
@@ -237,10 +284,10 @@ func Input(ctx context.Context, base *Source, name string) (*Source, error) {
 		}
 	}
 
-	s, ok, err := loadGithub(ctx, base, name)
+	s, ok, err := loadURL(ctx, base, name)
 	if err != nil || ok {
 		return s, err
 	}
 
-	return nil, fmt.Errorf("can not load tools %s at %s", name, base.Path)
+	return nil, fmt.Errorf("can not load tools path=%s name=%s", base.Path, name)
 }

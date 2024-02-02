@@ -19,7 +19,7 @@ type Tool struct {
 	JSONResponse bool   `json:"jsonResponse,omitempty"`
 	Cache        *bool  `json:"cache,omitempty"`
 
-	ToolSet ToolSet    `json:"-"`
+	ToolSet ToolSet    `json:"toolSet,omitempty"`
 	Source  ToolSource `json:"source,omitempty"`
 }
 
