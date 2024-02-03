@@ -16,6 +16,24 @@ type JSONSchema struct {
 	AdditionalProperties bool `json:"additionalProperties,omitempty"`
 }
 
+func ObjectSchema(kv ...string) *JSONSchema {
+	s := &JSONSchema{
+		Property: Property{
+			Type: "object",
+		},
+		Properties: map[string]Property{},
+	}
+	for i, v := range kv {
+		if i%2 == 1 {
+			s.Properties[kv[i-1]] = Property{
+				Description: v,
+				Type:        "string",
+			}
+		}
+	}
+	return s
+}
+
 type Property struct {
 	Description string       `json:"description,omitempty"`
 	Type        string       `json:"type,omitempty"`

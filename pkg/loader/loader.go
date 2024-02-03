@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	"github.com/acorn-io/gptscript/pkg/assemble"
+	"github.com/acorn-io/gptscript/pkg/builtin"
 	"github.com/acorn-io/gptscript/pkg/parser"
 	"github.com/acorn-io/gptscript/pkg/types"
 )
@@ -332,6 +333,14 @@ func Program(ctx context.Context, name, subToolName string) (types.Program, erro
 }
 
 func Resolve(ctx context.Context, prg *types.Program, base *Source, name, subTool string) (types.Tool, error) {
+	if subTool == "" {
+		t, ok := builtin.Builtin(name)
+		if ok {
+			prg.ToolSet[t.ID] = t
+			return t, nil
+		}
+	}
+
 	s, err := Input(ctx, base, name)
 	if err != nil {
 		return types.Tool{}, err

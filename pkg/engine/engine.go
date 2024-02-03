@@ -137,7 +137,11 @@ func (c *Context) getTool(name string) (types.Tool, error) {
 	return tool, nil
 }
 
-func (e *Engine) runCommand(tool types.Tool, input string) (string, error) {
+func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) (string, error) {
+	if tool.BuiltinFunc != nil {
+		return tool.BuiltinFunc(ctx, e.Env, input)
+	}
+
 	env := e.Env[:]
 	data := map[string]any{}
 
@@ -197,7 +201,7 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 	tool := ctx.Tool
 
 	if tool.IsCommand() {
-		s, err := e.runCommand(tool, input)
+		s, err := e.runCommand(ctx.Ctx, tool, input)
 		if err != nil {
 			return nil, err
 		}

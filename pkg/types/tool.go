@@ -1,6 +1,7 @@
 package types
 
 import (
+	"context"
 	"fmt"
 	"strings"
 )
@@ -12,6 +13,8 @@ type Program struct {
 	ToolSet     ToolSet `json:"toolSet,omitempty"`
 }
 
+type BuiltinFunc func(ctx context.Context, env []string, input string) (string, error)
+
 type Tool struct {
 	ID           string            `json:"id,omitempty"`
 	Name         string            `json:"name,omitempty"`
@@ -20,6 +23,7 @@ type Tool struct {
 	Instructions string            `json:"instructions,omitempty"`
 	Tools        []string          `json:"tools,omitempty"`
 	ToolMapping  map[string]string `json:"toolMapping,omitempty"`
+	BuiltinFunc  BuiltinFunc       `json:"-"`
 
 	Vision       bool   `json:"vision,omitempty"`
 	MaxTokens    int    `json:"maxTokens,omitempty"`
