@@ -17,4 +17,4 @@ arg: file: The filename to read
 
 #!/bin/bash
 
-cat ${ARG_FILE} </dev/null
+cat ${FILE} </dev/null

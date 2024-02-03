@@ -9,6 +9,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/acorn-io/gptscript/pkg/cache"
@@ -35,23 +36,74 @@ type Client struct {
 	cache *cache.Client
 }
 
-func NewClient(cache *cache.Client) (*Client, error) {
-	if url == "" {
-		if key == "" {
-			return nil, fmt.Errorf("OPENAI_API_KEY env var is not set")
-		}
-		return &Client{
-			c:     openai.NewClient(key),
-			cache: cache,
-		}, nil
+type Options struct {
+	BaseURL    string         `usage:"OpenAI base URL" name:"openai-base-url" env:"OPENAI_BASE_URL"`
+	APIKey     string         `usage:"OpenAI API KEY" name:"openai-api-key" env:"OPENAI_API_KEY"`
+	APIVersion string         `usage:"OpenAI API Version (for Azure)" name:"openai-api-version" env:"OPENAI_API_VERSION"`
+	APIType    openai.APIType `usage:"OpenAI API Type (valid: OPEN_AI, AZURE, AZURE_AD)" name:"openai-api-type" env:"OPENAI_API_TYPE"`
+	OrgID      string         `usage:"OpenAI organization ID" name:"openai-org-id" env:"OPENAI_ORG_ID"`
+	Cache      *cache.Client
+}
+
+func complete(opts ...Options) (result Options, err error) {
+	for _, opt := range opts {
+		result.BaseURL = types.FirstSet(opt.BaseURL, result.BaseURL)
+		result.APIKey = types.FirstSet(opt.APIKey, result.APIKey)
+		result.OrgID = types.FirstSet(opt.OrgID, result.OrgID)
+		result.Cache = types.FirstSet(opt.Cache, result.Cache)
+		result.APIVersion = types.FirstSet(opt.APIVersion, result.APIVersion)
+		result.APIType = types.FirstSet(opt.APIType, result.APIType)
 	}
 
-	cfg := openai.DefaultConfig(key)
-	cfg.BaseURL = url
+	if result.Cache == nil {
+		result.Cache, err = cache.New(cache.Options{
+			Cache: new(bool),
+		})
+	}
+
+	if result.BaseURL == "" && url != "" {
+		result.BaseURL = url
+	}
+
+	if result.APIKey == "" && key != "" {
+		result.APIKey = key
+	}
+
+	return result, err
+}
+
+func NewClient(opts ...Options) (*Client, error) {
+	opt, err := complete(opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg := openai.DefaultConfig(opt.APIKey)
+	if strings.Contains(string(opt.APIType), "AZURE") {
+		cfg = openai.DefaultAzureConfig(key, url)
+	}
+
+	cfg.BaseURL = types.FirstSet(opt.BaseURL, cfg.BaseURL)
+	cfg.OrgID = types.FirstSet(opt.OrgID, cfg.OrgID)
+	cfg.APIVersion = types.FirstSet(opt.APIVersion, cfg.APIVersion)
+	cfg.APIType = types.FirstSet(opt.APIType, cfg.APIType)
+
 	return &Client{
 		c:     openai.NewClientWithConfig(cfg),
-		cache: cache,
+		cache: opt.Cache,
 	}, nil
+}
+
+func (c *Client) ListModules(ctx context.Context) (result []string, _ error) {
+	models, err := c.c.ListModels(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, model := range models.Models {
+		result = append(result, model.ID)
+	}
+	sort.Strings(result)
+	return result, nil
 }
 
 func (c *Client) cacheKey(request openai.ChatCompletionRequest) string {
@@ -204,14 +256,6 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	if messageRequest.JSONResponse {
 		request.ResponseFormat = &openai.ChatCompletionResponseFormat{
 			Type: openai.ChatCompletionResponseFormatTypeJSONObject,
-		}
-	}
-
-	if request.Model == "" {
-		if messageRequest.Vision {
-			request.Model = DefaultVisionModel
-		} else {
-			request.Model = DefaultModel
 		}
 	}
 

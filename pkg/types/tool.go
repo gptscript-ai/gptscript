@@ -1,17 +1,25 @@
 package types
 
 import (
+	"fmt"
 	"strings"
 )
 
 type ToolSet map[string]Tool
 
+type Program struct {
+	EntryToolID string  `json:"entryToolId,omitempty"`
+	ToolSet     ToolSet `json:"toolSet,omitempty"`
+}
+
 type Tool struct {
-	Name         string      `json:"name,omitempty"`
-	Description  string      `json:"description,omitempty"`
-	Arguments    *JSONSchema `json:"arguments,omitempty"`
-	Instructions string      `json:"instructions,omitempty"`
-	Tools        []string    `json:"tools,omitempty"`
+	ID           string            `json:"id,omitempty"`
+	Name         string            `json:"name,omitempty"`
+	Description  string            `json:"description,omitempty"`
+	Arguments    *JSONSchema       `json:"arguments,omitempty"`
+	Instructions string            `json:"instructions,omitempty"`
+	Tools        []string          `json:"tools,omitempty"`
+	ToolMapping  map[string]string `json:"toolMapping,omitempty"`
 
 	Vision       bool   `json:"vision,omitempty"`
 	MaxTokens    int    `json:"maxTokens,omitempty"`
@@ -19,8 +27,7 @@ type Tool struct {
 	JSONResponse bool   `json:"jsonResponse,omitempty"`
 	Cache        *bool  `json:"cache,omitempty"`
 
-	ToolSet ToolSet    `json:"toolSet,omitempty"`
-	Source  ToolSource `json:"source,omitempty"`
+	Source ToolSource `json:"source,omitempty"`
 }
 
 type ToolSource struct {
@@ -28,6 +35,19 @@ type ToolSource struct {
 	LineNo int    `json:"lineNo,omitempty"`
 }
 
+func (t ToolSource) String() string {
+	return fmt.Sprintf("%s:%d", t.File, t.LineNo)
+}
+
 func (t Tool) IsCommand() bool {
 	return strings.HasPrefix(t.Instructions, "#!")
+}
+
+func FirstSet[T comparable](in ...T) (result T) {
+	for _, i := range in {
+		if i != result {
+			return i
+		}
+	}
+	return
 }

@@ -1,0 +1,15 @@
+tools: myfunction
+What's the myfunction of 3
+
+---
+name: myfunction
+description: A function taking an integer as argument and returns an integer
+args: number: An integer
+tools: myfunction
+
+Do the following steps in strict sequence:
+Step 1. If ${number} is 0, skip the remaining steps and return 1
+Step 2. Calculate ${number} minus 1
+Step 3. Calculate myfunction of the result of Step 2
+Step 4. Multiply result of Step 3 with ${number}
+Step 5. Return the result of Step 4

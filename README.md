@@ -57,7 +57,7 @@ arg: file: The filename to read
 
 #!/bin/bash
 
-cat ${ARG_FILE} </dev/null
+cat ${FILE} </dev/null
 ```
 #### From `./tables.gpt`
 ```
@@ -69,13 +69,13 @@ Arg: cmd: The sqlite command or sql statement to run.
 
 #!/bin/bash
 
-sqlite3 ${ARG_DATABASEFILE} -cmd "${ARG_CMD}" </dev/null
+sqlite3 ${DATABASEFILE} -cmd "${CMD}" </dev/null
 ```
 
 ## Additional Observations
 - The fields and code block are separated by a new line.
 - The arguments are indicated as `arg: argument_name: argument_description`.
-- The executable code is introduced with a `#!/bin/bash` shebang line and is expected to replace the argument placeholders (`${ARG_NAME}`) with actual values during execution.
+- The executable code is introduced with a `#!/bin/bash` shebang line and is expected to replace the argument placeholders (`${NAME}`) with actual values during execution.
 
 Please note that this description of the syntax is based on the provided examples and may not cover variations which are not included in those files. Additional GPT files may include diverse structures and should be reviewed to check for consistency with this syntax.
 

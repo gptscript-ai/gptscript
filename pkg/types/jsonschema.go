@@ -17,7 +17,7 @@ type JSONSchema struct {
 }
 
 type Property struct {
-	Description string       `json:",omitempty"`
+	Description string       `json:"description,omitempty"`
 	Type        string       `json:"type,omitempty"`
 	Ref         string       `json:"$ref,omitempty"`
 	Items       []JSONSchema `json:"items,omitempty"`

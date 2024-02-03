@@ -2,26 +2,35 @@ package mvl
 
 import (
 	"runtime"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 )
+
+// Minimally Viable Logger
 
 // This Package exists because I couldn't decide on a logging framework that didn't infuriate me.
 // So this is simple place to make a better decision later about logging frameworks. I only care about
 // the interface, not the implementation. Smarter people do that well.
 
-func init() {
+func SetDebug() {
 	logrus.SetLevel(logrus.DebugLevel)
 }
 
 func Package() Logger {
 	_, p, _, _ := runtime.Caller(1)
-	return New(p)
+	_, suffix, _ := strings.Cut(p, "gptscript/")
+	i := strings.LastIndex(suffix, "/")
+	return New(suffix[:i])
 }
 
 func New(name string) Logger {
+	var prefix string
+	if name != "" {
+		prefix = name + ": "
+	}
 	return Logger{
-		prefix: name + ": ",
+		prefix: prefix,
 		log:    logrus.StandardLogger(),
 		fields: logrus.Fields{},
 	}

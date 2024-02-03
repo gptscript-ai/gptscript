@@ -21,8 +21,9 @@ import (
 // terrible global effect and changes the behavior of all scripts.
 var InternalSystemPrompt = `
 You are task oriented system.
-You receive input from a user, process the input from the give instructions, and then output the result.
+You receive input from a user, process the input from the given instructions, and then output the result.
 Your objective is to provide consist and correct results.
+You do not need to explain the steps taken, only provide the result to the given instructions.
 You are referred to as a tool.
 `
 
@@ -42,6 +43,7 @@ func (e *ErrToolNotFound) Error() string {
 
 type Engine struct {
 	Client   *openai.Client
+	Env      []string
 	Progress chan<- openai.Status
 }
 
@@ -70,10 +72,11 @@ type CallResult struct {
 }
 
 type Context struct {
-	ID     string
-	Ctx    context.Context
-	Parent *Context
-	Tool   types.Tool
+	ID      string
+	Ctx     context.Context
+	Parent  *Context
+	Program *types.Program
+	Tool    types.Tool
 }
 
 func (c *Context) UnmarshalJSON(data []byte) error {
@@ -94,18 +97,38 @@ func (c *Context) MarshalJSON() ([]byte, error) {
 
 var execID int32
 
-func NewContext(ctx context.Context, parent *Context, tool types.Tool) Context {
+func NewContext(ctx context.Context, prg *types.Program) Context {
 	callCtx := Context{
-		ID:     fmt.Sprint(atomic.AddInt32(&execID, 1)),
-		Ctx:    ctx,
-		Parent: parent,
-		Tool:   tool,
+		ID:      fmt.Sprint(atomic.AddInt32(&execID, 1)),
+		Ctx:     ctx,
+		Program: prg,
+		Tool:    prg.ToolSet[prg.EntryToolID],
 	}
 	return callCtx
 }
 
+func (c *Context) SubCall(ctx context.Context, toolName, callID string) (Context, error) {
+	tool, err := c.getTool(toolName)
+	if err != nil {
+		return Context{}, err
+	}
+	return Context{
+		ID:      callID,
+		Ctx:     ctx,
+		Parent:  c,
+		Program: c.Program,
+		Tool:    tool,
+	}, nil
+}
+
 func (c *Context) getTool(name string) (types.Tool, error) {
-	tool, ok := c.Tool.ToolSet[name]
+	toolID, ok := c.Tool.ToolMapping[name]
+	if !ok {
+		return types.Tool{}, &ErrToolNotFound{
+			ToolName: name,
+		}
+	}
+	tool, ok := c.Program.ToolSet[toolID]
 	if !ok {
 		return types.Tool{}, &ErrToolNotFound{
 			ToolName: name,
@@ -115,7 +138,7 @@ func (c *Context) getTool(name string) (types.Tool, error) {
 }
 
 func (e *Engine) runCommand(tool types.Tool, input string) (string, error) {
-	env := os.Environ()
+	env := e.Env[:]
 	data := map[string]any{}
 
 	dec := json.NewDecoder(bytes.NewReader([]byte(input)))
@@ -123,7 +146,7 @@ func (e *Engine) runCommand(tool types.Tool, input string) (string, error) {
 
 	if err := json.Unmarshal([]byte(input), &data); err == nil {
 		for k, v := range data {
-			envName := fmt.Sprintf("ARG_%s", strings.ToUpper(strings.ReplaceAll(k, "-", "_")))
+			envName := fmt.Sprintf("%s", strings.ToUpper(strings.ReplaceAll(k, "-", "_")))
 			switch val := v.(type) {
 			case string:
 				env = append(env, envName+"="+val)
@@ -145,6 +168,7 @@ func (e *Engine) runCommand(tool types.Tool, input string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer os.Remove(f.Name())
 
 	_, err = f.Write([]byte(rest))
 	_ = f.Close()
@@ -161,6 +185,8 @@ func (e *Engine) runCommand(tool types.Tool, input string) (string, error) {
 	cmd.Stdout = output
 
 	if err := cmd.Run(); err != nil {
+		_, _ = os.Stderr.Write(output.Bytes())
+		log.Errorf("failed to run tool [%s] cmd [%s]: %v", tool.Name, interpreter, err)
 		return "", err
 	}
 

@@ -1,0 +1,2 @@
+# You can run this script with "gptscript echo.gpt --input 'Hello, World!'"
+echo "${input}"

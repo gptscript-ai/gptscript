@@ -2,7 +2,6 @@ package runner
 
 import (
 	"context"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -14,82 +13,72 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-type Options struct {
-	Quiet        bool   `usage:"Do not print status" short:"q"`
-	DumpState    string `usage:"Dump the internal execution state to a file"`
-	Cache        *bool  `usage:"Disable caching" default:"true"`
-	ShowFinished bool   `usage:"Show finished calls results"`
+type MonitorFactory interface {
+	Start(ctx context.Context, prg *types.Program, env []string, input string) (Monitor, error)
 }
 
-func complete(opts ...Options) (result Options) {
+type Monitor interface {
+	Event(event Event)
+	Stop()
+}
+
+type (
+	CacheOptions  cache.Options
+	OpenAIOptions openai.Options
+)
+
+type Options struct {
+	CacheOptions
+	OpenAIOptions
+	MonitorFactory MonitorFactory `usage:"-"`
+}
+
+func complete(opts ...Options) (cacheOpts []cache.Options, oaOpts []openai.Options, result Options) {
 	for _, opt := range opts {
-		if opt.DumpState != "" {
-			result.DumpState = opt.DumpState
-		}
-		if opt.Quiet {
-			result.Quiet = true
-		}
-		if opt.Cache != nil {
-			result.Cache = opt.Cache
-		}
-		if opt.ShowFinished {
-			result.ShowFinished = opt.ShowFinished
-		}
+		cacheOpts = append(cacheOpts, cache.Options(opt.CacheOptions))
+		oaOpts = append(oaOpts, openai.Options(opt.OpenAIOptions))
+		result.MonitorFactory = types.FirstSet(opt.MonitorFactory, result.MonitorFactory)
 	}
-	if result.Cache == nil {
-		result.Cache = &[]bool{true}[0]
+	if result.MonitorFactory == nil {
+		result.MonitorFactory = noopFactory{}
 	}
 	return
 }
 
 type Runner struct {
-	Quiet     bool
-	c         *openai.Client
-	display   *display
-	dumpState string
+	c       *openai.Client
+	factory MonitorFactory
 }
 
 func New(opts ...Options) (*Runner, error) {
-	opt := complete(opts...)
-
-	cacheBackend := cache.NoCache()
-	if *opt.Cache {
-		var err error
-		cacheBackend, err = cache.New()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	c, err := openai.NewClient(cacheBackend)
+	cacheOpts, oaOpts, opt := complete(opts...)
+	cacheClient, err := cache.New(cacheOpts...)
 	if err != nil {
 		return nil, err
 	}
+
+	oaClient, err := openai.NewClient(append(oaOpts, openai.Options{
+		Cache: cacheClient,
+	})...)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Runner{
-		c:         c,
-		display:   newDisplay(opt.Quiet, opt.ShowFinished),
-		dumpState: opt.DumpState,
+		c:       oaClient,
+		factory: opt.MonitorFactory,
 	}, nil
 }
 
-func (r *Runner) Run(ctx context.Context, tool types.Tool, input string) (string, error) {
-	if err := r.display.Start(ctx); err != nil {
+func (r *Runner) Run(ctx context.Context, prg types.Program, env []string, input string) (string, error) {
+	monitor, err := r.factory.Start(ctx, &prg, env, input)
+	if err != nil {
 		return "", err
 	}
+	defer monitor.Stop()
 
-	defer func() {
-		_ = r.display.Stop()
-		if r.dumpState != "" {
-			f, err := os.Create(r.dumpState)
-			if err == nil {
-				r.display.Dump(f)
-				f.Close()
-			}
-		}
-	}()
-
-	callCtx := engine.NewContext(ctx, nil, tool)
-	return r.call(callCtx, input)
+	callCtx := engine.NewContext(ctx, &prg)
+	return r.call(callCtx, monitor, env, input)
 }
 
 type Event struct {
@@ -109,12 +98,13 @@ var (
 	EventTypeStop   = EventType("stop")
 )
 
-func (r *Runner) call(callCtx engine.Context, input string) (string, error) {
+func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, input string) (string, error) {
 	progress := make(chan openai.Status)
 
 	e := engine.Engine{
 		Client:   r.c,
 		Progress: progress,
+		Env:      env,
 	}
 
 	wg := sync.WaitGroup{}
@@ -127,31 +117,31 @@ func (r *Runner) call(callCtx engine.Context, input string) (string, error) {
 				if strings.TrimSpace(content) != "" && !strings.Contains(content, "Sent content:") {
 					content += "\n\nModel responding..."
 				}
-				r.display.progress <- Event{
+				monitor.Event(Event{
 					Time:    time.Now(),
 					Context: &callCtx,
 					Type:    EventTypeUpdate,
 					Content: content,
-				}
+				})
 			} else {
-				r.display.progress <- Event{
+				monitor.Event(Event{
 					Time:    time.Now(),
 					Context: &callCtx,
 					Type:    EventTypeDebug,
 					Debug:   status,
-				}
+				})
 			}
 		}
 	}()
 	defer wg.Wait()
 	defer close(progress)
 
-	r.display.progress <- Event{
+	monitor.Event(Event{
 		Time:    time.Now(),
 		Context: &callCtx,
 		Type:    EventTypeStart,
 		Content: input,
-	}
+	})
 
 	result, err := e.Start(callCtx, input)
 	if err != nil {
@@ -159,13 +149,13 @@ func (r *Runner) call(callCtx engine.Context, input string) (string, error) {
 	}
 
 	for {
-		if result.Result != nil {
-			r.display.progress <- Event{
+		if result.Result != nil && len(result.Calls) == 0 {
+			monitor.Event(Event{
 				Time:    time.Now(),
 				Context: &callCtx,
 				Type:    EventTypeStop,
 				Content: *result.Result,
-			}
+			})
 			return *result.Result, nil
 		}
 
@@ -178,10 +168,13 @@ func (r *Runner) call(callCtx engine.Context, input string) (string, error) {
 		for id, call := range result.Calls {
 			id := id
 			call := call
-			callCtx := engine.NewContext(subCtx, &callCtx, callCtx.Tool.ToolSet[call.ToolName])
-			callCtx.ID = id
 			eg.Go(func() error {
-				result, err := r.call(callCtx, call.Input)
+				callCtx, err := callCtx.SubCall(subCtx, call.ToolName, id)
+				if err != nil {
+					return err
+				}
+
+				result, err := r.call(callCtx, monitor, env, call.Input)
 				if err != nil {
 					return err
 				}

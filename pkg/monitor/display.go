@@ -1,4 +1,4 @@
-package runner
+package monitor
 
 import (
 	"context"
@@ -9,22 +9,76 @@ import (
 	"time"
 
 	"github.com/acorn-io/gptscript/pkg/engine"
+	"github.com/acorn-io/gptscript/pkg/runner"
+	"github.com/acorn-io/gptscript/pkg/types"
 	"github.com/pterm/pterm"
 )
 
+type Options struct {
+	Quiet        bool   `usage:"Do not print status" short:"q"`
+	DumpState    string `usage:"Dump the internal execution state to a file"`
+	ShowFinished bool   `usage:"Show finished calls results"`
+}
+
+func complete(opts ...Options) (result Options) {
+	for _, opt := range opts {
+		result.DumpState = types.FirstSet(opt.DumpState, result.DumpState)
+		result.Quiet = types.FirstSet(opt.Quiet, result.Quiet)
+		result.ShowFinished = types.FirstSet(opt.ShowFinished, result.ShowFinished)
+	}
+	return
+}
+
+type Console struct {
+	quiet        bool
+	dumpState    string
+	showFinished bool
+}
+
+func (c *Console) Start(ctx context.Context, prg *types.Program, env []string, input string) (runner.Monitor, error) {
+	mon := newDisplay(c.quiet, c.showFinished, c.dumpState)
+	return mon, mon.Start(ctx)
+}
+
 type display struct {
-	progress     chan Event
+	progress     chan runner.Event
 	states       []state
 	done         chan struct{}
 	area         *pterm.AreaPrinter
 	quiet        bool
 	showFinished bool
+	dumpState    string
 }
 
-func newDisplay(quiet, showFinished bool) *display {
+func (d *display) Event(event runner.Event) {
+	d.progress <- event
+}
+
+func (d *display) Stop() {
+	d.stop()
+	if d.dumpState != "" {
+		f, err := os.Create(d.dumpState)
+		if err == nil {
+			_ = d.Dump(f)
+			_ = f.Close()
+		}
+	}
+}
+
+func NewConsole(opts ...Options) *Console {
+	opt := complete(opts...)
+	return &Console{
+		quiet:        opt.Quiet,
+		dumpState:    opt.DumpState,
+		showFinished: opt.ShowFinished,
+	}
+}
+
+func newDisplay(quiet, showFinished bool, dumpState string) *display {
 	return &display{
 		quiet:        quiet,
 		showFinished: showFinished,
+		dumpState:    dumpState,
 	}
 }
 
@@ -39,7 +93,7 @@ func (d *display) Start(ctx context.Context) (err error) {
 		}
 	}
 
-	d.progress = make(chan Event)
+	d.progress = make(chan runner.Event)
 	d.done = make(chan struct{})
 	go func() {
 		t := time.NewTicker(time.Second)
@@ -72,16 +126,12 @@ func (d *display) Dump(out io.Writer) error {
 	})
 }
 
-func (d *display) Stop() error {
+func (d *display) stop() {
 	close(d.progress)
 	<-d.done
 	if d.area != nil {
-		if err := d.area.Stop(); err != nil {
-			return err
-		}
+		_ = d.area.Stop()
 	}
-
-	return nil
 }
 
 func splitCount(line string, length int) (head, tail string) {
@@ -183,7 +233,7 @@ func (d *display) String() string {
 	return buf.String()
 }
 
-func (d *display) addEvent(msg Event) {
+func (d *display) addEvent(msg runner.Event) {
 	found := false
 	for i, state := range d.states {
 		if state.Context.ID != msg.Context.ID {
@@ -191,18 +241,18 @@ func (d *display) addEvent(msg Event) {
 		}
 		found = true
 		switch msg.Type {
-		case EventTypeUpdate:
+		case runner.EventTypeUpdate:
 			state.Output = msg.Content
-		case EventTypeStop:
+		case runner.EventTypeStop:
 			state.Running = false
 			state.Output = msg.Content
 			state.End = msg.Time
-		case EventTypeDebug:
+		case runner.EventTypeDebug:
 			state.Debug = append(state.Debug, msg.Debug)
 		}
 		d.states[i] = state
 	}
-	if !found && msg.Type == EventTypeStart {
+	if !found && msg.Type == runner.EventTypeStart {
 		d.states = append(d.states, state{
 			Context: msg.Context,
 			Running: true,

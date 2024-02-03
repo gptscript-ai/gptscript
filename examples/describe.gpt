@@ -9,7 +9,7 @@ arg: list: A comma separated list of numbers to sort
 
 #!/bin/bash
 
-for i in $(echo "${ARG_LIST}" | sed 's/[[,\]]/ /g'); do
+for i in $(echo "${LIST}" | sed 's/[[,\]]/ /g'); do
     echo $i
 done | sort -n
 
@@ -28,7 +28,7 @@ arg: file: The filename to count the lines of
 
 #!/bin/bash
 
-wc -l "${ARG_FILE}"
+wc -l "${FILE}"
 
 ---
 name: summarize
@@ -46,4 +46,4 @@ arg: file: The filename to count the lines of
 
 #!/bin/bash
 
-cat "${ARG_FILE}" </dev/null
+cat "${FILE}" </dev/null

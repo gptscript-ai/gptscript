@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/md5"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -135,50 +136,82 @@ func loadURL(ctx context.Context, base *Source, name string) (*Source, bool, err
 	}, true, nil
 }
 
-func ReadTool(ctx context.Context, base *Source, targetToolName string) (*types.Tool, error) {
+func loadProgram(data []byte, into *types.Program) (types.Tool, error) {
+	var (
+		ext types.Program
+		id  string
+	)
+
+	summed := sha256.Sum256(data)
+	id = "@" + hex.EncodeToString(summed[:])[:12]
+
+	if err := json.Unmarshal(data[len(assemble.Header):], &ext); err != nil {
+		return types.Tool{}, err
+	}
+
+	for k, v := range ext.ToolSet {
+		for tk, tv := range v.ToolMapping {
+			v.ToolMapping[tk] = tv + id
+		}
+		into.ToolSet[k+id] = v
+	}
+
+	return into.ToolSet[ext.EntryToolID+id], nil
+}
+
+func ReadTool(ctx context.Context, prg *types.Program, base *Source, targetToolName string) (types.Tool, error) {
 	data, err := io.ReadAll(base.Content)
 	if err != nil {
-		return nil, err
+		return types.Tool{}, err
 	}
 	_ = base.Content.Close()
 
 	if bytes.HasPrefix(data, assemble.Header) {
-		var tool types.Tool
-		return &tool, json.Unmarshal(data[len(assemble.Header):], &tool)
+		return loadProgram(data, prg)
 	}
 
 	tools, err := parser.Parse(bytes.NewReader(data))
 	if err != nil {
-		return nil, err
+		return types.Tool{}, err
 	}
 
 	if len(tools) == 0 {
-		return nil, fmt.Errorf("no tools found in %s", base)
+		return types.Tool{}, fmt.Errorf("no tools found in %s", base)
 	}
 
 	var (
-		toolSet  = types.ToolSet{}
-		mainTool types.Tool
+		localTools = types.ToolSet{}
+		mainTool   types.Tool
 	)
 
 	for i, tool := range tools {
 		tool.Source.File = base.File
+
+		// Probably a better way to come up with an ID
+		tool.ID = tool.Source.String()
+
 		if i == 0 {
 			mainTool = tool
 		}
 
 		if i != 0 && tool.Name == "" {
-			return nil, parser.NewErrLine(tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have no name"))
+			return types.Tool{}, parser.NewErrLine(tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have no name"))
 		}
 
 		if targetToolName != "" && tool.Name == targetToolName {
 			mainTool = tool
 		}
 
-		toolSet[tool.Name] = tool
+		if existing, ok := localTools[tool.Name]; ok {
+			return types.Tool{}, parser.NewErrLine(tool.Source.LineNo,
+				fmt.Errorf("duplicate tool name [%s] in %s found at lines %d and %d", tool.Name, tool.Source.File,
+					tool.Source.LineNo, existing.Source.LineNo))
+		}
+
+		localTools[tool.Name] = tool
 	}
 
-	return link(ctx, base, mainTool, toolSet)
+	return link(ctx, prg, base, mainTool, localTools)
 }
 
 var (
@@ -222,26 +255,44 @@ func pickToolName(toolName string, existing map[string]struct{}) string {
 	}
 }
 
-func link(ctx context.Context, base *Source, tool types.Tool, toolSet types.ToolSet) (*types.Tool, error) {
-	tool.ToolSet = types.ToolSet{}
+func link(ctx context.Context, prg *types.Program, base *Source, tool types.Tool, localTools types.ToolSet) (types.Tool, error) {
+	if existing, ok := prg.ToolSet[tool.ID]; ok {
+		return existing, nil
+	}
+
+	tool.ToolMapping = map[string]string{}
 	toolNames := map[string]struct{}{}
 
+	// Add now to break circular loops, but later we will update this tool and copy the new
+	// tool to the prg.ToolSet
+	prg.ToolSet[tool.ID] = tool
+
+	// The below is done in two loops so that local names stay as the tool names
+	// and don't get mangled by external references
+
 	for _, targetToolName := range tool.Tools {
-		targetTool, ok := toolSet[targetToolName]
+		localTool, ok := localTools[targetToolName]
 		if !ok {
 			continue
 		}
 
-		linkedTool, err := link(ctx, base, targetTool, toolSet)
-		if err != nil {
-			return nil, fmt.Errorf("failed linking %s at %s: %w", targetToolName, base, err)
+		var linkedTool types.Tool
+		if existing, ok := prg.ToolSet[localTool.ID]; ok {
+			linkedTool = existing
+		} else {
+			var err error
+			linkedTool, err = link(ctx, prg, base, localTool, localTools)
+			if err != nil {
+				return types.Tool{}, fmt.Errorf("failed linking %s at %s: %w", targetToolName, base, err)
+			}
 		}
-		tool.ToolSet[targetToolName] = *linkedTool
+
+		tool.ToolMapping[targetToolName] = linkedTool.ID
 		toolNames[targetToolName] = struct{}{}
 	}
 
 	for i, targetToolName := range tool.Tools {
-		_, ok := toolSet[targetToolName]
+		_, ok := localTools[targetToolName]
 		if ok {
 			continue
 		}
@@ -251,29 +302,42 @@ func link(ctx context.Context, base *Source, tool types.Tool, toolSet types.Tool
 			toolName = strings.TrimSpace(toolName)
 			subTool = strings.TrimSpace(subTool)
 		}
-		resolvedTool, err := Resolve(ctx, base, toolName, subTool)
+
+		resolvedTool, err := Resolve(ctx, prg, base, toolName, subTool)
 		if err != nil {
-			return nil, fmt.Errorf("failed resolving %s at %s: %w", targetToolName, base, err)
+			return types.Tool{}, fmt.Errorf("failed resolving %s at %s: %w", targetToolName, base, err)
 		}
+
 		newToolName := pickToolName(toolName, toolNames)
-		tool.ToolSet[newToolName] = *resolvedTool
+		tool.ToolMapping[newToolName] = resolvedTool.ID
 		tool.Tools[i] = newToolName
 	}
 
-	return &tool, nil
+	tool = SetDefaults(tool)
+	prg.ToolSet[tool.ID] = tool
+
+	return tool, nil
 }
 
-func Tool(ctx context.Context, name, subToolName string) (*types.Tool, error) {
-	return Resolve(ctx, &Source{}, name, subToolName)
+func Program(ctx context.Context, name, subToolName string) (types.Program, error) {
+	prg := types.Program{
+		ToolSet: types.ToolSet{},
+	}
+	tool, err := Resolve(ctx, &prg, &Source{}, name, subToolName)
+	if err != nil {
+		return types.Program{}, err
+	}
+	prg.EntryToolID = tool.ID
+	return prg, nil
 }
 
-func Resolve(ctx context.Context, base *Source, name, subTool string) (*types.Tool, error) {
+func Resolve(ctx context.Context, prg *types.Program, base *Source, name, subTool string) (types.Tool, error) {
 	s, err := Input(ctx, base, name)
 	if err != nil {
-		return nil, err
+		return types.Tool{}, err
 	}
 
-	return ReadTool(ctx, s, subTool)
+	return ReadTool(ctx, prg, s, subTool)
 }
 
 func Input(ctx context.Context, base *Source, name string) (*Source, error) {

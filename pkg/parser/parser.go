@@ -7,22 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/acorn-io/gptscript/pkg/openai"
 	"github.com/acorn-io/gptscript/pkg/types"
 )
-
-var defaultToolSchema = types.JSONSchema{
-	Property: types.Property{
-		Type: "object",
-	},
-	Properties: map[string]types.Property{
-		openai.DefaultPromptParameter: {
-			Description: "Prompt to send to the tool or assistant. This may be instructions or question",
-			Type:        "string",
-		},
-	},
-	Required: []string{openai.DefaultPromptParameter},
-}
 
 func normalize(key string) string {
 	return strings.ToLower(strings.ReplaceAll(key, " ", ""))
@@ -149,9 +135,6 @@ type context struct {
 func (c *context) finish(tools *[]types.Tool) {
 	c.tool.Instructions = strings.TrimSpace(strings.Join(c.instructions, ""))
 	if c.tool.Instructions != "" || c.tool.Name != "" {
-		if !c.tool.IsCommand() && c.tool.Arguments == nil {
-			c.tool.Arguments = &defaultToolSchema
-		}
 		*tools = append(*tools, c.tool)
 	}
 	*c = context{}

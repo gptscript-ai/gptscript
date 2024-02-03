@@ -12,4 +12,4 @@ Arg: cmd: The sqlite command or sql statement to run.
 
 #!/bin/bash
 
-sqlite3 ${ARG_DATABASEFILE} -cmd "${ARG_CMD}" </dev/null
+sqlite3 ${DATABASEFILE} -cmd "${CMD}" </dev/null

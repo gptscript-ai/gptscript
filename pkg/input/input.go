@@ -11,6 +11,15 @@ func FromArgs(args []string) string {
 	return strings.Join(args, " ")
 }
 
+func FromCLI(file string, args []string) (string, error) {
+	toolInput, err := FromFile(file)
+	if err != nil || toolInput != "" {
+		return toolInput, err
+	}
+
+	return FromArgs(args[1:]), nil
+}
+
 func FromFile(file string) (string, error) {
 	if file == "-" {
 		log.Debugf("reading stdin")

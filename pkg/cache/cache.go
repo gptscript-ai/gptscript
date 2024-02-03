@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/acorn-io/gptscript/pkg/types"
 	"github.com/acorn-io/gptscript/pkg/version"
 	"github.com/adrg/xdg"
 )
@@ -16,19 +17,33 @@ type Client struct {
 	noop bool
 }
 
-func NoCache() *Client {
-	return &Client{
-		noop: true,
-	}
-
+type Options struct {
+	Cache    *bool  `usage:"Disable caching" default:"true"`
+	CacheDir string `usage:"Directory to store cache (default: $XDG_CACHE_HOME/gptscript)"`
 }
-func New() (*Client, error) {
-	dir := filepath.Join(xdg.CacheHome, version.ProgramName)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+
+func complete(opts ...Options) (result Options) {
+	for _, opt := range opts {
+		result.CacheDir = types.FirstSet(opt.CacheDir, result.CacheDir)
+		result.Cache = types.FirstSet(opt.Cache, result.Cache)
+	}
+	if result.Cache == nil {
+		result.Cache = &[]bool{true}[0]
+	}
+	if result.CacheDir == "" {
+		result.CacheDir = filepath.Join(xdg.CacheHome, version.ProgramName)
+	}
+	return
+}
+
+func New(opts ...Options) (*Client, error) {
+	opt := complete(opts...)
+	if err := os.MkdirAll(opt.CacheDir, 0755); err != nil {
 		return nil, err
 	}
 	return &Client{
-		dir: dir,
+		dir:  opt.CacheDir,
+		noop: !*opt.Cache,
 	}, nil
 }
 
