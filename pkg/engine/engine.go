@@ -47,8 +47,6 @@ type Engine struct {
 	Progress chan<- openai.Status
 }
 
-// +k8s:deepcopy-gen=true
-
 type State struct {
 	Completion types.CompletionRequest             `json:"completion,omitempty"`
 	Pending    map[string]types.CompletionToolCall `json:"pending,omitempty"`
@@ -313,10 +311,10 @@ func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 }
 
 func (e *Engine) Continue(ctx context.Context, state *State, results ...CallResult) (*Return, error) {
-	state = state.DeepCopy()
-
-	if state.Results == nil {
-		state.Results = map[string]CallResult{}
+	state = &State{
+		Completion: state.Completion,
+		Pending:    state.Pending,
+		Results:    map[string]CallResult{},
 	}
 
 	for _, result := range results {
