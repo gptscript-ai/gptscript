@@ -1,8 +1,10 @@
 package mvl
 
 import (
+	"fmt"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -13,8 +15,26 @@ import (
 // So this is simple place to make a better decision later about logging frameworks. I only care about
 // the interface, not the implementation. Smarter people do that well.
 
+func SetSimpleFormat() {
+	logrus.SetFormatter(&formatter{})
+}
+
+type formatter struct {
+}
+
+func (f formatter) Format(entry *logrus.Entry) ([]byte, error) {
+	return []byte(fmt.Sprintf("%s %s %s\n",
+		entry.Time.Format(time.RFC3339),
+		entry.Level,
+		entry.Message)), nil
+}
+
 func SetDebug() {
 	logrus.SetLevel(logrus.DebugLevel)
+}
+
+func SetError() {
+	logrus.SetLevel(logrus.ErrorLevel)
 }
 
 func Package() Logger {
@@ -25,19 +45,19 @@ func Package() Logger {
 }
 
 func New(name string) Logger {
-	var prefix string
+	var fields logrus.Fields
 	if name != "" {
-		prefix = name + ": "
+		fields = logrus.Fields{
+			"logger": name,
+		}
 	}
 	return Logger{
-		prefix: prefix,
 		log:    logrus.StandardLogger(),
-		fields: logrus.Fields{},
+		fields: fields,
 	}
 }
 
 type Logger struct {
-	prefix string
 	log    *logrus.Logger
 	fields logrus.Fields
 }
@@ -51,7 +71,6 @@ func (l *Logger) FieldsMap(kv map[string]any) *Logger {
 		newFields[k] = v
 	}
 	return &Logger{
-		prefix: l.prefix,
 		log:    l.log,
 		fields: newFields,
 	}
@@ -68,28 +87,27 @@ func (l *Logger) Fields(kv ...any) *Logger {
 		}
 	}
 	return &Logger{
-		prefix: l.prefix,
 		log:    l.log,
 		fields: newFields,
 	}
 }
 
 func (l *Logger) Infof(msg string, args ...any) {
-	l.log.WithFields(l.fields).Infof(l.prefix+msg, args...)
+	l.log.WithFields(l.fields).Infof(msg, args...)
 }
 
 func (l *Logger) Errorf(msg string, args ...any) {
-	l.log.WithFields(l.fields).Errorf(l.prefix+msg, args...)
+	l.log.WithFields(l.fields).Errorf(msg, args...)
 }
 
 func (l *Logger) Tracef(msg string, args ...any) {
-	l.log.WithFields(l.fields).Tracef(l.prefix+msg, args...)
+	l.log.WithFields(l.fields).Tracef(msg, args...)
 }
 
 func (l *Logger) Debugf(msg string, args ...any) {
-	l.log.WithFields(l.fields).Debugf(l.prefix+msg, args...)
+	l.log.WithFields(l.fields).Debugf(msg, args...)
 }
 
 func (l *Logger) Fatalf(msg string, args ...any) {
-	l.log.WithFields(l.fields).Fatalf(l.prefix+msg, args...)
+	l.log.WithFields(l.fields).Fatalf(msg, args...)
 }

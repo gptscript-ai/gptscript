@@ -28,6 +28,7 @@ type GPTScript struct {
 	runner.Options
 	DisplayOptions
 	Debug      bool   `usage:"Enable debug logging"`
+	Quiet      bool   `usage:"No output logging" short:"q"`
 	Output     string `usage:"Save output to a file" short:"o"`
 	Input      string `usage:"Read input from a file (\"-\" for stdin)" short:"f"`
 	SubTool    string `usage:"Use tool of this name, not the first tool in file"`
@@ -65,6 +66,11 @@ func (r *GPTScript) listModels(ctx context.Context) error {
 func (r *GPTScript) Pre(cmd *cobra.Command, args []string) error {
 	if r.Debug {
 		mvl.SetDebug()
+	} else {
+		mvl.SetSimpleFormat()
+	}
+	if r.Quiet {
+		mvl.SetError()
 	}
 	return nil
 }
@@ -128,6 +134,13 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	} else {
+		if !r.Quiet {
+			if toolInput != "" {
+				_, _ = fmt.Fprintln(os.Stderr, "\nINPUT:\n")
+				_, _ = fmt.Fprintln(os.Stderr, toolInput)
+			}
+			_, _ = fmt.Fprintln(os.Stderr, "\nOUTPUT:\n")
+		}
 		fmt.Print(s)
 		if !strings.HasSuffix(s, "\n") {
 			fmt.Println()

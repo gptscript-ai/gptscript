@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"sort"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -75,6 +74,13 @@ type Context struct {
 	Parent  *Context
 	Program *types.Program
 	Tool    types.Tool
+}
+
+func (c *Context) ParentID() string {
+	if c.Parent == nil {
+		return ""
+	}
+	return c.Parent.ID
 }
 
 func (c *Context) UnmarshalJSON(data []byte) error {
@@ -327,12 +333,10 @@ func (e *Engine) Continue(ctx context.Context, state *State, results ...CallResu
 	}
 
 	var (
-		added            bool
-		pendingToolCalls []types.CompletionToolCall
+		added bool
 	)
 
 	for id, pending := range state.Pending {
-		pendingToolCalls = append(pendingToolCalls, pending)
 		if _, ok := state.Results[id]; !ok {
 			ret.Calls[id] = Call{
 				ToolName: pending.Function.Name,
@@ -345,25 +349,28 @@ func (e *Engine) Continue(ctx context.Context, state *State, results ...CallResu
 		return &ret, nil
 	}
 
-	sort.Slice(pendingToolCalls, func(i, j int) bool {
-		left := pendingToolCalls[i].Function.Name + pendingToolCalls[i].Function.Arguments
-		right := pendingToolCalls[j].Function.Name + pendingToolCalls[j].Function.Arguments
-		if left == right {
-			return pendingToolCalls[i].ID < pendingToolCalls[j].ID
+	for _, content := range state.Completion.Messages[len(state.Completion.Messages)-1].Content {
+		if content.ToolCall == nil {
+			continue
 		}
-		return left < right
-	})
+		result, ok := state.Results[content.ToolCall.ID]
+		if !ok {
+			return nil, fmt.Errorf("missing tool call result for id %s, most likely a %s BUG",
+				content.ToolCall.ID, version.ProgramName)
+		}
 
-	for _, pending := range pendingToolCalls {
-		pending := pending
-		if result, ok := state.Results[pending.ID]; ok {
-			added = true
-			state.Completion.Messages = append(state.Completion.Messages, types.CompletionMessage{
-				Role:     types.CompletionMessageRoleTypeTool,
-				Content:  types.Text(result.Result),
-				ToolCall: &pending,
-			})
+		pending, ok := state.Pending[content.ToolCall.ID]
+		if !ok {
+			return nil, fmt.Errorf("missing tool call pennding for id %s, most likely a %s BUG",
+				content.ToolCall.ID, version.ProgramName)
 		}
+
+		added = true
+		state.Completion.Messages = append(state.Completion.Messages, types.CompletionMessage{
+			Role:     types.CompletionMessageRoleTypeTool,
+			Content:  types.Text(result.Result),
+			ToolCall: &pending,
+		})
 	}
 
 	if !added {

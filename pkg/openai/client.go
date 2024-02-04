@@ -231,10 +231,11 @@ func toMessages(ctx context.Context, cache *cache.Client, request types.Completi
 }
 
 type Status struct {
-	Request         any                      `json:"request,omitempty"`
-	Response        any                      `json:"response,omitempty"`
-	Chunks          any                      `json:"-"`
-	PartialResponse *types.CompletionMessage `json:"partialResponse,omitempty"`
+	Request         any
+	Response        any
+	Cached          bool
+	Chunks          any
+	PartialResponse *types.CompletionMessage
 }
 
 func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- Status) (*types.CompletionMessage, error) {
@@ -280,6 +281,11 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		}
 	}
 
+	status <- Status{
+		Request: request,
+	}
+
+	var cacheResponse bool
 	request.Seed = ptr(c.seed(request))
 	response, ok, err := c.fromCache(ctx, messageRequest, request)
 	if err != nil {
@@ -289,6 +295,8 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		if err != nil {
 			return nil, err
 		}
+	} else {
+		cacheResponse = true
 	}
 
 	result := types.CompletionMessage{}
@@ -297,9 +305,9 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	}
 
 	status <- Status{
-		Request:  request,
 		Chunks:   response,
 		Response: result,
+		Cached:   cacheResponse,
 	}
 
 	return &result, nil

@@ -19,5 +19,5 @@ type noopMonitor struct {
 func (n noopMonitor) Event(event Event) {
 }
 
-func (n noopMonitor) Stop() {
+func (n noopMonitor) Stop(output string, err error) {
 }

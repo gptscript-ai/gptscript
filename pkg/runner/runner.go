@@ -2,7 +2,6 @@ package runner
 
 import (
 	"context"
-	"strings"
 	"sync"
 	"time"
 
@@ -19,7 +18,7 @@ type MonitorFactory interface {
 
 type Monitor interface {
 	Event(event Event)
-	Stop()
+	Stop(output string, err error)
 }
 
 type (
@@ -70,36 +69,43 @@ func New(opts ...Options) (*Runner, error) {
 	}, nil
 }
 
-func (r *Runner) Run(ctx context.Context, prg types.Program, env []string, input string) (string, error) {
+func (r *Runner) Run(ctx context.Context, prg types.Program, env []string, input string) (output string, err error) {
 	monitor, err := r.factory.Start(ctx, &prg, env, input)
 	if err != nil {
 		return "", err
 	}
-	defer monitor.Stop()
+	defer func() {
+		monitor.Stop(output, err)
+	}()
 
 	callCtx := engine.NewContext(ctx, &prg)
 	return r.call(callCtx, monitor, env, input)
 }
 
 type Event struct {
-	Time    time.Time
-	Context *engine.Context
-	Type    EventType
-	Debug   any
-	Content string
+	Time               time.Time
+	CallContext        *engine.Context
+	ToolResults        int
+	Type               EventType
+	ChatRequest        any
+	ChatResponse       any
+	ChatResponseCached bool
+	Content            string
 }
 
 type EventType string
 
 var (
-	EventTypeStart  = EventType("start")
-	EventTypeUpdate = EventType("progress")
-	EventTypeDebug  = EventType("debug")
-	EventTypeStop   = EventType("stop")
+	EventTypeCallStart    = EventType("callStart")
+	EventTypeCallContinue = EventType("callContinue")
+	EventTypeCallProgress = EventType("callProgress")
+	EventTypeChat         = EventType("callChat")
+	EventTypeCallFinish   = EventType("callFinish")
 )
 
 func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, input string) (string, error) {
-	progress := make(chan openai.Status)
+	progress, progressClose := streamProgress(&callCtx, monitor)
+	defer progressClose()
 
 	e := engine.Engine{
 		Client:   r.c,
@@ -107,40 +113,11 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 		Env:      env,
 	}
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		for status := range progress {
-			if message := status.PartialResponse; message != nil {
-				content := message.String()
-				if strings.TrimSpace(content) != "" && !strings.Contains(content, "Sent content:") {
-					content += "\n\nModel responding..."
-				}
-				monitor.Event(Event{
-					Time:    time.Now(),
-					Context: &callCtx,
-					Type:    EventTypeUpdate,
-					Content: content,
-				})
-			} else {
-				monitor.Event(Event{
-					Time:    time.Now(),
-					Context: &callCtx,
-					Type:    EventTypeDebug,
-					Debug:   status,
-				})
-			}
-		}
-	}()
-	defer wg.Wait()
-	defer close(progress)
-
 	monitor.Event(Event{
-		Time:    time.Now(),
-		Context: &callCtx,
-		Type:    EventTypeStart,
-		Content: input,
+		Time:        time.Now(),
+		CallContext: &callCtx,
+		Type:        EventTypeCallStart,
+		Content:     input,
 	})
 
 	result, err := e.Start(callCtx, input)
@@ -151,52 +128,101 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 	for {
 		if result.Result != nil && len(result.Calls) == 0 {
 			monitor.Event(Event{
-				Time:    time.Now(),
-				Context: &callCtx,
-				Type:    EventTypeStop,
-				Content: *result.Result,
+				Time:        time.Now(),
+				CallContext: &callCtx,
+				Type:        EventTypeCallFinish,
+				Content:     *result.Result,
 			})
 			return *result.Result, nil
 		}
 
-		var (
-			callResults []engine.CallResult
-			resultLock  sync.Mutex
-		)
-
-		eg, subCtx := errgroup.WithContext(callCtx.Ctx)
-		for id, call := range result.Calls {
-			id := id
-			call := call
-			eg.Go(func() error {
-				callCtx, err := callCtx.SubCall(subCtx, call.ToolName, id)
-				if err != nil {
-					return err
-				}
-
-				result, err := r.call(callCtx, monitor, env, call.Input)
-				if err != nil {
-					return err
-				}
-
-				resultLock.Lock()
-				defer resultLock.Unlock()
-				callResults = append(callResults, engine.CallResult{
-					ID:     id,
-					Result: result,
-				})
-
-				return nil
-			})
-		}
-
-		if err := eg.Wait(); err != nil {
+		callResults, err := r.subCalls(callCtx, monitor, env, result)
+		if err != nil {
 			return "", err
 		}
+
+		monitor.Event(Event{
+			Time:        time.Now(),
+			CallContext: &callCtx,
+			Type:        EventTypeCallContinue,
+			ToolResults: len(callResults),
+		})
 
 		result, err = e.Continue(callCtx.Ctx, result.State, callResults...)
 		if err != nil {
 			return "", err
 		}
 	}
+}
+
+func streamProgress(callCtx *engine.Context, monitor Monitor) (chan openai.Status, func()) {
+	progress := make(chan openai.Status)
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for status := range progress {
+			if message := status.PartialResponse; message != nil {
+				monitor.Event(Event{
+					Time:        time.Now(),
+					CallContext: callCtx,
+					Type:        EventTypeCallProgress,
+					Content:     message.String(),
+				})
+			} else {
+				monitor.Event(Event{
+					Time:               time.Now(),
+					CallContext:        callCtx,
+					Type:               EventTypeChat,
+					ChatRequest:        status.Request,
+					ChatResponse:       status.Response,
+					ChatResponseCached: status.Cached,
+				})
+			}
+		}
+	}()
+
+	return progress, func() {
+		close(progress)
+		wg.Wait()
+	}
+}
+
+func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string, lastReturn *engine.Return) (callResults []engine.CallResult, _ error) {
+	var (
+		resultLock sync.Mutex
+	)
+
+	eg, subCtx := errgroup.WithContext(callCtx.Ctx)
+	for id, call := range lastReturn.Calls {
+		id := id
+		call := call
+		eg.Go(func() error {
+			callCtx, err := callCtx.SubCall(subCtx, call.ToolName, id)
+			if err != nil {
+				return err
+			}
+
+			result, err := r.call(callCtx, monitor, env, call.Input)
+			if err != nil {
+				return err
+			}
+
+			resultLock.Lock()
+			defer resultLock.Unlock()
+			callResults = append(callResults, engine.CallResult{
+				ID:     id,
+				Result: result,
+			})
+
+			return nil
+		})
+	}
+
+	if err := eg.Wait(); err != nil {
+		return nil, err
+	}
+
+	return
 }

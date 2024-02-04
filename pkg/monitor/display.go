@@ -3,59 +3,125 @@ package monitor
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strings"
+	"sync/atomic"
 	"time"
 
-	"github.com/acorn-io/gptscript/pkg/engine"
 	"github.com/acorn-io/gptscript/pkg/runner"
 	"github.com/acorn-io/gptscript/pkg/types"
-	"github.com/pterm/pterm"
 )
 
 type Options struct {
-	Quiet        bool   `usage:"Do not print status" short:"q"`
-	DumpState    string `usage:"Dump the internal execution state to a file"`
-	ShowFinished bool   `usage:"Show finished calls results"`
+	DumpState string `usage:"Dump the internal execution state to a file"`
 }
 
 func complete(opts ...Options) (result Options) {
 	for _, opt := range opts {
 		result.DumpState = types.FirstSet(opt.DumpState, result.DumpState)
-		result.Quiet = types.FirstSet(opt.Quiet, result.Quiet)
-		result.ShowFinished = types.FirstSet(opt.ShowFinished, result.ShowFinished)
 	}
 	return
 }
 
 type Console struct {
-	quiet        bool
-	dumpState    string
-	showFinished bool
+	dumpState string
 }
 
+var runID int64
+
 func (c *Console) Start(ctx context.Context, prg *types.Program, env []string, input string) (runner.Monitor, error) {
-	mon := newDisplay(c.quiet, c.showFinished, c.dumpState)
-	return mon, mon.Start(ctx)
+	id := atomic.AddInt64(&runID, 1)
+	mon := newDisplay(c.dumpState)
+	mon.dump.ID = fmt.Sprint(id)
+	mon.dump.Program = prg
+	mon.dump.Input = input
+
+	log.Fields("runID", mon.dump.ID, "input", input).Debugf("Run started")
+	return mon, nil
 }
 
 type display struct {
-	progress     chan runner.Event
-	states       []state
-	done         chan struct{}
-	area         *pterm.AreaPrinter
-	quiet        bool
-	showFinished bool
-	dumpState    string
+	dump      dump
+	dumpState string
 }
 
 func (d *display) Event(event runner.Event) {
-	d.progress <- event
+	var (
+		currentIndex = -1
+		currentCall  call
+	)
+
+	for i, existing := range d.dump.Calls {
+		if event.CallContext.ID == existing.ID {
+			currentIndex = i
+			currentCall = existing
+			break
+		}
+	}
+
+	if currentIndex == -1 {
+		currentIndex = len(d.dump.Calls)
+		currentCall = call{
+			ID:       event.CallContext.ID,
+			ParentID: event.CallContext.ParentID(),
+			ToolID:   event.CallContext.Tool.ID,
+		}
+		d.dump.Calls = append(d.dump.Calls, currentCall)
+	}
+
+	log := log.Fields(
+		"id", currentCall.ID,
+		"parentID", currentCall.ParentID,
+		"toolID", currentCall.ToolID)
+
+	callName := callName{
+		call:  &currentCall,
+		prg:   d.dump.Program,
+		calls: d.dump.Calls,
+	}
+
+	switch event.Type {
+	case runner.EventTypeCallStart:
+		currentCall.Start = event.Time
+		currentCall.Input = event.Content
+		log.Fields("input", event.Content).Infof("%s started", callName)
+	case runner.EventTypeCallProgress:
+	case runner.EventTypeCallContinue:
+		log.Fields("toolResults", event.ToolResults).Infof("%s continue", callName)
+	case runner.EventTypeChat:
+		if event.ChatRequest == nil {
+			log = log.Fields(
+				"response", toJSON(event.ChatResponse),
+				"cached", event.ChatResponseCached,
+			)
+		} else {
+			log.Infof("%s openai request sent", callName)
+			log = log.Fields(
+				"request", toJSON(event.ChatRequest),
+			)
+		}
+		log.Debugf("messages")
+		currentCall.Messages = append(currentCall.Messages, message{
+			Request:  event.ChatRequest,
+			Response: event.ChatResponse,
+			Cached:   event.ChatResponseCached,
+		})
+	case runner.EventTypeCallFinish:
+		currentCall.End = event.Time
+		currentCall.Output = event.Content
+		log.Fields("output", event.Content).Infof("%s ended", callName)
+	}
+
+	d.dump.Calls[currentIndex] = currentCall
 }
 
-func (d *display) Stop() {
-	d.stop()
+func (d *display) Stop(output string, err error) {
+	log.Fields("runID", d.dump.ID, "output", output, "err", err).Debugf("Run stopped")
+	d.dump.Output = output
+	d.dump.Err = err
 	if d.dumpState != "" {
 		f, err := os.Create(d.dumpState)
 		if err == nil {
@@ -68,211 +134,96 @@ func (d *display) Stop() {
 func NewConsole(opts ...Options) *Console {
 	opt := complete(opts...)
 	return &Console{
-		quiet:        opt.Quiet,
-		dumpState:    opt.DumpState,
-		showFinished: opt.ShowFinished,
+		dumpState: opt.DumpState,
 	}
 }
 
-func newDisplay(quiet, showFinished bool, dumpState string) *display {
+func newDisplay(dumpState string) *display {
 	return &display{
-		quiet:        quiet,
-		showFinished: showFinished,
-		dumpState:    dumpState,
+		dumpState: dumpState,
 	}
-}
-
-func (d *display) Start(ctx context.Context) (err error) {
-	if !d.quiet {
-		d.area, err = pterm.DefaultArea.
-			//WithFullscreen(true).
-			//WithRemoveWhenDone(true).
-			Start("Starting...")
-		if err != nil {
-			return err
-		}
-	}
-
-	d.progress = make(chan runner.Event)
-	d.done = make(chan struct{})
-	go func() {
-		t := time.NewTicker(time.Second)
-		defer t.Stop()
-		for {
-			select {
-			case <-t.C:
-				d.print()
-			case <-d.done:
-				return
-			}
-		}
-	}()
-	go func() {
-		for msg := range d.progress {
-			d.addEvent(msg)
-		}
-		close(d.done)
-	}()
-	return nil
 }
 
 func (d *display) Dump(out io.Writer) error {
 	enc := json.NewEncoder(out)
 	enc.SetIndent("", "  ")
-	return enc.Encode(struct {
-		State []state `json:"state,omitempty"`
-	}{
-		State: d.states,
-	})
+	return enc.Encode(d.dump)
 }
 
-func (d *display) stop() {
-	close(d.progress)
-	<-d.done
-	if d.area != nil {
-		_ = d.area.Stop()
-	}
+func toJSON(obj any) jsonDump {
+	return jsonDump{obj: obj}
 }
 
-func splitCount(line string, length int) (head, tail string) {
-	if len(line) < length {
-		return line, ""
-	}
-	return line[:length], line[length:]
+type jsonDump struct {
+	obj any
 }
 
-func multiLineWrite(out io.StringWriter, prefix, lines string) {
-	if lines == "" {
-		_, _ = out.WriteString("\n")
+func (j jsonDump) String() string {
+	d, err := json.Marshal(j.obj)
+	if err != nil {
+		return err.Error()
 	}
-	width := pterm.GetTerminalWidth()
-	for _, line := range strings.Split(lines, "\n") {
-		line = prefix + line
-		for {
-			head, tail := splitCount(line, width)
-			_, _ = out.WriteString(head)
-			_, _ = out.WriteString("\n")
+	return string(d)
+}
 
-			if tail == "" {
+type callName struct {
+	call  *call
+	prg   *types.Program
+	calls []call
+}
+
+func (c callName) String() string {
+	var (
+		msg         []string
+		currentCall = c.call
+	)
+
+	for {
+		tool := c.prg.ToolSet[currentCall.ToolID]
+		name := tool.Name
+		if name == "" {
+			name = tool.Source.File
+		}
+		msg = append(msg, name)
+		found := false
+		for _, parent := range c.calls {
+			if parent.ID == currentCall.ParentID {
+				found = true
+				currentCall = &parent
 				break
 			}
-			line = prefix + tail
+		}
+		if !found {
+			break
 		}
 	}
+
+	sort.Sort(sort.Reverse(sort.StringSlice(msg)))
+	return strings.Join(msg, "->")
 }
 
-func (d *display) printState(s state, depth int) string {
-	if !d.showFinished && !s.Running {
-		return ""
-	}
-
-	buf := &strings.Builder{}
-	prefix := strings.Repeat("  ", depth)
-	inPrefix := prefix + "  |<- "
-	outPrefix := prefix + "  |-> "
-
-	buf.WriteString(prefix)
-	name := s.Context.Tool.Name
-	if name == "" {
-		name = "main"
-	}
-	if s.Running {
-		buf.WriteString("(running ")
-		buf.WriteString(name)
-		buf.WriteString(")\n")
-		if s.Input != "" {
-			multiLineWrite(buf, inPrefix, "args: "+s.Input)
-		}
-	} else {
-		buf.WriteString("(done ")
-		buf.WriteString(name)
-		buf.WriteString(") ")
-		buf.WriteString("args: ")
-		head, tail := splitCount(s.Input, 40)
-		buf.WriteString(head)
-		if tail != "" {
-			buf.WriteString("...")
-		}
-		buf.WriteString("\n")
-	}
-
-	childRunning := false
-	for _, state := range d.states {
-		if state.Context != nil && state.Context.Parent != nil && state.Context.Parent.ID == s.Context.ID {
-			if state.Running {
-				childRunning = true
-			}
-			buf.WriteString(d.printState(state, depth+1))
-		}
-	}
-
-	if depth == 0 && !childRunning {
-		if len(s.Input) > 0 && len(s.Output) > 0 {
-			multiLineWrite(buf, outPrefix, "---")
-		}
-
-		multiLineWrite(buf, outPrefix, s.Output)
-	}
-
-	return buf.String()
+type dump struct {
+	ID      string         `json:"id,omitempty"`
+	Program *types.Program `json:"program,omitempty"`
+	Calls   []call         `json:"calls,omitempty"`
+	Input   string         `json:"input,omitempty"`
+	Output  string         `json:"output,omitempty"`
+	Err     error          `json:"err,omitempty"`
 }
 
-func (d *display) print() {
-	if d.quiet {
-		return
-	}
-	d.area.Update(d.String() + "\n")
+type message struct {
+	Request  any  `json:"request,omitempty"`
+	Response any  `json:"response,omitempty"`
+	Cached   bool `json:"cached,omitempty"`
 }
 
-func (d *display) String() string {
-	buf := strings.Builder{}
-	if len(d.states) > 0 {
-		buf.WriteString(d.printState(d.states[0], 0))
-	}
-
-	return buf.String()
-}
-
-func (d *display) addEvent(msg runner.Event) {
-	found := false
-	for i, state := range d.states {
-		if state.Context.ID != msg.Context.ID {
-			continue
-		}
-		found = true
-		switch msg.Type {
-		case runner.EventTypeUpdate:
-			state.Output = msg.Content
-		case runner.EventTypeStop:
-			state.Running = false
-			state.Output = msg.Content
-			state.End = msg.Time
-		case runner.EventTypeDebug:
-			state.Debug = append(state.Debug, msg.Debug)
-		}
-		d.states[i] = state
-	}
-	if !found && msg.Type == runner.EventTypeStart {
-		d.states = append(d.states, state{
-			Context: msg.Context,
-			Running: true,
-			Start:   msg.Time,
-			Input:   msg.Content,
-		})
-	} else if !found {
-		enc := json.NewEncoder(os.Stderr)
-		enc.SetIndent("", "  ")
-		enc.Encode(msg)
-		panic("why?")
-	}
-}
-
-type state struct {
-	Context *engine.Context `json:"context,omitempty"`
-	Debug   []any           `json:"debug,omitempty"`
-	Running bool            `json:"running,omitempty"`
-	Start   time.Time       `json:"start,omitempty"`
-	End     time.Time       `json:"end,omitempty"`
-	Input   string          `json:"input,omitempty"`
-	Output  string          `json:"output,omitempty"`
+type call struct {
+	ID       string    `json:"id,omitempty"`
+	ParentID string    `json:"parentID,omitempty"`
+	ToolID   string    `json:"toolID,omitempty"`
+	Messages []message `json:"messages,omitempty"`
+	Start    time.Time `json:"start,omitempty"`
+	End      time.Time `json:"end,omitempty"`
+	Input    string    `json:"input,omitempty"`
+	Output   string    `json:"output,omitempty"`
 }
