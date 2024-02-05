@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"sort"
+	"slices"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -87,10 +87,10 @@ func (d *display) Event(event runner.Event) {
 	case runner.EventTypeCallStart:
 		currentCall.Start = event.Time
 		currentCall.Input = event.Content
-		log.Fields("input", event.Content).Infof("%s started", callName)
+		log.Fields("input", event.Content).Infof("started             [%s]", callName)
 	case runner.EventTypeCallProgress:
 	case runner.EventTypeCallContinue:
-		log.Fields("toolResults", event.ToolResults).Infof("%s continue", callName)
+		log.Fields("toolResults", event.ToolResults).Infof("continue            [%s]", callName)
 	case runner.EventTypeChat:
 		if event.ChatRequest == nil {
 			log = log.Fields(
@@ -98,7 +98,7 @@ func (d *display) Event(event runner.Event) {
 				"cached", event.ChatResponseCached,
 			)
 		} else {
-			log.Infof("%s openai request sent", callName)
+			log.Infof("openai request sent [%s]", callName)
 			log = log.Fields(
 				"request", toJSON(event.ChatRequest),
 			)
@@ -112,7 +112,7 @@ func (d *display) Event(event runner.Event) {
 	case runner.EventTypeCallFinish:
 		currentCall.End = event.Time
 		currentCall.Output = event.Content
-		log.Fields("output", event.Content).Infof("%s ended", callName)
+		log.Fields("output", event.Content).Infof("ended               [%s]", callName)
 	}
 
 	d.dump.Calls[currentIndex] = currentCall
@@ -158,6 +158,10 @@ type jsonDump struct {
 	obj any
 }
 
+func (j jsonDump) MarshalJSON() ([]byte, error) {
+	return json.Marshal(j.obj)
+}
+
 func (j jsonDump) String() string {
 	d, err := json.Marshal(j.obj)
 	if err != nil {
@@ -184,6 +188,9 @@ func (c callName) String() string {
 		if name == "" {
 			name = tool.Source.File
 		}
+		if currentCall.ID != "1" {
+			name += "(" + currentCall.ID + ")"
+		}
 		msg = append(msg, name)
 		found := false
 		for _, parent := range c.calls {
@@ -198,7 +205,7 @@ func (c callName) String() string {
 		}
 	}
 
-	sort.Sort(sort.Reverse(sort.StringSlice(msg)))
+	slices.Reverse(msg)
 	return strings.Join(msg, "->")
 }
 
@@ -226,4 +233,8 @@ type call struct {
 	End      time.Time `json:"end,omitempty"`
 	Input    string    `json:"input,omitempty"`
 	Output   string    `json:"output,omitempty"`
+}
+
+func (c call) String() string {
+	return c.ID
 }
