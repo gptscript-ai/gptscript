@@ -29,8 +29,7 @@ func complete(opts ...Options) (result Options) {
 }
 
 type Console struct {
-	dumpState  string
-	liveOutput bool
+	dumpState string
 }
 
 var runID int64

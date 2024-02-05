@@ -1,15 +1,11 @@
-tools: make, sys.abort
+tools: sys.exec, sys.abort, sys.getenv
 
 Run each step sequentially, if either step fails abort
 
-1. Run "make" to compile
-2. Run "make test" to test
-3. Run "make validate" to test
+1. If DANGEROUS environment variable does not equal "true" then abort
+2. Run "make" to compile
+3. Run the standard set of go validation tools: test, vet, and fmt recursively
+4. Install golangci-lint and validate the code using it
+5. If the git workspace is dirty, then abort
 
 Then print SUCCESS
----
-tool: make
-description: Runs the "make"
-args: arg: the args to pass to make
-
-#!make ${ARG}

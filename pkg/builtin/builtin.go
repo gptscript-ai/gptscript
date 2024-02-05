@@ -67,6 +67,12 @@ var Tools = map[string]types.Tool{
 		),
 		BuiltinFunc: SysExec,
 	},
+	"sys.getenv": {
+		Description: "Gets the value of an OS environment variable",
+		Arguments: types.ObjectSchema(
+			"name", "The environment variable name to lookup"),
+		BuiltinFunc: SysGetenv,
+	},
 }
 
 func ListTools() (result []types.Tool) {
@@ -147,6 +153,9 @@ func SysExec(ctx context.Context, env []string, input string) (string, error) {
 	cmd.Env = env
 	cmd.Dir = params.Directory
 	out, err := cmd.CombinedOutput()
+	if err != nil {
+		_, _ = os.Stdout.Write(out)
+	}
 	return string(out), err
 }
 
@@ -239,6 +248,17 @@ func SysHTTPPost(ctx context.Context, env []string, input string) (string, error
 	}
 
 	return fmt.Sprintf("Wrote %d to %s", len([]byte(params.Content)), params.URL), nil
+}
+
+func SysGetenv(ctx context.Context, env []string, input string) (string, error) {
+	var params struct {
+		Name string `json:"name,omitempty"`
+	}
+	if err := json.Unmarshal([]byte(input), &params); err != nil {
+		return "", err
+	}
+	log.Debugf("looking up env var %s", params.Name)
+	return os.Getenv(params.Name), nil
 }
 
 func SysAbort(ctx context.Context, env []string, input string) (string, error) {
