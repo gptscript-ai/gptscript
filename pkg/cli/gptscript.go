@@ -136,10 +136,10 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 	} else {
 		if !r.Quiet {
 			if toolInput != "" {
-				_, _ = fmt.Fprintln(os.Stderr, "\nINPUT:\n")
+				_, _ = fmt.Fprint(os.Stderr, "\nINPUT:\n\n")
 				_, _ = fmt.Fprintln(os.Stderr, toolInput)
 			}
-			_, _ = fmt.Fprintln(os.Stderr, "\nOUTPUT:\n")
+			_, _ = fmt.Fprint(os.Stderr, "\nOUTPUT:\n\n")
 		}
 		fmt.Print(s)
 		if !strings.HasSuffix(s, "\n") {

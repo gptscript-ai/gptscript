@@ -85,6 +85,21 @@ var Tools = map[string]types.Tool{
 			return string(data), nil
 		},
 	},
+	"sys.abort": {
+		Description: "Aborts execution",
+		Arguments: types.ObjectSchema(
+			"message", "The description of the error or unexpected result that caused abort to be called",
+		),
+		BuiltinFunc: func(ctx context.Context, env []string, input string) (string, error) {
+			var params struct {
+				Message string `json:"message,omitempty"`
+			}
+			if err := json.Unmarshal([]byte(input), &params); err != nil {
+				return "", err
+			}
+			return "", fmt.Errorf("ABORT: %s", params.Message)
+		},
+	},
 	"sys.http.post": {
 		Description: "Write contents to a http or https URL using the POST method",
 		Arguments: types.ObjectSchema(

@@ -14,6 +14,7 @@ import (
 	"github.com/acorn-io/gptscript/pkg/openai"
 	"github.com/acorn-io/gptscript/pkg/types"
 	"github.com/acorn-io/gptscript/pkg/version"
+	"github.com/google/shlex"
 )
 
 // InternalSystemPrompt is added to all threads. Changing this is very dangerous as it has a
@@ -152,19 +153,24 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 	dec := json.NewDecoder(bytes.NewReader([]byte(input)))
 	dec.UseNumber()
 
+	envMap := map[string]string{}
 	if err := json.Unmarshal([]byte(input), &data); err == nil {
 		for k, v := range data {
-			envName := fmt.Sprintf("%s", strings.ToUpper(strings.ReplaceAll(k, "-", "_")))
+			envName := strings.ToUpper(strings.ReplaceAll(k, "-", "_"))
 			switch val := v.(type) {
 			case string:
+				envMap[envName] = val
 				env = append(env, envName+"="+val)
 			case json.Number:
+				envMap[envName] = string(val)
 				env = append(env, envName+"="+string(val))
 			case bool:
+				envMap[envName] = fmt.Sprint(val)
 				env = append(env, envName+"="+fmt.Sprint(val))
 			default:
 				data, err := json.Marshal(val)
 				if err == nil {
+					envMap[envName] = string(data)
 					env = append(env, envName+"="+string(data))
 				}
 			}
@@ -184,9 +190,19 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 		return "", err
 	}
 	interpreter = strings.TrimSpace(interpreter)[2:]
+
+	interpreter = os.Expand(interpreter, func(s string) string {
+		return envMap[s]
+	})
+
+	args, err := shlex.Split(interpreter)
+	if err != nil {
+		return "", err
+	}
+
 	output := &bytes.Buffer{}
 
-	cmd := exec.Command(interpreter, f.Name())
+	cmd := exec.Command(args[0], append(args[1:], f.Name())...)
 	cmd.Env = env
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Stderr = os.Stderr
@@ -198,7 +214,7 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 		return "", err
 	}
 
-	return string(output.Bytes()), nil
+	return output.String(), nil
 }
 
 func (e *Engine) Start(ctx Context, input string) (*Return, error) {

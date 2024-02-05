@@ -5,6 +5,7 @@ go 1.21.5
 require (
 	github.com/acorn-io/cmd v0.0.0-20240203032901-e9e631185ddb
 	github.com/adrg/xdg v0.4.0
+	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/hexops/autogold/v2 v2.1.0
 	github.com/sashabaranov/go-openai v1.18.3
 	github.com/sirupsen/logrus v1.9.3

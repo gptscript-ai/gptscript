@@ -1,9 +1,10 @@
-tools: make
+tools: make, sys.abort
 
-Run each step sequentially
+Run each step sequentially, if either step fails abort
 
 1. Run "make" to compile
 2. Run "make test" to test
+3. Run "make validate" to test
 
 Then print SUCCESS
 ---
@@ -11,10 +12,4 @@ tool: make
 description: Runs the "make"
 args: arg: the args to pass to make
 
-#!/bin/sh
-set -e
-
-echo "START MAKE OUTPUT:"
-echo "Running make ${ARG}"
-make ${ARG}
-echo "END MAKE OUTPUT"
+#!make ${ARG}

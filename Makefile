@@ -4,5 +4,9 @@ build:
 test:
 	go test -v ./...
 
+validate:
+	go vet ./...
+	golangci-lint run
+
 ci: build
 	./bin/gptscript ./scripts/ci.gpt

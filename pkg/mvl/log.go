@@ -1,7 +1,6 @@
 package mvl
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"runtime"
@@ -32,24 +31,6 @@ func (f formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	return []byte(fmt.Sprintf("%s %s\n",
 		entry.Time.Format(time.RFC3339),
 		msg)), nil
-}
-
-type verbose struct {
-}
-
-func (f verbose) Format(entry *logrus.Entry) ([]byte, error) {
-	buf, err := json.MarshalIndent(struct {
-		Time    time.Time `json:"time,omitempty"`
-		Level   string    `json:"level,omitempty"`
-		Message string    `json:"message,omitempty"`
-		Data    any       `json:"data,omitempty"`
-	}{
-		Time:    entry.Time,
-		Level:   entry.Level.String(),
-		Message: entry.Message,
-		Data:    entry.Data,
-	}, "", "  ")
-	return append(buf, []byte("\n")...), err
 }
 
 func SetDebug() {
