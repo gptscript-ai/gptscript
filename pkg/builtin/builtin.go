@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -48,6 +51,22 @@ var Tools = map[string]types.Tool{
 			"contentType", "The \"content type\" of the content such as application/json or text/plain"),
 		BuiltinFunc: SysHTTPPost,
 	},
+	"sys.find": {
+		Description: "Traverse a directory looking for files that match a pattern in the style of the unix find command",
+		Arguments: types.ObjectSchema(
+			"pattern", "The file pattern to look for. The pattern is a traditional unix glob format with * matching any character and ? matching a single character",
+			"directory", "The directory to search in. The current directory \".\" will be used as the default if no argument is passed",
+		),
+		BuiltinFunc: SysFind,
+	},
+	"sys.exec": {
+		Description: "Execute a command and get the output of the command",
+		Arguments: types.ObjectSchema(
+			"command", "The command to run including all applicable arguments",
+			"directory", "The directory to use as the current working directory of the command. The current directory \".\" will be used if no argument is passed",
+		),
+		BuiltinFunc: SysExec,
+	},
 }
 
 func ListTools() (result []types.Tool) {
@@ -71,6 +90,64 @@ func Builtin(name string) (types.Tool, bool) {
 	t.ID = name
 	t.Instructions = "#!" + name
 	return t, ok
+}
+
+func SysFind(ctx context.Context, env []string, input string) (string, error) {
+	var result []string
+	var params struct {
+		Pattern   string `json:"pattern,omitempty"`
+		Directory string `json:"directory,omitempty"`
+	}
+	if err := json.Unmarshal([]byte(input), &params); err != nil {
+		return "", err
+	}
+
+	if params.Directory == "" {
+		params.Directory = "."
+	}
+
+	log.Debugf("Finding files %s in %s", params.Pattern, params.Directory)
+	err := fs.WalkDir(os.DirFS(params.Directory), params.Directory, func(pathname string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		if ok, err := filepath.Match(params.Pattern, d.Name()); err != nil {
+			return err
+		} else if ok {
+			result = append(result, filepath.Join(pathname))
+		}
+		return nil
+	})
+	if err != nil {
+		return "", nil
+	}
+	sort.Strings(result)
+	return strings.Join(result, "\n"), nil
+}
+
+func SysExec(ctx context.Context, env []string, input string) (string, error) {
+	var params struct {
+		Command   string `json:"command,omitempty"`
+		Directory string `json:"directory,omitempty"`
+	}
+	if err := json.Unmarshal([]byte(input), &params); err != nil {
+		return "", err
+	}
+
+	if params.Directory == "" {
+		params.Directory = "."
+	}
+
+	log.Debugf("Running %s in %s", params.Command, params.Directory)
+
+	cmd := exec.Command("/bin/sh", "-c", params.Command)
+	cmd.Env = env
+	cmd.Dir = params.Directory
+	out, err := cmd.CombinedOutput()
+	return string(out), err
 }
 
 func SysRead(ctx context.Context, env []string, input string) (string, error) {

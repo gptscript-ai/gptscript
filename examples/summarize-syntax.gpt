@@ -1,19 +1,9 @@
-tools: ls, sys.read, help
+tools: sys.find, sys.read, sys.exec
 
 Write a README.md for this github repo that describes this project, it's usage, and a description of the
-GPT file syntax. Example GPT files can be found by listing and read them. Also document the help of the
-gptscript command.
+GPT file syntax. 
 
----
-name: ls
-description: list all gpt files
+Example GPT files can be found by looking for all *.gpt files in the current directory. Analyze
+the contents of those files to discover the syntax and then describe how the syntax works.
 
-#!/bin/bash
-
-find . -name '*.gpt'
-
----
-name: help
-description: Get the help output of gptscript
-
-#!gptscript --help
+Also document the help of the gptscript command which can be obtained from running "gptscript --help".
