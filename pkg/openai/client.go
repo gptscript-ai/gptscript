@@ -406,7 +406,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 	partial <- Status{
 		PartialResponse: &types.CompletionMessage{
 			Role:    types.CompletionMessageRoleTypeAssistant,
-			Content: types.Text(msg + "Waiting for model response..."),
+			Content: types.Text(msg + "Waiting for model response...\n"),
 		},
 	}
 

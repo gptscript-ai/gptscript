@@ -3,6 +3,7 @@ package types
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -32,6 +33,51 @@ type Tool struct {
 	Cache        *bool  `json:"cache,omitempty"`
 
 	Source ToolSource `json:"source,omitempty"`
+}
+
+func (t Tool) String() string {
+	buf := &strings.Builder{}
+	if t.Name != "" {
+		_, _ = fmt.Fprintf(buf, "Name: %s\n", t.Name)
+	}
+	if t.Description != "" {
+		_, _ = fmt.Fprintf(buf, "Description: %s\n", t.Name)
+	}
+	if len(t.Tools) != 0 {
+		_, _ = fmt.Fprintf(buf, "Tools: %s\n", strings.Join(t.Tools, ", "))
+	}
+	if t.Vision {
+		_, _ = fmt.Fprintln(buf, "Vision: true")
+	}
+	if t.MaxTokens != 0 {
+		_, _ = fmt.Fprintf(buf, "Max Tokens: %d\n", t.MaxTokens)
+	}
+	if t.ModelName != "" {
+		_, _ = fmt.Fprintf(buf, "Model Name: %s\n", t.ModelName)
+	}
+	if t.JSONResponse {
+		_, _ = fmt.Fprintln(buf, "JSON Response: true")
+	}
+	if t.Cache != nil && !*t.Cache {
+		_, _ = fmt.Fprintln(buf, "Cache: false")
+	}
+	if t.Arguments != nil {
+		var keys []string
+		for k := range t.Arguments.Properties {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, key := range keys {
+			prop := t.Arguments.Properties[key]
+			_, _ = fmt.Fprintf(buf, "Arg: %s: %s\n", key, prop.Description)
+		}
+	}
+	if t.Instructions != "" && t.BuiltinFunc == nil {
+		_, _ = fmt.Fprintln(buf)
+		_, _ = fmt.Fprintln(buf, t.Instructions)
+	}
+
+	return buf.String()
 }
 
 type ToolSource struct {

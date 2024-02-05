@@ -9,6 +9,7 @@ import (
 
 	"github.com/acorn-io/cmd"
 	"github.com/acorn-io/gptscript/pkg/assemble"
+	"github.com/acorn-io/gptscript/pkg/builtin"
 	"github.com/acorn-io/gptscript/pkg/input"
 	"github.com/acorn-io/gptscript/pkg/loader"
 	"github.com/acorn-io/gptscript/pkg/monitor"
@@ -34,6 +35,7 @@ type GPTScript struct {
 	SubTool    string `usage:"Use tool of this name, not the first tool in file"`
 	Assemble   bool   `usage:"Assemble tool to a single artifact, saved to --output"`
 	ListModels bool   `usage:"List the models available and exit"`
+	ListTools  bool   `usage:"List built-in tools and exit"`
 }
 
 func New() *cobra.Command {
@@ -43,6 +45,15 @@ func New() *cobra.Command {
 func (r *GPTScript) Customize(cmd *cobra.Command) {
 	cmd.Use = version.ProgramName + " [flags] PROGRAM_FILE [INPUT...]"
 	cmd.Flags().SetInterspersed(false)
+}
+
+func (r *GPTScript) listTools(ctx context.Context) error {
+	var lines []string
+	for _, tool := range builtin.ListTools() {
+		lines = append(lines, tool.String())
+	}
+	fmt.Println(strings.Join(lines, "\n---\n"))
+	return nil
 }
 
 func (r *GPTScript) listModels(ctx context.Context) error {
@@ -78,6 +89,10 @@ func (r *GPTScript) Pre(cmd *cobra.Command, args []string) error {
 func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 	if r.ListModels {
 		return r.listModels(cmd.Context())
+	}
+
+	if r.ListTools {
+		return r.listTools(cmd.Context())
 	}
 
 	if len(args) == 0 {

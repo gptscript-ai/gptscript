@@ -1,6 +1,8 @@
-tools: ls, cat
+tools: ls, sys.read, help
 
-Read all gpt files and then write a README that describes the syntax of the gpt files
+Write a README.md for this github repo that describes this project, it's usage, and a description of the
+GPT file syntax. Example GPT files can be found by listing and read them. Also document the help of the
+gptscript command.
 
 ---
 name: ls
@@ -11,10 +13,7 @@ description: list all gpt files
 find . -name '*.gpt'
 
 ---
-name: cat
-description: Reads the contents of a file
-arg: file: The filename to read
+name: help
+description: Get the help output of gptscript
 
-#!/bin/bash
-
-cat ${FILE} </dev/null
+#!gptscript --help

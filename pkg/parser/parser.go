@@ -64,6 +64,8 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		fallthrough
 	case "name":
 		tool.Name = strings.ToLower(value)
+	case "model":
+		fallthrough
 	case "modelname":
 		tool.ModelName = value
 	case "description":

@@ -68,10 +68,13 @@ func Text(text string) []ContentPart {
 
 func (in CompletionMessage) String() string {
 	buf := strings.Builder{}
-	for _, content := range in.Content {
+	for i, content := range in.Content {
+		if i > 0 {
+			buf.WriteString("\n")
+		}
 		buf.WriteString(content.Text)
 		if content.ToolCall != nil {
-			buf.WriteString(fmt.Sprintf("tool call %s -> %s\n", content.ToolCall.Function.Name, content.ToolCall.Function.Arguments))
+			buf.WriteString(fmt.Sprintf("tool call %s -> %s", content.ToolCall.Function.Name, content.ToolCall.Function.Arguments))
 		}
 		if content.Image != nil {
 			buf.WriteString("image: ")

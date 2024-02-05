@@ -127,6 +127,7 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 
 	for {
 		if result.Result != nil && len(result.Calls) == 0 {
+			progressClose()
 			monitor.Event(Event{
 				Time:        time.Now(),
 				CallContext: &callCtx,
@@ -183,9 +184,12 @@ func streamProgress(callCtx *engine.Context, monitor Monitor) (chan openai.Statu
 		}
 	}()
 
+	var once sync.Once
 	return progress, func() {
-		close(progress)
-		wg.Wait()
+		once.Do(func() {
+			close(progress)
+			wg.Wait()
+		})
 	}
 }
 

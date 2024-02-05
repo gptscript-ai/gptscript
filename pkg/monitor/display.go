@@ -16,18 +16,21 @@ import (
 )
 
 type Options struct {
-	DumpState string `usage:"Dump the internal execution state to a file"`
+	LiveOutput bool   `usage:"-"`
+	DumpState  string `usage:"Dump the internal execution state to a file"`
 }
 
 func complete(opts ...Options) (result Options) {
 	for _, opt := range opts {
 		result.DumpState = types.FirstSet(opt.DumpState, result.DumpState)
+		result.LiveOutput = types.FirstSet(opt.LiveOutput, result.LiveOutput)
 	}
 	return
 }
 
 type Console struct {
-	dumpState string
+	dumpState  string
+	liveOutput bool
 }
 
 var runID int64
@@ -44,8 +47,39 @@ func (c *Console) Start(ctx context.Context, prg *types.Program, env []string, i
 }
 
 type display struct {
-	dump      dump
-	dumpState string
+	dump        dump
+	livePrinter *livePrinter
+	dumpState   string
+}
+
+type livePrinter struct {
+	lastLines    map[string]string
+	needsNewline bool
+}
+
+func (l *livePrinter) end() {
+	if l == nil {
+		return
+	}
+	if l.needsNewline {
+		fmt.Println()
+	}
+	l.needsNewline = false
+}
+
+func (l *livePrinter) print(event runner.Event, c call) {
+	if l == nil {
+		return
+	}
+	if c.ParentID != "" {
+		return
+	}
+
+	last := l.lastLines[c.ID]
+	line := strings.TrimPrefix(event.Content, last)
+	fmt.Print(line)
+	l.needsNewline = !strings.HasSuffix(line, "\n")
+	l.lastLines[c.ID] = event.Content
 }
 
 func (d *display) Event(event runner.Event) {
@@ -85,13 +119,17 @@ func (d *display) Event(event runner.Event) {
 
 	switch event.Type {
 	case runner.EventTypeCallStart:
+		d.livePrinter.end()
 		currentCall.Start = event.Time
 		currentCall.Input = event.Content
 		log.Fields("input", event.Content).Infof("started             [%s]", callName)
 	case runner.EventTypeCallProgress:
+		d.livePrinter.print(event, currentCall)
 	case runner.EventTypeCallContinue:
+		d.livePrinter.end()
 		log.Fields("toolResults", event.ToolResults).Infof("continue            [%s]", callName)
 	case runner.EventTypeChat:
+		d.livePrinter.end()
 		if event.ChatRequest == nil {
 			log = log.Fields(
 				"response", toJSON(event.ChatResponse),
@@ -110,6 +148,7 @@ func (d *display) Event(event runner.Event) {
 			Cached:   event.ChatResponseCached,
 		})
 	case runner.EventTypeCallFinish:
+		d.livePrinter.end()
 		currentCall.End = event.Time
 		currentCall.Output = event.Content
 		log.Fields("output", event.Content).Infof("ended               [%s]", callName)
@@ -141,6 +180,9 @@ func NewConsole(opts ...Options) *Console {
 func newDisplay(dumpState string) *display {
 	return &display{
 		dumpState: dumpState,
+		livePrinter: &livePrinter{
+			lastLines: map[string]string{},
+		},
 	}
 }
 
