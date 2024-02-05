@@ -17,6 +17,8 @@ const (
 )
 
 func TestExamples(t *testing.T) {
+	RequireOpenAPIKey(t)
+
 	tests := []string{
 		"fib.gpt",
 		"helloworld.gpt",
@@ -38,6 +40,8 @@ func TestExamples(t *testing.T) {
 }
 
 func TestEcho(t *testing.T) {
+	RequireOpenAPIKey(t)
+
 	r, err := runner.New()
 	require.NoError(t, err)
 
@@ -48,4 +52,10 @@ func TestEcho(t *testing.T) {
 	require.NoError(t, err)
 
 	autogold.ExpectFile(t, output)
+}
+
+func RequireOpenAPIKey(t *testing.T) {
+	if os.Getenv("OPENAI_API_KEY") == "" {
+		t.Skip()
+	}
 }
