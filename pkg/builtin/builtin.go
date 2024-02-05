@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/acorn-io/gptscript/pkg/types"
+	"github.com/jaytaylor/html2text"
 )
 
 var Tools = map[string]types.Tool{
@@ -35,6 +36,12 @@ var Tools = map[string]types.Tool{
 		Arguments: types.ObjectSchema(
 			"url", "The URL to download"),
 		BuiltinFunc: SysHTTPGet,
+	},
+	"sys.http.html2text": {
+		Description: "Download the contents of a http or https URL returning the content as rendered text converted from HTML",
+		Arguments: types.ObjectSchema(
+			"url", "The URL to download"),
+		BuiltinFunc: SysHTTPHtml2Text,
 	},
 	"sys.abort": {
 		Description: "Aborts execution",
@@ -91,10 +98,21 @@ func ListTools() (result []types.Tool) {
 }
 
 func Builtin(name string) (types.Tool, bool) {
+	name, dontFail := strings.CutSuffix(name, "?")
 	t, ok := Tools[name]
 	t.Name = name
 	t.ID = name
 	t.Instructions = "#!" + name
+	if ok && dontFail {
+		orig := t.BuiltinFunc
+		t.BuiltinFunc = func(ctx context.Context, env []string, input string) (string, error) {
+			s, err := orig(ctx, env, input)
+			if err != nil {
+				return fmt.Sprintf("ERROR: %s", err.Error()), nil
+			}
+			return s, err
+		}
+	}
 	return t, ok
 }
 
@@ -216,6 +234,16 @@ func SysHTTPGet(ctx context.Context, env []string, input string) (string, error)
 	}
 
 	return string(data), nil
+}
+
+func SysHTTPHtml2Text(ctx context.Context, env []string, input string) (string, error) {
+	content, err := SysHTTPGet(ctx, env, input)
+	if err != nil {
+		return "", err
+	}
+	return html2text.FromString(content, html2text.Options{
+		PrettyTables: true,
+	})
 }
 
 func SysHTTPPost(ctx context.Context, env []string, input string) (string, error) {

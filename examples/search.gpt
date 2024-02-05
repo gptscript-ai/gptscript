@@ -1,0 +1,16 @@
+tools: search
+
+Search the web for vacation spots in Florida, for each
+vacation spot give the name and description.
+
+---
+name: search
+description: Searches the internet for content
+args: query: The query to search for
+tools: sys.http.text?
+
+First download the content of "https://html.duckduckgo.com/html/?q=${query}".
+Look for the first 5 search results. Download each search result and look for content
+that would best answer the query ${query}.
+
+With all that information try your best to provide an answer or useful context to ${query}.

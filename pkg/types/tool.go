@@ -69,7 +69,7 @@ func (t Tool) String() string {
 		sort.Strings(keys)
 		for _, key := range keys {
 			prop := t.Arguments.Properties[key]
-			_, _ = fmt.Fprintf(buf, "Arg: %s: %s\n", key, prop.Description)
+			_, _ = fmt.Fprintf(buf, "Args: %s: %s\n", key, prop.Description)
 		}
 	}
 	if t.Instructions != "" && t.BuiltinFunc == nil {
