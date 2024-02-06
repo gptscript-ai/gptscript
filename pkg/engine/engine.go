@@ -27,6 +27,8 @@ You do not need to explain the steps taken, only provide the result to the given
 You are referred to as a tool.
 `
 
+var completionID int64
+
 func init() {
 	if p := os.Getenv("GPTSCRIPT_INTERNAL_SYSTEM_PROMPT"); p != "" {
 		InternalSystemPrompt = p
@@ -142,8 +144,27 @@ func (c *Context) getTool(name string) (types.Tool, error) {
 	return tool, nil
 }
 
-func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) (string, error) {
+func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) (cmdOut string, cmdErr error) {
+	id := fmt.Sprint(atomic.AddInt64(&completionID, 1))
+
+	defer func() {
+		e.Progress <- openai.Status{
+			CompletionID: id,
+			Response: map[string]any{
+				"output": cmdOut,
+				"err":    cmdErr,
+			},
+		}
+	}()
+
 	if tool.BuiltinFunc != nil {
+		e.Progress <- openai.Status{
+			CompletionID: id,
+			Request: map[string]any{
+				"command": []string{tool.ID},
+				"input":   input,
+			},
+		}
 		return tool.BuiltinFunc(ctx, e.Env, input)
 	}
 
@@ -198,6 +219,14 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 	args, err := shlex.Split(interpreter)
 	if err != nil {
 		return "", err
+	}
+
+	e.Progress <- openai.Status{
+		CompletionID: id,
+		Request: map[string]any{
+			"command": args,
+			"input":   input,
+		},
 	}
 
 	output := &bytes.Buffer{}
