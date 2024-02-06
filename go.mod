@@ -3,11 +3,13 @@ module github.com/acorn-io/gptscript
 go 1.21.5
 
 require (
+	github.com/acorn-io/broadcaster v0.0.0-20240105011354-bfadd4a7b45d
 	github.com/acorn-io/cmd v0.0.0-20240203032901-e9e631185ddb
 	github.com/adrg/xdg v0.4.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/hexops/autogold/v2 v2.1.0
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
+	github.com/olahol/melody v1.1.4
 	github.com/sashabaranov/go-openai v1.18.3
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.0
@@ -30,6 +32,7 @@ require (
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-containerregistry v0.16.1 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
 	github.com/hexops/valast v1.4.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect

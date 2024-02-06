@@ -16,27 +16,28 @@ import (
 )
 
 type Options struct {
-	LiveOutput bool   `usage:"-"`
-	DumpState  string `usage:"Dump the internal execution state to a file"`
+	DisplayProgress bool   `usage:"-"`
+	DumpState       string `usage:"Dump the internal execution state to a file"`
 }
 
 func complete(opts ...Options) (result Options) {
 	for _, opt := range opts {
 		result.DumpState = types.FirstSet(opt.DumpState, result.DumpState)
-		result.LiveOutput = types.FirstSet(opt.LiveOutput, result.LiveOutput)
+		result.DisplayProgress = types.FirstSet(opt.DisplayProgress, result.DisplayProgress)
 	}
 	return
 }
 
 type Console struct {
-	dumpState string
+	dumpState       string
+	displayProgress bool
 }
 
 var runID int64
 
 func (c *Console) Start(ctx context.Context, prg *types.Program, env []string, input string) (runner.Monitor, error) {
 	id := atomic.AddInt64(&runID, 1)
-	mon := newDisplay(c.dumpState)
+	mon := newDisplay(c.dumpState, c.displayProgress)
 	mon.dump.ID = fmt.Sprint(id)
 	mon.dump.Program = prg
 	mon.dump.Input = input
@@ -175,17 +176,21 @@ func (d *display) Stop(output string, err error) {
 func NewConsole(opts ...Options) *Console {
 	opt := complete(opts...)
 	return &Console{
-		dumpState: opt.DumpState,
+		dumpState:       opt.DumpState,
+		displayProgress: opt.DisplayProgress,
 	}
 }
 
-func newDisplay(dumpState string) *display {
-	return &display{
+func newDisplay(dumpState string, progress bool) *display {
+	display := &display{
 		dumpState: dumpState,
-		livePrinter: &livePrinter{
-			lastLines: map[string]string{},
-		},
 	}
+	if progress {
+		display.livePrinter = &livePrinter{
+			lastLines: map[string]string{},
+		}
+	}
+	return display
 }
 
 func (d *display) Dump(out io.Writer) error {

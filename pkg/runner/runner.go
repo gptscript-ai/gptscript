@@ -83,15 +83,15 @@ func (r *Runner) Run(ctx context.Context, prg types.Program, env []string, input
 }
 
 type Event struct {
-	Time               time.Time
-	CallContext        *engine.Context
-	ToolResults        int
-	Type               EventType
-	ChatCompletionID   string
-	ChatRequest        any
-	ChatResponse       any
-	ChatResponseCached bool
-	Content            string
+	Time               time.Time       `json:"time,omitempty"`
+	CallContext        *engine.Context `json:"callContext,omitempty"`
+	ToolResults        int             `json:"toolResults,omitempty"`
+	Type               EventType       `json:"type,omitempty"`
+	ChatCompletionID   string          `json:"chatCompletionId,omitempty"`
+	ChatRequest        any             `json:"chatRequest,omitempty"`
+	ChatResponse       any             `json:"chatResponse,omitempty"`
+	ChatResponseCached bool            `json:"chatResponseCached,omitempty"`
+	Content            string          `json:"content,omitempty"`
 }
 
 type EventType string

@@ -1,5 +1,7 @@
 github.com/acorn-io/baaah v0.0.0-20240119160309-2a58ee757bbd h1:Zbau2J6sEPl1H4gqnEx4/TI55eZncQR5cjfPOcG2lxE=
 github.com/acorn-io/baaah v0.0.0-20240119160309-2a58ee757bbd/go.mod h1:13nTO3svO8zTD3j9E5c86tCtK5YrKsK5sxca4Lwkbc0=
+github.com/acorn-io/broadcaster v0.0.0-20240105011354-bfadd4a7b45d h1:hfpNQkJ4I2b8+DbMr8m97gG67ku0uPsMzUfskVu3cHU=
+github.com/acorn-io/broadcaster v0.0.0-20240105011354-bfadd4a7b45d/go.mod h1:WF6FYrEqW0+ZtY5OKb21JhSL0aeL5VJoVrm+u0d4gOE=
 github.com/acorn-io/cmd v0.0.0-20240203032901-e9e631185ddb h1:UVs3i5r0bOh3KEZV5dTsSQzG4MG/8F0m+dcYIzXOO5I=
 github.com/acorn-io/cmd v0.0.0-20240203032901-e9e631185ddb/go.mod h1:J0xhtXVfrJk3Fz1HYz3AoJ/ON9gaHu/baTkqOvywcfo=
 github.com/adrg/xdg v0.4.0 h1:RzRqFcjH4nE5C6oTAxhBtoE2IRyjBSa62SCbyPidvls=
@@ -33,6 +35,8 @@ github.com/google/pprof v0.0.0-20210720184732-4bb14d4b1be1 h1:K6RDEckDVWvDI9JAJY
 github.com/google/pprof v0.0.0-20210720184732-4bb14d4b1be1/go.mod h1:kpwsk12EmLew5upagYY7GY0pfYCcupk39gWOCRROcvE=
 github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 h1:El6M4kTTCOh6aBiKaUGG7oYTSPP8MxqL4YI3kZKwcP4=
 github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510/go.mod h1:pupxD2MaaD3pAXIBCelhxNneeOaAeabZDe5s4K6zSpQ=
+github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWmnc=
+github.com/gorilla/websocket v1.5.0/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/hexops/autogold v0.8.1/go.mod h1:97HLDXyG23akzAoRYJh/2OBs3kd80eHyKPvZw0S5ZBY=
 github.com/hexops/autogold v1.3.1 h1:YgxF9OHWbEIUjhDbpnLhgVsjUDsiHDTyDfy2lrfdlzo=
 github.com/hexops/autogold v1.3.1/go.mod h1:sQO+mQUCVfxOKPht+ipDSkJ2SCJ7BNJVHZexsXqWMx4=
@@ -66,6 +70,8 @@ github.com/mattn/go-runewidth v0.0.9 h1:Lm995f3rfxdpd6TSmuVCHVb/QhupuXlYr8sCI/Qd
 github.com/mattn/go-runewidth v0.0.9/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m2gUSrubnMI=
 github.com/nightlyone/lockfile v1.0.0 h1:RHep2cFKK4PonZJDdEl4GmkabuhbsRMgk/k3uAmxBiA=
 github.com/nightlyone/lockfile v1.0.0/go.mod h1:rywoIealpdNse2r832aiD9jRk8ErCatROs6LzC841CI=
+github.com/olahol/melody v1.1.4 h1:RQHfKZkQmDxI0+SLZRNBCn4LiXdqxLKRGSkT8Dyoe/E=
+github.com/olahol/melody v1.1.4/go.mod h1:GgkTl6Y7yWj/HtfD48Q5vLKPVoZOH+Qqgfa7CvJgJM4=
 github.com/olekukonko/tablewriter v0.0.5 h1:P2Ga83D34wi1o9J6Wh1mRuqd4mF/x/lgBS7N7AbDhec=
 github.com/olekukonko/tablewriter v0.0.5/go.mod h1:hPp6KlRPjbx+hW8ykQs1w3UBbZlj6HuIJcUGPhkA7kY=
 github.com/onsi/ginkgo/v2 v2.13.0 h1:0jY9lJquiL8fcf3M4LAXN5aMlS/b2BV86HFFPCPMgE4=

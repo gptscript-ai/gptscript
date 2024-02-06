@@ -16,6 +16,7 @@ import (
 	"github.com/acorn-io/gptscript/pkg/mvl"
 	"github.com/acorn-io/gptscript/pkg/openai"
 	"github.com/acorn-io/gptscript/pkg/runner"
+	"github.com/acorn-io/gptscript/pkg/server"
 	"github.com/acorn-io/gptscript/pkg/version"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
@@ -28,14 +29,16 @@ type (
 type GPTScript struct {
 	runner.Options
 	DisplayOptions
-	Debug      bool   `usage:"Enable debug logging"`
-	Quiet      bool   `usage:"No output logging" short:"q"`
-	Output     string `usage:"Save output to a file" short:"o"`
-	Input      string `usage:"Read input from a file (\"-\" for stdin)" short:"f"`
-	SubTool    string `usage:"Use tool of this name, not the first tool in file"`
-	Assemble   bool   `usage:"Assemble tool to a single artifact, saved to --output"`
-	ListModels bool   `usage:"List the models available and exit"`
-	ListTools  bool   `usage:"List built-in tools and exit"`
+	Debug         bool   `usage:"Enable debug logging"`
+	Quiet         bool   `usage:"No output logging" short:"q"`
+	Output        string `usage:"Save output to a file" short:"o"`
+	Input         string `usage:"Read input from a file (\"-\" for stdin)" short:"f"`
+	SubTool       string `usage:"Use tool of this name, not the first tool in file"`
+	Assemble      bool   `usage:"Assemble tool to a single artifact, saved to --output"`
+	ListModels    bool   `usage:"List the models available and exit"`
+	ListTools     bool   `usage:"List built-in tools and exit"`
+	Server        bool   `usage:"Start server"`
+	ListenAddress string `usage:"Server listen address" default:"127.0.0.1:9090"`
 }
 
 func New() *cobra.Command {
@@ -75,13 +78,21 @@ func (r *GPTScript) listModels(ctx context.Context) error {
 }
 
 func (r *GPTScript) Pre(cmd *cobra.Command, args []string) error {
+	if r.Quiet {
+		if term.IsTerminal(int(os.Stdout.Fd())) {
+			r.Quiet = false
+		} else {
+			r.Quiet = true
+		}
+	}
+
 	if r.Debug {
 		mvl.SetDebug()
 	} else {
 		mvl.SetSimpleFormat()
-	}
-	if r.Quiet {
-		mvl.SetError()
+		if r.Quiet {
+			mvl.SetError()
+		}
 	}
 	return nil
 }
@@ -93,6 +104,18 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 
 	if r.ListTools {
 		return r.listTools(cmd.Context())
+	}
+
+	if r.Server {
+		s, err := server.New(server.Options{
+			CacheOptions:  r.CacheOptions,
+			OpenAIOptions: r.OpenAIOptions,
+			ListenAddress: r.ListenAddress,
+		})
+		if err != nil {
+			return err
+		}
+		return s.Start(cmd.Context())
 	}
 
 	if len(args) == 0 {
@@ -118,16 +141,12 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 		return assemble.Assemble(cmd.Context(), prg, out)
 	}
 
-	if !r.Quiet {
-		if !term.IsTerminal(int(os.Stdout.Fd())) {
-			r.Quiet = true
-		}
-	}
-
 	runner, err := runner.New(r.Options, runner.Options{
-		CacheOptions:   r.CacheOptions,
-		OpenAIOptions:  r.OpenAIOptions,
-		MonitorFactory: monitor.NewConsole(monitor.Options(r.DisplayOptions)),
+		CacheOptions:  r.CacheOptions,
+		OpenAIOptions: r.OpenAIOptions,
+		MonitorFactory: monitor.NewConsole(monitor.Options(r.DisplayOptions), monitor.Options{
+			DisplayProgress: !r.Quiet,
+		}),
 	})
 	if err != nil {
 		return err
