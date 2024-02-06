@@ -87,6 +87,7 @@ type Event struct {
 	CallContext        *engine.Context
 	ToolResults        int
 	Type               EventType
+	ChatTransactionID  string
 	ChatRequest        any
 	ChatResponse       any
 	ChatResponseCached bool
@@ -166,16 +167,18 @@ func streamProgress(callCtx *engine.Context, monitor Monitor) (chan openai.Statu
 		for status := range progress {
 			if message := status.PartialResponse; message != nil {
 				monitor.Event(Event{
-					Time:        time.Now(),
-					CallContext: callCtx,
-					Type:        EventTypeCallProgress,
-					Content:     message.String(),
+					Time:              time.Now(),
+					CallContext:       callCtx,
+					Type:              EventTypeCallProgress,
+					ChatTransactionID: status.OpenAITransactionID,
+					Content:           message.String(),
 				})
 			} else {
 				monitor.Event(Event{
 					Time:               time.Now(),
 					CallContext:        callCtx,
 					Type:               EventTypeChat,
+					ChatTransactionID:  status.OpenAITransactionID,
 					ChatRequest:        status.Request,
 					ChatResponse:       status.Response,
 					ChatResponseCached: status.Cached,

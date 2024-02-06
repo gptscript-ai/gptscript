@@ -11,6 +11,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"sync/atomic"
 
 	"github.com/acorn-io/gptscript/pkg/cache"
 	"github.com/acorn-io/gptscript/pkg/hash"
@@ -27,11 +28,14 @@ const (
 )
 
 var (
-	key = os.Getenv("OPENAI_API_KEY")
-	url = os.Getenv("OPENAI_URL")
+	key           = os.Getenv("OPENAI_API_KEY")
+	url           = os.Getenv("OPENAI_URL")
+	transactionID int64
 )
 
 type Client struct {
+	url   string
+	key   string
 	c     *openai.Client
 	cache *cache.Client
 }
@@ -107,7 +111,11 @@ func (c *Client) ListModules(ctx context.Context) (result []string, _ error) {
 }
 
 func (c *Client) cacheKey(request openai.ChatCompletionRequest) string {
-	return hash.Encode(request)
+	return hash.Encode(map[string]any{
+		"url":     c.url,
+		"key":     c.key,
+		"request": request,
+	})
 }
 
 func (c *Client) seed(request openai.ChatCompletionRequest) int {
@@ -231,11 +239,12 @@ func toMessages(ctx context.Context, cache *cache.Client, request types.Completi
 }
 
 type Status struct {
-	Request         any
-	Response        any
-	Cached          bool
-	Chunks          any
-	PartialResponse *types.CompletionMessage
+	OpenAITransactionID string
+	Request             any
+	Response            any
+	Cached              bool
+	Chunks              any
+	PartialResponse     *types.CompletionMessage
 }
 
 func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- Status) (*types.CompletionMessage, error) {
@@ -281,8 +290,10 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		}
 	}
 
+	id := fmt.Sprint(atomic.AddInt64(&transactionID, 1))
 	status <- Status{
-		Request: request,
+		OpenAITransactionID: id,
+		Request:             request,
 	}
 
 	var cacheResponse bool
@@ -291,7 +302,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	if err != nil {
 		return nil, err
 	} else if !ok {
-		response, err = c.call(ctx, request, status)
+		response, err = c.call(ctx, request, id, status)
 		if err != nil {
 			return nil, err
 		}
@@ -305,9 +316,10 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	}
 
 	status <- Status{
-		Chunks:   response,
-		Response: result,
-		Cached:   cacheResponse,
+		OpenAITransactionID: id,
+		Chunks:              response,
+		Response:            result,
+		Cached:              cacheResponse,
 	}
 
 	return &result, nil
@@ -391,7 +403,7 @@ func (c *Client) store(ctx context.Context, key string, responses []openai.ChatC
 	return c.cache.Store(ctx, key, buf.Bytes())
 }
 
-func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest, partial chan<- Status) (responses []openai.ChatCompletionStreamResponse, _ error) {
+func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest, transactionID string, partial chan<- Status) (responses []openai.ChatCompletionStreamResponse, _ error) {
 	cacheKey := c.cacheKey(request)
 	request.Stream = true
 
@@ -404,6 +416,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 	}
 
 	partial <- Status{
+		OpenAITransactionID: transactionID,
 		PartialResponse: &types.CompletionMessage{
 			Role:    types.CompletionMessageRoleTypeAssistant,
 			Content: types.Text(msg + "Waiting for model response...\n"),
@@ -429,7 +442,8 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 		if partial != nil {
 			partialMessage = appendMessage(partialMessage, response)
 			partial <- Status{
-				PartialResponse: &partialMessage,
+				OpenAITransactionID: transactionID,
+				PartialResponse:     &partialMessage,
 			}
 		}
 		responses = append(responses, response)
