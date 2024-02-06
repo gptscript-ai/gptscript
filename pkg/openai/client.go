@@ -28,9 +28,9 @@ const (
 )
 
 var (
-	key           = os.Getenv("OPENAI_API_KEY")
-	url           = os.Getenv("OPENAI_URL")
-	transactionID int64
+	key          = os.Getenv("OPENAI_API_KEY")
+	url          = os.Getenv("OPENAI_URL")
+	completionID int64
 )
 
 type Client struct {
@@ -239,12 +239,12 @@ func toMessages(ctx context.Context, cache *cache.Client, request types.Completi
 }
 
 type Status struct {
-	OpenAITransactionID string
-	Request             any
-	Response            any
-	Cached              bool
-	Chunks              any
-	PartialResponse     *types.CompletionMessage
+	CompletionID    string
+	Request         any
+	Response        any
+	Cached          bool
+	Chunks          any
+	PartialResponse *types.CompletionMessage
 }
 
 func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- Status) (*types.CompletionMessage, error) {
@@ -290,10 +290,10 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		}
 	}
 
-	id := fmt.Sprint(atomic.AddInt64(&transactionID, 1))
+	id := fmt.Sprint(atomic.AddInt64(&completionID, 1))
 	status <- Status{
-		OpenAITransactionID: id,
-		Request:             request,
+		CompletionID: id,
+		Request:      request,
 	}
 
 	var cacheResponse bool
@@ -316,10 +316,10 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	}
 
 	status <- Status{
-		OpenAITransactionID: id,
-		Chunks:              response,
-		Response:            result,
-		Cached:              cacheResponse,
+		CompletionID: id,
+		Chunks:       response,
+		Response:     result,
+		Cached:       cacheResponse,
 	}
 
 	return &result, nil
@@ -416,7 +416,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 	}
 
 	partial <- Status{
-		OpenAITransactionID: transactionID,
+		CompletionID: transactionID,
 		PartialResponse: &types.CompletionMessage{
 			Role:    types.CompletionMessageRoleTypeAssistant,
 			Content: types.Text(msg + "Waiting for model response...\n"),
@@ -442,8 +442,8 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 		if partial != nil {
 			partialMessage = appendMessage(partialMessage, response)
 			partial <- Status{
-				OpenAITransactionID: transactionID,
-				PartialResponse:     &partialMessage,
+				CompletionID:    transactionID,
+				PartialResponse: &partialMessage,
 			}
 		}
 		responses = append(responses, response)

@@ -131,23 +131,23 @@ func (d *display) Event(event runner.Event) {
 		d.livePrinter.end()
 		if event.ChatRequest == nil {
 			log = log.Fields(
-				"chatID", event.ChatTransactionID,
+				"completionID", event.ChatCompletionID,
 				"response", toJSON(event.ChatResponse),
 				"cached", event.ChatResponseCached,
 			)
 		} else {
 			log.Infof("openai request sent [%s]", callName)
 			log = log.Fields(
-				"chatID", event.ChatTransactionID,
+				"completionID", event.ChatCompletionID,
 				"request", toJSON(event.ChatRequest),
 			)
 		}
 		log.Debugf("messages")
 		currentCall.Messages = append(currentCall.Messages, message{
-			ChatID:   event.ChatTransactionID,
-			Request:  event.ChatRequest,
-			Response: event.ChatResponse,
-			Cached:   event.ChatResponseCached,
+			CompletionID: event.ChatCompletionID,
+			Request:      event.ChatRequest,
+			Response:     event.ChatResponse,
+			Cached:       event.ChatResponseCached,
 		})
 	case runner.EventTypeCallFinish:
 		d.livePrinter.end()
@@ -263,10 +263,10 @@ type dump struct {
 }
 
 type message struct {
-	ChatID   string `json:"chatID,omitempty"`
-	Request  any    `json:"request,omitempty"`
-	Response any    `json:"response,omitempty"`
-	Cached   bool   `json:"cached,omitempty"`
+	CompletionID string `json:"completionID,omitempty"`
+	Request      any    `json:"request,omitempty"`
+	Response     any    `json:"response,omitempty"`
+	Cached       bool   `json:"cached,omitempty"`
 }
 
 type call struct {
