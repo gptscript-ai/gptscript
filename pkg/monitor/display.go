@@ -41,7 +41,7 @@ func (c *Console) Start(ctx context.Context, prg *types.Program, env []string, i
 	mon.dump.Program = prg
 	mon.dump.Input = input
 
-	log.Fields("runID", mon.dump.ID, "input", input).Debugf("Run started")
+	log.Fields("runID", mon.dump.ID, "input", input, "program", prg).Debugf("Run started")
 	return mon, nil
 }
 
