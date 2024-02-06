@@ -7,7 +7,7 @@ vacation spot give the name and description.
 name: search
 description: Searches the internet for content
 args: query: The query to search for
-tools: sys.http.text?
+tools: sys.http.html2text?
 
 First download the content of "https://html.duckduckgo.com/html/?q=${query}".
 Look for the first 5 search results. Download each search result and look for content

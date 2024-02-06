@@ -82,6 +82,16 @@ var Tools = map[string]types.Tool{
 	},
 }
 
+func SysProgram() *types.Program {
+	result := &types.Program{
+		ToolSet: types.ToolSet{},
+	}
+	for _, tool := range ListTools() {
+		result.ToolSet[tool.ID] = tool
+	}
+	return result
+}
+
 func ListTools() (result []types.Tool) {
 	var keys []string
 	for k := range Tools {

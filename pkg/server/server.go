@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/acorn-io/broadcaster"
+	"github.com/acorn-io/gptscript/pkg/builtin"
 	"github.com/acorn-io/gptscript/pkg/loader"
 	"github.com/acorn-io/gptscript/pkg/runner"
 	"github.com/acorn-io/gptscript/pkg/types"
@@ -85,12 +86,30 @@ var (
 type execKey struct{}
 
 func (s *Server) list(rw http.ResponseWriter, req *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	enc := json.NewEncoder(rw)
+	enc.SetIndent("", "  ")
+
 	path := filepath.Join(".", req.URL.Path)
+	if req.URL.Path == "/sys" {
+		_ = enc.Encode(builtin.SysProgram())
+		return
+	} else if strings.HasSuffix(path, ".gpt") {
+		prg, err := loader.Program(req.Context(), path, "")
+		if err != nil {
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		_ = enc.Encode(prg)
+		return
+	}
+
 	files, err := os.ReadDir(path)
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	var result []string
 	for _, file := range files {
 		if file.IsDir() && !strings.HasPrefix(file.Name(), ".") {
@@ -100,8 +119,6 @@ func (s *Server) list(rw http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	enc := json.NewEncoder(rw)
-	enc.SetIndent("", "  ")
 	_ = enc.Encode(result)
 }
 
@@ -186,7 +203,7 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	case http.MethodPost:
 		s.run(rw, req)
 	case http.MethodGet:
-		if strings.Contains(strings.ToLower(req.Header.Get("Connection")), "upgrade") {
+		if req.URL.Path == "/" && strings.Contains(strings.ToLower(req.Header.Get("Connection")), "upgrade") {
 			err := s.melody.HandleRequest(rw, req)
 			if err != nil {
 				http.Error(rw, err.Error(), http.StatusInternalServerError)
@@ -244,7 +261,7 @@ func (s *Session) Stop(output string, err error) {
 	e := Event{
 		Event: runner.Event{
 			Time: time.Now(),
-			Type: "runEnd",
+			Type: "runFinish",
 		},
 		RunID:  s.id,
 		Input:  s.input,
