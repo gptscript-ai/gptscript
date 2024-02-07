@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/acorn-io/cmd"
-	"github.com/acorn-io/gptscript/pkg/cli"
+	"github.com/gptscript-ai/gptscript/pkg/cli"
 )
 
 func main() {

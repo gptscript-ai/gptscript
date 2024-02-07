@@ -1,8 +1,8 @@
 package loader
 
 import (
-	"github.com/acorn-io/gptscript/pkg/openai"
-	"github.com/acorn-io/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/pkg/openai"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 var (

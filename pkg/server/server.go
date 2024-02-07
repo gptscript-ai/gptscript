@@ -15,10 +15,10 @@ import (
 	"time"
 
 	"github.com/acorn-io/broadcaster"
-	"github.com/acorn-io/gptscript/pkg/builtin"
-	"github.com/acorn-io/gptscript/pkg/loader"
-	"github.com/acorn-io/gptscript/pkg/runner"
-	"github.com/acorn-io/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/pkg/builtin"
+	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/runner"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/olahol/melody"
 	"github.com/rs/cors"
 )

@@ -8,9 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/acorn-io/gptscript/pkg/cache"
-	"github.com/acorn-io/gptscript/pkg/hash"
-	"github.com/acorn-io/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/pkg/cache"
+	"github.com/gptscript-ai/gptscript/pkg/hash"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 var (

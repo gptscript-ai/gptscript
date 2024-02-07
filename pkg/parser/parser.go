@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/acorn-io/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 func normalize(key string) string {
