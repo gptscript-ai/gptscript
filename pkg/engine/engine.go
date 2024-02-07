@@ -11,10 +11,10 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/acorn-io/gptscript/pkg/openai"
-	"github.com/acorn-io/gptscript/pkg/types"
-	"github.com/acorn-io/gptscript/pkg/version"
 	"github.com/google/shlex"
+	"github.com/gptscript-ai/gptscript/pkg/openai"
+	"github.com/gptscript-ai/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/pkg/version"
 )
 
 // InternalSystemPrompt is added to all threads. Changing this is very dangerous as it has a
@@ -182,17 +182,25 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 			case string:
 				envMap[envName] = val
 				env = append(env, envName+"="+val)
+				envMap[k] = val
+				env = append(env, k+"="+val)
 			case json.Number:
 				envMap[envName] = string(val)
 				env = append(env, envName+"="+string(val))
+				envMap[k] = string(val)
+				env = append(env, k+"="+string(val))
 			case bool:
 				envMap[envName] = fmt.Sprint(val)
 				env = append(env, envName+"="+fmt.Sprint(val))
+				envMap[k] = fmt.Sprint(val)
+				env = append(env, k+"="+fmt.Sprint(val))
 			default:
 				data, err := json.Marshal(val)
 				if err == nil {
 					envMap[envName] = string(data)
 					env = append(env, envName+"="+string(data))
+					envMap[k] = string(data)
+					env = append(env, k+"="+string(data))
 				}
 			}
 		}
@@ -265,6 +273,7 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 		MaxToken:     tool.MaxTokens,
 		JSONResponse: tool.JSONResponse,
 		Cache:        tool.Cache,
+		Temperature:  tool.Temperature,
 	}
 
 	if InternalSystemPrompt != "" {

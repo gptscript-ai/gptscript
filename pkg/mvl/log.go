@@ -29,7 +29,7 @@ func (f formatter) Format(entry *logrus.Entry) ([]byte, error) {
 		msg += fmt.Sprintf(" [input=%s]", i)
 	}
 	return []byte(fmt.Sprintf("%s %s\n",
-		entry.Time.Format(time.RFC3339),
+		entry.Time.Format(time.TimeOnly),
 		msg)), nil
 }
 

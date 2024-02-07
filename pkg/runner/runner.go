@@ -5,10 +5,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/acorn-io/gptscript/pkg/cache"
-	"github.com/acorn-io/gptscript/pkg/engine"
-	"github.com/acorn-io/gptscript/pkg/openai"
-	"github.com/acorn-io/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/pkg/cache"
+	"github.com/gptscript-ai/gptscript/pkg/engine"
+	"github.com/gptscript-ai/gptscript/pkg/openai"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 	"golang.org/x/sync/errgroup"
 )
 

@@ -8,11 +8,12 @@ import (
 	"os"
 	"slices"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 
-	"github.com/acorn-io/gptscript/pkg/runner"
-	"github.com/acorn-io/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/pkg/runner"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 type Options struct {
@@ -33,7 +34,10 @@ type Console struct {
 	displayProgress bool
 }
 
-var runID int64
+var (
+	runID           int64
+	prettyIDCounter int64
+)
 
 func (c *Console) Start(ctx context.Context, prg *types.Program, env []string, input string) (runner.Monitor, error) {
 	id := atomic.AddInt64(&runID, 1)
@@ -50,6 +54,8 @@ type display struct {
 	dump        dump
 	livePrinter *livePrinter
 	dumpState   string
+	callIDMap   map[string]string
+	callLock    sync.Mutex
 }
 
 type livePrinter struct {
@@ -83,6 +89,9 @@ func (l *livePrinter) print(event runner.Event, c call) {
 }
 
 func (d *display) Event(event runner.Event) {
+	d.callLock.Lock()
+	defer d.callLock.Unlock()
+
 	var (
 		currentIndex = -1
 		currentCall  call
@@ -111,10 +120,17 @@ func (d *display) Event(event runner.Event) {
 		"parentID", currentCall.ParentID,
 		"toolID", currentCall.ToolID)
 
+	prettyID, ok := d.callIDMap[currentCall.ID]
+	if !ok {
+		prettyID = fmt.Sprint(atomic.AddInt64(&prettyIDCounter, 1))
+		d.callIDMap[currentCall.ID] = prettyID
+	}
+
 	callName := callName{
-		call:  &currentCall,
-		prg:   d.dump.Program,
-		calls: d.dump.Calls,
+		prettyID: prettyID,
+		call:     &currentCall,
+		prg:      d.dump.Program,
+		calls:    d.dump.Calls,
 	}
 
 	switch event.Type {
@@ -122,12 +138,12 @@ func (d *display) Event(event runner.Event) {
 		d.livePrinter.end()
 		currentCall.Start = event.Time
 		currentCall.Input = event.Content
-		log.Fields("input", event.Content).Infof("started             [%s]", callName)
+		log.Fields("input", event.Content).Infof("started  [%s]", callName)
 	case runner.EventTypeCallProgress:
 		d.livePrinter.print(event, currentCall)
 	case runner.EventTypeCallContinue:
 		d.livePrinter.end()
-		log.Fields("toolResults", event.ToolResults).Infof("continue            [%s]", callName)
+		log.Fields("toolResults", event.ToolResults).Infof("continue [%s]", callName)
 	case runner.EventTypeChat:
 		d.livePrinter.end()
 		if event.ChatRequest == nil {
@@ -137,7 +153,7 @@ func (d *display) Event(event runner.Event) {
 				"cached", event.ChatResponseCached,
 			)
 		} else {
-			log.Infof("openai request sent [%s]", callName)
+			log.Infof("sent     [%s]", callName)
 			log = log.Fields(
 				"completionID", event.ChatCompletionID,
 				"request", toJSON(event.ChatRequest),
@@ -154,7 +170,7 @@ func (d *display) Event(event runner.Event) {
 		d.livePrinter.end()
 		currentCall.End = event.Time
 		currentCall.Output = event.Content
-		log.Fields("output", event.Content).Infof("ended               [%s]", callName)
+		log.Fields("output", event.Content).Infof("ended    [%s]", callName)
 	}
 
 	d.dump.Calls[currentIndex] = currentCall
@@ -184,6 +200,7 @@ func NewConsole(opts ...Options) *Console {
 func newDisplay(dumpState string, progress bool) *display {
 	display := &display{
 		dumpState: dumpState,
+		callIDMap: make(map[string]string),
 	}
 	if progress {
 		display.livePrinter = &livePrinter{
@@ -220,9 +237,10 @@ func (j jsonDump) String() string {
 }
 
 type callName struct {
-	call  *call
-	prg   *types.Program
-	calls []call
+	prettyID string
+	call     *call
+	prg      *types.Program
+	calls    []call
 }
 
 func (c callName) String() string {
@@ -238,7 +256,7 @@ func (c callName) String() string {
 			name = tool.Source.File
 		}
 		if currentCall.ID != "1" {
-			name += "(" + currentCall.ID + ")"
+			name += "(" + c.prettyID + ")"
 		}
 		msg = append(msg, name)
 		found := false
@@ -255,7 +273,11 @@ func (c callName) String() string {
 	}
 
 	slices.Reverse(msg)
-	return strings.Join(msg, "->")
+	result := strings.Join(msg[1:], "->")
+	if result == "" {
+		return "main"
+	}
+	return result
 }
 
 type dump struct {

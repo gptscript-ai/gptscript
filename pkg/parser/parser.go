@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/acorn-io/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 func normalize(key string) string {
@@ -21,6 +21,15 @@ func toBool(line string) (bool, error) {
 		return false, fmt.Errorf("invalid boolean parameter, must be \"true\" or \"false\", got [%s]", line)
 	}
 	return false, nil
+}
+
+func toFloatPtr(line string) (*float32, error) {
+	f, err := strconv.ParseFloat(line, 32)
+	if err != nil {
+		return nil, err
+	}
+	f32 := float32(f)
+	return &f32, nil
 }
 
 func csv(line string) (result []string) {
@@ -98,6 +107,11 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		tool.Cache = &b
 	case "jsonresponse":
 		tool.JSONResponse, err = toBool(value)
+		if err != nil {
+			return false, err
+		}
+	case "temperature":
+		tool.Temperature, err = toFloatPtr(value)
 		if err != nil {
 			return false, err
 		}

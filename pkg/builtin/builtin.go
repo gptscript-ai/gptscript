@@ -13,7 +13,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/acorn-io/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/jaytaylor/html2text"
 )
 
@@ -80,6 +80,16 @@ var Tools = map[string]types.Tool{
 			"name", "The environment variable name to lookup"),
 		BuiltinFunc: SysGetenv,
 	},
+}
+
+func SysProgram() *types.Program {
+	result := &types.Program{
+		ToolSet: types.ToolSet{},
+	}
+	for _, tool := range ListTools() {
+		result.ToolSet[tool.ID] = tool
+	}
+	return result
 }
 
 func ListTools() (result []types.Tool) {

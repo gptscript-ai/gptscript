@@ -18,10 +18,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/acorn-io/gptscript/pkg/assemble"
-	"github.com/acorn-io/gptscript/pkg/builtin"
-	"github.com/acorn-io/gptscript/pkg/parser"
-	"github.com/acorn-io/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/pkg/assemble"
+	"github.com/gptscript-ai/gptscript/pkg/builtin"
+	"github.com/gptscript-ai/gptscript/pkg/parser"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 const (

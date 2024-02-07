@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/acorn-io/gptscript/pkg/loader"
-	"github.com/acorn-io/gptscript/pkg/runner"
+	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/hexops/autogold/v2"
 	"github.com/stretchr/testify/require"
 )
@@ -20,7 +20,7 @@ func TestExamples(t *testing.T) {
 	RequireOpenAPIKey(t)
 
 	tests := []string{
-		"fib.gpt",
+		"fac.gpt",
 		"helloworld.gpt",
 	}
 	for _, entry := range tests {

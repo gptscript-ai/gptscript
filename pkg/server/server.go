@@ -15,10 +15,12 @@ import (
 	"time"
 
 	"github.com/acorn-io/broadcaster"
-	"github.com/acorn-io/gptscript/pkg/loader"
-	"github.com/acorn-io/gptscript/pkg/runner"
-	"github.com/acorn-io/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/pkg/builtin"
+	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/runner"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/olahol/melody"
+	"github.com/rs/cors"
 )
 
 type Options struct {
@@ -36,7 +38,7 @@ func complete(opts []Options) (runnerOpts []runner.Options, result Options) {
 		})
 	}
 	if result.ListenAddress == "" {
-		result.ListenAddress = "127.0.0.1:89090"
+		result.ListenAddress = "127.0.0.1:9090"
 	}
 	return
 }
@@ -85,12 +87,30 @@ var (
 type execKey struct{}
 
 func (s *Server) list(rw http.ResponseWriter, req *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	enc := json.NewEncoder(rw)
+	enc.SetIndent("", "  ")
+
 	path := filepath.Join(".", req.URL.Path)
+	if req.URL.Path == "/sys" {
+		_ = enc.Encode(builtin.SysProgram())
+		return
+	} else if strings.HasSuffix(path, ".gpt") {
+		prg, err := loader.Program(req.Context(), path, "")
+		if err != nil {
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		_ = enc.Encode(prg)
+		return
+	}
+
 	files, err := os.ReadDir(path)
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	var result []string
 	for _, file := range files {
 		if file.IsDir() && !strings.HasPrefix(file.Name(), ".") {
@@ -100,8 +120,6 @@ func (s *Server) list(rw http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	enc := json.NewEncoder(rw)
-	enc.SetIndent("", "  ")
 	_ = enc.Encode(result)
 }
 
@@ -132,6 +150,7 @@ func (s *Server) run(rw http.ResponseWriter, req *http.Request) {
 		go func() {
 			_, _ = s.runner.Run(ctx, prg, os.Environ(), string(body))
 		}()
+		rw.Header().Set("Content-Type", "application/json")
 		err := json.NewEncoder(rw).Encode(map[string]any{
 			"id": id,
 		})
@@ -152,12 +171,14 @@ func (s *Server) Start(ctx context.Context) error {
 	s.melody.HandleConnect(s.Connect)
 	go s.events.Start(ctx)
 	log.Infof("Listening on http://%s", s.listenAddress)
-	server := &http.Server{Addr: s.listenAddress, Handler: s}
+	handler := cors.Default().Handler(s)
+	server := &http.Server{Addr: s.listenAddress, Handler: handler}
 	context.AfterFunc(ctx, func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		_ = server.Shutdown(ctx)
 	})
+
 	return server.ListenAndServe()
 }
 
@@ -186,7 +207,7 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	case http.MethodPost:
 		s.run(rw, req)
 	case http.MethodGet:
-		if strings.Contains(strings.ToLower(req.Header.Get("Connection")), "upgrade") {
+		if req.URL.Path == "/" && strings.Contains(strings.ToLower(req.Header.Get("Connection")), "upgrade") {
 			err := s.melody.HandleRequest(rw, req)
 			if err != nil {
 				http.Error(rw, err.Error(), http.StatusInternalServerError)
@@ -244,7 +265,7 @@ func (s *Session) Stop(output string, err error) {
 	e := Event{
 		Event: runner.Event{
 			Time: time.Now(),
-			Type: "runEnd",
+			Type: "runFinish",
 		},
 		RunID:  s.id,
 		Input:  s.input,
