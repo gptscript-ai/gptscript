@@ -13,10 +13,10 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/acorn-io/gptscript/pkg/cache"
-	"github.com/acorn-io/gptscript/pkg/hash"
-	"github.com/acorn-io/gptscript/pkg/types"
-	"github.com/acorn-io/gptscript/pkg/vision"
+	"github.com/gptscript-ai/gptscript/pkg/cache"
+	"github.com/gptscript-ai/gptscript/pkg/hash"
+	"github.com/gptscript-ai/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/pkg/vision"
 	"github.com/sashabaranov/go-openai"
 )
 

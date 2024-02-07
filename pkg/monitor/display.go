@@ -12,8 +12,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/acorn-io/gptscript/pkg/runner"
-	"github.com/acorn-io/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/pkg/runner"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 type Options struct {

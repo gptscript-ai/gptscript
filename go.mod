@@ -1,4 +1,4 @@
-module github.com/acorn-io/gptscript
+module github.com/gptscript-ai/gptscript
 
 go 1.21.5
 
@@ -12,6 +12,7 @@ require (
 	github.com/hexops/autogold/v2 v2.1.0
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
 	github.com/olahol/melody v1.1.4
+	github.com/rs/cors v1.10.1
 	github.com/sashabaranov/go-openai v1.18.3
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.0
@@ -42,7 +43,6 @@ require (
 	github.com/onsi/gomega v1.29.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
-	github.com/rs/cors v1.10.1 // indirect
 	github.com/samber/lo v1.38.1 // indirect
 	github.com/samber/slog-logrus v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

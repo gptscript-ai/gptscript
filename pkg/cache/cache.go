@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/acorn-io/gptscript/pkg/types"
-	"github.com/acorn-io/gptscript/pkg/version"
 	"github.com/adrg/xdg"
+	"github.com/gptscript-ai/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/pkg/version"
 )
 
 type Client struct {

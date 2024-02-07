@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/acorn-io/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 var Header = []byte("GPTSCRIPT!")

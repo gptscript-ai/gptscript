@@ -13,7 +13,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/acorn-io/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/jaytaylor/html2text"
 )
 

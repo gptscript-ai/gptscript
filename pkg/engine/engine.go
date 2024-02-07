@@ -11,10 +11,10 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/acorn-io/gptscript/pkg/openai"
-	"github.com/acorn-io/gptscript/pkg/types"
-	"github.com/acorn-io/gptscript/pkg/version"
 	"github.com/google/shlex"
+	"github.com/gptscript-ai/gptscript/pkg/openai"
+	"github.com/gptscript-ai/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/pkg/version"
 )
 
 // InternalSystemPrompt is added to all threads. Changing this is very dangerous as it has a
