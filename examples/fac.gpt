@@ -8,7 +8,10 @@ description: A function taking an integer as argument and returns an integer
 args: number: An integer
 tools: myfunction
 
-If ${number} is 0 return 1. Otherwise return myfunction(${number}-1) * ${number}
+Do the following in strict order:
+1. If ${number} is 0 skip the remaining steps and return 1
+2. Calculate the myfunction of (${number} - 1)
+3. Return ${number} multiply the result of the previous step
 
 ---
 name: sub
