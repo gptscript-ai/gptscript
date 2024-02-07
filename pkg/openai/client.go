@@ -258,9 +258,10 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	}
 
 	request := openai.ChatCompletionRequest{
-		Model:     messageRequest.Model,
-		Messages:  msgs,
-		MaxTokens: messageRequest.MaxToken,
+		Model:       messageRequest.Model,
+		Messages:    msgs,
+		MaxTokens:   messageRequest.MaxToken,
+		Temperature: messageRequest.Temperature,
 	}
 
 	if messageRequest.JSONResponse {

@@ -14,3 +14,6 @@ Look for the first 5 search results. Download each search result and look for co
 that would best answer the query ${query}.
 
 With all that information try your best to provide an answer or useful context to ${query}.
+
+If you can not retrieve a referenced URL then just skip that item and make a reference that
+that URL was skipped.

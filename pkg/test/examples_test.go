@@ -20,7 +20,7 @@ func TestExamples(t *testing.T) {
 	RequireOpenAPIKey(t)
 
 	tests := []string{
-		"fib.gpt",
+		"fac.gpt",
 		"helloworld.gpt",
 	}
 	for _, entry := range tests {

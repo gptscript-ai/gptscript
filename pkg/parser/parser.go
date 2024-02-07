@@ -23,6 +23,15 @@ func toBool(line string) (bool, error) {
 	return false, nil
 }
 
+func toFloatPtr(line string) (*float32, error) {
+	f, err := strconv.ParseFloat(line, 32)
+	if err != nil {
+		return nil, err
+	}
+	f32 := float32(f)
+	return &f32, nil
+}
+
 func csv(line string) (result []string) {
 	for _, part := range strings.Split(line, ",") {
 		result = append(result, strings.TrimSpace(part))
@@ -98,6 +107,11 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		tool.Cache = &b
 	case "jsonresponse":
 		tool.JSONResponse, err = toBool(value)
+		if err != nil {
+			return false, err
+		}
+	case "temperature":
+		tool.Temperature, err = toFloatPtr(value)
 		if err != nil {
 			return false, err
 		}

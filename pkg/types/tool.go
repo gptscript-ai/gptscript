@@ -26,11 +26,12 @@ type Tool struct {
 	ToolMapping  map[string]string `json:"toolMapping,omitempty"`
 	BuiltinFunc  BuiltinFunc       `json:"-"`
 
-	Vision       bool   `json:"vision,omitempty"`
-	MaxTokens    int    `json:"maxTokens,omitempty"`
-	ModelName    string `json:"modelName,omitempty"`
-	JSONResponse bool   `json:"jsonResponse,omitempty"`
-	Cache        *bool  `json:"cache,omitempty"`
+	Vision       bool     `json:"vision,omitempty"`
+	MaxTokens    int      `json:"maxTokens,omitempty"`
+	ModelName    string   `json:"modelName,omitempty"`
+	JSONResponse bool     `json:"jsonResponse,omitempty"`
+	Temperature  *float32 `json:"temperature,omitempty"`
+	Cache        *bool    `json:"cache,omitempty"`
 
 	Source ToolSource `json:"source,omitempty"`
 }
@@ -60,6 +61,9 @@ func (t Tool) String() string {
 	}
 	if t.Cache != nil && !*t.Cache {
 		_, _ = fmt.Fprintln(buf, "Cache: false")
+	}
+	if t.Temperature != nil {
+		_, _ = fmt.Fprintf(buf, "Temperature: %f", *t.Temperature)
 	}
 	if t.Arguments != nil {
 		var keys []string

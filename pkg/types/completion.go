@@ -17,6 +17,7 @@ type CompletionRequest struct {
 	Tools        []CompletionTool
 	Messages     []CompletionMessage
 	MaxToken     int
+	Temperature  *float32
 	JSONResponse bool
 	Cache        *bool
 }
