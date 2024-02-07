@@ -42,6 +42,7 @@ require (
 	github.com/onsi/gomega v1.29.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
+	github.com/rs/cors v1.10.1 // indirect
 	github.com/samber/lo v1.38.1 // indirect
 	github.com/samber/slog-logrus v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

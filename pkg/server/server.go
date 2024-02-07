@@ -20,6 +20,7 @@ import (
 	"github.com/acorn-io/gptscript/pkg/runner"
 	"github.com/acorn-io/gptscript/pkg/types"
 	"github.com/olahol/melody"
+	"github.com/rs/cors"
 )
 
 type Options struct {
@@ -37,7 +38,7 @@ func complete(opts []Options) (runnerOpts []runner.Options, result Options) {
 		})
 	}
 	if result.ListenAddress == "" {
-		result.ListenAddress = "127.0.0.1:89090"
+		result.ListenAddress = "127.0.0.1:9090"
 	}
 	return
 }
@@ -149,6 +150,7 @@ func (s *Server) run(rw http.ResponseWriter, req *http.Request) {
 		go func() {
 			_, _ = s.runner.Run(ctx, prg, os.Environ(), string(body))
 		}()
+		rw.Header().Set("Content-Type", "application/json")
 		err := json.NewEncoder(rw).Encode(map[string]any{
 			"id": id,
 		})
@@ -169,12 +171,14 @@ func (s *Server) Start(ctx context.Context) error {
 	s.melody.HandleConnect(s.Connect)
 	go s.events.Start(ctx)
 	log.Infof("Listening on http://%s", s.listenAddress)
-	server := &http.Server{Addr: s.listenAddress, Handler: s}
+	handler := cors.Default().Handler(s)
+	server := &http.Server{Addr: s.listenAddress, Handler: handler}
 	context.AfterFunc(ctx, func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		_ = server.Shutdown(ctx)
 	})
+
 	return server.ListenAndServe()
 }
 
