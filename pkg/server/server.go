@@ -149,6 +149,7 @@ func (s *Server) run(rw http.ResponseWriter, req *http.Request) {
 		go func() {
 			_, _ = s.runner.Run(ctx, prg, os.Environ(), string(body))
 		}()
+		rw.Header().Set("Content-Type", "application/json")
 		err := json.NewEncoder(rw).Encode(map[string]any{
 			"id": id,
 		})
