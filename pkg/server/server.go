@@ -20,6 +20,7 @@ import (
 	"github.com/acorn-io/gptscript/pkg/runner"
 	"github.com/acorn-io/gptscript/pkg/types"
 	"github.com/olahol/melody"
+	"github.com/rs/cors"
 )
 
 type Options struct {
@@ -170,12 +171,14 @@ func (s *Server) Start(ctx context.Context) error {
 	s.melody.HandleConnect(s.Connect)
 	go s.events.Start(ctx)
 	log.Infof("Listening on http://%s", s.listenAddress)
-	server := &http.Server{Addr: s.listenAddress, Handler: s}
+	handler := cors.Default().Handler(s)
+	server := &http.Server{Addr: s.listenAddress, Handler: handler}
 	context.AfterFunc(ctx, func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		_ = server.Shutdown(ctx)
 	})
+
 	return server.ListenAndServe()
 }
 
