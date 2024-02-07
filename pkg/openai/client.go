@@ -264,6 +264,10 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		Temperature: messageRequest.Temperature,
 	}
 
+	if request.Temperature == nil {
+		request.Temperature = new(float32)
+	}
+
 	if messageRequest.JSONResponse {
 		request.ResponseFormat = &openai.ChatCompletionResponseFormat{
 			Type: openai.ChatCompletionResponseFormatTypeJSONObject,

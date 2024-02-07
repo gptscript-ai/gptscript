@@ -273,6 +273,7 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 		MaxToken:     tool.MaxTokens,
 		JSONResponse: tool.JSONResponse,
 		Cache:        tool.Cache,
+		Temperature:  tool.Temperature,
 	}
 
 	if InternalSystemPrompt != "" {
