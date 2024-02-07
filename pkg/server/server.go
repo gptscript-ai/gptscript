@@ -37,7 +37,7 @@ func complete(opts []Options) (runnerOpts []runner.Options, result Options) {
 		})
 	}
 	if result.ListenAddress == "" {
-		result.ListenAddress = "127.0.0.1:89090"
+		result.ListenAddress = "127.0.0.1:9090"
 	}
 	return
 }
