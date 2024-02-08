@@ -116,19 +116,27 @@ func (s *Server) list(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	files, err := os.ReadDir(path)
+	var result []string
+	err := fs.WalkDir(os.DirFS(path), ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if strings.HasPrefix(d.Name(), ".") {
+			if d.IsDir() && d.Name() != "." {
+				return fs.SkipDir
+			}
+			return nil
+		}
+
+		if !d.IsDir() && strings.HasSuffix(d.Name(), ".gpt") {
+			result = append(result, path)
+		}
+
+		return nil
+	})
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		return
-	}
-
-	var result []string
-	for _, file := range files {
-		if file.IsDir() && !strings.HasPrefix(file.Name(), ".") {
-			result = append(result, filepath.Join(path, file.Name())+"/")
-		} else if strings.HasSuffix(file.Name(), ".gpt") {
-			result = append(result, filepath.Join(path, file.Name()))
-		}
 	}
 
 	_ = enc.Encode(result)
