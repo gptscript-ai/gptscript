@@ -19,6 +19,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/types"
+	"github.com/gptscript-ai/gptscript/static"
 	"github.com/olahol/melody"
 	"github.com/rs/cors"
 )
@@ -169,10 +170,10 @@ func (s *Server) run(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	id := fmt.Sprint(atomic.AddInt64(&execID, 1))
-	ctx := context.WithValue(req.Context(), execKey{}, id)
 	if req.URL.Query().Has("async") {
+		ctx := context.WithValue(s.ctx, execKey{}, id)
 		go func() {
-			_, _ = runner.Run(s.ctx, prg, os.Environ(), string(body))
+			_, _ = runner.Run(ctx, prg, os.Environ(), string(body))
 		}()
 		rw.Header().Set("Content-Type", "application/json")
 		err := json.NewEncoder(rw).Encode(map[string]any{
@@ -182,6 +183,7 @@ func (s *Server) run(rw http.ResponseWriter, req *http.Request) {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
 		}
 	} else {
+		ctx := context.WithValue(req.Context(), execKey{}, id)
 		out, err := runner.Run(ctx, prg, os.Environ(), string(body))
 		if err == nil {
 			_, _ = rw.Write([]byte(out))
@@ -228,6 +230,18 @@ func (s *Server) Connect(session *melody.Session) {
 }
 
 func (s *Server) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	if strings.HasPrefix(req.URL.Path, "/ui") {
+		path := req.URL.Path
+		if path == "/ui" || path == "/ui/" {
+			path = "/ui/index.html"
+		}
+		if _, err := fs.Stat(static.UI, path[1:]); errors.Is(err, fs.ErrNotExist) {
+			path = "/ui/index.html"
+		}
+		http.ServeFileFS(rw, req, static.UI, path)
+		return
+	}
+
 	switch req.Method {
 	case http.MethodPost:
 		s.run(rw, req)
