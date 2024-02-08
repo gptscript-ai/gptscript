@@ -1,6 +1,6 @@
 module github.com/gptscript-ai/gptscript
 
-go 1.21.5
+go 1.22.0
 
 replace github.com/sashabaranov/go-openai => github.com/gptscript-ai/go-openai v0.0.0-20240206232711-45b6e096246a
 

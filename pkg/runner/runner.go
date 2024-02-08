@@ -203,8 +203,6 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 
 	eg, subCtx := errgroup.WithContext(callCtx.Ctx)
 	for id, call := range lastReturn.Calls {
-		id := id
-		call := call
 		eg.Go(func() error {
 			callCtx, err := callCtx.SubCall(subCtx, call.ToolName, id)
 			if err != nil {
