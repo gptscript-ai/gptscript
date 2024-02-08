@@ -97,6 +97,15 @@ func (t Tool) IsCommand() bool {
 	return strings.HasPrefix(t.Instructions, "#!")
 }
 
+func (t Tool) IsDaemon() bool {
+	return strings.HasPrefix(t.Instructions, "#!sys.daemon")
+}
+
+func (t Tool) IsHTTP() bool {
+	return strings.HasPrefix(t.Instructions, "#!http://") ||
+		strings.HasPrefix(t.Instructions, "#!https://")
+}
+
 func FirstSet[T comparable](in ...T) (result T) {
 	for _, i := range in {
 		if i != result {

@@ -1,17 +1,13 @@
 package engine
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
-	"strings"
 	"sync"
 	"sync/atomic"
 
-	"github.com/google/shlex"
 	"github.com/gptscript-ai/gptscript/pkg/openai"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
@@ -47,6 +43,12 @@ type Engine struct {
 	Client   *openai.Client
 	Env      []string
 	Progress chan<- openai.Status
+
+	daemonPorts map[string]int64
+	daemonLock  sync.Mutex
+
+	startPort, endPort int64
+	nextPort           int64
 }
 
 type State struct {
@@ -144,125 +146,15 @@ func (c *Context) getTool(name string) (types.Tool, error) {
 	return tool, nil
 }
 
-func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) (cmdOut string, cmdErr error) {
-	id := fmt.Sprint(atomic.AddInt64(&completionID, 1))
-
-	defer func() {
-		e.Progress <- openai.Status{
-			CompletionID: id,
-			Response: map[string]any{
-				"output": cmdOut,
-				"err":    cmdErr,
-			},
-		}
-	}()
-
-	if tool.BuiltinFunc != nil {
-		e.Progress <- openai.Status{
-			CompletionID: id,
-			Request: map[string]any{
-				"command": []string{tool.ID},
-				"input":   input,
-			},
-		}
-		return tool.BuiltinFunc(ctx, e.Env, input)
-	}
-
-	env := e.Env[:]
-	data := map[string]any{}
-
-	dec := json.NewDecoder(bytes.NewReader([]byte(input)))
-	dec.UseNumber()
-
-	envMap := map[string]string{}
-	if err := json.Unmarshal([]byte(input), &data); err == nil {
-		for k, v := range data {
-			envName := strings.ToUpper(strings.ReplaceAll(k, "-", "_"))
-			switch val := v.(type) {
-			case string:
-				envMap[envName] = val
-				env = append(env, envName+"="+val)
-				envMap[k] = val
-				env = append(env, k+"="+val)
-			case json.Number:
-				envMap[envName] = string(val)
-				env = append(env, envName+"="+string(val))
-				envMap[k] = string(val)
-				env = append(env, k+"="+string(val))
-			case bool:
-				envMap[envName] = fmt.Sprint(val)
-				env = append(env, envName+"="+fmt.Sprint(val))
-				envMap[k] = fmt.Sprint(val)
-				env = append(env, k+"="+fmt.Sprint(val))
-			default:
-				data, err := json.Marshal(val)
-				if err == nil {
-					envMap[envName] = string(data)
-					env = append(env, envName+"="+string(data))
-					envMap[k] = string(data)
-					env = append(env, k+"="+string(data))
-				}
-			}
-		}
-	}
-
-	interpreter, rest, _ := strings.Cut(tool.Instructions, "\n")
-	interpreter = strings.TrimSpace(interpreter)[2:]
-
-	interpreter = os.Expand(interpreter, func(s string) string {
-		return envMap[s]
-	})
-
-	args, err := shlex.Split(interpreter)
-	if err != nil {
-		return "", err
-	}
-
-	e.Progress <- openai.Status{
-		CompletionID: id,
-		Request: map[string]any{
-			"command": args,
-			"input":   input,
-		},
-	}
-
-	output := &bytes.Buffer{}
-	cmdArgs := args[1:]
-
-	if strings.TrimSpace(rest) != "" {
-		f, err := os.CreateTemp("", version.ProgramName)
-		if err != nil {
-			return "", err
-		}
-		defer os.Remove(f.Name())
-
-		_, err = f.Write([]byte(rest))
-		_ = f.Close()
-		if err != nil {
-			return "", err
-		}
-		cmdArgs = append(cmdArgs, f.Name())
-	}
-
-	cmd := exec.Command(args[0], cmdArgs...)
-	cmd.Env = env
-	cmd.Stdin = strings.NewReader(input)
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = output
-
-	if err := cmd.Run(); err != nil {
-		_, _ = os.Stderr.Write(output.Bytes())
-		log.Errorf("failed to run tool [%s] cmd [%s]: %v", tool.Name, interpreter, err)
-		return "", err
-	}
-
-	return output.String(), nil
-}
-
 func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 	tool := ctx.Tool
 
 	if tool.IsCommand() {
+		if tool.IsHTTP() {
+			return e.runHTTP(ctx.Ctx, tool, input)
+		} else if tool.IsDaemon() {
+			return e.runDaemon(ctx.Ctx, tool, input)
+		}
 		s, err := e.runCommand(ctx.Ctx, tool, input)
 		if err != nil {
 			return nil, err

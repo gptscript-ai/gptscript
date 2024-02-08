@@ -52,6 +52,14 @@ func New(opts ...Options) (*Server, error) {
 			events: events,
 		},
 	})...)
+	noCacheRunner, err := runner.New(append(runnerOpts, runner.Options{
+		CacheOptions: runner.CacheOptions{
+			Cache: new(bool),
+		},
+		MonitorFactory: &SessionFactory{
+			events: events,
+		},
+	})...)
 	if err != nil {
 		return nil, err
 	}
@@ -60,6 +68,7 @@ func New(opts ...Options) (*Server, error) {
 		melody:        melody.New(),
 		events:        events,
 		runner:        r,
+		noCacheRunner: noCacheRunner,
 		listenAddress: opt.ListenAddress,
 	}, nil
 }
@@ -74,8 +83,10 @@ type Event struct {
 }
 
 type Server struct {
+	ctx           context.Context
 	melody        *melody.Melody
 	runner        *runner.Runner
+	noCacheRunner *runner.Runner
 	events        *broadcaster.Broadcaster[Event]
 	listenAddress string
 }
@@ -144,11 +155,16 @@ func (s *Server) run(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	runner := s.runner
+	if req.URL.Query().Has("nocache") {
+		runner = s.noCacheRunner
+	}
+
 	id := fmt.Sprint(atomic.AddInt64(&execID, 1))
 	ctx := context.WithValue(req.Context(), execKey{}, id)
 	if req.URL.Query().Has("async") {
 		go func() {
-			_, _ = s.runner.Run(ctx, prg, os.Environ(), string(body))
+			_, _ = runner.Run(s.ctx, prg, os.Environ(), string(body))
 		}()
 		rw.Header().Set("Content-Type", "application/json")
 		err := json.NewEncoder(rw).Encode(map[string]any{
@@ -158,7 +174,7 @@ func (s *Server) run(rw http.ResponseWriter, req *http.Request) {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
 		}
 	} else {
-		out, err := s.runner.Run(ctx, prg, os.Environ(), string(body))
+		out, err := runner.Run(ctx, prg, os.Environ(), string(body))
 		if err == nil {
 			_, _ = rw.Write([]byte(out))
 		} else {
@@ -168,6 +184,7 @@ func (s *Server) run(rw http.ResponseWriter, req *http.Request) {
 }
 
 func (s *Server) Start(ctx context.Context) error {
+	s.ctx = ctx
 	s.melody.HandleConnect(s.Connect)
 	go s.events.Start(ctx)
 	log.Infof("Listening on http://%s", s.listenAddress)
