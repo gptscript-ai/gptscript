@@ -11,7 +11,7 @@ import (
 )
 
 func normalize(key string) string {
-	return strings.ToLower(strings.ReplaceAll(key, " ", ""))
+	return strings.TrimSpace(strings.ToLower(strings.ReplaceAll(key, " ", "")))
 }
 
 func toBool(line string) (bool, error) {
@@ -156,6 +156,17 @@ func (c *context) finish(tools *[]types.Tool) {
 	*c = context{}
 }
 
+func commentEmbedded(line string) (string, bool) {
+	for _, i := range []string{"#", "# ", "//", "// "} {
+		prefix := i + "gptscript:"
+		cut, ok := strings.CutPrefix(line, prefix)
+		if ok {
+			return cut, ok
+		}
+	}
+	return line, false
+}
+
 func Parse(input io.Reader) ([]types.Tool, error) {
 	scan := bufio.NewScanner(input)
 
@@ -179,6 +190,16 @@ func Parse(input io.Reader) ([]types.Tool, error) {
 		}
 
 		if !context.inBody {
+			// Strip special comments to allow embedding the preamble in python or other interpreted languages
+			if newLine, ok := commentEmbedded(line); ok {
+				line = newLine
+			}
+
+			// If the very first line is #! just skip because this is a unix interpreter declaration
+			if strings.HasPrefix(line, "#!") && lineNo == 1 {
+				continue
+			}
+
 			// This is a comment
 			if strings.HasPrefix(line, "#") && !strings.HasPrefix(line, "#!") {
 				continue
