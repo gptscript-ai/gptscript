@@ -31,7 +31,7 @@ type GPTScript struct {
 	DisplayOptions
 	Debug         bool   `usage:"Enable debug logging"`
 	Quiet         bool   `usage:"No output logging" short:"q"`
-	Output        string `usage:"Save output to a file" short:"o"`
+	Output        string `usage:"Save output to a file, or - for stdout" short:"o"`
 	Input         string `usage:"Read input from a file (\"-\" for stdin)" short:"f"`
 	SubTool       string `usage:"Use tool of this name, not the first tool in file"`
 	Assemble      bool   `usage:"Assemble tool to a single artifact, saved to --output"`
@@ -129,7 +129,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 
 	if r.Assemble {
 		var out io.Writer = os.Stdout
-		if r.Output != "" {
+		if r.Output != "" && r.Output != "-" {
 			f, err := os.Create(r.Output)
 			if err != nil {
 				return fmt.Errorf("opening %s: %w", r.Output, err)
