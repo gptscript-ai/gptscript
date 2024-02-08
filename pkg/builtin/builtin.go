@@ -17,7 +17,7 @@ import (
 	"github.com/jaytaylor/html2text"
 )
 
-var Tools = map[string]types.Tool{
+var tools = map[string]types.Tool{
 	"sys.read": {
 		Description: "Reads the contents of a file",
 		Arguments: types.ObjectSchema(
@@ -94,7 +94,7 @@ func SysProgram() *types.Program {
 
 func ListTools() (result []types.Tool) {
 	var keys []string
-	for k := range Tools {
+	for k := range tools {
 		keys = append(keys, k)
 	}
 
@@ -109,7 +109,7 @@ func ListTools() (result []types.Tool) {
 
 func Builtin(name string) (types.Tool, bool) {
 	name, dontFail := strings.CutSuffix(name, "?")
-	t, ok := Tools[name]
+	t, ok := tools[name]
 	t.Name = name
 	t.ID = name
 	t.Instructions = "#!" + name
@@ -123,7 +123,7 @@ func Builtin(name string) (types.Tool, bool) {
 			return s, err
 		}
 	}
-	return t, ok
+	return SetDefaults(t), ok
 }
 
 func SysFind(ctx context.Context, env []string, input string) (string, error) {

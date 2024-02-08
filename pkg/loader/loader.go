@@ -154,7 +154,8 @@ func loadProgram(data []byte, into *types.Program) (types.Tool, error) {
 		for tk, tv := range v.ToolMapping {
 			v.ToolMapping[tk] = tv + id
 		}
-		into.ToolSet[k+id] = v
+		v.ID = k + id
+		into.ToolSet[v.ID] = v
 	}
 
 	return into.ToolSet[ext.EntryToolID+id], nil
@@ -314,7 +315,7 @@ func link(ctx context.Context, prg *types.Program, base *Source, tool types.Tool
 		tool.Tools[i] = newToolName
 	}
 
-	tool = SetDefaults(tool)
+	tool = builtin.SetDefaults(tool)
 	prg.ToolSet[tool.ID] = tool
 
 	return tool, nil

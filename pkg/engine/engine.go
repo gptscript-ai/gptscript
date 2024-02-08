@@ -23,6 +23,19 @@ You do not need to explain the steps taken, only provide the result to the given
 You are referred to as a tool.
 `
 
+var DefaultToolSchema = types.JSONSchema{
+	Property: types.Property{
+		Type: "object",
+	},
+	Properties: map[string]types.Property{
+		openai.DefaultPromptParameter: {
+			Description: "Prompt to send to the tool or assistant. This may be instructions or question.",
+			Type:        "string",
+		},
+	},
+	Required: []string{openai.DefaultPromptParameter},
+}
+
 var completionID int64
 
 func init() {
@@ -185,12 +198,16 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 		if err != nil {
 			return nil, err
 		}
+		args := subTool.Arguments
+		if args == nil && !subTool.IsCommand() {
+			args = &DefaultToolSchema
+		}
 		completion.Tools = append(completion.Tools, types.CompletionTool{
 			Type: types.CompletionToolTypeFunction,
 			Function: types.CompletionFunctionDefinition{
 				Name:        subToolName,
 				Description: subTool.Description,
-				Parameters:  subTool.Arguments,
+				Parameters:  args,
 			},
 		})
 	}
