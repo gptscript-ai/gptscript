@@ -1,0 +1,67 @@
+dist: releases
+snapshot:
+  name_template: '{{ trimprefix .Summary "v" }}'
+
+builds:
+  - id: default
+    binary: gptscript
+    env:
+      - CGO_ENABLED=0
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    flags:
+      - -trimpath
+    ldflags:
+      - -s
+      - -w
+      - -X "github.com/gptscript-ai/gptscript/pkg/version.Tag=v{{ .Version }}"
+
+universal_binaries:
+  - id: mac
+    ids:
+      - default
+    replace: true
+
+archives:
+  - id: default
+    builds:
+      - default
+      - mac
+    name_template: '{{.Project}}-v{{ .Version }}-{{ if eq .Os "darwin" }}macOS-universal{{ else }}{{ .Os }}-{{ .Arch }}{{ .Arm }}{{ end }}'
+    format_overrides:
+      - goos: windows
+        format: zip
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  use: github
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^Merge pull request"
+
+release:
+  github:
+    owner: gptscript-ai
+    name: gptscript
+  prerelease: auto
+
+brews:
+  - description: "GPTScript CLI"
+    install: |
+      bin.install "gptscript"
+    homepage: "https://github.com/gptscript-ai/gptscript"
+    skip_upload: false
+    folder: "Formula"
+    repository:
+      owner: gptscript-ai
+      name: homebrew-tap
+      token: "{{ .Env.GH_PROJECT_TOKEN }}"
