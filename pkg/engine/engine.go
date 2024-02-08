@@ -207,17 +207,6 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 	}
 
 	interpreter, rest, _ := strings.Cut(tool.Instructions, "\n")
-	f, err := os.CreateTemp("", version.ProgramName)
-	if err != nil {
-		return "", err
-	}
-	defer os.Remove(f.Name())
-
-	_, err = f.Write([]byte(rest))
-	_ = f.Close()
-	if err != nil {
-		return "", err
-	}
 	interpreter = strings.TrimSpace(interpreter)[2:]
 
 	interpreter = os.Expand(interpreter, func(s string) string {
@@ -238,8 +227,24 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 	}
 
 	output := &bytes.Buffer{}
+	cmdArgs := args[1:]
 
-	cmd := exec.Command(args[0], append(args[1:], f.Name())...)
+	if strings.TrimSpace(rest) != "" {
+		f, err := os.CreateTemp("", version.ProgramName)
+		if err != nil {
+			return "", err
+		}
+		defer os.Remove(f.Name())
+
+		_, err = f.Write([]byte(rest))
+		_ = f.Close()
+		if err != nil {
+			return "", err
+		}
+		cmdArgs = append(cmdArgs, f.Name())
+	}
+
+	cmd := exec.Command(args[0], cmdArgs...)
 	cmd.Env = env
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Stderr = os.Stderr
