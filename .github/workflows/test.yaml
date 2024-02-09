@@ -1,0 +1,26 @@
+name: test
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-go@v4
+        with:
+          cache: false
+          go-version: "1.21"
+      - name: Validate
+        run: make validate
+      - name: Build
+        run: make build
+      - name: Run Tests
+        run: make test
