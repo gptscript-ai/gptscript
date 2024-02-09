@@ -1,0 +1,22 @@
+run:
+  timeout: 5m
+
+output:
+  format: github-actions
+
+linters:
+  disable-all: true
+  enable:
+  - errcheck
+  - gofmt
+  - gosimple
+  - govet
+  - ineffassign
+  - staticcheck
+  - typecheck
+  - thelper
+  - unused
+  - goimports
+  - whitespace
+  fast: false
+  max-same-issues: 50

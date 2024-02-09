@@ -55,6 +55,7 @@ func TestEcho(t *testing.T) {
 }
 
 func RequireOpenAPIKey(t *testing.T) {
+	t.Helper()
 	if os.Getenv("OPENAI_API_KEY") == "" {
 		t.Skip()
 	}

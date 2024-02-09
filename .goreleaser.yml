@@ -31,7 +31,7 @@ archives:
     builds:
       - default
       - mac
-    name_template: '{{.Project}}-v{{ .Version }}-{{ if eq .Os "darwin" }}macOS-universal{{ else }}{{ .Os }}-{{ .Arch }}{{ .Arm }}{{ end }}'
+    name_template: 'gptscript-v{{ .Version }}-{{ if eq .Os "darwin" }}macOS-universal{{ else }}{{ .Os }}-{{ .Arch }}{{ .Arm }}{{ end }}'
     format_overrides:
       - goos: windows
         format: zip

@@ -53,6 +53,10 @@ func New(opts ...Options) (*Server, error) {
 			events: events,
 		},
 	})...)
+	if err != nil {
+		return nil, err
+	}
+
 	noCacheRunner, err := runner.New(append(runnerOpts, runner.Options{
 		CacheOptions: runner.CacheOptions{
 			Cache: new(bool),
