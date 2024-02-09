@@ -56,12 +56,6 @@ type Engine struct {
 	Client   *openai.Client
 	Env      []string
 	Progress chan<- openai.Status
-
-	daemonPorts map[string]int64
-	daemonLock  sync.Mutex
-
-	startPort, endPort int64
-	nextPort           int64
 }
 
 type State struct {

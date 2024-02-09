@@ -7,6 +7,11 @@ import (
 	"strings"
 )
 
+const (
+	DaemonPrefix  = "#!sys.daemon "
+	CommandPrefix = "#!"
+)
+
 type ToolSet map[string]Tool
 
 type Program struct {
@@ -94,11 +99,11 @@ func (t ToolSource) String() string {
 }
 
 func (t Tool) IsCommand() bool {
-	return strings.HasPrefix(t.Instructions, "#!")
+	return strings.HasPrefix(t.Instructions, CommandPrefix)
 }
 
 func (t Tool) IsDaemon() bool {
-	return strings.HasPrefix(t.Instructions, "#!sys.daemon")
+	return strings.HasPrefix(t.Instructions, DaemonPrefix)
 }
 
 func (t Tool) IsHTTP() bool {

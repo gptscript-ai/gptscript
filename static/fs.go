@@ -5,5 +5,5 @@ import (
 	_ "embed"
 )
 
-// /go:embed ui/** ui/**/_*
+//go:embed * ui/_nuxt/*
 var UI embed.FS

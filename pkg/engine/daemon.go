@@ -7,31 +7,45 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
+var (
+	daemonPorts map[string]int64
+	daemonLock  sync.Mutex
+
+	startPort, endPort int64
+	nextPort           int64
+)
+
 func (e *Engine) getNextPort() int64 {
-	count := e.endPort - e.startPort
-	e.nextPort++
-	e.nextPort = e.nextPort % count
-	return e.startPort + e.nextPort
+	if startPort == 0 {
+		startPort = 10240
+		endPort = 11240
+	}
+	count := endPort - startPort
+	nextPort++
+	nextPort = nextPort % count
+	return startPort + nextPort
 }
 
 func (e *Engine) startDaemon(ctx context.Context, tool types.Tool) (string, error) {
-	e.daemonLock.Lock()
-	defer e.daemonLock.Unlock()
+	daemonLock.Lock()
+	defer daemonLock.Unlock()
 
-	port, ok := e.daemonPorts[tool.ID]
+	port, ok := daemonPorts[tool.ID]
 	url := fmt.Sprintf("http://127.0.0.1:%d", port)
 	if ok {
 		return url, nil
 	}
 
 	port = e.getNextPort()
+	url = fmt.Sprintf("http://127.0.0.1:%d", port)
 
-	instructions := strings.TrimPrefix(tool.Instructions, "#!daemon ")
+	instructions := types.CommandPrefix + strings.TrimPrefix(tool.Instructions, types.DaemonPrefix)
 	cmd, close, err := e.newCommand(ctx, []string{
 		fmt.Sprintf("PORT=%d", port),
 	},
@@ -44,22 +58,31 @@ func (e *Engine) startDaemon(ctx context.Context, tool types.Tool) (string, erro
 
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
-	log.Infof("launching   [%s] port [%d] %v", tool.Name, port, cmd.Args)
+	log.Infof("launched [%s] port [%d] %v", tool.Name, port, cmd.Args)
 	if err := cmd.Start(); err != nil {
 		close()
 		return url, err
 	}
 
+	if daemonPorts == nil {
+		daemonPorts = map[string]int64{}
+	}
+
+	killedCtx, cancel := context.WithCancelCause(ctx)
+	defer cancel(nil)
+
 	go func() {
-		if err := cmd.Wait(); err != nil {
+		err := cmd.Wait()
+		if err != nil {
 			log.Errorf("daemon exited tool [%s] %v: %v", tool.Name, cmd.Args, err)
 		}
 
+		cancel(err)
 		close()
-		e.daemonLock.Lock()
-		defer e.daemonLock.Unlock()
+		daemonLock.Lock()
+		defer daemonLock.Unlock()
 
-		delete(e.daemonPorts, tool.ID)
+		delete(daemonPorts, tool.ID)
 	}()
 
 	context.AfterFunc(ctx, func() {
@@ -78,8 +101,8 @@ func (e *Engine) startDaemon(ctx context.Context, tool types.Tool) (string, erro
 			return url, nil
 		}
 		select {
-		case <-ctx.Done():
-			return url, ctx.Err()
+		case <-killedCtx.Done():
+			return url, fmt.Errorf("daemon failed to start: %w", context.Cause(killedCtx))
 		case <-time.After(time.Second):
 		}
 	}
@@ -93,7 +116,8 @@ func (e *Engine) runDaemon(ctx context.Context, tool types.Tool, input string) (
 		return nil, err
 	}
 
-	tool.Instructions = strings.Join(append([]string{url},
-		strings.Split(tool.Instructions, "\n")[1:]...), "\n")
+	tool.Instructions = strings.Join(append([]string{
+		types.CommandPrefix + url,
+	}, strings.Split(tool.Instructions, "\n")[1:]...), "\n")
 	return e.runHTTP(ctx, tool, input)
 }

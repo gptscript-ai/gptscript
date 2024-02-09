@@ -13,9 +13,9 @@ import (
 func (e *Engine) runHTTP(ctx context.Context, tool types.Tool, input string) (cmdRet *Return, cmdErr error) {
 	url := strings.Split(tool.Instructions, "\n")[0][2:]
 
-	req, err := http.NewRequestWithContext(ctx, url, http.MethodPost, strings.NewReader(input))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, strings.NewReader(input))
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	req.Header.Set("X-GPTScript-Tool-Name", tool.Name)
