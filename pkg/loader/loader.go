@@ -30,7 +30,7 @@ const (
 	githubRawURL = "https://raw.githubusercontent.com/"
 )
 
-type Source struct {
+type source struct {
 	Content io.ReadCloser
 	Remote  bool
 	Path    string
@@ -38,7 +38,7 @@ type Source struct {
 	File    string
 }
 
-func (s *Source) String() string {
+func (s *source) String() string {
 	if s.Path == "" && s.Name == "" {
 		return ""
 	}
@@ -55,7 +55,7 @@ func openFile(path string) (io.ReadCloser, bool, error) {
 	return f, true, nil
 }
 
-func loadLocal(base *Source, name string) (*Source, bool, error) {
+func loadLocal(base *source, name string) (*source, bool, error) {
 	path := filepath.Join(base.Path, name)
 
 	content, ok, err := openFile(path)
@@ -66,7 +66,7 @@ func loadLocal(base *Source, name string) (*Source, bool, error) {
 	}
 	log.Debugf("opened %s", path)
 
-	return &Source{
+	return &source{
 		Content: content,
 		Remote:  false,
 		Path:    filepath.Dir(path),
@@ -95,7 +95,7 @@ func githubURL(urlName string) (string, bool) {
 	return url, true
 }
 
-func loadURL(ctx context.Context, base *Source, name string) (*Source, bool, error) {
+func loadURL(ctx context.Context, base *source, name string) (*source, bool, error) {
 	url := name
 	if base.Path != "" {
 		url = base.Path + "/" + name
@@ -129,7 +129,7 @@ func loadURL(ctx context.Context, base *Source, name string) (*Source, bool, err
 	pathURL := *parsed
 	pathURL.Path = filepath.Dir(parsed.Path)
 
-	return &Source{
+	return &source{
 		Content: resp.Body,
 		Remote:  true,
 		Path:    pathURL.String(),
@@ -174,7 +174,7 @@ func loadProgram(data []byte, into *types.Program, targetToolName string) (types
 	return tool, nil
 }
 
-func ReadTool(ctx context.Context, prg *types.Program, base *Source, targetToolName string) (types.Tool, error) {
+func readTool(ctx context.Context, prg *types.Program, base *source, targetToolName string) (types.Tool, error) {
 	data, err := io.ReadAll(base.Content)
 	if err != nil {
 		return types.Tool{}, err
@@ -270,7 +270,7 @@ func pickToolName(toolName string, existing map[string]struct{}) string {
 	}
 }
 
-func link(ctx context.Context, prg *types.Program, base *Source, tool types.Tool, localTools types.ToolSet) (types.Tool, error) {
+func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool, localTools types.ToolSet) (types.Tool, error) {
 	if existing, ok := prg.ToolSet[tool.ID]; ok {
 		return existing, nil
 	}
@@ -319,7 +319,7 @@ func link(ctx context.Context, prg *types.Program, base *Source, tool types.Tool
 			subTool = strings.TrimSpace(subTool)
 		}
 
-		resolvedTool, err := Resolve(ctx, prg, base, toolName, subTool)
+		resolvedTool, err := resolve(ctx, prg, base, toolName, subTool)
 		if err != nil {
 			return types.Tool{}, fmt.Errorf("failed resolving %s at %s: %w", targetToolName, base, err)
 		}
@@ -343,7 +343,7 @@ func Program(ctx context.Context, name, subToolName string) (types.Program, erro
 	prg := types.Program{
 		ToolSet: types.ToolSet{},
 	}
-	tool, err := Resolve(ctx, &prg, &Source{}, name, subToolName)
+	tool, err := resolve(ctx, &prg, &source{}, name, subToolName)
 	if err != nil {
 		return types.Program{}, err
 	}
@@ -351,7 +351,7 @@ func Program(ctx context.Context, name, subToolName string) (types.Program, erro
 	return prg, nil
 }
 
-func Resolve(ctx context.Context, prg *types.Program, base *Source, name, subTool string) (types.Tool, error) {
+func resolve(ctx context.Context, prg *types.Program, base *source, name, subTool string) (types.Tool, error) {
 	if subTool == "" {
 		t, ok := builtin.Builtin(name)
 		if ok {
@@ -360,15 +360,15 @@ func Resolve(ctx context.Context, prg *types.Program, base *Source, name, subToo
 		}
 	}
 
-	s, err := Input(ctx, base, name)
+	s, err := input(ctx, base, name)
 	if err != nil {
 		return types.Tool{}, err
 	}
 
-	return ReadTool(ctx, prg, s, subTool)
+	return readTool(ctx, prg, s, subTool)
 }
 
-func Input(ctx context.Context, base *Source, name string) (*Source, error) {
+func input(ctx context.Context, base *source, name string) (*source, error) {
 	if !base.Remote {
 		s, ok, err := loadLocal(base, name)
 		if err != nil || ok {
