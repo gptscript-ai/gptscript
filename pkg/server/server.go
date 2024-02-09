@@ -108,7 +108,7 @@ func (s *Server) list(rw http.ResponseWriter, req *http.Request) {
 		_ = enc.Encode(builtin.SysProgram())
 		return
 	} else if strings.HasSuffix(path, ".gpt") {
-		prg, err := loader.Program(req.Context(), path, "")
+		prg, err := loader.Program(req.Context(), path, req.URL.Query().Get("tool"))
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
 			return
@@ -149,7 +149,7 @@ func (s *Server) run(rw http.ResponseWriter, req *http.Request) {
 		path += ".gpt"
 	}
 
-	prg, err := loader.Program(req.Context(), path, "")
+	prg, err := loader.Program(req.Context(), path, req.URL.Query().Get("tool"))
 	if errors.Is(err, fs.ErrNotExist) {
 		http.NotFound(rw, req)
 		return

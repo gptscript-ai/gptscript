@@ -15,8 +15,9 @@ const (
 type ToolSet map[string]Tool
 
 type Program struct {
-	EntryToolID string  `json:"entryToolId,omitempty"`
-	ToolSet     ToolSet `json:"toolSet,omitempty"`
+	EntryToolID string            `json:"entryToolId,omitempty"`
+	ToolSet     ToolSet           `json:"toolSet,omitempty"`
+	Exports     map[string]string `json:"exports,omitempty"`
 }
 
 type BuiltinFunc func(ctx context.Context, env []string, input string) (string, error)
@@ -29,6 +30,7 @@ type Tool struct {
 	Instructions string            `json:"instructions,omitempty"`
 	Tools        []string          `json:"tools,omitempty"`
 	ToolMapping  map[string]string `json:"toolMapping,omitempty"`
+	LocalTools   map[string]string `json:"localTools,omitempty"`
 	BuiltinFunc  BuiltinFunc       `json:"-"`
 
 	Vision       bool     `json:"vision,omitempty"`

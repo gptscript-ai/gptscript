@@ -20,6 +20,7 @@ import (
 
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
+	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/parser"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
@@ -137,7 +138,7 @@ func loadURL(ctx context.Context, base *Source, name string) (*Source, bool, err
 	}, true, nil
 }
 
-func loadProgram(data []byte, into *types.Program) (types.Tool, error) {
+func loadProgram(data []byte, into *types.Program, targetToolName string) (types.Tool, error) {
 	var (
 		ext types.Program
 		id  string
@@ -158,7 +159,19 @@ func loadProgram(data []byte, into *types.Program) (types.Tool, error) {
 		into.ToolSet[v.ID] = v
 	}
 
-	return into.ToolSet[ext.EntryToolID+id], nil
+	tool := into.ToolSet[ext.EntryToolID+id]
+	if targetToolName == "" {
+		return tool, nil
+	}
+
+	tool, ok := into.ToolSet[tool.LocalTools[targetToolName]]
+	if !ok {
+		return tool, &engine.ErrToolNotFound{
+			ToolName: targetToolName,
+		}
+	}
+
+	return tool, nil
 }
 
 func ReadTool(ctx context.Context, prg *types.Program, base *Source, targetToolName string) (types.Tool, error) {
@@ -169,7 +182,7 @@ func ReadTool(ctx context.Context, prg *types.Program, base *Source, targetToolN
 	_ = base.Content.Close()
 
 	if bytes.HasPrefix(data, assemble.Header) {
-		return loadProgram(data, prg)
+		return loadProgram(data, prg, targetToolName)
 	}
 
 	tools, err := parser.Parse(bytes.NewReader(data))
@@ -263,6 +276,7 @@ func link(ctx context.Context, prg *types.Program, base *Source, tool types.Tool
 	}
 
 	tool.ToolMapping = map[string]string{}
+	tool.LocalTools = map[string]string{}
 	toolNames := map[string]struct{}{}
 
 	// Add now to break circular loops, but later we will update this tool and copy the new
@@ -313,6 +327,10 @@ func link(ctx context.Context, prg *types.Program, base *Source, tool types.Tool
 		newToolName := pickToolName(toolName, toolNames)
 		tool.ToolMapping[newToolName] = resolvedTool.ID
 		tool.Tools[i] = newToolName
+	}
+
+	for _, localTool := range localTools {
+		tool.LocalTools[localTool.Name] = localTool.ID
 	}
 
 	tool = builtin.SetDefaults(tool)
