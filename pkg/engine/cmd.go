@@ -77,8 +77,8 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, instructions
 
 	envMap := map[string]string{}
 	for _, env := range env {
-		key, value, ok := strings.Cut(env, "=")
-		key, ok = strings.CutPrefix(key, "GPTSCRIPT_VAR_")
+		key, value, _ := strings.Cut(env, "=")
+		key, ok := strings.CutPrefix(key, "GPTSCRIPT_VAR_")
 		if !ok {
 			continue
 		}

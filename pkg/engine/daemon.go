@@ -86,7 +86,9 @@ func (e *Engine) startDaemon(ctx context.Context, tool types.Tool) (string, erro
 	}()
 
 	context.AfterFunc(ctx, func() {
-		cmd.Process.Kill()
+		if err := cmd.Process.Kill(); err != nil {
+			log.Errorf("daemon failed to kill tool [%s] process: %v", tool.Name, err)
+		}
 	})
 
 	for range 20 {
