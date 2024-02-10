@@ -342,6 +342,21 @@ func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool
 	return tool, nil
 }
 
+func ProgramFromSource(ctx context.Context, content, subToolName string) (types.Program, error) {
+	prg := types.Program{
+		ToolSet: types.ToolSet{},
+	}
+	tool, err := readTool(ctx, &prg, &source{
+		Content: io.NopCloser(strings.NewReader(content)),
+		File:    "inline",
+	}, subToolName)
+	if err != nil {
+		return types.Program{}, err
+	}
+	prg.EntryToolID = tool.ID
+	return prg, nil
+}
+
 func Program(ctx context.Context, name, subToolName string) (types.Program, error) {
 	prg := types.Program{
 		ToolSet: types.ToolSet{},

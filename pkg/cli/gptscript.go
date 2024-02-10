@@ -18,6 +18,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/openai"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/server"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
@@ -125,9 +126,25 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	}
 
-	prg, err := loader.Program(cmd.Context(), args[0], r.SubTool)
-	if err != nil {
-		return err
+	var (
+		prg types.Program
+		err error
+	)
+
+	if args[0] == "-" {
+		data, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			return err
+		}
+		prg, err = loader.ProgramFromSource(cmd.Context(), string(data), r.SubTool)
+		if err != nil {
+			return err
+		}
+	} else {
+		prg, err = loader.Program(cmd.Context(), args[0], r.SubTool)
+		if err != nil {
+			return err
+		}
 	}
 
 	if r.Assemble {
