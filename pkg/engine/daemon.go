@@ -68,7 +68,7 @@ func getPath(instructions string) (string, string) {
 	return strings.TrimSpace(rest), strings.TrimSpace(value)
 }
 
-func (e *Engine) startDaemon(ctx context.Context, tool types.Tool) (string, error) {
+func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error) {
 	daemonLock.Lock()
 	defer daemonLock.Unlock()
 
@@ -85,7 +85,7 @@ func (e *Engine) startDaemon(ctx context.Context, tool types.Tool) (string, erro
 		daemonCtx, daemonClose = context.WithCancel(context.Background())
 	}
 
-	ctx = daemonCtx
+	ctx := daemonCtx
 	port = e.getNextPort()
 	url = fmt.Sprintf("http://127.0.0.1:%d%s", port, path)
 
