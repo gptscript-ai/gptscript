@@ -3,6 +3,7 @@ package builtin
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -79,6 +80,13 @@ var tools = map[string]types.Tool{
 		Arguments: types.ObjectSchema(
 			"name", "The environment variable name to lookup"),
 		BuiltinFunc: SysGetenv,
+	},
+	"sys.download": {
+		Description: "Downloads a URL, saving the contents to disk at a given location",
+		Arguments: types.ObjectSchema(
+			"url", "The URL to download, either http or https.",
+			"location", "(optional) The on disk location to store the file. If no location is specified a temp location will be used. If the target file already exists it will not be overwritten and will fail."),
+		BuiltinFunc: SysDownload,
 	},
 }
 
@@ -307,4 +315,61 @@ func SysAbort(ctx context.Context, env []string, input string) (string, error) {
 		return "", err
 	}
 	return "", fmt.Errorf("ABORT: %s", params.Message)
+}
+
+func SysDownload(ctx context.Context, env []string, input string) (string, error) {
+	var params struct {
+		URL      string `json:"url,omitempty"`
+		Location string `json:"location,omitempty"`
+	}
+	if err := json.Unmarshal([]byte(input), &params); err != nil {
+		return "", err
+	}
+
+	checkExists := true
+	if params.Location == "" {
+		f, err := os.CreateTemp("", "gpt-download")
+		if err != nil {
+			return "", err
+		}
+		if err := f.Close(); err != nil {
+			return "", err
+		}
+		checkExists = false
+		params.Location = f.Name()
+	}
+
+	if checkExists {
+		if _, err := os.Stat(params.Location); err == nil {
+			return "", fmt.Errorf("file %s already exists and can not be overwritten: %w", params.Location, err)
+		} else if err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return "", err
+		}
+	}
+
+	log.Infof("download [%s] to [%s]", params.URL, params.Location)
+	resp, err := http.Get(params.URL)
+	if err != nil {
+		return "", err
+	}
+	defer func() {
+		_, _ = io.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+	}()
+
+	if resp.StatusCode > 299 {
+		return "", fmt.Errorf("invalid status code [%d] downloading [%s]: %s", resp.StatusCode, params.URL, resp.Status)
+	}
+
+	f, err := os.Create(params.Location)
+	if err != nil {
+		return "", fmt.Errorf("failed to create [%s]: %w", params.Location, err)
+	}
+	defer f.Close()
+
+	if _, err := io.Copy(f, resp.Body); err != nil {
+		return "", fmt.Errorf("failed copying data from [%s] to [%s]: %w", params.URL, params.Location, err)
+	}
+
+	return params.Location, nil
 }
