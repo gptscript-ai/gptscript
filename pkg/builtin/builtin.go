@@ -85,8 +85,15 @@ var tools = map[string]types.Tool{
 		Description: "Downloads a URL, saving the contents to disk at a given location",
 		Arguments: types.ObjectSchema(
 			"url", "The URL to download, either http or https.",
-			"location", "(optional) The on disk location to store the file. If no location is specified a temp location will be used. If the target file already exists it will not be overwritten and will fail."),
+			"location", "(optional) The on disk location to store the file. If no location is specified a temp location will be used. If the target file already exists it will fail unless override is set to true.",
+			"override", "If true and a file at the location exists, the file will be overwritten, otherwise fail. Default is false"),
 		BuiltinFunc: SysDownload,
+	},
+	"sys.remove": {
+		Description: "Removes the specified files",
+		Arguments: types.ObjectSchema(
+			"location", "The file to remove"),
+		BuiltinFunc: SysRemove,
 	},
 }
 
@@ -317,10 +324,22 @@ func SysAbort(ctx context.Context, env []string, input string) (string, error) {
 	return "", fmt.Errorf("ABORT: %s", params.Message)
 }
 
+func SysRemove(ctx context.Context, env []string, input string) (string, error) {
+	var params struct {
+		Location string `json:"location,omitempty"`
+	}
+	if err := json.Unmarshal([]byte(input), &params); err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("Removed file: %s", params.Location), os.Remove(params.Location)
+}
+
 func SysDownload(ctx context.Context, env []string, input string) (string, error) {
 	var params struct {
 		URL      string `json:"url,omitempty"`
 		Location string `json:"location,omitempty"`
+		Override bool   `json:"override,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
 		return "", err
@@ -339,9 +358,9 @@ func SysDownload(ctx context.Context, env []string, input string) (string, error
 		params.Location = f.Name()
 	}
 
-	if checkExists {
+	if checkExists && !params.Override {
 		if _, err := os.Stat(params.Location); err == nil {
-			return "", fmt.Errorf("file %s already exists and can not be overwritten: %w", params.Location, err)
+			return "", fmt.Errorf("file %s already exists and can not be overwritten", params.Location)
 		} else if err != nil && !errors.Is(err, fs.ErrNotExist) {
 			return "", err
 		}
@@ -361,6 +380,7 @@ func SysDownload(ctx context.Context, env []string, input string) (string, error
 		return "", fmt.Errorf("invalid status code [%d] downloading [%s]: %s", resp.StatusCode, params.URL, resp.Status)
 	}
 
+	_ = os.Remove(params.Location)
 	f, err := os.Create(params.Location)
 	if err != nil {
 		return "", fmt.Errorf("failed to create [%s]: %w", params.Location, err)

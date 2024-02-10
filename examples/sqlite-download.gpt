@@ -1,9 +1,12 @@
-tools: sys.download, sys.exec
+tools: sys.download, sys.exec, sys.remove
 
-Download https://www.sqlitetutorial.net/wp-content/uploads/2018/03/chinook.zip to the
-local directory. Expand the archive as there is a sqlite database in it.
+Download https://www.sqlitetutorial.net/wp-content/uploads/2018/03/chinook.zip to a
+random file. Then expand the archive to a temporary location as there is a sqlite
+database in it.
 
 First inspect the schema of the database to understand the table structure.
 
 Form and run a SQL query to find the artist with the most number of albums and output
 the result of that.
+
+When done remove the database file and the downloaded content.
