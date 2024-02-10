@@ -51,7 +51,7 @@ gptscript https://gptscript.ai/echo.gpt --input "Hello, World!"
 
 ***GPTScript is composed of tools.*** Each tool performs a series of actions similar to a function. Tools have available
 to them other tools that can be invoked similar to a function call. While similar to a function, the tools are
-implemented with a natural language and not code. ***The interaction of the tools is determined by the AI model***,
+primarily implemented with a natural language prompt. ***The interaction of the tools is determined by the AI model***,
 the model determines if the tool needs to be invoked and what arguments to pass. Tools are intended to be implemented
 with a natural language prompt but can also be implemented with a command or HTTP call.
 
@@ -77,7 +77,7 @@ $ gptscript bob.gpt
 
 OUTPUT:
 
-Bob said, "I'm doing great fellow friendly AI tool!"
+Bob said, "Thanks for asking 'How are you doing?', I'm doing great fellow friendly AI tool!"
 ```
 Tools can be implemented by invoking a program instead of a natural language prompt. The below
 example is the same as the previous example but implements Bob using bash.
@@ -97,7 +97,7 @@ Args: question: The question to ask Bob.
 echo "Thanks for asking ${question}, I'm doing great fellow friendly AI tool!"
 ```
 
-With these basic building blocks you can create complex scripts with AI interacting with, your local system, data,
+With these basic building blocks you can create complex scripts with AI interacting with AI, your local system, data,
 or external services.
 
 ## GPT File Reference
