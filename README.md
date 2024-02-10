@@ -8,6 +8,8 @@ Natural language prompts can be mixed with traditional scripts such as bash and 
 calls.
 
 ```yaml
+# example.gpt
+
 Tools: sys.download, sys.exec, sys.remove
 
 Download https://www.sqlitetutorial.net/wp-content/uploads/2018/03/chinook.zip to a
@@ -20,6 +22,14 @@ Form and run a SQL query to find the artist with the most number of albums and o
 the result of that.
 
 When done remove the database file and the downloaded content.
+```
+```
+$ gptscript ./example.gpt
+
+OUTPUT:
+
+The artist with the most number of albums in the database is Iron Maiden, with a total
+of 21 albums.
 ```
 
 ## Quick Start
