@@ -19,7 +19,22 @@ var (
 
 	startPort, endPort int64
 	nextPort           int64
+	daemonCtx          context.Context
+	daemonClose        func()
+	daemonWG           sync.WaitGroup
 )
+
+func CloseDaemons() {
+	daemonLock.Lock()
+	if daemonCtx == nil {
+		daemonLock.Unlock()
+		return
+	}
+	daemonLock.Unlock()
+
+	daemonClose()
+	daemonWG.Wait()
+}
 
 func (e *Engine) getNextPort() int64 {
 	if startPort == 0 {
@@ -32,24 +47,52 @@ func (e *Engine) getNextPort() int64 {
 	return startPort + nextPort
 }
 
+func getPath(instructions string) (string, string) {
+	instructions = strings.TrimSpace(instructions)
+	line := strings.TrimSpace(instructions)
+
+	if !strings.HasPrefix(line, "(") {
+		return instructions, ""
+	}
+
+	line, rest, ok := strings.Cut(line[1:], ")")
+	if !ok {
+		return instructions, ""
+	}
+
+	path, value, ok := strings.Cut(strings.TrimSpace(line), "=")
+	if !ok || strings.TrimSpace(path) != "path" {
+		return instructions, ""
+	}
+
+	return strings.TrimSpace(rest), strings.TrimSpace(value)
+}
+
 func (e *Engine) startDaemon(ctx context.Context, tool types.Tool) (string, error) {
 	daemonLock.Lock()
 	defer daemonLock.Unlock()
 
+	instructions := strings.TrimPrefix(tool.Instructions, types.DaemonPrefix)
+	instructions, path := getPath(instructions)
+
 	port, ok := daemonPorts[tool.ID]
-	url := fmt.Sprintf("http://127.0.0.1:%d", port)
+	url := fmt.Sprintf("http://127.0.0.1:%d%s", port, path)
 	if ok {
 		return url, nil
 	}
 
-	port = e.getNextPort()
-	url = fmt.Sprintf("http://127.0.0.1:%d", port)
+	if daemonCtx == nil {
+		daemonCtx, daemonClose = context.WithCancel(context.Background())
+	}
 
-	instructions := types.CommandPrefix + strings.TrimPrefix(tool.Instructions, types.DaemonPrefix)
+	ctx = daemonCtx
+	port = e.getNextPort()
+	url = fmt.Sprintf("http://127.0.0.1:%d%s", port, path)
+
 	cmd, close, err := e.newCommand(ctx, []string{
 		fmt.Sprintf("PORT=%d", port),
 	},
-		instructions,
+		types.CommandPrefix+instructions,
 		"{}",
 	)
 	if err != nil {
@@ -58,7 +101,7 @@ func (e *Engine) startDaemon(ctx context.Context, tool types.Tool) (string, erro
 
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
-	log.Infof("launched [%s] port [%d] %v", tool.Name, port, cmd.Args)
+	log.Infof("launched [%s][%s] port [%d] %v", tool.Name, tool.ID, port, cmd.Args)
 	if err := cmd.Start(); err != nil {
 		close()
 		return url, err
@@ -67,6 +110,7 @@ func (e *Engine) startDaemon(ctx context.Context, tool types.Tool) (string, erro
 	if daemonPorts == nil {
 		daemonPorts = map[string]int64{}
 	}
+	daemonPorts[tool.ID] = port
 
 	killedCtx, cancel := context.WithCancelCause(ctx)
 	defer cancel(nil)
@@ -85,13 +129,15 @@ func (e *Engine) startDaemon(ctx context.Context, tool types.Tool) (string, erro
 		delete(daemonPorts, tool.ID)
 	}()
 
+	daemonWG.Add(1)
 	context.AfterFunc(ctx, func() {
 		if err := cmd.Process.Kill(); err != nil {
 			log.Errorf("daemon failed to kill tool [%s] process: %v", tool.Name, err)
 		}
+		daemonWG.Done()
 	})
 
-	for range 20 {
+	for i := 0; i < 20; i++ {
 		resp, err := http.Get(url)
 		if err == nil && resp.StatusCode == http.StatusOK {
 			defer func() {
@@ -112,7 +158,7 @@ func (e *Engine) startDaemon(ctx context.Context, tool types.Tool) (string, erro
 	return url, fmt.Errorf("timeout waiting for 200 response from GET %s", url)
 }
 
-func (e *Engine) runDaemon(ctx context.Context, tool types.Tool, input string) (cmdRet *Return, cmdErr error) {
+func (e *Engine) runDaemon(ctx context.Context, prg *types.Program, tool types.Tool, input string) (cmdRet *Return, cmdErr error) {
 	url, err := e.startDaemon(ctx, tool)
 	if err != nil {
 		return nil, err
@@ -121,5 +167,5 @@ func (e *Engine) runDaemon(ctx context.Context, tool types.Tool, input string) (
 	tool.Instructions = strings.Join(append([]string{
 		types.CommandPrefix + url,
 	}, strings.Split(tool.Instructions, "\n")[1:]...), "\n")
-	return e.runHTTP(ctx, tool, input)
+	return e.runHTTP(ctx, prg, tool, input)
 }

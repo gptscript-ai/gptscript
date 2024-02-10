@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	DaemonPrefix  = "#!sys.daemon "
+	DaemonPrefix  = "#!sys.daemon"
 	CommandPrefix = "#!"
 )
 

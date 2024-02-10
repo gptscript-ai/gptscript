@@ -23,7 +23,6 @@ import (
 const (
 	DefaultVisionModel     = openai.GPT4VisionPreview
 	DefaultModel           = openai.GPT4TurboPreview
-	DefaultMaxTokens       = 1024
 	DefaultPromptParameter = "defaultPromptParameter"
 )
 
@@ -272,10 +271,6 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		request.ResponseFormat = &openai.ChatCompletionResponseFormat{
 			Type: openai.ChatCompletionResponseFormatTypeJSONObject,
 		}
-	}
-
-	if request.MaxTokens == 0 {
-		request.MaxTokens = DefaultMaxTokens
 	}
 
 	if !messageRequest.Vision {

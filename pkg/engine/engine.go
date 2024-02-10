@@ -158,9 +158,9 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 
 	if tool.IsCommand() {
 		if tool.IsHTTP() {
-			return e.runHTTP(ctx.Ctx, tool, input)
+			return e.runHTTP(ctx.Ctx, ctx.Program, tool, input)
 		} else if tool.IsDaemon() {
-			return e.runDaemon(ctx.Ctx, tool, input)
+			return e.runDaemon(ctx.Ctx, ctx.Program, tool, input)
 		}
 		s, err := e.runCommand(ctx.Ctx, tool, input)
 		if err != nil {

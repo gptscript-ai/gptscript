@@ -123,6 +123,7 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 }
 
 type ErrLine struct {
+	Path string
 	Line int
 	Err  error
 }
@@ -132,11 +133,15 @@ func (e *ErrLine) Unwrap() error {
 }
 
 func (e *ErrLine) Error() string {
-	return fmt.Sprintf("line %d: %v", e.Line, e.Err)
+	if e.Path == "" {
+		return fmt.Sprintf("line %d: %v", e.Line, e.Err)
+	}
+	return fmt.Sprintf("line %s:%d: %v", e.Path, e.Line, e.Err)
 }
 
-func NewErrLine(lineNo int, err error) error {
+func NewErrLine(path string, lineNo int, err error) error {
 	return &ErrLine{
+		Path: path,
 		Line: lineNo,
 		Err:  err,
 	}
@@ -161,7 +166,7 @@ func commentEmbedded(line string) (string, bool) {
 		prefix := i + "gptscript:"
 		cut, ok := strings.CutPrefix(line, prefix)
 		if ok {
-			return cut, ok
+			return strings.TrimSpace(cut) + "\n", ok
 		}
 	}
 	return line, false
@@ -183,6 +188,10 @@ func Parse(input io.Reader) ([]types.Tool, error) {
 		}
 
 		line := scan.Text() + "\n"
+		if embeddedLine, ok := commentEmbedded(line); ok {
+			// Strip special comments to allow embedding the preamble in python or other interpreted languages
+			line = embeddedLine
+		}
 
 		if line == "---\n" {
 			context.finish(&tools)
@@ -190,11 +199,6 @@ func Parse(input io.Reader) ([]types.Tool, error) {
 		}
 
 		if !context.inBody {
-			// Strip special comments to allow embedding the preamble in python or other interpreted languages
-			if newLine, ok := commentEmbedded(line); ok {
-				line = newLine
-			}
-
 			// If the very first line is #! just skip because this is a unix interpreter declaration
 			if strings.HasPrefix(line, "#!") && lineNo == 1 {
 				continue
@@ -212,7 +216,7 @@ func Parse(input io.Reader) ([]types.Tool, error) {
 
 			// Look for params
 			if isParam, err := isParam(line, &context.tool); err != nil {
-				return nil, NewErrLine(lineNo, err)
+				return nil, NewErrLine("", lineNo, err)
 			} else if isParam {
 				continue
 			}

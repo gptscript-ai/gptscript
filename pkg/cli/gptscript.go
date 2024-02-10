@@ -10,6 +10,7 @@ import (
 	"github.com/acorn-io/cmd"
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
+	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/input"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/monitor"
@@ -98,6 +99,8 @@ func (r *GPTScript) Pre(cmd *cobra.Command, args []string) error {
 }
 
 func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
+	defer engine.CloseDaemons()
+
 	if r.ListModels {
 		return r.listModels(cmd.Context())
 	}
@@ -119,7 +122,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		return fmt.Errorf("scripts argument required")
+		return cmd.Help()
 	}
 
 	prg, err := loader.Program(cmd.Context(), args[0], r.SubTool)

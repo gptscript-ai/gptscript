@@ -210,7 +210,7 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 		}
 
 		if i != 0 && tool.Name == "" {
-			return types.Tool{}, parser.NewErrLine(tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have no name"))
+			return types.Tool{}, parser.NewErrLine(tool.Source.File, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have no name"))
 		}
 
 		if targetToolName != "" && tool.Name == targetToolName {
@@ -218,7 +218,7 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 		}
 
 		if existing, ok := localTools[tool.Name]; ok {
-			return types.Tool{}, parser.NewErrLine(tool.Source.LineNo,
+			return types.Tool{}, parser.NewErrLine(tool.Source.File, tool.Source.LineNo,
 				fmt.Errorf("duplicate tool name [%s] in %s found at lines %d and %d", tool.Name, tool.Source.File,
 					tool.Source.LineNo, existing.Source.LineNo))
 		}
@@ -313,10 +313,13 @@ func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool
 			continue
 		}
 
-		toolName, subTool, ok := strings.Cut(targetToolName, " from ")
+		subTool, toolName, ok := strings.Cut(targetToolName, " from ")
 		if ok {
 			toolName = strings.TrimSpace(toolName)
 			subTool = strings.TrimSpace(subTool)
+		} else {
+			toolName = targetToolName
+			subTool = ""
 		}
 
 		resolvedTool, err := resolve(ctx, prg, base, toolName, subTool)
