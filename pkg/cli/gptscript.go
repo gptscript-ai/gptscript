@@ -32,7 +32,7 @@ type GPTScript struct {
 	runner.Options
 	DisplayOptions
 	Debug         bool   `usage:"Enable debug logging"`
-	Quiet         bool   `usage:"No output logging" short:"q"`
+	Quiet         *bool  `usage:"No output logging" short:"q"`
 	Output        string `usage:"Save output to a file, or - for stdout" short:"o"`
 	Input         string `usage:"Read input from a file (\"-\" for stdin)" short:"f"`
 	SubTool       string `usage:"Use tool of this name, not the first tool in file"`
@@ -80,11 +80,11 @@ func (r *GPTScript) listModels(ctx context.Context) error {
 }
 
 func (r *GPTScript) Pre(cmd *cobra.Command, args []string) error {
-	if r.Quiet {
+	if r.Quiet == nil {
 		if term.IsTerminal(int(os.Stdout.Fd())) {
-			r.Quiet = false
+			r.Quiet = new(bool)
 		} else {
-			r.Quiet = true
+			r.Quiet = &[]bool{true}[0]
 		}
 	}
 
@@ -92,7 +92,7 @@ func (r *GPTScript) Pre(cmd *cobra.Command, args []string) error {
 		mvl.SetDebug()
 	} else {
 		mvl.SetSimpleFormat()
-		if r.Quiet {
+		if *r.Quiet {
 			mvl.SetError()
 		}
 	}
@@ -165,7 +165,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 		CacheOptions:  r.CacheOptions,
 		OpenAIOptions: r.OpenAIOptions,
 		MonitorFactory: monitor.NewConsole(monitor.Options(r.DisplayOptions), monitor.Options{
-			DisplayProgress: !r.Quiet,
+			DisplayProgress: !*r.Quiet,
 		}),
 	})
 	if err != nil {
@@ -188,7 +188,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	} else {
-		if !r.Quiet {
+		if !*r.Quiet {
 			if toolInput != "" {
 				_, _ = fmt.Fprint(os.Stderr, "\nINPUT:\n\n")
 				_, _ = fmt.Fprintln(os.Stderr, toolInput)

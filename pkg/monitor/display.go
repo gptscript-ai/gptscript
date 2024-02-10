@@ -59,8 +59,11 @@ type display struct {
 }
 
 type livePrinter struct {
-	lastLines    map[string]string
-	needsNewline bool
+	lastContent    map[string]string
+	callIDMap      map[string]string
+	activePrinters []string
+	toPrint        []string
+	needsNewline   bool
 }
 
 func (l *livePrinter) end() {
@@ -71,21 +74,100 @@ func (l *livePrinter) end() {
 		_, _ = fmt.Fprintln(os.Stderr)
 	}
 	l.needsNewline = false
+	if len(l.activePrinters) > 0 {
+		delete(l.lastContent, l.activePrinters[0])
+	}
+}
+
+func (l *livePrinter) progressStart(event runner.Event, c call) {
+	if l == nil {
+		return
+	}
+	if !slices.Contains(l.activePrinters, c.ID) {
+		l.activePrinters = append(l.activePrinters, c.ID)
+	}
+	l.toPrint = slices.DeleteFunc(l.toPrint, func(s string) bool {
+		return s == c.ID
+	})
+}
+
+func (l *livePrinter) progressEnd(event runner.Event, c call) {
+	if l == nil {
+		return
+	}
+	var result []string
+	for i, id := range l.activePrinters {
+		if id != c.ID {
+			result = append(result, id)
+			continue
+		}
+
+		if i != 0 {
+			if !slices.Contains(l.toPrint, id) {
+				l.toPrint = append(l.toPrint, id)
+			}
+			continue
+		}
+
+		for _, toPrintID := range l.toPrint {
+			content := l.lastContent[toPrintID]
+			delete(l.lastContent, toPrintID)
+			if content != "" {
+				_, _ = fmt.Fprint(os.Stderr, content)
+				if !strings.HasSuffix(content, "\n") {
+					_, _ = fmt.Fprintln(os.Stderr)
+				}
+			}
+		}
+
+		l.toPrint = nil
+		result = l.activePrinters[1:]
+		if len(result) > 0 {
+			content := l.lastContent[result[0]]
+			if content != "" {
+				_, _ = fmt.Fprint(os.Stderr, content)
+				l.needsNewline = !strings.HasSuffix(content, "\n")
+			}
+		}
+		break
+	}
+	l.activePrinters = result
+}
+
+func (l *livePrinter) formatContent(event runner.Event, c call) string {
+	if event.Content == "" {
+		return event.Content
+	}
+	prefix := fmt.Sprintf("         content  [%s] content | ", l.callIDMap[c.ID])
+	var lines []string
+	for _, line := range strings.Split(event.Content, "\n") {
+		if len(line) > 100 {
+			line = line[:100] + " ..."
+		}
+		lines = append(lines, prefix+line)
+	}
+	return strings.Join(lines, "\n")
 }
 
 func (l *livePrinter) print(event runner.Event, c call) {
 	if l == nil {
 		return
 	}
-	if c.ParentID != "" {
-		return
-	}
 
-	last := l.lastLines[c.ID]
-	line := strings.TrimPrefix(event.Content, last)
-	_, _ = fmt.Fprint(os.Stderr, line)
-	l.needsNewline = !strings.HasSuffix(line, "\n")
-	l.lastLines[c.ID] = event.Content
+	content := l.formatContent(event, c)
+	last := l.lastContent[c.ID]
+	l.lastContent[c.ID] = content
+
+	if len(l.activePrinters) > 0 && l.activePrinters[0] == c.ID && content != "" {
+		line, ok := strings.CutPrefix(content, last)
+		if !ok && last != "" {
+			_, _ = fmt.Fprintln(os.Stderr)
+		}
+		if line != "" {
+			_, _ = fmt.Fprint(os.Stderr, line)
+			l.needsNewline = !strings.HasSuffix(line, "\n")
+		}
+	}
 }
 
 func (d *display) Event(event runner.Event) {
@@ -135,13 +217,17 @@ func (d *display) Event(event runner.Event) {
 
 	switch event.Type {
 	case runner.EventTypeCallStart:
+		d.livePrinter.progressStart(event, currentCall)
 		d.livePrinter.end()
 		currentCall.Start = event.Time
 		currentCall.Input = event.Content
 		log.Fields("input", event.Content).Infof("started  [%s]", callName)
+	case runner.EventTypeCallSubCalls:
+		d.livePrinter.progressEnd(event, currentCall)
 	case runner.EventTypeCallProgress:
 		d.livePrinter.print(event, currentCall)
 	case runner.EventTypeCallContinue:
+		d.livePrinter.progressStart(event, currentCall)
 		d.livePrinter.end()
 		log.Fields("toolResults", event.ToolResults).Infof("continue [%s]", callName)
 	case runner.EventTypeChat:
@@ -167,6 +253,7 @@ func (d *display) Event(event runner.Event) {
 			Cached:       event.ChatResponseCached,
 		})
 	case runner.EventTypeCallFinish:
+		d.livePrinter.progressEnd(event, currentCall)
 		d.livePrinter.end()
 		currentCall.End = event.Time
 		currentCall.Output = event.Content
@@ -204,7 +291,8 @@ func newDisplay(dumpState string, progress bool) *display {
 	}
 	if progress {
 		display.livePrinter = &livePrinter{
-			lastLines: map[string]string{},
+			lastContent: map[string]string{},
+			callIDMap:   display.callIDMap,
 		}
 	}
 	return display

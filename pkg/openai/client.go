@@ -407,19 +407,11 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 	cacheKey := c.cacheKey(request)
 	request.Stream = true
 
-	msg := ""
-	if len(request.Messages) > 0 {
-		msg = request.Messages[len(request.Messages)-1].Content
-		if msg != "" {
-			msg = "Sent content:\n\n" + msg + "\n"
-		}
-	}
-
 	partial <- Status{
 		CompletionID: transactionID,
 		PartialResponse: &types.CompletionMessage{
 			Role:    types.CompletionMessageRoleTypeAssistant,
-			Content: types.Text(msg + "Waiting for model response...\n"),
+			Content: types.Text("Waiting for model response..."),
 		},
 	}
 

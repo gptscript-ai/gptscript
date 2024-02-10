@@ -83,15 +83,16 @@ func (r *Runner) Run(ctx context.Context, prg types.Program, env []string, input
 }
 
 type Event struct {
-	Time               time.Time       `json:"time,omitempty"`
-	CallContext        *engine.Context `json:"callContext,omitempty"`
-	ToolResults        int             `json:"toolResults,omitempty"`
-	Type               EventType       `json:"type,omitempty"`
-	ChatCompletionID   string          `json:"chatCompletionId,omitempty"`
-	ChatRequest        any             `json:"chatRequest,omitempty"`
-	ChatResponse       any             `json:"chatResponse,omitempty"`
-	ChatResponseCached bool            `json:"chatResponseCached,omitempty"`
-	Content            string          `json:"content,omitempty"`
+	Time               time.Time              `json:"time,omitempty"`
+	CallContext        *engine.Context        `json:"callContext,omitempty"`
+	ToolSubCalls       map[string]engine.Call `json:"toolSubCalls,omitempty"`
+	ToolResults        int                    `json:"toolResults,omitempty"`
+	Type               EventType              `json:"type,omitempty"`
+	ChatCompletionID   string                 `json:"chatCompletionId,omitempty"`
+	ChatRequest        any                    `json:"chatRequest,omitempty"`
+	ChatResponse       any                    `json:"chatResponse,omitempty"`
+	ChatResponseCached bool                   `json:"chatResponseCached,omitempty"`
+	Content            string                 `json:"content,omitempty"`
 }
 
 type EventType string
@@ -99,6 +100,7 @@ type EventType string
 var (
 	EventTypeCallStart    = EventType("callStart")
 	EventTypeCallContinue = EventType("callContinue")
+	EventTypeCallSubCalls = EventType("callSubCalls")
 	EventTypeCallProgress = EventType("callProgress")
 	EventTypeChat         = EventType("callChat")
 	EventTypeCallFinish   = EventType("callFinish")
@@ -137,6 +139,13 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 			})
 			return *result.Result, nil
 		}
+
+		monitor.Event(Event{
+			Time:         time.Now(),
+			CallContext:  &callCtx,
+			Type:         EventTypeCallSubCalls,
+			ToolSubCalls: result.Calls,
+		})
 
 		callResults, err := r.subCalls(callCtx, monitor, env, result)
 		if err != nil {
