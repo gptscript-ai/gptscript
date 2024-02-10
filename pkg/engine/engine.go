@@ -180,7 +180,7 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 		Temperature:  tool.Temperature,
 	}
 
-	if InternalSystemPrompt != "" {
+	if InternalSystemPrompt != "" && (tool.InternalPrompt == nil || *tool.InternalPrompt) {
 		completion.Messages = append(completion.Messages, types.CompletionMessage{
 			Role:    types.CompletionMessageRoleTypeSystem,
 			Content: types.Text(InternalSystemPrompt),

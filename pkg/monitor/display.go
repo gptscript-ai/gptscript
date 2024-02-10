@@ -68,7 +68,7 @@ func (l *livePrinter) end() {
 		return
 	}
 	if l.needsNewline {
-		fmt.Println()
+		_, _ = fmt.Fprintln(os.Stderr)
 	}
 	l.needsNewline = false
 }
@@ -83,7 +83,7 @@ func (l *livePrinter) print(event runner.Event, c call) {
 
 	last := l.lastLines[c.ID]
 	line := strings.TrimPrefix(event.Content, last)
-	fmt.Print(line)
+	_, _ = fmt.Fprint(os.Stderr, line)
 	l.needsNewline = !strings.HasSuffix(line, "\n")
 	l.lastLines[c.ID] = event.Content
 }

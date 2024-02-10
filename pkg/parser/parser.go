@@ -79,6 +79,12 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		tool.ModelName = value
 	case "description":
 		tool.Description = value
+	case "internalprompt":
+		v, err := toBool(value)
+		if err != nil {
+			return false, err
+		}
+		tool.InternalPrompt = &v
 	case "tools":
 		tool.Tools = append(tool.Tools, csv(strings.ToLower(value))...)
 	case "args":

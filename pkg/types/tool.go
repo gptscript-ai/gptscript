@@ -23,15 +23,16 @@ type Program struct {
 type BuiltinFunc func(ctx context.Context, env []string, input string) (string, error)
 
 type Tool struct {
-	ID           string            `json:"id,omitempty"`
-	Name         string            `json:"name,omitempty"`
-	Description  string            `json:"description,omitempty"`
-	Arguments    *JSONSchema       `json:"arguments,omitempty"`
-	Instructions string            `json:"instructions,omitempty"`
-	Tools        []string          `json:"tools,omitempty"`
-	ToolMapping  map[string]string `json:"toolMapping,omitempty"`
-	LocalTools   map[string]string `json:"localTools,omitempty"`
-	BuiltinFunc  BuiltinFunc       `json:"-"`
+	ID             string            `json:"id,omitempty"`
+	Name           string            `json:"name,omitempty"`
+	Description    string            `json:"description,omitempty"`
+	InternalPrompt *bool             `json:"internalPrompt"`
+	Arguments      *JSONSchema       `json:"arguments,omitempty"`
+	Instructions   string            `json:"instructions,omitempty"`
+	Tools          []string          `json:"tools,omitempty"`
+	ToolMapping    map[string]string `json:"toolMapping,omitempty"`
+	LocalTools     map[string]string `json:"localTools,omitempty"`
+	BuiltinFunc    BuiltinFunc       `json:"-"`
 
 	Vision       bool     `json:"vision,omitempty"`
 	MaxTokens    int      `json:"maxTokens,omitempty"`
