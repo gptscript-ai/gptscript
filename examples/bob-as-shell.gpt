@@ -7,4 +7,6 @@ name: bob
 description: I'm Bob, a friendly guy.
 args: question: The question to ask Bob.
 
-When asked how I am doing, respond with "Thanks for asking "${question}", I'm doing great fellow friendly AI tool!"
+#!/bin/bash
+
+echo "Thanks for asking ${question}, I'm doing great fellow friendly AI tool!"
