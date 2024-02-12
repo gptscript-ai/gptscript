@@ -48,8 +48,23 @@ func New() *cobra.Command {
 }
 
 func (r *GPTScript) Customize(cmd *cobra.Command) {
-	cmd.Use = version.ProgramName + " [flags] PROGRAM_FILE [INPUT...]"
 	cmd.Flags().SetInterspersed(false)
+	cmd.Use = version.ProgramName + " [flags] PROGRAM_FILE [INPUT...]"
+	cmd.Version = version.Get().String()
+	cmd.CompletionOptions.HiddenDefaultCmd = true
+	cmd.TraverseChildren = true
+
+	// Enable shell completion for the gptscript command.
+	// Note: The gptscript command doesn't have any subcommands, but Cobra requires that at least one is defined before
+	// it will generate the completion command automatically. To work around this, define a hidden no-op subcommand.
+	cmd.AddCommand(&cobra.Command{Hidden: true})
+	cmd.SetHelpCommand(&cobra.Command{Hidden: true})
+
+	// Override arg completion to prevent the hidden subcommands from masking default completion for positional args.
+	// Note: This should be removed if the gptscript command supports subcommands in the future.
+	cmd.ValidArgsFunction = func(*cobra.Command, []string, string) ([]string, cobra.ShellCompDirective) {
+		return nil, cobra.ShellCompDirectiveDefault
+	}
 }
 
 func (r *GPTScript) listTools(ctx context.Context) error {
