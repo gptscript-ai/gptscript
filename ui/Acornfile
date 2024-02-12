@@ -1,0 +1,25 @@
+args: {
+  // Number of replicas
+  replicas: 1
+
+  // API Endpoint
+  api: "https://localhost:9090/v1"
+}
+
+services: default: {
+    default: true
+    ports: ["80/http"]
+    container: "ui"
+}
+
+containers: ui: {
+  scale: args.replicas
+  build: context: "."
+
+  env: {
+    NUXT_PUBLIC_API: args.api
+  }
+
+  ports: publish: "80/http"
+  probes: "http://localhost/healthz"
+}

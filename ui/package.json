@@ -1,0 +1,39 @@
+{
+  "name": "gptscript-ui",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "./node_modules/.bin/nuxt build",
+    "clean": "./scripts/clean",
+    "dev": "./node_modules/.bin/nuxt dev --host",
+    "generate": "./node_modules/.bin/nuxt generate",
+    "info": "./node_modules/.bin/nuxt info",
+    "lint": "./node_modules/.bin/eslint --max-warnings 0 .",
+    "lint:fix": "./node_modules/.bin/eslint --fix .",
+    "postinstall": "./node_modules/.bin/nuxt prepare",
+    "preview": "./node_modules/.bin/nuxt preview",
+    "start": "node .output/server/index.mjs"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.10"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "2.6.4",
+    "@heroicons/vue": "^2.1.1",
+    "@nuxt/devtools": "1.0.8",
+    "@nuxt/ui": "2.13.0",
+    "@nuxtjs/color-mode": "^3.3.2",
+    "@pinia/nuxt": "^0.5.1",
+    "@types/lodash-es": "^4.17.12",
+    "@vueuse/core": "^10.7.2",
+    "dotenv": "^16.4.1",
+    "eslint": "^8.56.0",
+    "lodash-es": "^4.17.21",
+    "nuxt": "^3.10.1",
+    "sass": "^1.70.0",
+    "typescript": "^5.3.3",
+    "vue": "3.4.15",
+    "vue-router": "^4.2.5"
+  }
+}

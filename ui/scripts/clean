@@ -1,0 +1,6 @@
+  #!/bin/bash
+  set -e
+
+  cd $(dirname $0)/..
+
+  rm -rf dist .nuxt* node_modules/.cache node_modules/.vite .output

@@ -1,0 +1,58 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.detectIndentation": false,
+  "editor.insertSpaces": true,
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "editor.tabSize": 2,
+  "eslint.format.enable": true,
+  "eslint.run": "onSave",
+  "eslint.validate": [
+    "vue",
+    "html",
+    "javascript",
+    "typescript"
+  ],
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "files.exclude": {
+    ".ackrc": true,
+    ".dockerignore": true,
+    ".drone.yml": true,
+    ".editorconfig": true,
+    ".eslintcache": true,
+    ".eslintignore": true,
+    ".eslintrc.js": true,
+    ".gitignore": true,
+    ".nuxt*": true,
+    ".nyc_output": true,
+    "babel.config.js": true,
+    "coverage": true,
+    "jsconfig.json": true,
+    "LICENSE": true,
+    "yarn-error.log": true
+  },
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  "prettier.enable": false,
+  "tailwindCSS.classAttributes": [
+    "class",
+    "className",
+    "ui"
+  ],
+  "tailwindCSS.experimental.classRegex": [
+    [
+      "ui:\\s*{([^)]*)\\s*}",
+      "[\"'`]([^\"'`]*).*?[\"'`]"
+    ],
+    [
+      "/\\*ui\\*/\\s*{([^;]*)}",
+      ":\\s*[\"'`]([^\"'`]*).*?[\"'`]"
+    ]
+  ],
+  "tailwindCSS.experimental.configFile": "tailwind.config.ts",
+  "typescript.preferences.importModuleSpecifier": "non-relative"
+}
