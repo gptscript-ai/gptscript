@@ -4,7 +4,7 @@ const gptList = await useGpts().listAll()
 const runList = await useRuns().findAll()
 
 const gptLinks = computed(() => {
-  return (gptList.value || []).map(x => { return {
+  return (gptList || []).map(x => { return {
     label: x,
     icon: 'i-heroicons-wrench-screwdriver',
     to: `/gpt/` + x.split('/').map(y => encodeURIComponent(y)).join('/'),

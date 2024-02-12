@@ -234,6 +234,21 @@ func (s *Server) Connect(session *melody.Session) {
 }
 
 func (s *Server) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	isUpgrade := strings.Contains(strings.ToLower(req.Header.Get("Connection")), "upgrade")
+	isBrowser := strings.Contains(strings.ToLower(req.Header.Get("User-Agent")), "mozilla")
+	isAjax := req.Header.Get("X-Requested-With") != ""
+
+	if req.URL.Path == "/" && isBrowser && !isAjax && !isUpgrade {
+		rw.Header().Set("Location", "/ui/")
+		rw.WriteHeader(302)
+		return
+	}
+
+	if req.URL.Path == "/favicon.ico" {
+		http.ServeFileFS(rw, req, static.UI, "/ui/favicon.ico")
+		return
+	}
+
 	if strings.HasPrefix(req.URL.Path, "/ui") {
 		path := req.URL.Path
 		if path == "/ui" || path == "/ui/" {
@@ -250,7 +265,7 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	case http.MethodPost:
 		s.run(rw, req)
 	case http.MethodGet:
-		if req.URL.Path == "/" && strings.Contains(strings.ToLower(req.Header.Get("Connection")), "upgrade") {
+		if req.URL.Path == "/" && isUpgrade {
 			err := s.melody.HandleRequest(rw, req)
 			if err != nil {
 				http.Error(rw, err.Error(), http.StatusInternalServerError)

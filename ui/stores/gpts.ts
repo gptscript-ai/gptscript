@@ -27,8 +27,8 @@ export const useGpts = defineStore('gpts', {
 
     async listAll() {
       const url = useRuntimeConfig().public.api
-      const { data } = (await useFetch(url) as any as {data: Ref<string[]>})
-      return data
+      const data = await $fetch(url, {headers: {'X-Requested-With': 'fetch'} }) as string[]
+      return reactive(data)
     }
   }
 })
