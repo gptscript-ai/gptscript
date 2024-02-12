@@ -15,6 +15,7 @@ const (
 type ToolSet map[string]Tool
 
 type Program struct {
+	Name        string            `json:"name,omitempty"`
 	EntryToolID string            `json:"entryToolId,omitempty"`
 	ToolSet     ToolSet           `json:"toolSet,omitempty"`
 	Exports     map[string]string `json:"exports,omitempty"`

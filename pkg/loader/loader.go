@@ -359,6 +359,7 @@ func ProgramFromSource(ctx context.Context, content, subToolName string) (types.
 
 func Program(ctx context.Context, name, subToolName string) (types.Program, error) {
 	prg := types.Program{
+		Name:    name,
 		ToolSet: types.ToolSet{},
 	}
 	tool, err := resolve(ctx, &prg, &source{}, name, subToolName)
