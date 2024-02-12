@@ -1,0 +1,14 @@
+--ignore-dir=.git
+--ignore-dir=.nuxt
+--ignore-dir=.nuxt-prod
+--ignore-dir=.nyc_output
+--ignore-dir=.output
+--ignore-dir=.vscode
+--ignore-dir=coverage
+--ignore-dir=dist
+--ignore-dir=node_modules
+--ignore-dir=tmp
+--ignore-dir=vendor
+--ignore-file=ext:svg
+--ignore-file=is:selection.json
+--ignore-file=is:yarn.lock
