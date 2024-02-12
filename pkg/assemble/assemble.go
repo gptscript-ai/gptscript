@@ -1,7 +1,6 @@
 package assemble
 
 import (
-	"context"
 	"encoding/json"
 	"io"
 
@@ -10,7 +9,7 @@ import (
 
 var Header = []byte("GPTSCRIPT!")
 
-func Assemble(ctx context.Context, prg types.Program, output io.Writer) error {
+func Assemble(prg types.Program, output io.Writer) error {
 	if _, err := output.Write(Header); err != nil {
 		return err
 	}

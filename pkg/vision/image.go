@@ -1,7 +1,6 @@
 package vision
 
 import (
-	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -17,7 +16,7 @@ var (
 	urlBase = os.Getenv("cached://")
 )
 
-func ToVisionMessage(ctx context.Context, c *cache.Client, message types.CompletionMessage) (types.CompletionMessage, error) {
+func ToVisionMessage(c *cache.Client, message types.CompletionMessage) (types.CompletionMessage, error) {
 	if len(message.Content) != 1 || !strings.HasPrefix(message.Content[0].Text, "{") {
 		return message, nil
 	}
@@ -33,7 +32,7 @@ func ToVisionMessage(ctx context.Context, c *cache.Client, message types.Complet
 	content.Text = input.Text
 
 	if input.URL != "" {
-		b64, ok, err := Base64FromStored(ctx, c, input.URL)
+		b64, ok, err := Base64FromStored(c, input.URL)
 		if err != nil {
 			return message, err
 		}
@@ -60,7 +59,7 @@ func ToVisionMessage(ctx context.Context, c *cache.Client, message types.Complet
 	return message, nil
 }
 
-func Base64FromStored(ctx context.Context, cache *cache.Client, url string) (string, bool, error) {
+func Base64FromStored(cache *cache.Client, url string) (string, bool, error) {
 	if !strings.HasPrefix(url, urlBase) {
 		return "", false, nil
 	}
@@ -70,7 +69,7 @@ func Base64FromStored(ctx context.Context, cache *cache.Client, url string) (str
 	}
 	name := parts[len(parts)-1]
 
-	cached, ok, err := cache.Get(ctx, name)
+	cached, ok, err := cache.Get(name)
 	if err != nil || !ok {
 		return "", ok, err
 	}
@@ -78,7 +77,7 @@ func Base64FromStored(ctx context.Context, cache *cache.Client, url string) (str
 	return base64.StdEncoding.EncodeToString(cached), true, nil
 }
 
-func ImageToURL(ctx context.Context, c *cache.Client, vision bool, message types.ImageURL) (string, error) {
+func ImageToURL(c *cache.Client, vision bool, message types.ImageURL) (string, error) {
 	if message.URL != "" {
 		return message.URL, nil
 	}
@@ -93,7 +92,7 @@ func ImageToURL(ctx context.Context, c *cache.Client, vision bool, message types
 	}
 
 	id := "i" + hash.Encode(message)[:12]
-	if err := c.Store(ctx, id, data); err != nil {
+	if err := c.Store(id, data); err != nil {
 		return "", err
 	}
 	return fmt.Sprintf("%s/%s", urlBase, id), nil

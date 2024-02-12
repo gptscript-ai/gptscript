@@ -95,7 +95,7 @@ func (c *Context) ParentID() string {
 	return c.Parent.ID
 }
 
-func (c *Context) UnmarshalJSON(data []byte) error {
+func (c *Context) UnmarshalJSON([]byte) error {
 	panic("this data struct is circular by design and can not be read from json")
 }
 

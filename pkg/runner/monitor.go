@@ -9,15 +9,14 @@ import (
 type noopFactory struct {
 }
 
-func (n noopFactory) Start(ctx context.Context, prg *types.Program, env []string, input string) (Monitor, error) {
+func (n noopFactory) Start(context.Context, *types.Program, []string, string) (Monitor, error) {
 	return noopMonitor{}, nil
 }
 
 type noopMonitor struct {
 }
 
-func (n noopMonitor) Event(event Event) {
+func (n noopMonitor) Event(Event) {
 }
 
-func (n noopMonitor) Stop(output string, err error) {
-}
+func (n noopMonitor) Stop(string, error) {}

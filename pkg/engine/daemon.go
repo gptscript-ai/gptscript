@@ -89,7 +89,7 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 	port = e.getNextPort()
 	url = fmt.Sprintf("http://127.0.0.1:%d%s", port, path)
 
-	cmd, close, err := e.newCommand(ctx, []string{
+	cmd, stop, err := e.newCommand(ctx, []string{
 		fmt.Sprintf("PORT=%d", port),
 	},
 		types.CommandPrefix+instructions,
@@ -103,7 +103,7 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 	cmd.Stdout = os.Stdout
 	log.Infof("launched [%s][%s] port [%d] %v", tool.Name, tool.ID, port, cmd.Args)
 	if err := cmd.Start(); err != nil {
-		close()
+		stop()
 		return url, err
 	}
 
@@ -122,7 +122,7 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 		}
 
 		cancel(err)
-		close()
+		stop()
 		daemonLock.Lock()
 		defer daemonLock.Unlock()
 
@@ -140,11 +140,9 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 	for i := 0; i < 20; i++ {
 		resp, err := http.Get(url)
 		if err == nil && resp.StatusCode == http.StatusOK {
-			defer func() {
-				_ = resp.Body.Close()
-			}()
 			go func() {
 				_, _ = io.ReadAll(resp.Body)
+				_ = resp.Body.Close()
 			}()
 			return url, nil
 		}

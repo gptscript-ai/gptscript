@@ -40,11 +40,11 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 		return tool.BuiltinFunc(ctx, e.Env, input)
 	}
 
-	cmd, close, err := e.newCommand(ctx, nil, tool.Instructions, input)
+	cmd, stop, err := e.newCommand(ctx, nil, tool.Instructions, input)
 	if err != nil {
 		return "", err
 	}
-	defer close()
+	defer stop()
 
 	e.Progress <- openai.Status{
 		CompletionID: id,
@@ -130,7 +130,7 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, instructions
 
 	var (
 		cmdArgs = args[1:]
-		close   func()
+		stop    func()
 	)
 
 	if strings.TrimSpace(rest) != "" {
@@ -138,14 +138,14 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, instructions
 		if err != nil {
 			return nil, nil, err
 		}
-		close = func() {
-			os.Remove(f.Name())
+		stop = func() {
+			_ = os.Remove(f.Name())
 		}
 
 		_, err = f.Write([]byte(rest))
 		_ = f.Close()
 		if err != nil {
-			close()
+			stop()
 			return nil, nil, err
 		}
 		cmdArgs = append(cmdArgs, f.Name())
@@ -153,5 +153,5 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, instructions
 
 	cmd := exec.CommandContext(ctx, args[0], cmdArgs...)
 	cmd.Env = env
-	return cmd, close, nil
+	return cmd, stop, nil
 }
