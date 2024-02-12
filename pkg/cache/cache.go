@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"context"
 	"errors"
 	"io/fs"
 	"os"
@@ -47,14 +46,14 @@ func New(opts ...Options) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) Store(ctx context.Context, key string, content []byte) error {
+func (c *Client) Store(key string, content []byte) error {
 	if c == nil || c.noop {
 		return nil
 	}
 	return os.WriteFile(filepath.Join(c.dir, key), content, 0644)
 }
 
-func (c *Client) Get(ctx context.Context, key string) ([]byte, bool, error) {
+func (c *Client) Get(key string) ([]byte, bool, error) {
 	if c == nil || c.noop {
 		return nil, false, nil
 	}

@@ -2,5 +2,5 @@ package loader
 
 import "testing"
 
-func TestLoader(t *testing.T) {
+func TestLoader(*testing.T) {
 }

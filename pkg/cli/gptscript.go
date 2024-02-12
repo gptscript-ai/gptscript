@@ -67,7 +67,7 @@ func (r *GPTScript) Customize(cmd *cobra.Command) {
 	}
 }
 
-func (r *GPTScript) listTools(ctx context.Context) error {
+func (r *GPTScript) listTools() error {
 	var lines []string
 	for _, tool := range builtin.ListTools() {
 		lines = append(lines, tool.String())
@@ -94,7 +94,7 @@ func (r *GPTScript) listModels(ctx context.Context) error {
 	return nil
 }
 
-func (r *GPTScript) Pre(cmd *cobra.Command, args []string) error {
+func (r *GPTScript) Pre(*cobra.Command, []string) error {
 	if r.Quiet == nil {
 		if term.IsTerminal(int(os.Stdout.Fd())) {
 			r.Quiet = new(bool)
@@ -122,7 +122,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 	}
 
 	if r.ListTools {
-		return r.listTools(cmd.Context())
+		return r.listTools()
 	}
 
 	if r.Server {
@@ -173,7 +173,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 			out = f
 		}
 
-		return assemble.Assemble(cmd.Context(), prg, out)
+		return assemble.Assemble(prg, out)
 	}
 
 	runner, err := runner.New(r.Options, runner.Options{

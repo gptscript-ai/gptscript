@@ -136,12 +136,12 @@ func (c *Client) seed(request openai.ChatCompletionRequest) int {
 	return hash.Seed(newRequest)
 }
 
-func (c *Client) fromCache(ctx context.Context, messageRequest types.CompletionRequest, request openai.ChatCompletionRequest) (result []openai.ChatCompletionStreamResponse, _ bool, _ error) {
+func (c *Client) fromCache(messageRequest types.CompletionRequest, request openai.ChatCompletionRequest) (result []openai.ChatCompletionStreamResponse, _ bool, _ error) {
 	if messageRequest.Cache != nil && !*messageRequest.Cache {
 		return nil, false, nil
 	}
 
-	cache, found, err := c.cache.Get(ctx, c.cacheKey(request))
+	cache, found, err := c.cache.Get(c.cacheKey(request))
 	if err != nil {
 		return nil, false, err
 	} else if !found {
@@ -167,10 +167,10 @@ func toToolCall(call types.CompletionToolCall) openai.ToolCall {
 	}
 }
 
-func toMessages(ctx context.Context, cache *cache.Client, request types.CompletionRequest) (result []openai.ChatCompletionMessage, err error) {
+func toMessages(cache *cache.Client, request types.CompletionRequest) (result []openai.ChatCompletionMessage, err error) {
 	for _, message := range request.Messages {
 		if request.Vision {
-			message, err = vision.ToVisionMessage(ctx, cache, message)
+			message, err = vision.ToVisionMessage(cache, message)
 			if err != nil {
 				return nil, err
 			}
@@ -189,7 +189,7 @@ func toMessages(ctx context.Context, cache *cache.Client, request types.Completi
 				chatMessage.ToolCalls = append(chatMessage.ToolCalls, toToolCall(*content.ToolCall))
 			}
 			if content.Image != nil {
-				url, err := vision.ImageToURL(ctx, cache, request.Vision, *content.Image)
+				url, err := vision.ImageToURL(cache, request.Vision, *content.Image)
 				if err != nil {
 					return nil, err
 				}
@@ -247,7 +247,7 @@ type Status struct {
 }
 
 func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- Status) (*types.CompletionMessage, error) {
-	msgs, err := toMessages(ctx, c.cache, messageRequest)
+	msgs, err := toMessages(c.cache, messageRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -298,7 +298,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 
 	var cacheResponse bool
 	request.Seed = ptr(c.seed(request))
-	response, ok, err := c.fromCache(ctx, messageRequest, request)
+	response, ok, err := c.fromCache(messageRequest, request)
 	if err != nil {
 		return nil, err
 	} else if !ok {
@@ -390,7 +390,7 @@ func override(left, right string) string {
 	return left
 }
 
-func (c *Client) store(ctx context.Context, key string, responses []openai.ChatCompletionStreamResponse) error {
+func (c *Client) store(key string, responses []openai.ChatCompletionStreamResponse) error {
 	buf := &bytes.Buffer{}
 	gz := gzip.NewWriter(buf)
 	err := json.NewEncoder(gz).Encode(responses)
@@ -400,7 +400,7 @@ func (c *Client) store(ctx context.Context, key string, responses []openai.ChatC
 	if err := gz.Close(); err != nil {
 		return err
 	}
-	return c.cache.Store(ctx, key, buf.Bytes())
+	return c.cache.Store(key, buf.Bytes())
 }
 
 func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest, transactionID string, partial chan<- Status) (responses []openai.ChatCompletionStreamResponse, _ error) {
@@ -426,7 +426,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 	for {
 		response, err := stream.Recv()
 		if err == io.EOF {
-			return responses, c.store(ctx, cacheKey, responses)
+			return responses, c.store(cacheKey, responses)
 		} else if err != nil {
 			return nil, err
 		}

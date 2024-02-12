@@ -39,7 +39,7 @@ var (
 	prettyIDCounter int64
 )
 
-func (c *Console) Start(ctx context.Context, prg *types.Program, env []string, input string) (runner.Monitor, error) {
+func (c *Console) Start(_ context.Context, prg *types.Program, _ []string, input string) (runner.Monitor, error) {
 	id := atomic.AddInt64(&runID, 1)
 	mon := newDisplay(c.dumpState, c.displayProgress)
 	mon.dump.ID = fmt.Sprint(id)
@@ -79,7 +79,7 @@ func (l *livePrinter) end() {
 	}
 }
 
-func (l *livePrinter) progressStart(event runner.Event, c call) {
+func (l *livePrinter) progressStart(c call) {
 	if l == nil {
 		return
 	}
@@ -91,7 +91,7 @@ func (l *livePrinter) progressStart(event runner.Event, c call) {
 	})
 }
 
-func (l *livePrinter) progressEnd(event runner.Event, c call) {
+func (l *livePrinter) progressEnd(c call) {
 	if l == nil {
 		return
 	}
@@ -217,17 +217,17 @@ func (d *display) Event(event runner.Event) {
 
 	switch event.Type {
 	case runner.EventTypeCallStart:
-		d.livePrinter.progressStart(event, currentCall)
+		d.livePrinter.progressStart(currentCall)
 		d.livePrinter.end()
 		currentCall.Start = event.Time
 		currentCall.Input = event.Content
 		log.Fields("input", event.Content).Infof("started  [%s]", callName)
 	case runner.EventTypeCallSubCalls:
-		d.livePrinter.progressEnd(event, currentCall)
+		d.livePrinter.progressEnd(currentCall)
 	case runner.EventTypeCallProgress:
 		d.livePrinter.print(event, currentCall)
 	case runner.EventTypeCallContinue:
-		d.livePrinter.progressStart(event, currentCall)
+		d.livePrinter.progressStart(currentCall)
 		d.livePrinter.end()
 		log.Fields("toolResults", event.ToolResults).Infof("continue [%s]", callName)
 	case runner.EventTypeChat:
@@ -253,7 +253,7 @@ func (d *display) Event(event runner.Event) {
 			Cached:       event.ChatResponseCached,
 		})
 	case runner.EventTypeCallFinish:
-		d.livePrinter.progressEnd(event, currentCall)
+		d.livePrinter.progressEnd(currentCall)
 		d.livePrinter.end()
 		currentCall.End = event.Time
 		currentCall.Output = event.Content
