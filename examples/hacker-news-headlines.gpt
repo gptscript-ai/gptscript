@@ -1,0 +1,36 @@
+tools: sys.http.get, sys.http.html2text, sys.find, sys.write, mongo_run, mongo_command, init_flask_project
+
+Perform the following actions in this order:
+
+1. Start the MongoDB database.
+2. Create a collection in the Mongo instance called `headlines`.
+3. Visit https://hackernews.com and get the top ten headlines.
+4. Call the init_flask_project tool to set up the directories you will need.
+5. Write each headline into the MongoDB collection that you created earlier called `headlines`. Write each one using a separate call to the mongo_command tool. The name of the database in Mongo that these will be written to is `headlines`. Don't forget to escape any quotation marks or apostrophes that appear in the headlines.
+6. Generate a simple webserver in Python using Flask that will connect to the database and serve a single page listing all the headlines. Create it in the `headline` directory. Embed a link to the article in each headline displayed on the page.
+7. Add some basic CSS styling to make the page look cool and modern. I want it to be dark themed. Style the links to be a light gray color. Make sure the page has a neat header with red accents.
+
+---
+name: mongo_run
+description: starts a MongoDB database
+
+#!/usr/bin/env bash
+
+docker run -d -p 27017:27017 --name mongodb mongo:latest
+
+---
+name: mongo_command
+description: run a command in the MongoDB database
+args: command: the command to run in mongodb
+
+#!/usr/bin/env bash
+
+mongosh mongodb://localhost:27017/headlines --eval "$COMMAND"
+
+---
+name: init_flask_project
+description: sets up initial directory structure needed for the flask project
+
+#!/usr/bin/env bash
+
+mkdir -p headline/{templates,static}
