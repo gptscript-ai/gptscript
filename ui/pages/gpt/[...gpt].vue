@@ -1,5 +1,6 @@
 <script lang="ts" setup>
   import { usePrefs } from '@/stores/prefs';
+  const { metaSymbol } = useShortcuts()
 
   const TOOL = 'tool'
 
@@ -65,6 +66,15 @@
     const obj = await useRuns().create(fileName, toolName.value, input, prefs.cache)
     navigateTo({name: 'run-run', params: {run: obj.id}} )
   }
+
+  defineShortcuts({
+    'meta_enter': {
+      usingInput: true,
+      handler: () => {
+        run()
+      }
+    }
+  })
 </script>
 
 <template>
@@ -97,6 +107,8 @@
     />
     <UTextarea
       v-else
+      :autofocus="true"
+      name="stringArg"
       v-model="stringArg"
       placeholder="Optional free-form input"
       class="mb-2"
@@ -104,7 +116,15 @@
 
     <div class="clearfix">
       <div class="float-left mt-2">
-        <UButton icon="i-heroicons-play-circle" label="Run GPTScript" @click="run" :disabled="argsForm && !argsForm.valid" />
+        <UTooltip>
+          <template #text>
+            {{metaSymbol}} + Enter
+          </template>
+
+          <UButton icon="i-heroicons-play-circle" @click="run" :disabled="argsForm && !argsForm.valid">
+            Run
+          </UButton>
+        </UTooltip>
       </div>
       <div class="float-right">
         <UFormGroup label="Cache" size="xs">
