@@ -32,12 +32,12 @@ async function remove(e: MouseEvent, id: any) {
 <template>
   <nav class="left">
     <div class="scripts text-slate-700 dark:text-slate-400">
-      <h4 class="header px-3 py-2 bg-slate-300 dark:bg-slate-800">GPTScripts</h4>
+      <h4 class="header px-3 py-2 bg-slate-200 dark:bg-slate-800">GPTScripts</h4>
       <UVerticalNavigation :links="gptLinks" />
     </div>
 
     <div class="runs text-slate-700 dark:text-slate-400">
-      <h4 class="header px-3 py-2 bg-slate-300 dark:bg-slate-800">Run History</h4>
+      <h4 class="header px-3 py-2 bg-slate-200 dark:bg-slate-800">Run History</h4>
       <UVerticalNavigation :links="runLinks">
         <template #badge="{ link }">
           <UButton

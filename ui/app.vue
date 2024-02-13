@@ -1,9 +1,6 @@
-<script lang="ts" setup>
-  import '@/styles/app.scss'
-</script>
 <template>
   <div class="root bg-slate-100 dark:bg-slate-950">
-    <LeftNav class="left-nav bg-slate-200 dark:bg-slate-900"/>
+    <LeftNav class="left-nav bg-slate-50 dark:bg-slate-900"/>
     <main>
       <NuxtPage />
     </main>

@@ -19,6 +19,9 @@ export default defineNuxtConfig({
     },
   },
   colorMode: { classSuffix: '' },
+  css: [
+    '@/assets/styles/app.scss',
+  ],
   components: true,
   devServer: {
     port,
@@ -27,6 +30,7 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/ui',
     '@pinia/nuxt',
+    '@nuxtjs/tailwindcss'
   ],
   nitro: { sourceMap: true },
   runtimeConfig: {
