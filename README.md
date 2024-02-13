@@ -60,7 +60,7 @@ export OPENAI_API_KEY="your-api-key"
 ### 3. Run Hello World
 
 ```shell
-gptscript https://gptscript.ai/echo.gpt --input "Hello, World!"
+gptscript https://get.gptscript.ai/echo.gpt --input "Hello, World!"
 ```
 
 ## How it works
