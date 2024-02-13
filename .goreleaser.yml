@@ -55,8 +55,7 @@ release:
   prerelease: auto
 
 brews:
-  - name: gptscript@{{ .Major }}.{{ .Minor }}.{{ .Patch }} 
-    description: "GPTScript CLI"
+  - description: "GPTScript CLI"
     install: |
       bin.install "gptscript"
     homepage: "https://github.com/gptscript-ai/gptscript"
