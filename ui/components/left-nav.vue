@@ -2,7 +2,6 @@
 // const router = useRouter()
 const gptList = await useGpts().listAll()
 const runList = await useRuns().findAll()
-const sock = useSocket()
 
 const gptLinks = computed(() => {
   return (gptList || []).map(x => { return {
@@ -32,12 +31,12 @@ async function remove(e: MouseEvent, id: any) {
 <template>
   <nav class="left">
     <div class="scripts text-slate-700 dark:text-slate-400">
-      <h4 class="header px-3 py-2 bg-slate-300 dark:bg-slate-800">GPTScripts</h4>
+      <h4 class="header px-3 py-2 bg-slate-200 dark:bg-slate-800">Scripts</h4>
       <UVerticalNavigation :links="gptLinks" />
     </div>
 
     <div class="runs text-slate-700 dark:text-slate-400">
-      <h4 class="header px-3 py-2 bg-slate-300 dark:bg-slate-800">Run History</h4>
+      <h4 class="header px-3 py-2 bg-slate-200 dark:bg-slate-800">Run History</h4>
       <UVerticalNavigation :links="runLinks">
         <template #badge="{ link }">
           <UButton
@@ -50,27 +49,14 @@ async function remove(e: MouseEvent, id: any) {
         </template>
       </UVerticalNavigation>
     </div>
-
-    <aside class="px-2 flex">
-      <div class="flex-1 mt-1">
-        <ThemeToggle />
-      </div>
-      <div class="flex-initial text-right" v-if="sock.sock.status !== 'OPEN'">
-        <UBadge color="red" class="mt-2">
-          <i class="i-heroicons-bolt-slash"/>&nbsp;{{ucFirst(sock.sock.status.toLowerCase())}}
-        </UBadge>
-      </div>
-    </aside>
   </nav>
 </template>
 
 <style lang="scss" scoped>
-  $aside-height: 45px;
-
   .left {
     display: grid;
-    grid-template-areas: "scripts" "runs" "aside";
-    grid-template-rows: 1fr 1fr $aside-height;
+    grid-template-areas: "scripts" "runs";
+    grid-template-rows: 1fr 1fr;
     height: 100%;
   }
 
@@ -82,9 +68,6 @@ async function remove(e: MouseEvent, id: any) {
   .runs {
     grid-area: runs;
     overflow-y: auto;
-  }
-
-  ASIDE {
   }
 
   .delete-btn {

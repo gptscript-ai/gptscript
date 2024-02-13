@@ -5,7 +5,7 @@ export function iconForState(state: string) {
     case 'running':
       return 'i-heroicons-cog animate-spin'
     case 'finished':
-      return 'i-heroicons-beaker'
+      return 'i-heroicons-check'
     case 'error':
     default:
       return 'i-heroicons-exclamation-triangle'

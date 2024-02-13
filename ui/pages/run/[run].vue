@@ -16,8 +16,6 @@
 
   const run = (await useRuns().find(id))!
 
-  window.run = run
-
   const callMap = reactive<Record<string, Call>>({})
   const referredTo = reactive<MapBool>({})
 
@@ -101,13 +99,13 @@
 
 <template>
   <div v-if="run">
-    <div class="clearfix">
-      <div class="float-left">
+    <div class="grid lg:grid-cols-[1fr,375px] grid-cols-1">
+      <div>
         <h1 class="text-xl">
-          Run: {{id}}
+          {{run.program?.name}} #{{id}}
         </h1>
       </div>
-      <div class="float-right">
+      <div class="mt-2 lg:mt-0 lg:text-right">
         <UButton
           size="sm"
           :icon="prefs.allExpanded ? 'i-heroicons-minus' : 'i-heroicons-plus'"
@@ -115,7 +113,7 @@
           @click="toggleAll()"
         />
 
-        <UButton size="sm" icon="i-heroicons-pencil" label="Edit" @click="edit" class="ml-2"/>
+        <UButton size="sm" icon="i-heroicons-pencil" label="Run Again…" @click="edit" class="ml-2"/>
 
         <UBadge :color="colorForState(run.state)" size="lg" class="align-top ml-2" variant="subtle">
           <i :class="iconForState(run.state)"/>&nbsp;{{ucFirst(run.state)}}
@@ -133,6 +131,11 @@
       :description="run.err"
     />
 
+    <UDivider class="my-4" />
+    <UCard class="p-2">
+      <Content v-if="run.output || run.state === 'finished'" v-model="run.output"/>
+      <UProgress v-else animation="swing" />
+    </UCard>
 
     <UDivider class="my-4" />
 

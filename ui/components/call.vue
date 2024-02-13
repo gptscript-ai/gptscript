@@ -103,13 +103,12 @@ const outputTruncated = computed(() => {
     <i v-if="prefs.debug" class="text-blue-400">{{call}}</i>
     <div class="flex" :class="[isExpanded && 'mb-2']">
       <div class="flex-1">
-        <div>
+        <div class="break-all max-lg:text-sm">
           <UButton v-if="children.length || call.messages?.length || inputTruncated || outputTruncated" size="xs" :icon="icon" @click="toggle" class="align-baseline mr-1"/>
-          {{displayName}}
-          <template v-if="!isExpanded">({{inputShort}}) <i class="i-heroicons-arrow-right align-text-bottom"/> {{outputShort}}</template>
+          {{displayName}}<template v-if="!isExpanded">({{inputShort}}) <i class="i-heroicons-arrow-right align-text-bottom"/> {{outputShort}}</template>
         </div>
       </div>
-      <div class="flex-inline text-right">
+      <div class="flex-inline text-right ml-1">
         <UTooltip v-if="isExpanded" :text="call.showSystemMessages ? 'Internal messages shown' : 'Internal messages hidden'">
           <UToggle v-model="call.showSystemMessages" class="mr-2" off-icon="i-heroicons-bars-2" on-icon="i-heroicons-bars-4" />
         </UTooltip>
@@ -118,16 +117,16 @@ const outputTruncated = computed(() => {
           <i class="i-heroicons-key"/>&nbsp;{{ prefs.mapCall(call.id) }}
         </UBadge> -->
         <UBadge size="md" :color="colorForState(call.state)" class="align-baseline" variant="subtle">
-          <i :class="iconForState(call.state)"/>&nbsp;{{ucFirst(call.state)}}
+          <i :class="iconForState(call.state)"/><span class="hidden lg:inline">&nbsp;{{ucFirst(call.state)}}</span>
         </UBadge>
       </div>
     </div>
 
     <div v-if="isExpanded">
-      <b>Input:</b> <span class="whitespace-pre-wrap">{{call.input || '<none>'}}</span>
+      <b>Input:&nbsp;</b><Content v-model="call.input"/>
     </div>
     <div v-if="isExpanded">
-      <b>Output:</b> <span class="whitespace-pre-wrap">{{call.output || '<none>'}}</span>
+      <b>Output:&nbsp;</b><Content v-model="call.output"/>
     </div>
 
     <template v-if="isExpanded">
@@ -144,7 +143,7 @@ const outputTruncated = computed(() => {
       />
     </template>
 
-    <div v-if="children.length" class="ml-9">
+    <div v-if="children.length" class="indent">
       <Call
         v-for="(child, idx) in children"
         :key="idx"
@@ -157,3 +156,15 @@ const outputTruncated = computed(() => {
     </div>
   </UCard>
 </template>
+
+<style lang="scss" scoped>
+  .indent {
+    margin-left: 10px;
+  }
+
+  @media all and (min-width: 768px)  {
+    .indent {
+      margin-left: 2.5rem;
+    }
+  }
+</style>

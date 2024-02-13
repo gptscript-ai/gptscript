@@ -32,8 +32,7 @@ const { run, /*call,*/ msg, referredTo, depth=0 } = defineProps<Props>()
     />
     <template v-else>
       <UCard v-if="typeof msg.content === 'string'" class="mt-2">
-        <b>{{ucFirst(msg.role)}}:&nbsp;</b>
-        <span class="whitespace-pre-wrap">{{`${msg.content}`.trim()}}</span>
+        <b>{{ucFirst(msg.role)}}:&nbsp;</b><Content v-model="msg.content" />
       </UCard>
       <template v-else>
         <UCard v-for="(c, idx) in msg.content" :key="idx">

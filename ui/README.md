@@ -5,7 +5,7 @@ Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introdu
 ## Setup
 
 ```bash
-yarn install
+npm install
 ```
 
 ## Development Server
@@ -13,13 +13,13 @@ yarn install
 Start the development server on `http://localhost:9091`:
 
 ```bash
-yarn dev
+npm run dev
 ```
 
 ## Production
 
-Build the application for embedding into GPTScript:
+Build the application for embedding into GPTScript (the Makefile does this):
 
 ```bash
-yarn run generate
+npm run generate
 ```

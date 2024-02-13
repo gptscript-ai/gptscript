@@ -1,4 +1,6 @@
 import type { Config } from 'tailwindcss'
+import defaultTheme from 'tailwindcss/defaultTheme'
+
 
 // import colors from 'tailwindcss/colors'
 
@@ -20,6 +22,10 @@ export default <Partial<Config>> {
         //   '900': '#1d1d1d',
         //   '950': '#080808',
         // },
+      },
+
+      fontFamily: {
+        'sans': ['Poppins', ...defaultTheme.fontFamily.sans],
       },
     },
   },
