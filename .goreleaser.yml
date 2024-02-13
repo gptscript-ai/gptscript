@@ -2,6 +2,11 @@ dist: releases
 snapshot:
   name_template: '{{ trimprefix .Summary "v" }}'
 
+before:
+  hooks:
+    # Generate UI assets to embedded in binaries
+    - make build-ui
+
 builds:
   - id: default
     binary: gptscript
