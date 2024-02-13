@@ -8,10 +8,6 @@ export default <Partial<Config>> {
   darkMode: 'class',
   theme: {
     extend: {
-      fontFamily: {
-        'sans': ['Poppins', ...defaultTheme.fontFamily.sans],
-      },
-
       colors: {
         // 'gpt': {
         //   '50': '#f6f6f6',
@@ -26,6 +22,10 @@ export default <Partial<Config>> {
         //   '900': '#1d1d1d',
         //   '950': '#080808',
         // },
+      },
+
+      fontFamily: {
+        'sans': ['Poppins', ...defaultTheme.fontFamily.sans],
       },
     },
   },

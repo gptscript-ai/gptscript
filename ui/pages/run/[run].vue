@@ -99,13 +99,13 @@
 
 <template>
   <div v-if="run">
-    <div class="clearfix">
-      <div class="float-left">
+    <div class="grid lg:grid-cols-[1fr,375px] grid-cols-1">
+      <div>
         <h1 class="text-xl">
           {{run.program?.name}} #{{id}}
         </h1>
       </div>
-      <div class="float-right">
+      <div class="mt-2 lg:mt-0 lg:text-right">
         <UButton
           size="sm"
           :icon="prefs.allExpanded ? 'i-heroicons-minus' : 'i-heroicons-plus'"
@@ -132,9 +132,9 @@
     />
 
     <UDivider class="my-4" />
-    <UCard>
+    <UCard class="p-2">
       <Content v-if="run.output || run.state === 'finished'" v-model="run.output"/>
-      <UProgress v-else class="p-2" animation="swing" />
+      <UProgress v-else animation="swing" />
     </UCard>
 
     <UDivider class="my-4" />
