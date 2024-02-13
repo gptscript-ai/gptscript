@@ -105,8 +105,7 @@ const outputTruncated = computed(() => {
       <div class="flex-1">
         <div>
           <UButton v-if="children.length || call.messages?.length || inputTruncated || outputTruncated" size="xs" :icon="icon" @click="toggle" class="align-baseline mr-1"/>
-          {{displayName}}
-          <template v-if="!isExpanded">({{inputShort}}) <i class="i-heroicons-arrow-right align-text-bottom"/> {{outputShort}}</template>
+          {{displayName}}<template v-if="!isExpanded">({{inputShort}}) <i class="i-heroicons-arrow-right align-text-bottom"/> {{outputShort}}</template>
         </div>
       </div>
       <div class="flex-inline text-right">
@@ -124,10 +123,10 @@ const outputTruncated = computed(() => {
     </div>
 
     <div v-if="isExpanded">
-      <b>Input:</b> <span class="whitespace-pre-wrap">{{call.input || '<none>'}}</span>
+      <b>Input:&nbsp;</b><Content v-model="call.input"/>
     </div>
     <div v-if="isExpanded">
-      <b>Output:</b> <span class="whitespace-pre-wrap">{{call.output || '<none>'}}</span>
+      <b>Output:&nbsp;</b><Content v-model="call.output"/>
     </div>
 
     <template v-if="isExpanded">
