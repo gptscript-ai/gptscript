@@ -104,11 +104,9 @@ export const useSocket = defineStore('socket', {
           run.calls.push(call)
         }
 
-        console.log('Call frame', call)
-
         if ( f.type === 'callStart' ) {
           call.state = 'creating'
-          call.input = f.input || ''
+          call.input = f.content || ''
         } else if ( f.type === 'callChat' ) {
           call.state = 'running'
 

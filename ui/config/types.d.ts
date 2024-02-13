@@ -10,6 +10,7 @@ declare global {
   }
 
   interface Gpt {
+    name: string
     entryToolId: string
     toolSet: Record<string, Tool>
   }
@@ -35,6 +36,7 @@ declare global {
     arguments: ArgSchema
     instructions: string
     tools: string[]
+    localTools: Record<string,string>
     toolMapping: Record<string,string>
     modelName: string
     source: {
@@ -64,6 +66,7 @@ declare global {
     chatRequest?: JsonDict
     input?: Args
     output?: string
+    showSystemMessages?: boolean
   }
 
   interface BaseFrame {
@@ -145,7 +148,7 @@ declare global {
   }
 
   interface ChatToolMessage {
-    role: "system"|"assistant"|"user"
+    role: "system"|"assistant"|"user"|"tool"
     content: string | (ChatToolCall|ChatText)[]
   }
 

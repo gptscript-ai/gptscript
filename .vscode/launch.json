@@ -5,7 +5,17 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch file",
+      "name": "Launch UI",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/ui/node_modules/.bin/nuxt",
+      "args": ["dev"],
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "name": "Launch Server",
       "type": "go",
       "request": "launch",
       "mode": "debug",

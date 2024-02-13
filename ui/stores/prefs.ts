@@ -51,7 +51,7 @@ export const usePrefs = defineStore('prefs', {
 
     mapCall(id: string) {
       if ( !this.callMap[id] ) {
-        const k = 'c_' + this.nextCall++
+        const k = 'call_' + this.nextCall++
         this.callMap[id] = k
       }
 

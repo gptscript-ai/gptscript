@@ -25,20 +25,20 @@ const { run, /*call,*/ msg, referredTo, depth=0 } = defineProps<Props>()
       v-else-if="'err' in msg"
       icon="i-heroicons-exclamation-triangle"
       color="red"
-      class="my-5"
+      class="my-2"
       title="Error"
       variant="solid"
       :description="msg.err"
     />
     <template v-else>
-      <UCard v-if="typeof msg.content === 'string'" class="mb-5">
-        <b>{{ucFirst(msg.role)}}:</b>
-        {{msg.content}}
+      <UCard v-if="typeof msg.content === 'string'" class="mt-2">
+        <b>{{ucFirst(msg.role)}}:&nbsp;</b>
+        <span class="whitespace-pre-wrap">{{`${msg.content}`.trim()}}</span>
       </UCard>
       <template v-else>
         <UCard v-for="(c, idx) in msg.content" :key="idx">
           <template v-if="'text' in c">
-            <b>{{ucFirst(msg.role)}}:</b>
+            <b>{{ucFirst(msg.role)}}:&nbsp;</b>
             {{c.text}}
           </template>
           <template v-else>
