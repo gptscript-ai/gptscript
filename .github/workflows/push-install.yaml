@@ -1,0 +1,26 @@
+name: push-install
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/install.sh"
+
+jobs:
+  push-install:
+    name: push-install
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      - name: Copy files to S3
+        env:
+          AWS_ENDPOINT_URL: ${{ secrets.R2_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          ls -la
+          aws s3 cp scripts/install.sh s3://${{ secrets.R2_BUCKET }}/install.sh
