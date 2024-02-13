@@ -31,18 +31,21 @@
   const args = ref<Args>({})
   const stringArg = ref('')
 
+  const entryTool = computed(() => {
+    return gpt.toolSet[gpt.entryToolId]
+  })
+
   const tool = computed(() => {
     return gpt.toolSet[toolNameToId(toolName.value)]
   })
 
   const toolOptions = computed((): SelectOption[] => {
-    const toolset = gpt.toolSet || []
     const out: SelectOption[] = []
 
-    for ( const t of Object.values(toolset) ) {
+    for ( const k in entryTool.value?.localTools || {} ) {
       out.push({
-        label: t.name || '<Default>',
-        value: t.name || ''
+        label: k || '<Default>',
+        value: k
       })
     }
 
