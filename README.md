@@ -31,18 +31,34 @@ OUTPUT:
 The artist with the most number of albums in the database is Iron Maiden, with a total
 of 21 albums.
 ```
-
 ## Quick Start
 
-1. Install with brew (or from [releases](https://github.com/gptscript-ai/gptscript/releases/latest))
+### 1. Install the latest release
+
+#### Homebrew (macOS and Linux)
+
 ```shell
 brew install gptscript-ai/tap/gptscript
 ```
-2. Get an API key from [OpenAI](https://platform.openai.com/api-keys).
+
+#### Install Script (macOS and Linux):
+
+```shell
+curl https://get.gptscript.ai/install.sh | sh
+```
+
+#### Manually
+
+Download and install the archive for your platform and architecture from the [release page](https://github.com/gptscript-ai/gptscript/releases).
+
+### 2. Get an API key from [OpenAI](https://platform.openai.com/api-keys).
+
 ```shell
 export OPENAI_API_KEY="your-api-key"
 ```
-3. Run Hello World:
+
+### 3. Run Hello World
+
 ```shell
 gptscript https://gptscript.ai/echo.gpt --input "Hello, World!"
 ```
