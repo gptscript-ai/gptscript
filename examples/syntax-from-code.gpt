@@ -1,0 +1,5 @@
+tools: sys.read
+
+
+The file pkg/parser/parser.go defines a parser that reads GPT files. Analyze the go code and 
+describe the file format that is parsed by that code.  Use both an english description and BNF syntax

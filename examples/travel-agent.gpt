@@ -1,4 +1,10 @@
+tools: travelagent
+Plan a vacation in France starting on March 1 for two weeks
+
+---
+name: travelagent
 tools: search, sys.write
+description: Plans a vacation
 arg: destination: Destination to plan the vacation for
 arg: start: Date to start the vacation on
 arg: end: Date to end the vacation on

@@ -1,7 +1,7 @@
 tools: myfunction
 What's the myfunction of 3
 
----
+----
 name: myfunction
 tools: sub, mul
 description: A function taking an integer as argument and returns an integer

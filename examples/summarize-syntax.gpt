@@ -1,9 +1,0 @@
-tools: sys.find, sys.read, sys.exec
-
-Write a README.md for this github repo that describes this project, it's usage, and a description of the
-GPT file syntax. 
-
-Example GPT files can be found by looking for all *.gpt files in the current directory. Analyze
-the contents of those files to discover the syntax and then describe how the syntax works.
-
-Also document the help of the gptscript command which can be obtained from running "gptscript --help".

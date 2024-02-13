@@ -16,7 +16,7 @@ description: starts a MongoDB database
 
 #!/usr/bin/env bash
 
-docker run -d -p 27017:27017 --name mongodb mongo:latest
+docker run --rm -d -p 27017:27017 --name mongodb mongo:latest
 
 ---
 name: mongo_command

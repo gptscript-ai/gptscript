@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -55,14 +56,15 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 	}
 
 	output := &bytes.Buffer{}
+	all := &bytes.Buffer{}
 	cmd.Stdin = strings.NewReader(input)
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = output
+	cmd.Stderr = io.MultiWriter(all, os.Stderr)
+	cmd.Stdout = io.MultiWriter(all, output)
 
 	if err := cmd.Run(); err != nil {
 		_, _ = os.Stderr.Write(output.Bytes())
 		log.Errorf("failed to run tool [%s] cmd %v: %v", tool.Parameters.Name, cmd.Args, err)
-		return "", err
+		return "", fmt.Errorf("ERROR: %s: %w", all, err)
 	}
 
 	return output.String(), nil
@@ -130,7 +132,7 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, instructions
 
 	var (
 		cmdArgs = args[1:]
-		stop    func()
+		stop    = func() {}
 	)
 
 	if strings.TrimSpace(rest) != "" {

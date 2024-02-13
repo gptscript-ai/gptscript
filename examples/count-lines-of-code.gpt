@@ -1,0 +1,22 @@
+tools: sys.find, count, add
+
+Find all *.go files and count the lines of code in each file, add the result and print it
+
+---
+name: count
+description: Count the lines of code
+args: file: The file to read and count
+
+#!wc -l ${file}
+
+---
+name: add
+description: Sum a bunch of numbers
+args: nums: A comma seperated list of numbers
+
+#!python
+
+import os
+import json
+
+print(sum(json.loads("[" + os.environ.get("nums") + "]")))

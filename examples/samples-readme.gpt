@@ -1,0 +1,14 @@
+tools: sys.find, sys.read, sys.write, summary
+
+Generate a readme at examples/README.md that gives a consolidated summary of each sample *.gpt file in examples/
+Each entry should be a include a link to the referenced file.
+
+---
+name: summary
+description: Summarize a gpt file
+args: file: filename to summarize
+tools: sys.read
+temperature: 0.7
+
+Read ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.
+Briefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.
