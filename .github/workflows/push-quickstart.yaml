@@ -1,14 +1,14 @@
-name: push-install
+name: push-quickstart
 on:
   push:
     branches:
       - main
     paths:
       - "scripts/install.sh"
-
+      - "examples/echo.gpt"
 jobs:
-  push-install:
-    name: push-install
+  push-quickstart:
+    name: push-quickstart
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -24,3 +24,4 @@ jobs:
         run: |
           ls -la
           aws s3 cp scripts/install.sh s3://${{ secrets.R2_BUCKET }}/install.sh
+          aws s3 cp examples/echo.gpt s3://${{ secrets.R2_BUCKET }}/echo.gpt
