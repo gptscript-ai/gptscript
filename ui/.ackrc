@@ -10,5 +10,4 @@
 --ignore-dir=tmp
 --ignore-dir=vendor
 --ignore-file=ext:svg
---ignore-file=is:selection.json
---ignore-file=is:yarn.lock
+--ignore-file=is:package-lock.json
