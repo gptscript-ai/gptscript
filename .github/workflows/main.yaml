@@ -11,9 +11,10 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
-  release-snapshot:
+  release-main:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
@@ -24,7 +25,20 @@ jobs:
         uses: actions/setup-go@v4
         with:
           cache: false
-          go-version: "1.21"
+          go-version: "1.22"
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          buildkitd-flags: --debug
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         with:
@@ -34,3 +48,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_PROJECT_TOKEN: ${{ secrets.GH_PROJECT_TOKEN }}
+      - name: Push Docker Images
+        run: |
+          VERSION=v$(cat releases/metadata.json | jq -r .version)
+          IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep "$VERSION")
+          for i in ${IMAGES}; do
+            docker push $i
+          done
+          docker manifest create ghcr.io/gptscript-ai/gptscript:main ${IMAGES}
+          docker manifest push ghcr.io/gptscript-ai/gptscript:main
+          docker manifest create ghcr.io/gptscript-ai/gptscript:${VERSION} ${IMAGES}
+          docker manifest push ghcr.io/gptscript-ai/gptscript:${VERSION}
