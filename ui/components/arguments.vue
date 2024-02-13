@@ -6,7 +6,7 @@ interface Props {
 
 const { schema, modelValue: initialState } = defineProps<Props>()
 const form = ref()
-const state = reactive(clone(initialState || {}))
+const state = reactive<any>(clone(initialState || {}))
 
 if ( schema ) {
   for ( const k in schema.properties ) {
@@ -70,7 +70,7 @@ watchEffect(() => {
         </UFormGroup>
       </template>
       <template v-else>
-          <UTextarea autoresize :rows="1" :value="state[k]" @update:modelValue="(v) => state[k] = v" />
+          <UTextarea autoresize :rows="1" :value="state" @update:modelValue="(v) => state = v" />
       </template>
     </UForm>
   </div>

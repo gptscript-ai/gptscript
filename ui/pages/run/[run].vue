@@ -16,6 +16,8 @@
 
   const run = (await useRuns().find(id))!
 
+  window.run = run
+
   const callMap = reactive<Record<string, Call>>({})
   const referredTo = reactive<MapBool>({})
 
@@ -65,6 +67,36 @@
       prefs.expandAll(Object.keys(callMap))
     }
   }
+
+  function edit() {
+    const p = run.program!
+
+    if (!p?.name || !p?.toolSet ) {
+      return
+    }
+
+    const gpt = p.name
+    const tools = p.toolSet[p.entryToolId].localTools
+    let tool = ''
+    let input = run.calls?.[0]?.input
+
+    for ( const k in tools ) {
+      if ( tools[k] === p.entryToolId ) {
+        tool = k
+      }
+    }
+
+    navigateTo({
+      name: 'gpt-gpt',
+      params: {
+        gpt,
+      },
+      query: {
+        tool,
+        input,
+      },
+    })
+  }
 </script>
 
 <template>
@@ -83,8 +115,10 @@
           @click="toggleAll()"
         />
 
-        <UBadge :color="colorForState(run.state)" size="lg" class="align-top ml-5">
-          <i :class="iconForState(run.state)"/> {{ucFirst(run.state)}}
+        <UButton size="sm" icon="i-heroicons-pencil" label="Edit" @click="edit" class="ml-2"/>
+
+        <UBadge :color="colorForState(run.state)" size="lg" class="align-top ml-2" variant="subtle">
+          <i :class="iconForState(run.state)"/>&nbsp;{{ucFirst(run.state)}}
         </UBadge>
       </div>
     </div>
@@ -93,7 +127,7 @@
       v-if="run?.err"
       icon="i-heroicons-exclamation-triangle"
       color="red"
-      class="my-5"
+      class="my-2"
       title="Error"
       variant="solid"
       :description="run.err"

@@ -3,24 +3,29 @@
   const { metaSymbol } = useShortcuts()
 
   const TOOL = 'tool'
+  const INPUT = 'input'
 
   const route = useRoute()
   const argsForm = ref()
   const prefs = usePrefs()
 
-  let fileName = route.params.gpt.join('/')
+  let fileName = isArray(route.params.gpt) ? route.params.gpt.join('/') : route.params.gpt.replace(/%3f/ig,'/')
   const gpt = await useGpts().find(fileName)
 
-  function toolIdToName(id: string) {
-    return gpt.toolSet?.[id]?.name || ''
-  }
+  const entryTool = computed(() => {
+    return gpt.toolSet[gpt.entryToolId]
+  })
 
-  function toolNameToId(name?: string) {
-    if ( !name ) {
-      return gpt.entryToolId || ''
+  function toolIdToName(id: string) {
+    const locals = entryTool.value.localTools
+
+    for ( const name in locals ) {
+      if ( locals[name] === id ) {
+        return name
+      }
     }
 
-    return Object.values(gpt.toolSet||{}).find(x => x.name === name)?.id || ''
+    return ''
   }
 
   const toolName = ref(route.query[TOOL] || toolIdToName(gpt.entryToolId) || '')
@@ -29,15 +34,18 @@
     navigateTo({query: {[TOOL]: neu || undefined }})
   })
 
+  let initialArg = fromArray(route.query[INPUT]) || ''
   const args = ref<Args>({})
-  const stringArg = ref('')
-
-  const entryTool = computed(() => {
-    return gpt.toolSet[gpt.entryToolId]
-  })
+  const stringArg = ref(initialArg)
+  try {
+    const parsed = JSON.parse(initialArg)
+    args.value = parsed
+  } catch (e) {
+  }
 
   const tool = computed(() => {
-    return gpt.toolSet[toolNameToId(toolName.value)]
+    const id = entryTool.value.localTools[toolName.value] || ''
+    return gpt.toolSet[id]
   })
 
   const toolOptions = computed((): SelectOption[] => {
@@ -79,14 +87,14 @@
 
 <template>
   <div v-if="tool">
-    <div class="clearfix">
-      <div class="float-left">
+    <div class="flex">
+      <div class="flex-1">
         <h1 class="text-xl py-1">
           <i class="i-heroicons-wrench-screwdriver mr-2 align-middle"/>{{fileName}}
           <span v-if="toolName">: {{toolName}}</span>
         </h1>
       </div>
-      <div class="float-right mt-1">
+      <div class="flex-initial text-right">
         <USelect
           v-if="toolOptions.length > 1"
           v-model="toolName" :options="toolOptions" value-attribute="value"
