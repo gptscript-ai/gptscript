@@ -4,10 +4,15 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/gptscript-ai/gptscript/pkg/types"
+)
+
+var (
+	sepRegex = regexp.MustCompile(`^\s*---+\s*$`)
 )
 
 func normalize(key string) string {
@@ -40,8 +45,8 @@ func csv(line string) (result []string) {
 }
 
 func addArg(line string, tool *types.Tool) error {
-	if tool.Arguments == nil {
-		tool.Arguments = &types.JSONSchema{
+	if tool.Parameters.Arguments == nil {
+		tool.Parameters.Arguments = &types.JSONSchema{
 			Property: types.Property{
 				Type: "object",
 			},
@@ -54,7 +59,7 @@ func addArg(line string, tool *types.Tool) error {
 		return fmt.Errorf("invalid arg format: %s", line)
 	}
 
-	tool.Arguments.Properties[key] = types.Property{
+	tool.Parameters.Arguments.Properties[key] = types.Property{
 		Description: value,
 		Type:        "string",
 	}
@@ -72,21 +77,21 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 	case "tool":
 		fallthrough
 	case "name":
-		tool.Name = strings.ToLower(value)
+		tool.Parameters.Name = strings.ToLower(value)
 	case "model":
 		fallthrough
 	case "modelname":
-		tool.ModelName = value
+		tool.Parameters.ModelName = value
 	case "description":
-		tool.Description = value
+		tool.Parameters.Description = value
 	case "internalprompt":
 		v, err := toBool(value)
 		if err != nil {
 			return false, err
 		}
-		tool.InternalPrompt = &v
+		tool.Parameters.InternalPrompt = &v
 	case "tools":
-		tool.Tools = append(tool.Tools, csv(strings.ToLower(value))...)
+		tool.Parameters.Tools = append(tool.Parameters.Tools, csv(strings.ToLower(value))...)
 	case "args":
 		fallthrough
 	case "arg":
@@ -94,14 +99,14 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 			return false, err
 		}
 	case "vision":
-		tool.Vision, err = toBool(value)
+		tool.Parameters.Vision, err = toBool(value)
 		if err != nil {
 			return false, err
 		}
 	case "maxtoken":
 		fallthrough
 	case "maxtokens":
-		tool.MaxTokens, err = strconv.Atoi(value)
+		tool.Parameters.MaxTokens, err = strconv.Atoi(value)
 		if err != nil {
 			return false, err
 		}
@@ -110,14 +115,14 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		if err != nil {
 			return false, err
 		}
-		tool.Cache = &b
+		tool.Parameters.Cache = &b
 	case "jsonresponse":
-		tool.JSONResponse, err = toBool(value)
+		tool.Parameters.JSONResponse, err = toBool(value)
 		if err != nil {
 			return false, err
 		}
 	case "temperature":
-		tool.Temperature, err = toFloatPtr(value)
+		tool.Parameters.Temperature, err = toFloatPtr(value)
 		if err != nil {
 			return false, err
 		}
@@ -161,7 +166,7 @@ type context struct {
 
 func (c *context) finish(tools *[]types.Tool) {
 	c.tool.Instructions = strings.TrimSpace(strings.Join(c.instructions, ""))
-	if c.tool.Instructions != "" || c.tool.Name != "" {
+	if c.tool.Instructions != "" || c.tool.Parameters.Name != "" {
 		*tools = append(*tools, c.tool)
 	}
 	*c = context{}
@@ -199,7 +204,7 @@ func Parse(input io.Reader) ([]types.Tool, error) {
 			line = embeddedLine
 		}
 
-		if line == "---\n" {
+		if sepRegex.MatchString(line) {
 			context.finish(&tools)
 			continue
 		}

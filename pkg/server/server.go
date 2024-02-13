@@ -224,6 +224,7 @@ func (s *Server) Connect(session *melody.Session) {
 				log.Errorf("error marshaling event: %v", err)
 				return
 			}
+			log.Fields("event").Debugf("send")
 			err = session.Write(data)
 			if err != nil {
 				log.Errorf("error writing event: %v", err)

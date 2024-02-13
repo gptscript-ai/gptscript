@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/fs"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -20,79 +21,101 @@ import (
 
 var tools = map[string]types.Tool{
 	"sys.read": {
-		Description: "Reads the contents of a file",
-		Arguments: types.ObjectSchema(
-			"filename", "The name of the file to read"),
+		Parameters: types.Parameters{
+			Description: "Reads the contents of a file",
+			Arguments: types.ObjectSchema(
+				"filename", "The name of the file to read"),
+		},
 		BuiltinFunc: SysRead,
 	},
 	"sys.write": {
-		Description: "Write the contents to a file",
-		Arguments: types.ObjectSchema(
-			"filename", "The name of the file to write to",
-			"content", "The content to write"),
+		Parameters: types.Parameters{
+			Description: "Write the contents to a file",
+			Arguments: types.ObjectSchema(
+				"filename", "The name of the file to write to",
+				"content", "The content to write"),
+		},
 		BuiltinFunc: SysWrite,
 	},
 	"sys.http.get": {
-		Description: "Download the contents of a http or https URL",
-		Arguments: types.ObjectSchema(
-			"url", "The URL to download"),
+		Parameters: types.Parameters{
+			Description: "Download the contents of a http or https URL",
+			Arguments: types.ObjectSchema(
+				"url", "The URL to download"),
+		},
 		BuiltinFunc: SysHTTPGet,
 	},
 	"sys.http.html2text": {
-		Description: "Download the contents of a http or https URL returning the content as rendered text converted from HTML",
-		Arguments: types.ObjectSchema(
-			"url", "The URL to download"),
+		Parameters: types.Parameters{
+			Description: "Download the contents of a http or https URL returning the content as rendered text converted from HTML",
+			Arguments: types.ObjectSchema(
+				"url", "The URL to download"),
+		},
 		BuiltinFunc: SysHTTPHtml2Text,
 	},
 	"sys.abort": {
-		Description: "Aborts execution",
-		Arguments: types.ObjectSchema(
-			"message", "The description of the error or unexpected result that caused abort to be called",
-		),
+		Parameters: types.Parameters{
+			Description: "Aborts execution",
+			Arguments: types.ObjectSchema(
+				"message", "The description of the error or unexpected result that caused abort to be called",
+			),
+		},
 		BuiltinFunc: SysAbort,
 	},
 	"sys.http.post": {
-		Description: "Write contents to a http or https URL using the POST method",
-		Arguments: types.ObjectSchema(
-			"url", "The URL to POST to",
-			"content", "The content to POST",
-			"contentType", "The \"content type\" of the content such as application/json or text/plain"),
+		Parameters: types.Parameters{
+			Description: "Write contents to a http or https URL using the POST method",
+			Arguments: types.ObjectSchema(
+				"url", "The URL to POST to",
+				"content", "The content to POST",
+				"contentType", "The \"content type\" of the content such as application/json or text/plain"),
+		},
 		BuiltinFunc: SysHTTPPost,
 	},
 	"sys.find": {
-		Description: "Traverse a directory looking for files that match a pattern in the style of the unix find command",
-		Arguments: types.ObjectSchema(
-			"pattern", "The file pattern to look for. The pattern is a traditional unix glob format with * matching any character and ? matching a single character",
-			"directory", "The directory to search in. The current directory \".\" will be used as the default if no argument is passed",
-		),
+		Parameters: types.Parameters{
+			Description: "Traverse a directory looking for files that match a pattern in the style of the unix find command",
+			Arguments: types.ObjectSchema(
+				"pattern", "The file pattern to look for. The pattern is a traditional unix glob format with * matching any character and ? matching a single character",
+				"directory", "The directory to search in. The current directory \".\" will be used as the default if no argument is passed",
+			),
+		},
 		BuiltinFunc: SysFind,
 	},
 	"sys.exec": {
-		Description: "Execute a command and get the output of the command",
-		Arguments: types.ObjectSchema(
-			"command", "The command to run including all applicable arguments",
-			"directory", "The directory to use as the current working directory of the command. The current directory \".\" will be used if no argument is passed",
-		),
+		Parameters: types.Parameters{
+			Description: "Execute a command and get the output of the command",
+			Arguments: types.ObjectSchema(
+				"command", "The command to run including all applicable arguments",
+				"directory", "The directory to use as the current working directory of the command. The current directory \".\" will be used if no argument is passed",
+			),
+		},
 		BuiltinFunc: SysExec,
 	},
 	"sys.getenv": {
-		Description: "Gets the value of an OS environment variable",
-		Arguments: types.ObjectSchema(
-			"name", "The environment variable name to lookup"),
+		Parameters: types.Parameters{
+			Description: "Gets the value of an OS environment variable",
+			Arguments: types.ObjectSchema(
+				"name", "The environment variable name to lookup"),
+		},
 		BuiltinFunc: SysGetenv,
 	},
 	"sys.download": {
-		Description: "Downloads a URL, saving the contents to disk at a given location",
-		Arguments: types.ObjectSchema(
-			"url", "The URL to download, either http or https.",
-			"location", "(optional) The on disk location to store the file. If no location is specified a temp location will be used. If the target file already exists it will fail unless override is set to true.",
-			"override", "If true and a file at the location exists, the file will be overwritten, otherwise fail. Default is false"),
+		Parameters: types.Parameters{
+			Description: "Downloads a URL, saving the contents to disk at a given location",
+			Arguments: types.ObjectSchema(
+				"url", "The URL to download, either http or https.",
+				"location", "(optional) The on disk location to store the file. If no location is specified a temp location will be used. If the target file already exists it will fail unless override is set to true.",
+				"override", "If true and a file at the location exists, the file will be overwritten, otherwise fail. Default is false"),
+		},
 		BuiltinFunc: SysDownload,
 	},
 	"sys.remove": {
-		Description: "Removes the specified files",
-		Arguments: types.ObjectSchema(
-			"location", "The file to remove"),
+		Parameters: types.Parameters{
+			Description: "Removes the specified files",
+			Arguments: types.ObjectSchema(
+				"location", "The file to remove"),
+		},
 		BuiltinFunc: SysRemove,
 	},
 }
@@ -125,7 +148,7 @@ func ListTools() (result []types.Tool) {
 func Builtin(name string) (types.Tool, bool) {
 	name, dontFail := strings.CutSuffix(name, "?")
 	t, ok := tools[name]
-	t.Name = name
+	t.Parameters.Name = name
 	t.ID = name
 	t.Instructions = "#!" + name
 	if ok && dontFail {
@@ -156,7 +179,7 @@ func SysFind(ctx context.Context, env []string, input string) (string, error) {
 	}
 
 	log.Debugf("Finding files %s in %s", params.Pattern, params.Directory)
-	err := fs.WalkDir(os.DirFS(params.Directory), params.Directory, func(pathname string, d fs.DirEntry, err error) error {
+	err := fs.WalkDir(os.DirFS(params.Directory), ".", func(pathname string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -166,7 +189,7 @@ func SysFind(ctx context.Context, env []string, input string) (string, error) {
 		if ok, err := filepath.Match(params.Pattern, d.Name()); err != nil {
 			return err
 		} else if ok {
-			result = append(result, filepath.Join(pathname))
+			result = append(result, filepath.Join(params.Directory, pathname))
 		}
 		return nil
 	})
@@ -235,11 +258,25 @@ func SysWrite(ctx context.Context, env []string, input string) (string, error) {
 	return "", os.WriteFile(params.Filename, data, 0644)
 }
 
-func SysHTTPGet(ctx context.Context, env []string, input string) (string, error) {
+func fixQueries(u string) (string, error) {
+	url, err := url.Parse(u)
+	if err != nil {
+		return "", err
+	}
+	url.RawQuery = url.Query().Encode()
+	return url.String(), nil
+}
+
+func SysHTTPGet(ctx context.Context, env []string, input string) (_ string, err error) {
 	var params struct {
 		URL string `json:"url,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
+		return "", err
+	}
+
+	params.URL, err = fixQueries(params.URL)
+	if err != nil {
 		return "", err
 	}
 
@@ -271,13 +308,18 @@ func SysHTTPHtml2Text(ctx context.Context, env []string, input string) (string, 
 	})
 }
 
-func SysHTTPPost(ctx context.Context, env []string, input string) (string, error) {
+func SysHTTPPost(ctx context.Context, env []string, input string) (_ string, err error) {
 	var params struct {
 		URL         string `json:"url,omitempty"`
 		Content     string `json:"content,omitempty"`
 		ContentType string `json:"contentType,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
+		return "", err
+	}
+
+	params.URL, err = fixQueries(params.URL)
+	if err != nil {
 		return "", err
 	}
 
@@ -335,13 +377,18 @@ func SysRemove(ctx context.Context, env []string, input string) (string, error) 
 	return fmt.Sprintf("Removed file: %s", params.Location), os.Remove(params.Location)
 }
 
-func SysDownload(ctx context.Context, env []string, input string) (string, error) {
+func SysDownload(ctx context.Context, env []string, input string) (_ string, err error) {
 	var params struct {
 		URL      string `json:"url,omitempty"`
 		Location string `json:"location,omitempty"`
 		Override bool   `json:"override,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
+		return "", err
+	}
+
+	params.URL, err = fixQueries(params.URL)
+	if err != nil {
 		return "", err
 	}
 

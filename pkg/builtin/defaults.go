@@ -11,11 +11,11 @@ var (
 )
 
 func SetDefaults(tool types.Tool) types.Tool {
-	if tool.ModelName == "" {
-		if tool.Vision {
-			tool.ModelName = DefaultVisionModel
+	if tool.Parameters.ModelName == "" {
+		if tool.Parameters.Vision {
+			tool.Parameters.ModelName = DefaultVisionModel
 		} else {
-			tool.ModelName = DefaultModel
+			tool.Parameters.ModelName = DefaultModel
 		}
 	}
 	return tool

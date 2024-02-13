@@ -172,27 +172,27 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 	}
 
 	completion := types.CompletionRequest{
-		Model:        tool.ModelName,
-		Vision:       tool.Vision,
-		MaxToken:     tool.MaxTokens,
-		JSONResponse: tool.JSONResponse,
-		Cache:        tool.Cache,
-		Temperature:  tool.Temperature,
+		Model:        tool.Parameters.ModelName,
+		Vision:       tool.Parameters.Vision,
+		MaxToken:     tool.Parameters.MaxTokens,
+		JSONResponse: tool.Parameters.JSONResponse,
+		Cache:        tool.Parameters.Cache,
+		Temperature:  tool.Parameters.Temperature,
 	}
 
-	if InternalSystemPrompt != "" && (tool.InternalPrompt == nil || *tool.InternalPrompt) {
+	if InternalSystemPrompt != "" && (tool.Parameters.InternalPrompt == nil || *tool.Parameters.InternalPrompt) {
 		completion.Messages = append(completion.Messages, types.CompletionMessage{
 			Role:    types.CompletionMessageRoleTypeSystem,
 			Content: types.Text(InternalSystemPrompt),
 		})
 	}
 
-	for _, subToolName := range tool.Tools {
+	for _, subToolName := range tool.Parameters.Tools {
 		subTool, err := ctx.getTool(subToolName)
 		if err != nil {
 			return nil, err
 		}
-		args := subTool.Arguments
+		args := subTool.Parameters.Arguments
 		if args == nil && !subTool.IsCommand() {
 			args = &DefaultToolSchema
 		}
@@ -200,7 +200,7 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 			Type: types.CompletionToolTypeFunction,
 			Function: types.CompletionFunctionDefinition{
 				Name:        subToolName,
-				Description: subTool.Description,
+				Description: subTool.Parameters.Description,
 				Parameters:  args,
 			},
 		})

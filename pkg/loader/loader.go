@@ -209,21 +209,21 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 			mainTool = tool
 		}
 
-		if i != 0 && tool.Name == "" {
+		if i != 0 && tool.Parameters.Name == "" {
 			return types.Tool{}, parser.NewErrLine(tool.Source.File, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have no name"))
 		}
 
-		if targetToolName != "" && tool.Name == targetToolName {
+		if targetToolName != "" && tool.Parameters.Name == targetToolName {
 			mainTool = tool
 		}
 
-		if existing, ok := localTools[tool.Name]; ok {
+		if existing, ok := localTools[tool.Parameters.Name]; ok {
 			return types.Tool{}, parser.NewErrLine(tool.Source.File, tool.Source.LineNo,
-				fmt.Errorf("duplicate tool name [%s] in %s found at lines %d and %d", tool.Name, tool.Source.File,
+				fmt.Errorf("duplicate tool name [%s] in %s found at lines %d and %d", tool.Parameters.Name, tool.Source.File,
 					tool.Source.LineNo, existing.Source.LineNo))
 		}
 
-		localTools[tool.Name] = tool
+		localTools[tool.Parameters.Name] = tool
 	}
 
 	return link(ctx, prg, base, mainTool, localTools)
@@ -286,7 +286,7 @@ func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool
 	// The below is done in two loops so that local names stay as the tool names
 	// and don't get mangled by external references
 
-	for _, targetToolName := range tool.Tools {
+	for _, targetToolName := range tool.Parameters.Tools {
 		localTool, ok := localTools[targetToolName]
 		if !ok {
 			continue
@@ -307,7 +307,7 @@ func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool
 		toolNames[targetToolName] = struct{}{}
 	}
 
-	for i, targetToolName := range tool.Tools {
+	for i, targetToolName := range tool.Parameters.Tools {
 		_, ok := localTools[targetToolName]
 		if ok {
 			continue
@@ -329,11 +329,11 @@ func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool
 
 		newToolName := pickToolName(toolName, toolNames)
 		tool.ToolMapping[newToolName] = resolvedTool.ID
-		tool.Tools[i] = newToolName
+		tool.Parameters.Tools[i] = newToolName
 	}
 
 	for _, localTool := range localTools {
-		tool.LocalTools[localTool.Name] = localTool.ID
+		tool.LocalTools[localTool.Parameters.Name] = localTool.ID
 	}
 
 	tool = builtin.SetDefaults(tool)

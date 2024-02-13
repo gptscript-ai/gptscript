@@ -61,7 +61,7 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 
 	if err := cmd.Run(); err != nil {
 		_, _ = os.Stderr.Write(output.Bytes())
-		log.Errorf("failed to run tool [%s] cmd %v: %v", tool.Name, cmd.Args, err)
+		log.Errorf("failed to run tool [%s] cmd %v: %v", tool.Parameters.Name, cmd.Args, err)
 		return "", err
 	}
 

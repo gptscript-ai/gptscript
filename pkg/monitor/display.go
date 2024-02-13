@@ -339,7 +339,7 @@ func (c callName) String() string {
 
 	for {
 		tool := c.prg.ToolSet[currentCall.ToolID]
-		name := tool.Name
+		name := tool.Parameters.Name
 		if name == "" {
 			name = tool.Source.File
 		}

@@ -23,67 +23,73 @@ type Program struct {
 
 type BuiltinFunc func(ctx context.Context, env []string, input string) (string, error)
 
+type Parameters struct {
+	Name           string      `json:"name,omitempty"`
+	Description    string      `json:"description,omitempty"`
+	Vision         bool        `json:"vision,omitempty"`
+	MaxTokens      int         `json:"maxTokens,omitempty"`
+	ModelName      string      `json:"modelName,omitempty"`
+	JSONResponse   bool        `json:"jsonResponse,omitempty"`
+	Temperature    *float32    `json:"temperature,omitempty"`
+	Cache          *bool       `json:"cache,omitempty"`
+	InternalPrompt *bool       `json:"internalPrompt"`
+	Arguments      *JSONSchema `json:"arguments,omitempty"`
+	Tools          []string    `json:"tools,omitempty"`
+}
+
 type Tool struct {
-	ID             string            `json:"id,omitempty"`
-	Name           string            `json:"name,omitempty"`
-	Description    string            `json:"description,omitempty"`
-	InternalPrompt *bool             `json:"internalPrompt"`
-	Arguments      *JSONSchema       `json:"arguments,omitempty"`
-	Instructions   string            `json:"instructions,omitempty"`
-	Tools          []string          `json:"tools,omitempty"`
-	ToolMapping    map[string]string `json:"toolMapping,omitempty"`
-	LocalTools     map[string]string `json:"localTools,omitempty"`
-	BuiltinFunc    BuiltinFunc       `json:"-"`
+	Parameters   `json:",inline"`
+	Instructions string `json:"instructions,omitempty"`
 
-	Vision       bool     `json:"vision,omitempty"`
-	MaxTokens    int      `json:"maxTokens,omitempty"`
-	ModelName    string   `json:"modelName,omitempty"`
-	JSONResponse bool     `json:"jsonResponse,omitempty"`
-	Temperature  *float32 `json:"temperature,omitempty"`
-	Cache        *bool    `json:"cache,omitempty"`
-
-	Source ToolSource `json:"source,omitempty"`
+	ID          string            `json:"id,omitempty"`
+	ToolMapping map[string]string `json:"toolMapping,omitempty"`
+	LocalTools  map[string]string `json:"localTools,omitempty"`
+	BuiltinFunc BuiltinFunc       `json:"-"`
+	Source      ToolSource        `json:"source,omitempty"`
 }
 
 func (t Tool) String() string {
 	buf := &strings.Builder{}
-	if t.Name != "" {
-		_, _ = fmt.Fprintf(buf, "Name: %s\n", t.Name)
+	if t.Parameters.Name != "" {
+		_, _ = fmt.Fprintf(buf, "Name: %s\n", t.Parameters.Name)
 	}
-	if t.Description != "" {
-		_, _ = fmt.Fprintf(buf, "Description: %s\n", t.Name)
+	if t.Parameters.Description != "" {
+		_, _ = fmt.Fprintf(buf, "Description: %s\n", t.Parameters.Name)
 	}
-	if len(t.Tools) != 0 {
-		_, _ = fmt.Fprintf(buf, "Tools: %s\n", strings.Join(t.Tools, ", "))
+	if len(t.Parameters.Tools) != 0 {
+		_, _ = fmt.Fprintf(buf, "Tools: %s\n", strings.Join(t.Parameters.Tools, ", "))
 	}
-	if t.Vision {
+	if t.Parameters.Vision {
 		_, _ = fmt.Fprintln(buf, "Vision: true")
 	}
-	if t.MaxTokens != 0 {
-		_, _ = fmt.Fprintf(buf, "Max Tokens: %d\n", t.MaxTokens)
+	if t.Parameters.MaxTokens != 0 {
+		_, _ = fmt.Fprintf(buf, "Max Tokens: %d\n", t.Parameters.MaxTokens)
 	}
-	if t.ModelName != "" {
-		_, _ = fmt.Fprintf(buf, "Model Name: %s\n", t.ModelName)
+	if t.Parameters.ModelName != "" {
+		_, _ = fmt.Fprintf(buf, "Model Name: %s\n", t.Parameters.ModelName)
 	}
-	if t.JSONResponse {
+	if t.Parameters.JSONResponse {
 		_, _ = fmt.Fprintln(buf, "JSON Response: true")
 	}
-	if t.Cache != nil && !*t.Cache {
+	if t.Parameters.Cache != nil && !*t.Parameters.Cache {
 		_, _ = fmt.Fprintln(buf, "Cache: false")
 	}
-	if t.Temperature != nil {
-		_, _ = fmt.Fprintf(buf, "Temperature: %f", *t.Temperature)
+	if t.Parameters.Temperature != nil {
+		_, _ = fmt.Fprintf(buf, "Temperature: %f", *t.Parameters.Temperature)
 	}
-	if t.Arguments != nil {
+	if t.Parameters.Arguments != nil {
 		var keys []string
-		for k := range t.Arguments.Properties {
+		for k := range t.Parameters.Arguments.Properties {
 			keys = append(keys, k)
 		}
 		sort.Strings(keys)
 		for _, key := range keys {
-			prop := t.Arguments.Properties[key]
+			prop := t.Parameters.Arguments.Properties[key]
 			_, _ = fmt.Fprintf(buf, "Args: %s: %s\n", key, prop.Description)
 		}
+	}
+	if t.Parameters.InternalPrompt != nil {
+		_, _ = fmt.Fprintf(buf, "Internal Prompt: %v\n", *t.Parameters.InternalPrompt)
 	}
 	if t.Instructions != "" && t.BuiltinFunc == nil {
 		_, _ = fmt.Fprintln(buf)
