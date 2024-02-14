@@ -1,4 +1,4 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from 'tailwindcss/types/config'
 import defaultTheme from 'tailwindcss/defaultTheme'
 
 

@@ -1,6 +1,6 @@
 export default defineAppConfig({
   ui: {
-    primary: 'slate',
+    primary: '#63797C',
     gray: 'cool',
 
     card: {
