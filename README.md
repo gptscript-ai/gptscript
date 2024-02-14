@@ -2,8 +2,7 @@
 
 ## Overview
 
-GPTScript is a new scripting language to automate your interaction with a Large Language Model (LLM), namely OpenAI.
-The syntax of GPTScript is largely natural language, making it very easy to learn and use.
+GPTScript is a new scripting language to automate your interaction with a Large Language Model (LLM), namely OpenAI. The ultimate goal is to create a fully natural language based programming experience. The syntax of GPTScript is largely natural language, making it very easy to learn and use.
 Natural language prompts can be mixed with traditional scripts such as bash and python or even external HTTP service
 calls. With GPTScript you can do just about anything like [plan a vacation](./examples/travel-agent.gpt),
 [edit a file](./examples/add-go-mod-dep.gpt), [run some SQL](./examples/sqlite-download.gpt), or [build a mongodb/flask app](./examples/hacker-news-headlines.gpt).
