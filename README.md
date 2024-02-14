@@ -222,6 +222,11 @@ args: input: The input
 echo "${input}"
 ```
 
+## Built in Tools
+
+There are several built in tools to do basic things like read/write files, download http content and execute commands.
+Run `gptscript --list-tools` to list all the built-in tools.
+
 ## Examples
 
 For more examples check out the [examples](examples) directory.
