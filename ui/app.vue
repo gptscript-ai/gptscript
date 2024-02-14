@@ -30,7 +30,10 @@ function toggle() {
         <UButton icon="i-heroicons-bars-3" @click="toggle"/>
       </div>
       <div class="flex-initial">
-        <img src="~/assets/logo.svg" class="dark:invert" style="height: 100%; padding: 0.25rem;"/>
+        <img src="~/assets/logo.svg" style="height: 40px; margin: 5px 0 5px 0.5rem;"/>
+      </div>
+      <div class="flex-initial">
+        <img src="~/assets/logotype.svg" class="dark:invert" style="height: 30px; margin: 12px 0 8px 5px;"/>
       </div>
 
       <div class="flex-1"/>
