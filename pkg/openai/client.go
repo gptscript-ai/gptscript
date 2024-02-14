@@ -71,7 +71,11 @@ func complete(opts ...Options) (result Options, err error) {
 	if result.APIKey == "" && key != "" {
 		result.APIKey = key
 	}
-
+	
+        if result.APIKey == "" {
+            return result, fmt.Errorf("OPENAI_API_KEY is not set. Please set the OPENAI_API_KEY environment variable")
+        }
+	
 	return result, err
 }
 
