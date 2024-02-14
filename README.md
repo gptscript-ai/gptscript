@@ -50,7 +50,7 @@ curl https://get.gptscript.ai/install.sh | sh
 
 #### Manually
 
-Download and install the archive for your platform and architecture from the [release page](https://github.com/gptscript-ai/gptscript/releases).
+Download and install the archive for your platform and architecture from the [releases page](https://github.com/gptscript-ai/gptscript/releases).
 
 ### 2. Get an API key from [OpenAI](https://platform.openai.com/api-keys).
 
@@ -62,7 +62,12 @@ export OPENAI_API_KEY="your-api-key"
 
 ```shell
 gptscript https://get.gptscript.ai/echo.gpt --input 'Hello, World!'
+
+OUTPUT:
+
+Hello, World!
 ```
+The model used by default is `gpt-4-turbo-preview` and you must have access to that model in your OpenAI account.
 
 ### 4. Extra Credit: Examples and Run Debugging UI
 
