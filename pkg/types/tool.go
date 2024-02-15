@@ -54,7 +54,7 @@ func (t Tool) String() string {
 		_, _ = fmt.Fprintf(buf, "Name: %s\n", t.Parameters.Name)
 	}
 	if t.Parameters.Description != "" {
-		_, _ = fmt.Fprintf(buf, "Description: %s\n", t.Parameters.Name)
+		_, _ = fmt.Fprintf(buf, "Description: %s\n", t.Parameters.Description)
 	}
 	if len(t.Parameters.Tools) != 0 {
 		_, _ = fmt.Fprintf(buf, "Tools: %s\n", strings.Join(t.Parameters.Tools, ", "))
