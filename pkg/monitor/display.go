@@ -141,8 +141,10 @@ func (l *livePrinter) formatContent(event runner.Event, c call) string {
 	prefix := fmt.Sprintf("         content  [%s] content | ", l.callIDMap[c.ID])
 	var lines []string
 	for _, line := range strings.Split(event.Content, "\n") {
-		if len(line) > 100 {
-			line = line[:100] + " ..."
+		if c.ParentID != "" {
+			if len(line) > 100 {
+				line = line[:100] + " ..."
+			}
 		}
 		lines = append(lines, prefix+line)
 	}
