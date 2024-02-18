@@ -1,8 +1,8 @@
 Tools: sys.find, count, summarize, compare
 
-Find the top 10 go files that have to most lines of code. Then summarize each one.
+Find the top 10 go files that have the most lines of code. Then summarize each one.
 
-Looking at the summary of all files write a short description of this program and it's function.
+Looking at the summary of all files write a short description of this program and its function.
 
 ---
 name: compare
