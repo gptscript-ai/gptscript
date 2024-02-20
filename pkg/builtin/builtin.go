@@ -118,6 +118,21 @@ var tools = map[string]types.Tool{
 		},
 		BuiltinFunc: SysRemove,
 	},
+	"sys.search.brave": {
+		Parameters: types.Parameters{
+			Description: "Searches the Internet using the Brave Search API. The search results are returned as a JSON object.",
+			Arguments: types.ObjectSchema(
+				"q", "The search query",
+				"offset", "(optional) Each query returns 20 results. Use this arg for pagination.",
+				"country", "(optional) The country to use for search results in ISO 3166-2 format. Some countries may not be supported.",
+				"search_lang", `(optional) The language to use for searching. Use a standard IETF language tag, except for the following:
+
+Chinese: must be either "zh-hans" (Simplified) or "zh-hant" (Traditional)
+Japanese: must be "jp"
+Portuguese: must be either "pt-pt" (Portugal) or "pt-br" (Brazil)`),
+		},
+		BuiltinFunc: SysSearchBrave,
+	},
 }
 
 func SysProgram() *types.Program {
