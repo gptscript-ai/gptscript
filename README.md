@@ -47,6 +47,12 @@ brew install gptscript-ai/tap/gptscript
 curl https://get.gptscript.ai/install.sh | sh
 ```
 
+### Scoop (Windows)
+
+```shell
+scoop install gptscript
+```
+
 #### Manually
 
 Download and install the archive for your platform and architecture from the [releases page](https://github.com/gptscript-ai/gptscript/releases).
