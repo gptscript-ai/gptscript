@@ -31,3 +31,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_PROJECT_TOKEN: ${{ secrets.GH_PROJECT_TOKEN }}
           GORELEASER_CURRENT_TAG: ${{ github.ref_name }}
+  winget-release:
+    needs: release-tag
+    runs-on: windows-latest
+    steps:
+      - name: Install winget-create
+        run: |
+            Invoke-WebRequest -Uri 'https://aka.ms/wingetcreate/latest' -OutFile 'wingetcreate.exe'      
+      - name: Create WinGet Package Update Pull Request
+        run: |
+         $latestRelease = Invoke-RestMethod -Uri https://api.github.com/repos/gptscript-ai/gptscript/releases/latest
+         $url = $latestRelease.assets | Where-Object { $_.name -eq ("gptscript-" + $latestRelease.tag_name + "-windows-amd64.zip") } | Select-Object -ExpandProperty browser_download_url
+         ./wingetcreate.exe update --submit --token "${{ secrets.GITHUB_TOKEN }}" --urls $url --version "${{ github.event.release.tag_name }}" gptscript-ai.gptscript
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
