@@ -37,6 +37,15 @@ var tools = map[string]types.Tool{
 		},
 		BuiltinFunc: SysWrite,
 	},
+	"sys.append": {
+		Parameters: types.Parameters{
+			Description: "Appends the contents to a file",
+			Arguments: types.ObjectSchema(
+				"filename", "The name of the file to append to",
+				"content", "The content to append"),
+		},
+		BuiltinFunc: SysAppend,
+	},
 	"sys.http.get": {
 		Parameters: types.Parameters{
 			Description: "Download the contents of a http or https URL",
@@ -256,6 +265,33 @@ func SysWrite(ctx context.Context, env []string, input string) (string, error) {
 	log.Debugf(msg)
 
 	return "", os.WriteFile(params.Filename, data, 0644)
+}
+
+func SysAppend(ctx context.Context, env []string, input string) (string, error) {
+	var params struct {
+		Filename string `json:"filename,omitempty"`
+		Content  string `json:"content,omitempty"`
+	}
+	if err := json.Unmarshal([]byte(input), &params); err != nil {
+		return "", err
+	}
+
+	f, err := os.OpenFile(params.Filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return "", err
+	}
+
+	// Attempt to append to the file and close it immediately.
+	// Write is guaranteed to return an error when n != len([]byte(params.Content))
+	n, err := f.Write([]byte(params.Content))
+	if err := errors.Join(err, f.Close()); err != nil {
+		return "", err
+	}
+
+	msg := fmt.Sprintf("Appended %d bytes to file %s", n, params.Filename)
+	log.Debugf(msg)
+
+	return "", err
 }
 
 func fixQueries(u string) (string, error) {
