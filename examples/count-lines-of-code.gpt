@@ -12,7 +12,7 @@ args: file: The file to read and count
 ---
 name: add
 description: Sum a bunch of numbers
-args: nums: A comma seperated list of numbers
+args: nums: A comma separated list of numbers
 
 #!python
 
