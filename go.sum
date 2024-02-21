@@ -1,3 +1,5 @@
+github.com/BurntSushi/locker v0.0.0-20171006230638-a6e239ea1c69 h1:+tu3HOoMXB7RXEINRVIpxJCT+KdYiI7LAEAUrOw3dIU=
+github.com/BurntSushi/locker v0.0.0-20171006230638-a6e239ea1c69/go.mod h1:L1AbZdiDllfyYH5l5OkAaZtk7VkWe89bPJFmnDBNHxg=
 github.com/acorn-io/baaah v0.0.0-20240119160309-2a58ee757bbd h1:Zbau2J6sEPl1H4gqnEx4/TI55eZncQR5cjfPOcG2lxE=
 github.com/acorn-io/baaah v0.0.0-20240119160309-2a58ee757bbd/go.mod h1:13nTO3svO8zTD3j9E5c86tCtK5YrKsK5sxca4Lwkbc0=
 github.com/acorn-io/broadcaster v0.0.0-20240105011354-bfadd4a7b45d h1:hfpNQkJ4I2b8+DbMr8m97gG67ku0uPsMzUfskVu3cHU=
