@@ -5,6 +5,7 @@ go 1.22.0
 replace github.com/sashabaranov/go-openai => github.com/gptscript-ai/go-openai v0.0.0-20240206232711-45b6e096246a
 
 require (
+	github.com/BurntSushi/locker v0.0.0-20171006230638-a6e239ea1c69
 	github.com/acorn-io/broadcaster v0.0.0-20240105011354-bfadd4a7b45d
 	github.com/acorn-io/cmd v0.0.0-20240203032901-e9e631185ddb
 	github.com/adrg/xdg v0.4.0
