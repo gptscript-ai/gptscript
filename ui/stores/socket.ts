@@ -12,7 +12,13 @@ interface SocketState {
 
 export const useSocket = defineStore('socket', {
   state: () => {
-    const url = useRuntimeConfig().public.api.replace(/^http/,'ws')
+    let url = useRuntimeConfig().public.api
+    if ( url.startsWith('/') ) {
+      url = `${window.location.origin}${url}`
+    }
+
+    url = url.replace(/^http/,'ws')
+
     const sock = useWebSocket(url, {
       immediate: false,
       autoReconnect: true,

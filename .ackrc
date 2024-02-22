@@ -7,6 +7,7 @@
 --ignore-dir=coverage
 --ignore-dir=dist
 --ignore-dir=node_modules
+--ignore-dir=static/ui
 --ignore-dir=tmp
 --ignore-dir=vendor
 --ignore-file=ext:svg

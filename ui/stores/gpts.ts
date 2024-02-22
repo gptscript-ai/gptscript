@@ -18,7 +18,7 @@ export const useGpts = defineStore('gpts', {
       }
 
       const url = useRuntimeConfig().public.api + id
-      const data = reactive<Gpt>(await $fetch(url))
+      const data = reactive<Gpt>(await $fetch(url, {baseURL: '/'}))
 
       this.list.push(data)
       this.map[id] = data
@@ -27,7 +27,7 @@ export const useGpts = defineStore('gpts', {
 
     async listAll() {
       const url = useRuntimeConfig().public.api
-      const data = await $fetch(url, {headers: {'X-Requested-With': 'fetch'} }) as string[]
+      const data = await $fetch(url, {baseURL: '/', headers: {'X-Requested-With': 'fetch'} }) as string[]
       return reactive(data)
     }
   }

@@ -4,6 +4,8 @@ import pkg from './package.json'
 dotenv.config()
 
 const port = 9091
+const isDev = process.env.NODE_ENV === 'development'
+const api = process.env.NUXT_PUBLIC_API || (isDev ? 'http://localhost:9090/' : '/')
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -35,7 +37,7 @@ export default defineNuxtConfig({
   nitro: { sourceMap: true },
   runtimeConfig: {
     public: {
-      api: (process.env.NUXT_PUBLIC_API || 'http://localhost:9090/').replace(/\/+$/,'')+'/',
+      api: api.replace(/\/+$/,'')+'/',
     },
   },
   sourcemap: true,
