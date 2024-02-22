@@ -388,6 +388,10 @@ func resolve(ctx context.Context, prg *types.Program, base *source, name, subToo
 }
 
 func input(ctx context.Context, base *source, name string) (*source, error) {
+	if strings.HasPrefix(name, "http://") || strings.HasPrefix(name, "https://") {
+		base.Remote = true
+	}
+
 	if !base.Remote {
 		s, ok, err := loadLocal(base, name)
 		if err != nil || ok {
