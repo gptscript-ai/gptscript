@@ -323,7 +323,7 @@ func (e *Engine) Continue(ctx context.Context, state *State, results ...CallResu
 
 		pending, ok := state.Pending[content.ToolCall.ID]
 		if !ok {
-			return nil, fmt.Errorf("missing tool call pennding for id %s, most likely a %s BUG",
+			return nil, fmt.Errorf("missing tool call pending for id %s, most likely a %s BUG",
 				content.ToolCall.ID, version.ProgramName)
 		}
 
