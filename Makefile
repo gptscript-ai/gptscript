@@ -2,6 +2,10 @@ all: build-ui build
 
 build-ui:
 	$(MAKE) -C ui
+	rm -rf static/ui
+	mkdir -p static/ui/_nuxt
+	touch static/ui/placeholder static/ui/_nuxt/_placeholder
+	cp -rp ui/.output/public/* static/ui/
 
 build:
 	CGO_ENABLED=0 go build -o bin/gptscript -tags "${GO_TAGS}" -ldflags "-s -w" .

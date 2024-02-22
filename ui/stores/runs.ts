@@ -41,7 +41,7 @@ export const useRuns = defineStore('runs', {
         url = addParam(url, 'tool', toolName)
       }
 
-      const res = await $fetch(url, {method: 'POST', body: args}) as {id: string}
+      const res = await $fetch(url, {baseURL: '/', method: 'POST', body: args}) as {id: string}
       const id = res.id
 
       const obj: Run = reactive({

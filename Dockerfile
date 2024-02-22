@@ -1,10 +1,18 @@
-FROM golang:1.22.0-alpine3.19 AS build
-RUN apk add -U --no-cache make git npm
-COPY . /src/gptscript
-WORKDIR /src/gptscript
+FROM node:18-alpine as build-ui
+RUN apk add -U --no-cache make git
+COPY ui /src
+WORKDIR /src
+RUN make
 
-RUN make all
+FROM golang:1.22.0-alpine3.19 AS build-go
+RUN apk add -U --no-cache make git
+COPY . /src/gptscript
+COPY --from=build-ui /src/.output/public /src/gptscript/static/ui
+WORKDIR /src/gptscript
+RUN make build
 
 FROM alpine AS release
-COPY --from=build /src/gptscript/bin /usr/local/bin/
+WORKDIR /src
+COPY --from=build-go /src/gptscript/bin /usr/local/bin/
+COPY --from=build-go /src/gptscript/examples /src/examples
 ENTRYPOINT ["/usr/local/bin/gptscript"]
