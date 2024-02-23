@@ -1,0 +1,11 @@
+{
+  "label": "Cookbook",
+  "collapsible": true,
+  "link": {
+    "type": "generated-index",
+    "title": "Cookbook"
+  },
+  "customProps": {
+    "description": "Explore the various things you can do with GPTScript and how to do them."
+  }
+}

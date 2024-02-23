@@ -2,10 +2,13 @@
 
 ## Overview
 
-GPTScript is a new scripting language to automate your interaction with a Large Language Model (LLM), namely OpenAI. The ultimate goal is to create a fully natural language based programming experience. The syntax of GPTScript is largely natural language, making it very easy to learn and use.
+GPTScript is a new scripting language to automate your interaction with a Large Language Model (LLM), namely OpenAI. The ultimate goal is to create a natural language programming experience. The syntax of GPTScript is largely natural language, making it very easy to learn and use.
 Natural language prompts can be mixed with traditional scripts such as bash and python or even external HTTP service
-calls. With GPTScript you can do just about anything like [plan a vacation](./examples/travel-agent.gpt),
+calls. With GPTScript you can do just about anything, like [plan a vacation](./examples/travel-agent.gpt),
 [edit a file](./examples/add-go-mod-dep.gpt), [run some SQL](./examples/sqlite-download.gpt), or [build a mongodb/flask app](./examples/hacker-news-headlines.gpt).
+
+| :memo: | We are currently exploring options for interacting with local models using GPTScript. |
+|-|:-|
 
 ```yaml
 # example.gpt
@@ -59,8 +62,16 @@ Download and install the archive for your platform and architecture from the [re
 
 ### 2. Get an API key from [OpenAI](https://platform.openai.com/api-keys).
 
+#### macOS and Linux
+
 ```shell
 export OPENAI_API_KEY="your-api-key"
+```
+
+#### Windows
+
+```powershell
+$env:OPENAI = 'your-api-key'
 ```
 
 ### 3. Run Hello World
@@ -175,7 +186,7 @@ Description: Tool description
 # This tool can invoke tool1 or tool2 if needed
 Tools: tool1, tool2
 Args: arg1: The description of arg1
-      
+
 Tool instructions go here.
 ```
 #### Tool Parameters
@@ -228,7 +239,7 @@ description: A tool that echos the input
 args: input: The input
 
 #!/bin/bash
-        
+
 echo "${input}"
 ```
 
@@ -247,7 +258,7 @@ Join us on Discord: [![Discord](https://img.shields.io/discord/12045584209848648
 
 ## License
 
-Copyright (c) 2023 [Acorn Labs, Inc.](http://acorn.io)
+Copyright (c) 2024 [Acorn Labs, Inc.](http://acorn.io)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

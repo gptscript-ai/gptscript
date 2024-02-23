@@ -104,3 +104,12 @@ Writes content to a specified file.
 
 - `content`: The content to be written to the file.
 - `filename`: The filename where the content should be written.
+
+## sys.append
+
+Appends the contents to a file.
+
+#### Arguments
+
+- `content`: The content to append.
+- `filename`: The name of the file to append to.
