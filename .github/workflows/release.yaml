@@ -42,4 +42,4 @@ jobs:
         run: |
             $latestRelease = Invoke-RestMethod -Uri https://api.github.com/repos/gptscript-ai/gptscript/releases/latest
             $url = $latestRelease.assets | Where-Object { $_.name -eq ("gptscript-" + $latestRelease.tag_name + "-windows-amd64.zip") } | Select-Object -ExpandProperty browser_download_url
-            ./wingetcreate.exe update --submit --token "${{ secrets.WINGET_GH_TOKEN }}" --urls $url --version "$latestRelease.tag_name" gptscript-ai.gptscript
+            ./wingetcreate.exe update --submit --token "${{ secrets.WINGET_GH_TOKEN }}" --urls $url --version "${{ github.ref_name }}" gptscript-ai.gptscript
