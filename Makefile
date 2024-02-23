@@ -37,3 +37,5 @@ validate: tidy lint
 ci: build
 	./bin/gptscript ./scripts/ci.gpt
 
+serve-docs:
+	(cd docs && npm start)
