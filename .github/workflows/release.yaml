@@ -40,6 +40,5 @@ jobs:
             Invoke-WebRequest -Uri 'https://aka.ms/wingetcreate/latest' -OutFile 'wingetcreate.exe'      
       - name: Create WinGet Package Update Pull Request
         run: |
-            $latestRelease = Invoke-RestMethod -Uri https://api.github.com/repos/gptscript-ai/gptscript/releases/latest
-            $url = $latestRelease.assets | Where-Object { $_.name -eq ("gptscript-" + $latestRelease.tag_name + "-windows-amd64.zip") } | Select-Object -ExpandProperty browser_download_url
+            $url = "${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}/gptscript-${{ github.ref_name }}-windows-amd64.zip"
             ./wingetcreate.exe update --submit --token "${{ secrets.WINGET_GH_TOKEN }}" --urls $url --version "${{ github.ref_name }}" gptscript-ai.gptscript
