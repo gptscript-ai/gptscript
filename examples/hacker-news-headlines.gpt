@@ -16,7 +16,24 @@ description: starts a MongoDB database
 
 #!/usr/bin/env bash
 
-docker run --rm -d -p 27017:27017 --name mongodb mongo:latest
+# The name of your container
+CONTAINER_NAME=mongodb
+
+# Check if the container already exists
+if docker ps -a --format '{{.Names}}' | grep -Eq "^${CONTAINER_NAME}\$"; then
+    echo "Container ${CONTAINER_NAME} exists."
+
+    # Check if the container is already running
+    if ! docker ps --format '{{.Names}}' | grep -Eq "^${CONTAINER_NAME}\$"; then
+        echo "Starting existing container ${CONTAINER_NAME}."
+        docker start ${CONTAINER_NAME}
+    else
+        echo "Container ${CONTAINER_NAME} is already running."
+    fi
+else
+    echo "Container ${CONTAINER_NAME} does not exist. Running a new one."
+    docker run --rm -d -p 27017:27017 --name ${CONTAINER_NAME} mongo:latest
+fi
 
 ---
 name: mongo_command
