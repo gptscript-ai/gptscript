@@ -270,8 +270,7 @@ func SysWrite(ctx context.Context, env []string, input string) (string, error) {
 	defer locker.Unlock(params.Filename)
 
 	data := []byte(params.Content)
-	msg := fmt.Sprintf("Wrote %d bytes to file %s", len(data), params.Filename)
-	log.Debugf(msg)
+	log.Debugf("Wrote %d bytes to file %s", len(data), params.Filename)
 
 	return "", os.WriteFile(params.Filename, data, 0644)
 }
@@ -301,10 +300,9 @@ func SysAppend(ctx context.Context, env []string, input string) (string, error) 
 		return "", err
 	}
 
-	msg := fmt.Sprintf("Appended %d bytes to file %s", n, params.Filename)
-	log.Debugf(msg)
+	log.Debugf("Appended %d bytes to file %s", n, params.Filename)
 
-	return "", err
+	return "", nil
 }
 
 func fixQueries(u string) (string, error) {
