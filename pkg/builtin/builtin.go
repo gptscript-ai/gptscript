@@ -118,6 +118,15 @@ var tools = map[string]types.Tool{
 		},
 		BuiltinFunc: SysRemove,
 	},
+	"sys.stat": {
+		Parameters: types.Parameters{
+			Description: "Gets size, modfied time, and mode of the specified file",
+			Arguments: types.ObjectSchema(
+				"filepath", "The complete path and filename of the file",
+			),
+		},
+		BuiltinFunc: SysStat,
+	},
 }
 
 func SysProgram() *types.Program {
@@ -375,6 +384,22 @@ func SysRemove(ctx context.Context, env []string, input string) (string, error) 
 	}
 
 	return fmt.Sprintf("Removed file: %s", params.Location), os.Remove(params.Location)
+}
+
+func SysStat(ctx context.Context, env []string, input string) (string, error) {
+	var params struct {
+		Filepath string `json:"filepath,omitempty"`
+	}
+	if err := json.Unmarshal([]byte(input), &params); err != nil {
+		return "", err
+	}
+
+	stat, err := os.Stat(params.Filepath)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("File %s mode: %s, size: %d bytes, modtime: %s", params.Filepath, stat.Mode().String(), stat.Size(), stat.ModTime().String()), nil
 }
 
 func SysDownload(ctx context.Context, env []string, input string) (_ string, err error) {
