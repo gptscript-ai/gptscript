@@ -381,7 +381,7 @@ func SysDownload(ctx context.Context, env []string, input string) (_ string, err
 	var params struct {
 		URL      string `json:"url,omitempty"`
 		Location string `json:"location,omitempty"`
-		Override bool   `json:"override,omitempty"`
+		Override string `json:"override,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
 		return "", err
@@ -405,7 +405,7 @@ func SysDownload(ctx context.Context, env []string, input string) (_ string, err
 		params.Location = f.Name()
 	}
 
-	if checkExists && !params.Override {
+	if checkExists && params.Override != "true" {
 		if _, err := os.Stat(params.Location); err == nil {
 			return "", fmt.Errorf("file %s already exists and can not be overwritten", params.Location)
 		} else if err != nil && !errors.Is(err, fs.ErrNotExist) {
