@@ -1,3 +1,5 @@
+.DEFAULT_GOAL := build
+
 all: build-ui build
 
 build-ui:
