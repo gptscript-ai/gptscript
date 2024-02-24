@@ -173,7 +173,6 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 
 	completion := types.CompletionRequest{
 		Model:        tool.Parameters.ModelName,
-		Vision:       tool.Parameters.Vision,
 		MaxToken:     tool.Parameters.MaxTokens,
 		JSONResponse: tool.Parameters.JSONResponse,
 		Cache:        tool.Parameters.Cache,

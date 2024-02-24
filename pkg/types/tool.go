@@ -26,7 +26,6 @@ type BuiltinFunc func(ctx context.Context, env []string, input string) (string, 
 type Parameters struct {
 	Name           string      `json:"name,omitempty"`
 	Description    string      `json:"description,omitempty"`
-	Vision         bool        `json:"vision,omitempty"`
 	MaxTokens      int         `json:"maxTokens,omitempty"`
 	ModelName      string      `json:"modelName,omitempty"`
 	JSONResponse   bool        `json:"jsonResponse,omitempty"`
@@ -58,9 +57,6 @@ func (t Tool) String() string {
 	}
 	if len(t.Parameters.Tools) != 0 {
 		_, _ = fmt.Fprintf(buf, "Tools: %s\n", strings.Join(t.Parameters.Tools, ", "))
-	}
-	if t.Parameters.Vision {
-		_, _ = fmt.Fprintln(buf, "Vision: true")
 	}
 	if t.Parameters.MaxTokens != 0 {
 		_, _ = fmt.Fprintf(buf, "Max Tokens: %d\n", t.Parameters.MaxTokens)

@@ -98,11 +98,6 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		if err := addArg(value, tool); err != nil {
 			return false, err
 		}
-	case "vision":
-		tool.Parameters.Vision, err = toBool(value)
-		if err != nil {
-			return false, err
-		}
 	case "maxtoken":
 		fallthrough
 	case "maxtokens":

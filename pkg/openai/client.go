@@ -16,12 +16,10 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/types"
-	"github.com/gptscript-ai/gptscript/pkg/vision"
 	"github.com/sashabaranov/go-openai"
 )
 
 const (
-	DefaultVisionModel     = openai.GPT4VisionPreview
 	DefaultModel           = openai.GPT4TurboPreview
 	DefaultPromptParameter = "defaultPromptParameter"
 )
@@ -171,15 +169,8 @@ func toToolCall(call types.CompletionToolCall) openai.ToolCall {
 	}
 }
 
-func toMessages(cache *cache.Client, request types.CompletionRequest) (result []openai.ChatCompletionMessage, err error) {
+func toMessages(request types.CompletionRequest) (result []openai.ChatCompletionMessage, err error) {
 	for _, message := range request.Messages {
-		if request.Vision {
-			message, err = vision.ToVisionMessage(cache, message)
-			if err != nil {
-				return nil, err
-			}
-		}
-
 		chatMessage := openai.ChatCompletionMessage{
 			Role: string(message.Role),
 		}
@@ -191,25 +182,6 @@ func toMessages(cache *cache.Client, request types.CompletionRequest) (result []
 		for _, content := range message.Content {
 			if content.ToolCall != nil {
 				chatMessage.ToolCalls = append(chatMessage.ToolCalls, toToolCall(*content.ToolCall))
-			}
-			if content.Image != nil {
-				url, err := vision.ImageToURL(cache, request.Vision, *content.Image)
-				if err != nil {
-					return nil, err
-				}
-				if request.Vision {
-					chatMessage.MultiContent = append(chatMessage.MultiContent, openai.ChatMessagePart{
-						Type: openai.ChatMessagePartTypeImageURL,
-						ImageURL: &openai.ChatMessageImageURL{
-							URL: url,
-						},
-					})
-				} else {
-					chatMessage.MultiContent = append(chatMessage.MultiContent, openai.ChatMessagePart{
-						Type: openai.ChatMessagePartTypeText,
-						Text: fmt.Sprintf("Image URL %s", url),
-					})
-				}
 			}
 			if content.Text != "" {
 				chatMessage.MultiContent = append(chatMessage.MultiContent, openai.ChatMessagePart{
@@ -251,7 +223,7 @@ type Status struct {
 }
 
 func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- Status) (*types.CompletionMessage, error) {
-	msgs, err := toMessages(c.cache, messageRequest)
+	msgs, err := toMessages(messageRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -277,21 +249,19 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		}
 	}
 
-	if !messageRequest.Vision {
-		for _, tool := range messageRequest.Tools {
-			params := tool.Function.Parameters
-			if params != nil && params.Type == "object" && params.Properties == nil {
-				params.Properties = map[string]types.Property{}
-			}
-			request.Tools = append(request.Tools, openai.Tool{
-				Type: openai.ToolType(tool.Type),
-				Function: openai.FunctionDefinition{
-					Name:        tool.Function.Name,
-					Description: tool.Function.Description,
-					Parameters:  params,
-				},
-			})
+	for _, tool := range messageRequest.Tools {
+		params := tool.Function.Parameters
+		if params != nil && params.Type == "object" && params.Properties == nil {
+			params.Properties = map[string]types.Property{}
 		}
+		request.Tools = append(request.Tools, openai.Tool{
+			Type: openai.ToolType(tool.Type),
+			Function: openai.FunctionDefinition{
+				Name:        tool.Function.Name,
+				Description: tool.Function.Description,
+				Parameters:  params,
+			},
+		})
 	}
 
 	id := fmt.Sprint(atomic.AddInt64(&completionID, 1))
@@ -368,7 +338,7 @@ func appendMessage(msg types.CompletionMessage, response openai.ChatCompletionSt
 	if delta.Content != "" {
 		found := false
 		for i, content := range msg.Content {
-			if content.ToolCall != nil || content.Image != nil {
+			if content.ToolCall != nil {
 				continue
 			}
 			msg.Content[i] = types.ContentPart{

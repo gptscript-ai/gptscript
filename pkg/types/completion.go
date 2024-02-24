@@ -13,7 +13,6 @@ type CompletionToolType string
 
 type CompletionRequest struct {
 	Model        string
-	Vision       bool
 	Tools        []CompletionTool
 	Messages     []CompletionMessage
 	MaxToken     int
@@ -77,17 +76,6 @@ func (in CompletionMessage) String() string {
 		if content.ToolCall != nil {
 			buf.WriteString(fmt.Sprintf("tool call %s -> %s", content.ToolCall.Function.Name, content.ToolCall.Function.Arguments))
 		}
-		if content.Image != nil {
-			buf.WriteString("image: ")
-			if content.Image.URL != "" {
-				buf.WriteString(content.Image.URL)
-			}
-			if len(content.Image.Base64) > 50 {
-				buf.WriteString(content.Image.Base64[:50] + "...")
-			} else {
-				buf.WriteString(content.Image.Base64)
-			}
-		}
 	}
 	return buf.String()
 }
@@ -95,22 +83,6 @@ func (in CompletionMessage) String() string {
 type ContentPart struct {
 	Text     string              `json:"text,omitempty"`
 	ToolCall *CompletionToolCall `json:"toolCall,omitempty"`
-	Image    *ImageURL           `json:"image,omitempty"`
-}
-
-type ImageURLDetail string
-
-const (
-	ImageURLDetailHigh ImageURLDetail = "high"
-	ImageURLDetailLow  ImageURLDetail = "low"
-	ImageURLDetailAuto ImageURLDetail = "auto"
-)
-
-type ImageURL struct {
-	Base64      string         `json:"base64,omitempty"`
-	ContentType string         `json:"contentType,omitempty"`
-	URL         string         `json:"url,omitempty"`
-	Detail      ImageURLDetail `json:"detail,omitempty"`
 }
 
 type CompletionToolCall struct {
