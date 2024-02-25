@@ -6,6 +6,16 @@ import (
 	"encoding/json"
 )
 
+func Digest(obj any) string {
+	data, err := json.Marshal(obj)
+	if err != nil {
+		panic(err)
+	}
+
+	hash := sha256.Sum224(data)
+	return hex.EncodeToString(hash[:])
+}
+
 func Encode(obj any) string {
 	data, err := json.Marshal(obj)
 	if err != nil {

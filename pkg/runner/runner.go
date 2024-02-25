@@ -5,9 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
-	"github.com/gptscript-ai/gptscript/pkg/openai"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"golang.org/x/sync/errgroup"
 )
@@ -21,21 +19,12 @@ type Monitor interface {
 	Stop(output string, err error)
 }
 
-type (
-	CacheOptions  cache.Options
-	OpenAIOptions openai.Options
-)
-
 type Options struct {
-	CacheOptions
-	OpenAIOptions
 	MonitorFactory MonitorFactory `usage:"-"`
 }
 
-func complete(opts ...Options) (cacheOpts []cache.Options, oaOpts []openai.Options, result Options) {
+func complete(opts ...Options) (result Options) {
 	for _, opt := range opts {
-		cacheOpts = append(cacheOpts, cache.Options(opt.CacheOptions))
-		oaOpts = append(oaOpts, openai.Options(opt.OpenAIOptions))
 		result.MonitorFactory = types.FirstSet(opt.MonitorFactory, result.MonitorFactory)
 	}
 	if result.MonitorFactory == nil {
@@ -45,26 +34,15 @@ func complete(opts ...Options) (cacheOpts []cache.Options, oaOpts []openai.Optio
 }
 
 type Runner struct {
-	c       *openai.Client
+	c       engine.Model
 	factory MonitorFactory
 }
 
-func New(opts ...Options) (*Runner, error) {
-	cacheOpts, oaOpts, opt := complete(opts...)
-	cacheClient, err := cache.New(cacheOpts...)
-	if err != nil {
-		return nil, err
-	}
-
-	oaClient, err := openai.NewClient(append(oaOpts, openai.Options{
-		Cache: cacheClient,
-	})...)
-	if err != nil {
-		return nil, err
-	}
+func New(client engine.Model, opts ...Options) (*Runner, error) {
+	opt := complete(opts...)
 
 	return &Runner{
-		c:       oaClient,
+		c:       client,
 		factory: opt.MonitorFactory,
 	}, nil
 }
@@ -111,7 +89,7 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 	defer progressClose()
 
 	e := engine.Engine{
-		Client:   r.c,
+		Model:    r.c,
 		Progress: progress,
 		Env:      env,
 	}
@@ -166,8 +144,8 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 	}
 }
 
-func streamProgress(callCtx *engine.Context, monitor Monitor) (chan openai.Status, func()) {
-	progress := make(chan openai.Status)
+func streamProgress(callCtx *engine.Context, monitor Monitor) (chan types.CompletionStatus, func()) {
+	progress := make(chan types.CompletionStatus)
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)

@@ -15,13 +15,13 @@ import (
 
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
+	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/sashabaranov/go-openai"
 )
 
 const (
-	DefaultModel           = openai.GPT4TurboPreview
-	DefaultPromptParameter = "defaultPromptParameter"
+	DefaultModel = openai.GPT4TurboPreview
 )
 
 var (
@@ -31,19 +31,21 @@ var (
 )
 
 type Client struct {
-	url   string
-	key   string
-	c     *openai.Client
-	cache *cache.Client
+	url          string
+	key          string
+	defaultModel string
+	c            *openai.Client
+	cache        *cache.Client
 }
 
 type Options struct {
-	BaseURL    string         `usage:"OpenAI base URL" name:"openai-base-url" env:"OPENAI_BASE_URL"`
-	APIKey     string         `usage:"OpenAI API KEY" name:"openai-api-key" env:"OPENAI_API_KEY"`
-	APIVersion string         `usage:"OpenAI API Version (for Azure)" name:"openai-api-version" env:"OPENAI_API_VERSION"`
-	APIType    openai.APIType `usage:"OpenAI API Type (valid: OPEN_AI, AZURE, AZURE_AD)" name:"openai-api-type" env:"OPENAI_API_TYPE"`
-	OrgID      string         `usage:"OpenAI organization ID" name:"openai-org-id" env:"OPENAI_ORG_ID"`
-	Cache      *cache.Client
+	BaseURL      string         `usage:"OpenAI base URL" name:"openai-base-url" env:"OPENAI_BASE_URL"`
+	APIKey       string         `usage:"OpenAI API KEY" name:"openai-api-key" env:"OPENAI_API_KEY"`
+	APIVersion   string         `usage:"OpenAI API Version (for Azure)" name:"openai-api-version" env:"OPENAI_API_VERSION"`
+	APIType      openai.APIType `usage:"OpenAI API Type (valid: OPEN_AI, AZURE, AZURE_AD)" name:"openai-api-type" env:"OPENAI_API_TYPE"`
+	OrgID        string         `usage:"OpenAI organization ID" name:"openai-org-id" env:"OPENAI_ORG_ID"`
+	DefaultModel string         `usage:"Default LLM model to use" default:"gpt-4-turbo-preview"`
+	Cache        *cache.Client
 }
 
 func complete(opts ...Options) (result Options, err error) {
@@ -54,6 +56,7 @@ func complete(opts ...Options) (result Options, err error) {
 		result.Cache = types.FirstSet(opt.Cache, result.Cache)
 		result.APIVersion = types.FirstSet(opt.APIVersion, result.APIVersion)
 		result.APIType = types.FirstSet(opt.APIType, result.APIType)
+		result.DefaultModel = types.FirstSet(opt.DefaultModel, result.DefaultModel)
 	}
 
 	if result.Cache == nil {
@@ -70,7 +73,7 @@ func complete(opts ...Options) (result Options, err error) {
 		result.APIKey = key
 	}
 
-	if result.APIKey == "" {
+	if result.APIKey == "" && result.BaseURL == "" {
 		return result, fmt.Errorf("OPENAI_API_KEY is not set. Please set the OPENAI_API_KEY environment variable")
 	}
 
@@ -94,12 +97,13 @@ func NewClient(opts ...Options) (*Client, error) {
 	cfg.APIType = types.FirstSet(opt.APIType, cfg.APIType)
 
 	return &Client{
-		c:     openai.NewClientWithConfig(cfg),
-		cache: opt.Cache,
+		c:            openai.NewClientWithConfig(cfg),
+		cache:        opt.Cache,
+		defaultModel: opt.DefaultModel,
 	}, nil
 }
 
-func (c *Client) ListModules(ctx context.Context) (result []string, _ error) {
+func (c *Client) ListModels(ctx context.Context) (result []string, _ error) {
 	models, err := c.c.ListModels(ctx)
 	if err != nil {
 		return nil, err
@@ -138,7 +142,10 @@ func (c *Client) seed(request openai.ChatCompletionRequest) int {
 	return hash.Seed(newRequest)
 }
 
-func (c *Client) fromCache(messageRequest types.CompletionRequest, request openai.ChatCompletionRequest) (result []openai.ChatCompletionStreamResponse, _ bool, _ error) {
+func (c *Client) fromCache(ctx context.Context, messageRequest types.CompletionRequest, request openai.ChatCompletionRequest) (result []openai.ChatCompletionStreamResponse, _ bool, _ error) {
+	if cache.IsNoCache(ctx) {
+		return nil, false, nil
+	}
 	if messageRequest.Cache != nil && !*messageRequest.Cache {
 		return nil, false, nil
 	}
@@ -161,7 +168,7 @@ func toToolCall(call types.CompletionToolCall) openai.ToolCall {
 	return openai.ToolCall{
 		Index: call.Index,
 		ID:    call.ID,
-		Type:  openai.ToolType(call.Type),
+		Type:  openai.ToolTypeFunction,
 		Function: openai.FunctionCall{
 			Name:      call.Function.Name,
 			Arguments: call.Function.Arguments,
@@ -170,6 +177,13 @@ func toToolCall(call types.CompletionToolCall) openai.ToolCall {
 }
 
 func toMessages(request types.CompletionRequest) (result []openai.ChatCompletionMessage, err error) {
+	if request.InternalSystemPrompt == nil || *request.InternalSystemPrompt {
+		result = append(result, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleSystem,
+			Content: system.InternalSystemPrompt,
+		})
+	}
+
 	for _, message := range request.Messages {
 		chatMessage := openai.ChatCompletionMessage{
 			Role: string(message.Role),
@@ -198,13 +212,8 @@ func toMessages(request types.CompletionRequest) (result []openai.ChatCompletion
 			chatMessage.Content = chatMessage.MultiContent[0].Text
 			chatMessage.MultiContent = nil
 
-			if strings.Contains(chatMessage.Content, DefaultPromptParameter) && strings.HasPrefix(chatMessage.Content, "{") {
-				data := map[string]any{}
-				if err := json.Unmarshal([]byte(chatMessage.Content), &data); err == nil && len(data) == 1 {
-					if v, _ := data[DefaultPromptParameter].(string); v != "" {
-						chatMessage.Content = v
-					}
-				}
+			if prompt, ok := system.IsDefaultPrompt(chatMessage.Content); ok {
+				chatMessage.Content = prompt
 			}
 		}
 
@@ -213,16 +222,10 @@ func toMessages(request types.CompletionRequest) (result []openai.ChatCompletion
 	return
 }
 
-type Status struct {
-	CompletionID    string
-	Request         any
-	Response        any
-	Cached          bool
-	Chunks          any
-	PartialResponse *types.CompletionMessage
-}
-
-func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- Status) (*types.CompletionMessage, error) {
+func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error) {
+	if messageRequest.Model == "" {
+		messageRequest.Model = c.defaultModel
+	}
 	msgs, err := toMessages(messageRequest)
 	if err != nil {
 		return nil, err
@@ -235,8 +238,9 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	request := openai.ChatCompletionRequest{
 		Model:       messageRequest.Model,
 		Messages:    msgs,
-		MaxTokens:   messageRequest.MaxToken,
+		MaxTokens:   messageRequest.MaxTokens,
 		Temperature: messageRequest.Temperature,
+		Grammar:     messageRequest.Grammar,
 	}
 
 	if request.Temperature == nil {
@@ -255,7 +259,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 			params.Properties = map[string]types.Property{}
 		}
 		request.Tools = append(request.Tools, openai.Tool{
-			Type: openai.ToolType(tool.Type),
+			Type: openai.ToolTypeFunction,
 			Function: openai.FunctionDefinition{
 				Name:        tool.Function.Name,
 				Description: tool.Function.Description,
@@ -265,14 +269,14 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	}
 
 	id := fmt.Sprint(atomic.AddInt64(&completionID, 1))
-	status <- Status{
+	status <- types.CompletionStatus{
 		CompletionID: id,
 		Request:      request,
 	}
 
 	var cacheResponse bool
 	request.Seed = ptr(c.seed(request))
-	response, ok, err := c.fromCache(messageRequest, request)
+	response, ok, err := c.fromCache(ctx, messageRequest, request)
 	if err != nil {
 		return nil, err
 	} else if !ok {
@@ -289,7 +293,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		result = appendMessage(result, response)
 	}
 
-	status <- Status{
+	status <- types.CompletionStatus{
 		CompletionID: id,
 		Chunks:       response,
 		Response:     result,
@@ -328,7 +332,6 @@ func appendMessage(msg types.CompletionMessage, response openai.ChatCompletionSt
 			tc.ToolCall.Index = tool.Index
 		}
 		tc.ToolCall.ID = override(tc.ToolCall.ID, tool.ID)
-		tc.ToolCall.Type = types.CompletionToolType(override(string(tc.ToolCall.Type), string(tool.Type)))
 		tc.ToolCall.Function.Name += tool.Function.Name
 		tc.ToolCall.Function.Arguments += tool.Function.Arguments
 
@@ -364,7 +367,10 @@ func override(left, right string) string {
 	return left
 }
 
-func (c *Client) store(key string, responses []openai.ChatCompletionStreamResponse) error {
+func (c *Client) store(ctx context.Context, key string, responses []openai.ChatCompletionStreamResponse) error {
+	if cache.IsNoCache(ctx) {
+		return nil
+	}
 	buf := &bytes.Buffer{}
 	gz := gzip.NewWriter(buf)
 	err := json.NewEncoder(gz).Encode(responses)
@@ -377,11 +383,11 @@ func (c *Client) store(key string, responses []openai.ChatCompletionStreamRespon
 	return c.cache.Store(key, buf.Bytes())
 }
 
-func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest, transactionID string, partial chan<- Status) (responses []openai.ChatCompletionStreamResponse, _ error) {
+func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest, transactionID string, partial chan<- types.CompletionStatus) (responses []openai.ChatCompletionStreamResponse, _ error) {
 	cacheKey := c.cacheKey(request)
 	request.Stream = true
 
-	partial <- Status{
+	partial <- types.CompletionStatus{
 		CompletionID: transactionID,
 		PartialResponse: &types.CompletionMessage{
 			Role:    types.CompletionMessageRoleTypeAssistant,
@@ -400,14 +406,14 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 	for {
 		response, err := stream.Recv()
 		if err == io.EOF {
-			return responses, c.store(cacheKey, responses)
+			return responses, c.store(ctx, cacheKey, responses)
 		} else if err != nil {
 			return nil, err
 		}
 		slog.Debug("stream", "content", response.Choices[0].Delta.Content)
 		if partial != nil {
 			partialMessage = appendMessage(partialMessage, response)
-			partial <- Status{
+			partial <- types.CompletionStatus{
 				CompletionID:    transactionID,
 				PartialResponse: &partialMessage,
 			}

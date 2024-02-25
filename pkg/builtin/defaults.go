@@ -6,12 +6,20 @@ import (
 )
 
 var (
-	DefaultModel = openai.DefaultModel
+	defaultModel = openai.DefaultModel
 )
+
+func GetDefaultModel() string {
+	return defaultModel
+}
+
+func SetDefaultModel(model string) {
+	defaultModel = model
+}
 
 func SetDefaults(tool types.Tool) types.Tool {
 	if tool.Parameters.ModelName == "" {
-		tool.Parameters.ModelName = DefaultModel
+		tool.Parameters.ModelName = GetDefaultModel()
 	}
 	return tool
 }

@@ -12,7 +12,6 @@ import (
 	"sync/atomic"
 
 	"github.com/google/shlex"
-	"github.com/gptscript-ai/gptscript/pkg/openai"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
@@ -21,7 +20,7 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 	id := fmt.Sprint(atomic.AddInt64(&completionID, 1))
 
 	defer func() {
-		e.Progress <- openai.Status{
+		e.Progress <- types.CompletionStatus{
 			CompletionID: id,
 			Response: map[string]any{
 				"output": cmdOut,
@@ -31,7 +30,7 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 	}()
 
 	if tool.BuiltinFunc != nil {
-		e.Progress <- openai.Status{
+		e.Progress <- types.CompletionStatus{
 			CompletionID: id,
 			Request: map[string]any{
 				"command": []string{tool.ID},
@@ -47,7 +46,7 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 	}
 	defer stop()
 
-	e.Progress <- openai.Status{
+	e.Progress <- types.CompletionStatus{
 		CompletionID: id,
 		Request: map[string]any{
 			"command": cmd.Args,

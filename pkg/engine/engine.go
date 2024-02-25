@@ -4,45 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"sync"
 	"sync/atomic"
 
-	"github.com/gptscript-ai/gptscript/pkg/openai"
+	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
 
-// InternalSystemPrompt is added to all threads. Changing this is very dangerous as it has a
-// terrible global effect and changes the behavior of all scripts.
-var InternalSystemPrompt = `
-You are task oriented system.
-You receive input from a user, process the input from the given instructions, and then output the result.
-Your objective is to provide consistent and correct results.
-You do not need to explain the steps taken, only provide the result to the given instructions.
-You are referred to as a tool.
-`
-
-var DefaultToolSchema = types.JSONSchema{
-	Property: types.Property{
-		Type: "object",
-	},
-	Properties: map[string]types.Property{
-		openai.DefaultPromptParameter: {
-			Description: "Prompt to send to the tool or assistant. This may be instructions or question.",
-			Type:        "string",
-		},
-	},
-	Required: []string{openai.DefaultPromptParameter},
-}
-
 var completionID int64
-
-func init() {
-	if p := os.Getenv("GPTSCRIPT_INTERNAL_SYSTEM_PROMPT"); p != "" {
-		InternalSystemPrompt = p
-	}
-}
 
 type ErrToolNotFound struct {
 	ToolName string
@@ -52,10 +22,14 @@ func (e *ErrToolNotFound) Error() string {
 	return fmt.Sprintf("tool not found: %s", e.ToolName)
 }
 
+type Model interface {
+	Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error)
+}
+
 type Engine struct {
-	Client   *openai.Client
+	Model    Model
 	Env      []string
-	Progress chan<- openai.Status
+	Progress chan<- types.CompletionStatus
 }
 
 type State struct {
@@ -172,18 +146,12 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 	}
 
 	completion := types.CompletionRequest{
-		Model:        tool.Parameters.ModelName,
-		MaxToken:     tool.Parameters.MaxTokens,
-		JSONResponse: tool.Parameters.JSONResponse,
-		Cache:        tool.Parameters.Cache,
-		Temperature:  tool.Parameters.Temperature,
-	}
-
-	if InternalSystemPrompt != "" && (tool.Parameters.InternalPrompt == nil || *tool.Parameters.InternalPrompt) {
-		completion.Messages = append(completion.Messages, types.CompletionMessage{
-			Role:    types.CompletionMessageRoleTypeSystem,
-			Content: types.Text(InternalSystemPrompt),
-		})
+		Model:                tool.Parameters.ModelName,
+		MaxTokens:            tool.Parameters.MaxTokens,
+		JSONResponse:         tool.Parameters.JSONResponse,
+		Cache:                tool.Parameters.Cache,
+		Temperature:          tool.Parameters.Temperature,
+		InternalSystemPrompt: tool.Parameters.InternalPrompt,
 	}
 
 	for _, subToolName := range tool.Parameters.Tools {
@@ -193,10 +161,9 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 		}
 		args := subTool.Parameters.Arguments
 		if args == nil && !subTool.IsCommand() {
-			args = &DefaultToolSchema
+			args = &system.DefaultToolSchema
 		}
 		completion.Tools = append(completion.Tools, types.CompletionTool{
-			Type: types.CompletionToolTypeFunction,
 			Function: types.CompletionFunctionDefinition{
 				Name:        subToolName,
 				Description: subTool.Parameters.Description,
@@ -207,12 +174,8 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 
 	if tool.Instructions != "" {
 		completion.Messages = append(completion.Messages, types.CompletionMessage{
-			Role: types.CompletionMessageRoleTypeSystem,
-			Content: []types.ContentPart{
-				{
-					Text: tool.Instructions,
-				},
-			},
+			Role:    types.CompletionMessageRoleTypeSystem,
+			Content: types.Text(tool.Instructions),
 		})
 	}
 
@@ -230,7 +193,7 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 
 func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 	var (
-		progress = make(chan openai.Status)
+		progress = make(chan types.CompletionStatus)
 		ret      = Return{
 			State: state,
 			Calls: map[string]Call{},
@@ -241,6 +204,7 @@ func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 	// ensure we aren't writing to the channel anymore on exit
 	wg.Add(1)
 	defer wg.Wait()
+	defer close(progress)
 
 	go func() {
 		defer wg.Done()
@@ -251,8 +215,7 @@ func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 		}
 	}()
 
-	resp, err := e.Client.Call(ctx, state.Completion, progress)
-	close(progress)
+	resp, err := e.Model.Call(ctx, state.Completion, progress)
 	if err != nil {
 		return nil, err
 	}
