@@ -45,9 +45,7 @@ func New(model engine.Model, opts ...Options) (*Server, error) {
 
 	opt := complete(opts)
 	r, err := runner.New(model, runner.Options{
-		MonitorFactory: &SessionFactory{
-			events: events,
-		},
+		MonitorFactory: NewSessionFactory(events),
 	})
 	if err != nil {
 		return nil, err
@@ -83,6 +81,14 @@ var (
 )
 
 type execKey struct{}
+
+func ContextWithNewID(ctx context.Context) context.Context {
+	return context.WithValue(ctx, execKey{}, fmt.Sprint(atomic.AddInt64(&execID, 1)))
+}
+
+func IDFromContext(ctx context.Context) string {
+	return ctx.Value(execKey{}).(string)
+}
 
 func (s *Server) list(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -274,6 +280,12 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 type SessionFactory struct {
 	events *broadcaster.Broadcaster[Event]
+}
+
+func NewSessionFactory(events *broadcaster.Broadcaster[Event]) *SessionFactory {
+	return &SessionFactory{
+		events: events,
+	}
 }
 
 func (s SessionFactory) Start(ctx context.Context, prg *types.Program, env []string, input string) (runner.Monitor, error) {
