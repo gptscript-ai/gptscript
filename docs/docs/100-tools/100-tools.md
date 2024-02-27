@@ -1,97 +1,7 @@
----
-title: Overview
-slug: /
----
+# Tools
 
-GPTScript is a new scripting language to automate your interaction with a Large Language Model (LLM), namely OpenAI. The ultimate goal is to create a fully natural language based programming experience. The syntax of GPTScript is largely natural language, making it very easy to learn and use.
-Natural language prompts can be mixed with traditional scripts such as bash and python or even external HTTP service
-calls. With GPTScript you can do just about anything like [plan a vacation](https://github.com/gptscript-ai/gptscript/blob/main/examples/travel-agent.gpt),
-[edit a file](https://github.com/gptscript-ai/gptscript/blob/main/examples/add-go-mod-dep.gpt), [run some SQL](https://github.com/gptscript-ai/gptscript/blob/main/examples/sqlite-download.gpt), or [build a mongodb/flask app](https://github.com/gptscript-ai/gptscript/blob/main/examples/hacker-news-headlines.gpt).
-
-```yaml
-# example.gpt
-
-Tools: sys.download, sys.exec, sys.remove
-
-Download https://www.sqlitetutorial.net/wp-content/uploads/2018/03/chinook.zip to a
-random file. Then expand the archive to a temporary location as there is a sqlite
-database in it.
-
-First inspect the schema of the database to understand the table structure.
-
-Form and run a SQL query to find the artist with the most number of albums and output
-the result of that.
-
-When done remove the database file and the downloaded content.
-```
-```
-$ gptscript ./example.gpt
-
-OUTPUT:
-
-The artist with the most number of albums in the database is Iron Maiden, with a total
-of 21 albums.
-```
-## Quick Start
-
-### 1. Install the latest release
-
-#### Homebrew (macOS and Linux)
-
-```shell
-brew install gptscript-ai/tap/gptscript
-```
-
-#### Install Script (macOS and Linux):
-
-```shell
-curl https://get.gptscript.ai/install.sh | sh
-```
-
-#### WinGet (Windows)
-
-```shell
-winget install gptscript-ai.gptscript
-```
-
-#### Manually
-
-Download and install the archive for your platform and architecture from the [releases page](https://github.com/gptscript-ai/gptscript/releases).
-
-### 2. Get an API key from [OpenAI](https://platform.openai.com/api-keys).
-
-```shell
-export OPENAI_API_KEY="your-api-key"
-```
-
-### 3. Run Hello World
-
-```shell
-gptscript https://get.gptscript.ai/echo.gpt --input 'Hello, World!'
-
-OUTPUT:
-
-Hello, World!
-```
-The model used by default is `gpt-4-turbo-preview` and you must have access to that model in your OpenAI account.
-
-### 4. Extra Credit: Examples and Run Debugging UI
-
-Clone examples and run debugging UI
-```shell
-git clone https://github.com/gptscript-ai/gptscript
-cd gptscript/examples
-
-# Run the debugging UI
-gptscript --server
-```
-
-## How it works
-
-***GPTScript is composed of tools.*** Each tool performs a series of actions similar to a function. Tools have available
-to them other tools that can be invoked similar to a function call. While similar to a function, the tools are
-primarily implemented with a natural language prompt. ***The interaction of the tools is determined by the AI model***,
-the model determines if the tool needs to be invoked and what arguments to pass. Tools are intended to be implemented
+***GPTScript is composed of tools.*** Each tool performs a series of actions similar to a function. Tools have available to them other tools that can be invoked similar to a function call. While similar to a function, the tools are
+primarily implemented with a natural language prompt. ***The interaction of the tools is determined by the AI model***, the model determines if the tool needs to be invoked and what arguments to pass. Tools are intended to be implemented
 with a natural language prompt but can also be implemented with a command or HTTP call.
 
 ### Example
@@ -110,14 +20,17 @@ args: question: The question to ask Bob.
 
 When asked how I am doing, respond with "Thanks for asking "${question}", I'm doing great fellow friendly AI tool!"
 ```
+
+
 Put the above content in a file named `bob.gpt` and run the following command:
-```shell
+```sh
 $ gptscript bob.gpt
 
 OUTPUT:
 
 Bob said, "Thanks for asking 'How are you doing?', I'm doing great fellow friendly AI tool!"
 ```
+
 Tools can be implemented by invoking a program instead of a natural language prompt. The below
 example is the same as the previous example but implements Bob using python.
 
@@ -141,10 +54,6 @@ print(f"Thanks for asking {os.environ['question']}, I'm doing great fellow frien
 With these basic building blocks you can create complex scripts with AI interacting with AI, your local system, data,
 or external services.
 
-## GPT File Reference
-
-### Extension
-GPTScript files use the `.gpt` extension by convention.
 
 ### File Structure
 A GPTScript file has one or more tools in the file. Each tool is separated by three dashes `---` alone on a line.
@@ -232,32 +141,3 @@ args: input: The input
 
 echo "${input}"
 ```
-
-## Built in Tools
-
-There are several built in tools to do basic things like read/write files, download http content and execute commands.
-Run `gptscript --list-tools` to list all the built-in tools.
-
-## Examples
-
-For more examples check out the [examples](https://github.com/gptscript-ai/gptscript/blob/main/examples) directory.
-
-## Community
-
-Join us on Discord: [![Discord](https://img.shields.io/discord/1204558420984864829?label=Discord)](https://discord.gg/9sSf4UyAMC)
-
-## License
-
-Copyright (c) 2023 [Acorn Labs, Inc.](http://acorn.io)
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-[http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.

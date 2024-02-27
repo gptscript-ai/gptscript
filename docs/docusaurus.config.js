@@ -60,6 +60,11 @@ const config = {
             label: "GitHub",
             position: "right",
           },
+          {
+            href: "https://discord.gg/9sSf4UyAMC",
+            label: "Discord",
+            position: "right",
+          },
         ],
       },
       footer: {
@@ -68,6 +73,10 @@ const config = {
           {
             label: "GitHub",
             to: "https://github.com/gptscript-ai/gptscript",
+          },
+          {
+            label: "Discord",
+            to: "https://discord.gg/9sSf4UyAMC",
           },
         ],
         copyright: `Copyright © ${new Date().getFullYear()} Acorn Labs, Inc`,
