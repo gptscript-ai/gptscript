@@ -8,6 +8,7 @@ There are a few different Internet search tools for GPTScript:
 - `bing-image` (coming soon)
 - `brave`
 - `brave-image`
+- `duckduckgo`
 - `google`
 - `google-image`
 
@@ -86,6 +87,12 @@ The environment variable `GPTSCRIPT_BING_SEARCH_TOKEN` must be set to your API k
 The `brave` and `brave-image` tools return search results from the [Brave Search API](https://brave.com/search/api/).
 
 The environment variable `GPTSCRIPT_BRAVE_SEARCH_TOKEN` must be set to your API key in order for it to work.
+
+## DuckDuckGo
+
+The `duckduckgo` tool returns search results from the [DuckDuckGo HTML-only Site](https://html.duckduckgo.com).
+
+No environment variables need to be set for this tool, as it does not require an API key.
 
 ## Google
 
