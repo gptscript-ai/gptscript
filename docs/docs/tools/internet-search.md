@@ -12,13 +12,20 @@ There are a few different Internet search tools for GPTScript:
 - `google-image`
 
 Each of these tools use the corresponding search engine's API to perform searches and return results that
-the LLM can process. This is the format of the results:
+the LLM can process. The number of results returned will depend on the
+search engine. This is the format of the results:
 
 Web search format:
 ```
 Title: the title of the web page
 URL: the link to the web page
 Description: a short snippet from the web page
+
+Title: ...
+URL: ...
+Description: ...
+
+<etc.>
 ```
 
 Image search format:
@@ -26,6 +33,12 @@ Image search format:
 Title: the title of the image
 Source: the link to the web page where the image came from
 Image URL: the link to the image
+
+Title: ...
+Source: ...
+Image URL: ...
+
+<etc.>
 ```
 
 The tools are developed in the [gptscript-ai/search repo](https://github.com/gptscript-ai/search).
