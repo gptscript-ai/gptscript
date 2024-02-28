@@ -5,7 +5,7 @@
 There are a few different Internet search tools for GPTScript:
 
 - `bing`
-- `bing-image` (coming soon)
+- `bing-image`
 - `brave`
 - `brave-image`
 - `duckduckgo`
@@ -78,7 +78,7 @@ Specific instructions for each search engine follow.
 
 ## Bing
 
-The `bing` tool returns search results from the [Bing Web Search API](https://www.microsoft.com/en-us/bing/apis/bing-web-search-api).
+The `bing` and `bing-image` tools return search results from the [Bing Web Search API](https://www.microsoft.com/en-us/bing/apis/bing-web-search-api).
 
 The environment variable `GPTSCRIPT_BING_SEARCH_TOKEN` must be set to your API key in order for it to work.
 
