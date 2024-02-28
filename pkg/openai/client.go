@@ -249,8 +249,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	request := openai.ChatCompletionRequest{
 		Model:       messageRequest.Model,
 		Messages:    msgs,
-		MaxTokens:   messageRequest.MaxToken,
-		Grammar:     messageRequest.Grammar,
+		MaxTokens:   messageRequest.MaxTokens,
 	}
 
 	if messageRequest.Temperature == nil {
@@ -272,7 +271,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 			params.Properties = map[string]types.Property{}
 		}
 		request.Tools = append(request.Tools, openai.Tool{
-			Type: openai.ToolType(tool.Type),
+			Type: openai.ToolTypeFunction,
 			Function: &openai.FunctionDefinition{
 				Name:        tool.Function.Name,
 				Description: tool.Function.Description,
