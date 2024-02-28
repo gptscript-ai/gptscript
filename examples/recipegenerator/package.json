@@ -1,0 +1,20 @@
+{
+    "name": "vision",
+    "version": "0.0.1",
+    "description": "Utility for processing images with the OpenAI API",
+    "exports": "./index.js",
+    "type": "module",
+    "scripts": {
+      "start": "node index.js"
+    },
+    "bin": "index.js",
+    "keywords": [],
+    "author": "",
+    "dependencies": {
+      "commander": "^9.0.0",
+      "file-type": "^19.0.0",
+      "openai": "^4.28.0",
+      "whatwg-url": "^14.0.0"
+    }
+  }
+  

@@ -1,0 +1,17 @@
+tools: sys.find, sys.read, sys.write, recipegenerator, tool.gpt
+
+Perform the following steps in order:
+
+1. Give me a list of 5 to 10 ingredients from the picture grocery.png located in the current directory and put those extracted ingredients in a file name response.json
+2. Analyse the json file response.json in the current directory and give me a list of ingredients listed under "content"
+3. Based on these items, suggest me one recipe that is quick to cook and create a new recipe.md file with the recipe
+
+
+---
+name: recipegenerator
+description: Generate a recipe from an ingredient file
+args: file: filename of ingredients
+tools: sys.read
+
+Read ${file} which is a response.json file
+Generate 1 new recipe based on the ingredients read from $(file)
