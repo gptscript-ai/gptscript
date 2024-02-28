@@ -54,7 +54,7 @@ Here is a GPTScript that reads the content of a large SQL database and produces 
 
 Here is a GPTScript that performs sentiment analysis on the input text. [Link to example here]
 
-### CVS Files
+### CSV Files
 
 Here is a GPTScript that summarizes the content of a CSV file. [Link to example here]
 
