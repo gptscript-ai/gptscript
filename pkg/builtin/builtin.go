@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/BurntSushi/locker"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -336,8 +337,10 @@ func SysHTTPGet(ctx context.Context, env []string, input string) (_ string, err 
 		return "", err
 	}
 
+	c := http.Client{Timeout: 10 * time.Second}
+
 	log.Debugf("http get %s", params.URL)
-	resp, err := http.Get(params.URL)
+	resp, err := c.Get(params.URL)
 	if err != nil {
 		return "", err
 	}
@@ -387,7 +390,9 @@ func SysHTTPPost(ctx context.Context, env []string, input string) (_ string, err
 		req.Header.Set("Content-Type", params.ContentType)
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	c := http.Client{Timeout: 10 * time.Second}
+
+	resp, err := c.Do(req)
 	if err != nil {
 		return "", err
 	}
