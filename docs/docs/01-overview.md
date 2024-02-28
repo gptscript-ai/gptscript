@@ -3,6 +3,8 @@ title: Overview
 slug: /
 ---
 
+[![Discord](https://img.shields.io/discord/1204558420984864829?label=Discord)](https://discord.gg/9sSf4UyAMC)
+
 GPTScript is a new scripting language to automate your interaction with a Large Language Model (LLM), namely OpenAI. The ultimate goal is to create a natural language programming experience. The syntax of GPTScript is largely natural language, making it very easy to learn and use. Natural language prompts can be mixed with traditional scripts such as bash and python or even external HTTP service calls. With GPTScript you can do just about anything, like [plan a vacation](https://github.com/gptscript-ai/gptscript/blob/main/examples/travel-agent.gpt), [edit a file](https://github.com/gptscript-ai/gptscript/blob/main/examples/add-go-mod-dep.gpt), [run some SQL](https://github.com/gptscript-ai/gptscript/blob/main/examples/sqlite-download.gpt), or [build a mongodb/flask app](https://github.com/gptscript-ai/gptscript/blob/main/examples/hacker-news-headlines.gpt).
 
 :::note
@@ -35,7 +37,3 @@ of 21 albums.
 ```
 
 For more examples check out the [examples](https://github.com/gptscript-ai/gptscript/blob/main/examples) directory.
-
-## Community
-
-Join us on Discord: [![Discord](https://img.shields.io/discord/1204558420984864829?label=Discord)](https://discord.gg/9sSf4UyAMC)
