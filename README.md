@@ -74,7 +74,7 @@ Alternatively Azure OpenAI can be utilized
 
 ```shell
 export OPENAI_API_KEY="your-api-key"
-export OPENAI_URL="your-endpiont"
+export OPENAI_BASE_URL="your-endpiont"
 export OPENAI_API_TYPE="AZURE"
 export OPENAI_AZURE_DEPLOYMENT="your-deployment-name"
 ```
