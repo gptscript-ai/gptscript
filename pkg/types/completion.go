@@ -5,24 +5,19 @@ import (
 	"strings"
 )
 
-const (
-	CompletionToolTypeFunction CompletionToolType = "function"
-)
-
-type CompletionToolType string
-
 type CompletionRequest struct {
-	Model        string
-	Tools        []CompletionTool
-	Messages     []CompletionMessage
-	MaxToken     int
-	Temperature  *float32
-	JSONResponse bool
-	Cache        *bool
+	Model                string
+	InternalSystemPrompt *bool
+	Tools                []CompletionTool
+	Messages             []CompletionMessage
+	MaxTokens            int
+	Temperature          *float32
+	JSONResponse         bool
+	Grammar              string
+	Cache                *bool
 }
 
 type CompletionTool struct {
-	Type     CompletionToolType           `json:"type"`
 	Function CompletionFunctionDefinition `json:"function,omitempty"`
 }
 
@@ -44,9 +39,20 @@ const (
 type CompletionMessageRoleType string
 
 type CompletionMessage struct {
-	Role     CompletionMessageRoleType `json:"role,omitempty"`
-	Content  []ContentPart             `json:"content,omitempty" column:"name=Message,jsonpath=.spec.content"`
-	ToolCall *CompletionToolCall       `json:"toolCall,omitempty"`
+	Role    CompletionMessageRoleType `json:"role,omitempty"`
+	Content []ContentPart             `json:"content,omitempty" column:"name=Message,jsonpath=.spec.content"`
+	// ToolCall should be set for only messages of type "tool" and Content[0].Text should be set as the
+	// result of the call describe by this field
+	ToolCall *CompletionToolCall `json:"toolCall,omitempty"`
+}
+
+type CompletionStatus struct {
+	CompletionID    string
+	Request         any
+	Response        any
+	Cached          bool
+	Chunks          any
+	PartialResponse *CompletionMessage
 }
 
 func (in CompletionMessage) IsToolCall() bool {
@@ -88,7 +94,6 @@ type ContentPart struct {
 type CompletionToolCall struct {
 	Index    *int                   `json:"index,omitempty"`
 	ID       string                 `json:"id,omitempty"`
-	Type     CompletionToolType     `json:"type,omitempty"`
 	Function CompletionFunctionCall `json:"function,omitempty"`
 }
 

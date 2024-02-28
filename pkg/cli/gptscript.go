@@ -10,8 +10,10 @@ import (
 	"github.com/acorn-io/cmd"
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
+	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/input"
+	"github.com/gptscript-ai/gptscript/pkg/llm"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/monitor"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
@@ -26,10 +28,13 @@ import (
 
 type (
 	DisplayOptions monitor.Options
+	CacheOptions   cache.Options
+	OpenAIOptions  openai.Options
 )
 
 type GPTScript struct {
-	runner.Options
+	CacheOptions
+	OpenAIOptions
 	DisplayOptions
 	Debug         bool   `usage:"Enable debug logging"`
 	Quiet         *bool  `usage:"No output logging" short:"q"`
@@ -41,6 +46,8 @@ type GPTScript struct {
 	ListTools     bool   `usage:"List built-in tools and exit"`
 	Server        bool   `usage:"Start server"`
 	ListenAddress string `usage:"Server listen address" default:"127.0.0.1:9090"`
+
+	_client llm.Client `usage:"-"`
 }
 
 func New() *cobra.Command {
@@ -67,6 +74,33 @@ func (r *GPTScript) Customize(cmd *cobra.Command) {
 	}
 }
 
+func (r *GPTScript) getClient(ctx context.Context) (llm.Client, error) {
+	if r._client != nil {
+		return r._client, nil
+	}
+
+	cacheClient, err := cache.New(cache.Options(r.CacheOptions))
+	if err != nil {
+		return nil, err
+	}
+
+	oaClient, err := openai.NewClient(openai.Options(r.OpenAIOptions), openai.Options{
+		Cache: cacheClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	registry := llm.NewRegistry()
+
+	if err := registry.AddClient(ctx, oaClient); err != nil {
+		return nil, err
+	}
+
+	r._client = registry
+	return r._client, nil
+}
+
 func (r *GPTScript) listTools() error {
 	var lines []string
 	for _, tool := range builtin.ListTools() {
@@ -77,12 +111,12 @@ func (r *GPTScript) listTools() error {
 }
 
 func (r *GPTScript) listModels(ctx context.Context) error {
-	c, err := openai.NewClient(openai.Options(r.OpenAIOptions))
+	c, err := r.getClient(ctx)
 	if err != nil {
 		return err
 	}
 
-	models, err := c.ListModules(ctx)
+	models, err := c.ListModels(ctx)
 	if err != nil {
 		return err
 	}
@@ -95,6 +129,10 @@ func (r *GPTScript) listModels(ctx context.Context) error {
 }
 
 func (r *GPTScript) Pre(*cobra.Command, []string) error {
+	if r.DefaultModel != "" {
+		builtin.SetDefaultModel(r.DefaultModel)
+	}
+
 	if r.Quiet == nil {
 		if term.IsTerminal(int(os.Stdout.Fd())) {
 			r.Quiet = new(bool)
@@ -126,9 +164,11 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 	}
 
 	if r.Server {
-		s, err := server.New(server.Options{
-			CacheOptions:  r.CacheOptions,
-			OpenAIOptions: r.OpenAIOptions,
+		c, err := r.getClient(cmd.Context())
+		if err != nil {
+			return err
+		}
+		s, err := server.New(c, server.Options{
 			ListenAddress: r.ListenAddress,
 		})
 		if err != nil {
@@ -176,9 +216,12 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 		return assemble.Assemble(prg, out)
 	}
 
-	runner, err := runner.New(r.Options, runner.Options{
-		CacheOptions:  r.CacheOptions,
-		OpenAIOptions: r.OpenAIOptions,
+	client, err := r.getClient(cmd.Context())
+	if err != nil {
+		return err
+	}
+
+	runner, err := runner.New(client, runner.Options{
 		MonitorFactory: monitor.NewConsole(monitor.Options(r.DisplayOptions), monitor.Options{
 			DisplayProgress: !*r.Quiet,
 		}),

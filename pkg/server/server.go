@@ -16,6 +16,8 @@ import (
 
 	"github.com/acorn-io/broadcaster"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
+	"github.com/gptscript-ai/gptscript/pkg/cache"
+	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -25,18 +27,12 @@ import (
 )
 
 type Options struct {
-	runner.CacheOptions
-	runner.OpenAIOptions
 	ListenAddress string
 }
 
-func complete(opts []Options) (runnerOpts []runner.Options, result Options) {
+func complete(opts []Options) (result Options) {
 	for _, opt := range opts {
 		result.ListenAddress = types.FirstSet(opt.ListenAddress, result.ListenAddress)
-		runnerOpts = append(runnerOpts, runner.Options{
-			CacheOptions:  opt.CacheOptions,
-			OpenAIOptions: opt.OpenAIOptions,
-		})
 	}
 	if result.ListenAddress == "" {
 		result.ListenAddress = "127.0.0.1:9090"
@@ -44,27 +40,15 @@ func complete(opts []Options) (runnerOpts []runner.Options, result Options) {
 	return
 }
 
-func New(opts ...Options) (*Server, error) {
+func New(model engine.Model, opts ...Options) (*Server, error) {
 	events := broadcaster.New[Event]()
 
-	runnerOpts, opt := complete(opts)
-	r, err := runner.New(append(runnerOpts, runner.Options{
+	opt := complete(opts)
+	r, err := runner.New(model, runner.Options{
 		MonitorFactory: &SessionFactory{
 			events: events,
 		},
-	})...)
-	if err != nil {
-		return nil, err
-	}
-
-	noCacheRunner, err := runner.New(append(runnerOpts, runner.Options{
-		CacheOptions: runner.CacheOptions{
-			Cache: new(bool),
-		},
-		MonitorFactory: &SessionFactory{
-			events: events,
-		},
-	})...)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +57,6 @@ func New(opts ...Options) (*Server, error) {
 		melody:        melody.New(),
 		events:        events,
 		runner:        r,
-		noCacheRunner: noCacheRunner,
 		listenAddress: opt.ListenAddress,
 	}, nil
 }
@@ -91,7 +74,6 @@ type Server struct {
 	ctx           context.Context
 	melody        *melody.Melody
 	runner        *runner.Runner
-	noCacheRunner *runner.Runner
 	events        *broadcaster.Broadcaster[Event]
 	listenAddress string
 }
@@ -168,16 +150,10 @@ func (s *Server) run(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	runner := s.runner
-	if req.URL.Query().Has("nocache") {
-		runner = s.noCacheRunner
-	}
-
-	id := fmt.Sprint(atomic.AddInt64(&execID, 1))
-	if req.URL.Query().Has("async") {
-		ctx := context.WithValue(s.ctx, execKey{}, id)
+	id, ctx := s.getContext(req)
+	if isAsync(req) {
 		go func() {
-			_, _ = runner.Run(ctx, prg, os.Environ(), string(body))
+			_, _ = s.runner.Run(ctx, prg, os.Environ(), string(body))
 		}()
 		rw.Header().Set("Content-Type", "application/json")
 		err := json.NewEncoder(rw).Encode(map[string]any{
@@ -187,14 +163,31 @@ func (s *Server) run(rw http.ResponseWriter, req *http.Request) {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
 		}
 	} else {
-		ctx := context.WithValue(req.Context(), execKey{}, id)
-		out, err := runner.Run(ctx, prg, os.Environ(), string(body))
+		out, err := s.runner.Run(ctx, prg, os.Environ(), string(body))
 		if err == nil {
 			_, _ = rw.Write([]byte(out))
 		} else {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
 		}
 	}
+}
+
+func isAsync(req *http.Request) bool {
+	return req.URL.Query().Has("async")
+}
+
+func (s *Server) getContext(req *http.Request) (string, context.Context) {
+	ctx := req.Context()
+	if req.URL.Query().Has("async") {
+		ctx = s.ctx
+	}
+
+	id := fmt.Sprint(atomic.AddInt64(&execID, 1))
+	ctx = context.WithValue(ctx, execKey{}, id)
+	if req.URL.Query().Has("nocache") {
+		ctx = cache.WithNoCache(ctx)
+	}
+	return id, ctx
 }
 
 func (s *Server) Start(ctx context.Context) error {

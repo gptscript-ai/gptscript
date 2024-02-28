@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"errors"
 	"io/fs"
 	"os"
@@ -33,6 +34,17 @@ func complete(opts ...Options) (result Options) {
 		result.CacheDir = filepath.Join(xdg.CacheHome, version.ProgramName)
 	}
 	return
+}
+
+type noCacheKey struct{}
+
+func IsNoCache(ctx context.Context) bool {
+	v, _ := ctx.Value(noCacheKey{}).(bool)
+	return v
+}
+
+func WithNoCache(ctx context.Context) context.Context {
+	return context.WithValue(ctx, noCacheKey{}, true)
 }
 
 func New(opts ...Options) (*Client, error) {

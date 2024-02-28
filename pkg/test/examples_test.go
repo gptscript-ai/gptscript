@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/openai"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/hexops/autogold/v2"
 	"github.com/stretchr/testify/require"
@@ -23,9 +24,13 @@ func TestExamples(t *testing.T) {
 		"fac.gpt",
 		"helloworld.gpt",
 	}
+
+	client, err := openai.NewClient()
+	require.NoError(t, err)
+
 	for _, entry := range tests {
 		t.Run(entry, func(t *testing.T) {
-			r, err := runner.New()
+			r, err := runner.New(client)
 			require.NoError(t, err)
 
 			prg, err := loader.Program(context.Background(), filepath.Join(examplePath, entry), "")
@@ -42,7 +47,10 @@ func TestExamples(t *testing.T) {
 func TestEcho(t *testing.T) {
 	RequireOpenAPIKey(t)
 
-	r, err := runner.New()
+	client, err := openai.NewClient()
+	require.NoError(t, err)
+
+	r, err := runner.New(client)
 	require.NoError(t, err)
 
 	prg, err := loader.Program(context.Background(), filepath.Join(examplePath, "echo.gpt"), "")
