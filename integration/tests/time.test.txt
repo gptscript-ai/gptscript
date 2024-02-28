@@ -1,0 +1,13 @@
+# Test Cases for time.gpt
+
+## Test Case 1: Timezone Available
+- Input: "America/New_York"
+- Expected Output: Current date and time in America/New_York timezone
+
+## Test Case 2: Invalid Timezone
+- Input: "Invalid/Timezone"
+- Expected Output: Error or notice indicating invalid timezone
+
+## Test Case 3: No Timezone Provided
+- Input: ""
+- Expected Output: Current date and time in default timezone

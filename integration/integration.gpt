@@ -1,0 +1,43 @@
+tools: gptscript, sys.read, sys.find, sys.abort
+description: Test the GPTScript tool against a series of example files and assert if the tool's output for given test cases meets the expected result.
+temperature: 0.5
+
+Objective: Test the GPTScript tool against a series of example files and assert if the tool's output for given test
+           cases meets the expected result.
+
+Test Files:
+- examples/bob.gpt
+- examples/bob-as-shell.gpt
+- examples/echo.gpt
+- examples/time.gpt
+- examples/helloworld.gpt
+
+Procedure:
+1. For each `.gpt` script file, locate its corresponding `.test.txt` file at the `integration/tests/*.test.txt` path.
+   The test file shares the same name as the script, minus the `.gpt` extension.
+2. Parse the test file to extract individual test cases. Each test case contains an input and an expected output.
+3. Sequentially execute the following steps for each test case:
+    1. Invoke the `gptscript` tool with the provided input from the test case.
+    2. Capture the actual output and compare it with the expected output from the test case.
+    3. Create a unique test case name derived from the input and expected output for easy identification.
+    4. Determine if the actual output is correct. Criteria for correctness include an exact match or an acceptable similarity
+       to the expected output, as well as any changes made to system state as described in the test case.
+       - If correct, output a success message: `PASSED: <test case name>`.
+       - If incorrect or an error occurs, output an error message: `FAILED: <test case name>: <error description or output difference>`.
+    5. Continue with the next test case regardless of the outcome of the current one.
+4. After completing all test cases for all files, compile and display a summary of the results. The summary should include:
+   - A bullet-point list of the files that were tested.
+   - The count of passed tests compared to the total number of tests.
+   - A listing and description of any failed tests (only if failures occurred).
+   - Analyze the results and determine if any ammendments need to be made to the test summary.
+5. Finally, if any tests failed, abort the script with a non-zero exit code. Otherwise, exit with a zero exit code.
+
+---
+name: gptscript
+description: Run a file
+arg: file: The file to be run
+arg: input: The input to be used
+
+#!/bin/bash
+
+go run main.go ${file} ${input}

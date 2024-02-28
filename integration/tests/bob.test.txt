@@ -1,0 +1,4 @@
+# Test Cases for bob.gpt
+
+## Test Case 1: Standard Execution
+- Expected Output: Bob said, "Thanks for asking 'How are you doing?', I'm doing great fellow friendly AI tool!"
