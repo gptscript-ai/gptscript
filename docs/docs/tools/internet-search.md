@@ -92,7 +92,12 @@ The environment variable `GPTSCRIPT_BRAVE_SEARCH_TOKEN` must be set to your API 
 
 The `duckduckgo` tool returns search results from the [DuckDuckGo HTML-only Site](https://html.duckduckgo.com).
 
-No environment variables need to be set for this tool, as it does not require an API key.
+No API key is required to use this tool.
+
+By default, this tool will make an HTTP request to DuckDuckGo and parse the results.
+If you do this enough times, it will start to get rate limited.
+Rate limits can be more easily avoided by using Google Chrome in headless mode.
+The tool will do this if the `GPTSCRIPT_USE_CHROME` environment variable is set to `true`.
 
 ## Google
 
