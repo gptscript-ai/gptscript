@@ -52,7 +52,7 @@ Here is a GPTScript that automates Kubernetes operations by driving the `kubectl
 
 Agents and assistants are synonyms. They are software programs that leverage LLM to carry out tasks.
 
-In GPTScript, agents and assistants are implemented using tools. Tools can use other tools. Tools can be implemented using natural language prompts or using traditional programming languages such as Python or JavaScript. You can therefore build arbitrarily complex agents and assistants in GPTScript.
+In GPTScript, agents and assistants are implemented using tools. Tools can use other tools. Tools can be implemented using natural language prompts or using traditional programming languages such as Python or JavaScript. You can therefore build arbitrarily complex agents and assistants in GPTScript. Here is an example of an assistant that leverages an HTTP client, MongoDB, and Python code generation to display Hacker News headlines: [`hacker-news-headlines.gpt`](../examples/hacker-news-headlines.gpt)
 
 ## Data Analysis
 
@@ -74,7 +74,7 @@ Here is a GPTScript that summarizes the content of a CSV file. [Link to example 
 
 ### Understanding Code
 
-Here is a GPTScript that summarizes the the code stored in a given directory. [Link to example here]
+Here is a GPTScript that summarizes the the code stored under the current directory: [`describe-code.gpt`](../examples/describe-code.gpt)
 
 ## Audio, Image, and Vision
 
