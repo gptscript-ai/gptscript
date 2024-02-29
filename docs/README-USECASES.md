@@ -34,6 +34,20 @@ You construct the appropriate query tool based on the type of knowledge base you
 | An ElasticSearch/OpenSearch database storing logs or other text files | Implement query tools using database command line tools [Link to example]|
 | Other databases such as graph or time series databases | Implement query tools using database command line tools [Link to example]|
 
+## Task Automation
+
+### Planning
+
+Here is a GPTScript that produces a detailed travel itenirary based on inputs from a user: [`travel-agent.gpt`](../examples/travel-agent.gpt)
+
+### Web UI Automation
+
+Here is a GPTScript that automates data gathering and analysis of web sites by interacting with a chrome web browser. [Link to example here]
+
+### CLI Automation
+
+Here is a GPTScript that automates Kubernetes operations by driving the `kubectl` command line. [Link to example here]
+
 ## Agents and Assistants
 
 Agents and assistants are synonyms. They are software programs that leverage LLM to carry out tasks.
@@ -44,7 +58,7 @@ In GPTScript, agents and assistants are implemented using tools. Tools can use o
 
 Depending on the context window supported by the LLM, you can either send a large amount of data to the LLM to analyze in one shot or supply data in batches.
 
-### Summerization
+### Summarization
 
 Here is a GPTScript that sends a large document in batches to the LLM and produces a summary of the entire document. [Link to example here]
 
@@ -62,25 +76,13 @@ Here is a GPTScript that summarizes the content of a CSV file. [Link to example 
 
 Here is a GPTScript that summarizes the the code stored in a given directory. [Link to example here]
 
-## Task Automation
-
-### Planning
-
-Here is a GPTScript that produces a detailed travel itenirary based on inputs from a user. [Link to example here]
-
-### Web UI Automation
-
-Here is a GPTScript that automates data gathering and analysis of web sites by driving a web browser. [Link to example here]
-
-### CLI Automation
-
-Here is a GPTScript that automates Kubernetes operations by driving the `kubectl` command line. [Link to example here]
-
 ## Audio, Image, and Vision
 
 [More details to come]
 
 ## Memory Management
+
+LLMs are stateless. That's why GPTScript by default caches LLM invocations. LLM apps need to keep memory outside of the model.
 
 GPTScript provides a means to manage memory that persists across multiple LLM invocations. The relevant information can be extracted and passed into the LLM as part of the context. In addition, LLM can utilize tools to obtain additional data from the memory maintained in GPTScript.
 
