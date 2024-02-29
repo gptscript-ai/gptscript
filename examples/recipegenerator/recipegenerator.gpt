@@ -1,0 +1,15 @@
+tools: sys.find, sys.read, sys.write, recipegenerator, tool.gpt
+
+Perform the following steps in order:
+
+1. Give me a list of 5 to 10 ingredients from the picture grocery.png located in the current directory and put those extracted ingredients into a list.
+2. Based on these ingredients list, suggest me one recipe that is quick to cook and create a new recipe.md file with the recipe
+
+
+---
+name: recipegenerator
+description: Generate a recipe from the list of ingredients
+args: ingredients: a list of available ingredients.
+tools: sys.read
+
+Generate 1 new recipe based on the ingredients list

@@ -1,0 +1,11 @@
+Name: vision
+Description:  Analyze a set of images using a given prompt and vision model.
+Args: detail: Fidelity to process images at. One of ["high", "low", "auto"]. Default is "auto".
+Args: max-tokens: The maximum number of tokens. Default is 2048.
+Args: model: The name of the model to use. Default is "gpt-4-vision-preview".
+Args: prompt: The text prompt based on which the GPT model will generate a response.
+Args: images: Space-delimited list of image URIs to analyze. Valid URI protocols are "http" and "https" for remote images, and "file" for local images. Only supports jpeg and png.
+
+#!/bin/bash
+
+node index.js "${PROMPT}" ${IMAGES}
