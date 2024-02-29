@@ -27,6 +27,7 @@ const (
 var (
 	key          = os.Getenv("OPENAI_API_KEY")
 	url          = os.Getenv("OPENAI_URL")
+	azureModel   = os.Getenv("OPENAI_AZURE_DEPLOYMENT")
 	completionID int64
 )
 
@@ -80,6 +81,15 @@ func complete(opts ...Options) (result Options, err error) {
 	return result, err
 }
 
+func AzureMapperFunction(model string) string {
+	if azureModel == "" {
+		return model
+	}
+	return map[string]string{
+		openai.GPT4TurboPreview: azureModel,
+	}[model]
+}
+
 func NewClient(opts ...Options) (*Client, error) {
 	opt, err := complete(opts...)
 	if err != nil {
@@ -89,6 +99,7 @@ func NewClient(opts ...Options) (*Client, error) {
 	cfg := openai.DefaultConfig(opt.APIKey)
 	if strings.Contains(string(opt.APIType), "AZURE") {
 		cfg = openai.DefaultAzureConfig(key, url)
+		cfg.AzureModelMapperFunc = AzureMapperFunction
 	}
 
 	cfg.BaseURL = types.FirstSet(opt.BaseURL, cfg.BaseURL)
@@ -236,15 +247,16 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	}
 
 	request := openai.ChatCompletionRequest{
-		Model:       messageRequest.Model,
-		Messages:    msgs,
-		MaxTokens:   messageRequest.MaxTokens,
-		Temperature: messageRequest.Temperature,
-		Grammar:     messageRequest.Grammar,
+		Model:     messageRequest.Model,
+		Messages:  msgs,
+		MaxTokens: messageRequest.MaxTokens,
 	}
 
-	if request.Temperature == nil {
-		request.Temperature = new(float32)
+	if messageRequest.Temperature == nil {
+		// this is a hack because the field is marked as omitempty, so we need it to be set to a non-zero value but arbitrarily small
+		request.Temperature = 1e-08
+	} else {
+		request.Temperature = *messageRequest.Temperature
 	}
 
 	if messageRequest.JSONResponse {
@@ -260,7 +272,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		}
 		request.Tools = append(request.Tools, openai.Tool{
 			Type: openai.ToolTypeFunction,
-			Function: openai.FunctionDefinition{
+			Function: &openai.FunctionDefinition{
 				Name:        tool.Function.Name,
 				Description: tool.Function.Description,
 				Parameters:  params,
