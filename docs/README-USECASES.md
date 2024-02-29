@@ -76,7 +76,10 @@ Here is a GPTScript that summarizes the content of a CSV file. [Link to example 
 
 Here is a GPTScript that summarizes the the code stored under the current directory: [`describe-code.gpt`](../examples/describe-code.gpt)
 
-## Audio, Image, and Vision
+## Vision, Image, and Audio
+
+### Vision
+Here is an example of a web app that leverages GPTScript to recognize ingredients in a photo and suggest a recipe based on them: [recipe-generator](../examples/recipegenerator).
 
 [More details to come]
 
