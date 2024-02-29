@@ -45,6 +45,7 @@ type Tool struct {
 	LocalTools  map[string]string `json:"localTools,omitempty"`
 	BuiltinFunc BuiltinFunc       `json:"-"`
 	Source      ToolSource        `json:"source,omitempty"`
+	WorkingDir  string            `json:"workingDir,omitempty"`
 }
 
 func (t Tool) String() string {

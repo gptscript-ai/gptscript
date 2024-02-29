@@ -37,7 +37,7 @@ type GPTScript struct {
 	OpenAIOptions
 	DisplayOptions
 	Debug         bool   `usage:"Enable debug logging"`
-	Quiet         *bool  `usage:"No output logging" short:"q"`
+	Quiet         *bool  `usage:"No output logging (set --quiet=false to force on even when there is no TTY)" short:"q"`
 	Output        string `usage:"Save output to a file, or - for stdout" short:"o"`
 	Input         string `usage:"Read input from a file (\"-\" for stdin)" short:"f"`
 	SubTool       string `usage:"Use tool of this name, not the first tool in file"`

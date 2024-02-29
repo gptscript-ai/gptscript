@@ -59,6 +59,9 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 	cmd.Stdin = strings.NewReader(input)
 	cmd.Stderr = io.MultiWriter(all, os.Stderr)
 	cmd.Stdout = io.MultiWriter(all, output)
+	if tool.WorkingDir != "" {
+		cmd.Dir = tool.WorkingDir
+	}
 
 	if err := cmd.Run(); err != nil {
 		_, _ = os.Stderr.Write(output.Bytes())

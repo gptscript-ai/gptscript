@@ -1,0 +1,13 @@
+tools: ./subtool/test.gpt, local
+
+noop
+
+---
+name: local
+
+#!/bin/bash
+set -e -x
+
+P=$(pwd)
+echo ${P##${GPTSCRIPT_VAR_WORKDIR}}
+cat data.txt

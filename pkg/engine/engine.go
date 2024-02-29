@@ -230,8 +230,7 @@ func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 				ToolName: content.ToolCall.Function.Name,
 				Input:    content.ToolCall.Function.Arguments,
 			}
-		}
-		if content.Text != "" {
+		} else {
 			cp := content.Text
 			ret.Result = &cp
 		}

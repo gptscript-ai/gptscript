@@ -1,0 +1,33 @@
+`{
+  "Model": "gpt-4-turbo-preview",
+  "InternalSystemPrompt": null,
+  "Tools": [
+    {
+      "function": {
+        "name": "test",
+        "parameters": null
+      }
+    },
+    {
+      "function": {
+        "name": "local",
+        "parameters": null
+      }
+    }
+  ],
+  "Messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "noop"
+        }
+      ]
+    }
+  ],
+  "MaxTokens": 0,
+  "Temperature": null,
+  "JSONResponse": false,
+  "Grammar": "",
+  "Cache": null
+}`

@@ -200,6 +200,7 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 	)
 
 	for i, tool := range tools {
+		tool.WorkingDir = base.Path
 		tool.Source.File = base.File
 
 		// Probably a better way to come up with an ID
@@ -234,7 +235,13 @@ var (
 	invalidChars  = regexp.MustCompile("[^a-zA-Z0-9_-]+")
 )
 
-func toolNormalizer(tool string) string {
+func ToolNormalizer(tool string) string {
+	parts := strings.Split(tool, "/")
+	tool = parts[len(parts)-1]
+	if strings.HasSuffix(tool, ".gpt") {
+		tool = strings.TrimSuffix(tool, filepath.Ext(tool))
+	}
+
 	if validToolName.MatchString(tool) {
 		return tool
 	}
@@ -251,22 +258,17 @@ func toolNormalizer(tool string) string {
 }
 
 func pickToolName(toolName string, existing map[string]struct{}) string {
-	newName, suffix, ok := strings.Cut(toolName, "/")
-	if ok {
-		newName = suffix
-	}
-	newName = strings.TrimSuffix(newName, filepath.Ext(newName))
-	if newName == "" {
-		newName = "external"
+	if toolName == "" {
+		toolName = "external"
 	}
 
 	for {
-		testName := toolNormalizer(newName)
+		testName := ToolNormalizer(toolName)
 		if _, ok := existing[testName]; !ok {
 			existing[testName] = struct{}{}
 			return testName
 		}
-		newName += "0"
+		toolName += "0"
 	}
 }
 

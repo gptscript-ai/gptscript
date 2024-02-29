@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -15,7 +16,19 @@ import (
 const DaemonURLSuffix = ".daemon.gpt.local"
 
 func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Tool, input string) (cmdRet *Return, cmdErr error) {
+	envMap := map[string]string{}
+	for _, env := range e.Env {
+		v, ok := strings.CutPrefix(env, "GPTSCRIPT_VAR_")
+		if ok {
+			k, v, _ := strings.Cut(v, "=")
+			envMap[k] = v
+		}
+	}
+
 	toolURL := strings.Split(tool.Instructions, "\n")[0][2:]
+	toolURL = os.Expand(toolURL, func(s string) string {
+		return envMap[s]
+	})
 
 	parsed, err := url.Parse(toolURL)
 	if err != nil {
@@ -50,6 +63,10 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 	}
 
 	req.Header.Set("X-GPTScript-Tool-Name", tool.Parameters.Name)
+
+	for k, v := range envMap {
+		req.Header.Set("X-GPTScript-Var-"+k, v)
+	}
 
 	if err := json.Unmarshal([]byte(input), &map[string]any{}); err == nil {
 		req.Header.Set("Content-Type", "application/json")

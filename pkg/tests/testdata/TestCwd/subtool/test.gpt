@@ -1,0 +1,6 @@
+#
+#!/bin/bash
+set -e -x
+
+echo sub
+cat sub.txt
