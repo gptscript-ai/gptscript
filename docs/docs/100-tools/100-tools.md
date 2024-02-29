@@ -23,9 +23,10 @@ When asked how I am doing, respond with "Thanks for asking "${question}", I'm do
 
 
 Put the above content in a file named `bob.gpt` and run the following command:
-```sh
+```shell
 $ gptscript bob.gpt
-
+```
+```
 OUTPUT:
 
 Bob said, "Thanks for asking 'How are you doing?', I'm doing great fellow friendly AI tool!"
