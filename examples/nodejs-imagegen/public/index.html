@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logo Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <style>
+        .spinner-border {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            border-width: 2px;
+            border-color: currentColor;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spinner-border 0.75s linear infinite;
+        }
+
+        @keyframes spinner-border {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 p-8">
+
+    <h1 class="text-center">AI Logo Generator</h1>
+
+    <div class="text-center mt-8">
+        <p>Describe the logo you want designed for your company and we will generate it for you.</p>
+        <p>Our AI will generate a logo based on your description.</p>
+    </div>
+
+    <!-- Artists Section -->
+    <div id="artistsSection" class="flex flex-wrap justify-center mb-8"></div>
+
+    <!-- New Artists Link -->
+    <div class="text-center mt-4">
+        <a id="newArtistsLink" href="#" class="text-blue-500 underline">New Artists</a>
+    </div>
+
+
+    <!-- Logo Description Form -->
+    <div class="flex flex-col items-center">
+        <textarea id="logoDescription" class="w-full p-2 border rounded-lg mb-4"
+            placeholder="Describe the logo you want designed for your company"></textarea>
+        <button id="submitBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Submit
+        </button>
+    </div>
+
+    <!-- Response Areas -->
+    <div id="artistResponse" class="flex justify-center mt-8">
+        <div class="spinner-border hidden text-blue-500" role="status">
+            <span class="sr-only">Waiting for submissions...</span>
+        </div>
+    </div>
+
+    <script src="/script.js" type="module"></script>
+</body>
+
+</html>
