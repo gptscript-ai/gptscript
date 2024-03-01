@@ -1,0 +1,33 @@
+tools: hamlet-summarizer, sys.read
+
+You are a program that is tasked with fetching partial summaries of a play called Hamlet.
+
+Call the hamlet-summarizer tool to get each part of the summary. Begin with index 0. Do not proceed
+until the tool has responded to you.
+
+Once you get "No more content" from the hamlet-summarizer, stop calling it.
+Then, print the contents of the summary.txt file.
+
+---
+name: hamlet-summarizer
+tools: hamlet-retriever, sys.read, sys.append
+description: Summarizes a part of the text of Hamlet. Returns "No more content" if the index is greater than the number of parts.
+args: index: (unsigned int) the index of the portion to summarize, beginning at 0
+
+You are a theater expert, and you're tasked with summarizing part of Hamlet.
+Get the part of Hamlet at index $index.
+Read the existing summary of Hamlet up to this point in summary.txt.
+
+Summarize the part at index $index. Include as many details as possible. Do not leave out any important plot points.
+Do not introduce the summary with "In this part of Hamlet", "In this segment", or any similar language.
+If a new character is introduced, be sure to explain who they are.
+Add two newlines to the end of your summary and append it to summary.txt.
+
+If you got "No more content" just say "No more content". Otherwise, say "Continue".
+
+---
+name: hamlet-retriever
+description: Returns a part of the text of Hamlet. Returns "No more content" if the index is greater than the number of parts.
+args: index: (unsigned int) the index of the part to return, beginning at 0
+
+#!python3 main.py "$index"
