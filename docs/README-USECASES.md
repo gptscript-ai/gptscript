@@ -42,7 +42,30 @@ Here is a GPTScript that produces a detailed travel itenirary based on inputs fr
 
 ### Web UI Automation
 
-Here is a GPTScript that automates data gathering and analysis of web sites by interacting with a chrome web browser. [Link to example here]
+GPTScript enables the automation of data collection and analysis from websites through seamless interaction with a Chrome web browser. Here's an example to illustrate how it works:
+
+1. Please install the browsing tool and configure it to operate continuously in the background as a service.
+
+```sh
+git clone https://github.com/gptscript-ai/browser
+
+cd browser
+
+npm install
+
+npm run server
+```
+
+2. Let's explore a brief example on how to navigate through the Coachella Festival offerings and retrieve ticketing details
+
+```sh
+# Go to the browser repo you just cloned
+cd browser 
+
+gpscript ./example/coachella-browse.gpt
+```
+
+For additional examples, please explore [here](https://github.com/gptscript-ai/browser?tab=readme-ov-file#examples).
 
 ### CLI Automation
 
