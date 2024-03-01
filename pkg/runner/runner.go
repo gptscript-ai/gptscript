@@ -2,12 +2,17 @@ package runner
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"golang.org/x/sync/errgroup"
+	"google.golang.org/appengine/log"
 )
 
 type MonitorFactory interface {
@@ -115,6 +120,9 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 				Type:        EventTypeCallFinish,
 				Content:     *result.Result,
 			})
+			if err := recordStateMessage(result.State); err != nil {
+				log.Warningf(callCtx.Ctx, "Failed to record state message: %v", err)
+			}
 			return *result.Result, nil
 		}
 
@@ -217,4 +225,25 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 	}
 
 	return
+}
+
+// recordStateMessage record the final state of the openai request and fetch messages and tools for analysis purpose
+// The name follows `gptscript-state-${hostname}-${unixtimestamp}`
+func recordStateMessage(state *engine.State) error {
+	if state == nil {
+		return nil
+	}
+	tmpdir := os.TempDir()
+	data, err := json.Marshal(state)
+	if err != nil {
+		return err
+	}
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		return err
+	}
+
+	filename := filepath.Join(tmpdir, fmt.Sprintf("gptscript-state-%v-%v", hostname, time.Now().Unix()))
+	return os.WriteFile(filename, data, 0444)
 }
