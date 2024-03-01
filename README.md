@@ -27,6 +27,7 @@ Form and run a SQL query to find the artist with the most number of albums and o
 the result of that.
 
 When done remove the database file and the downloaded content.
+```
 ```shell
 $ gptscript ./example.gpt
 ```
