@@ -31,7 +31,7 @@ In this example, let's say that we want to create a `.gpt` script that uses visi
 
 ## Recap
 
-In this example, we have created a GPTScript that leverages the `vision` tool to describe an image at a given URL. We gave it some flexibility by specifiying an argument `url` that the user can provide when running the script. We also specified gave the script a specific style to generate the description with.
+In this example, we have created a GPTScript that leverages the `vision` tool to describe an image at a given URL. We gave it some flexibility by specifying an argument `url` that the user can provide when running the script. We also gave the script a specific style to generate the description with.
 
 Notable things to point out:
 
