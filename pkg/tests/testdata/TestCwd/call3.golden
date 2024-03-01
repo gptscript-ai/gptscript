@@ -71,7 +71,7 @@
       "role": "tool",
       "content": [
         {
-          "text": "/testdata/TestCwd\nthe data"
+          "text": "testdata/TestCwd\nthe data"
         }
       ],
       "toolCall": {

@@ -1,6 +1,8 @@
 #
-#!/bin/bash
+#!/usr/bin/env X=${GPTSCRIPT_TOOL_DIR} /bin/bash
 set -e -x
 
+[ ${X} = ${GPTSCRIPT_TOOL_DIR} ]
+cd $X
 echo sub
 cat sub.txt
