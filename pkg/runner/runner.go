@@ -2,7 +2,6 @@ package runner
 
 import (
 	"context"
-	"os"
 	"sync"
 	"time"
 
@@ -21,41 +20,30 @@ type Monitor interface {
 }
 
 type Options struct {
-	WorkingDir     string
 	MonitorFactory MonitorFactory `usage:"-"`
 }
 
 func complete(opts ...Options) (result Options) {
 	for _, opt := range opts {
-		result.WorkingDir = types.FirstSet(opt.WorkingDir, result.WorkingDir)
 		result.MonitorFactory = types.FirstSet(opt.MonitorFactory, result.MonitorFactory)
 	}
 	if result.MonitorFactory == nil {
 		result.MonitorFactory = noopFactory{}
 	}
-	if result.WorkingDir == "" {
-		var err error
-		result.WorkingDir, err = os.Getwd()
-		if err != nil {
-			log.Fatalf("failed to determine current working directory: %v", err)
-		}
-	}
 	return
 }
 
 type Runner struct {
-	c          engine.Model
-	factory    MonitorFactory
-	workingDir string
+	c       engine.Model
+	factory MonitorFactory
 }
 
 func New(client engine.Model, opts ...Options) (*Runner, error) {
 	opt := complete(opts...)
 
 	return &Runner{
-		c:          client,
-		factory:    opt.MonitorFactory,
-		workingDir: opt.WorkingDir,
+		c:       client,
+		factory: opt.MonitorFactory,
 	}, nil
 }
 
@@ -104,10 +92,6 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 		Model:    r.c,
 		Progress: progress,
 		Env:      env,
-	}
-
-	if r.workingDir != "" {
-		e.Env = append(e.Env, "GPTSCRIPT_VAR_WORKDIR="+r.workingDir)
 	}
 
 	monitor.Event(Event{
