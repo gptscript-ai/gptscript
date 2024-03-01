@@ -27,10 +27,10 @@ Form and run a SQL query to find the artist with the most number of albums and o
 the result of that.
 
 When done remove the database file and the downloaded content.
-```
-```
+```shell
 $ gptscript ./example.gpt
-
+```
+```
 OUTPUT:
 
 The artist with the most number of albums in the database is Iron Maiden, with a total
@@ -89,7 +89,8 @@ $env:OPENAI = 'your-api-key'
 
 ```shell
 gptscript https://get.gptscript.ai/echo.gpt --input 'Hello, World!'
-
+```
+```
 OUTPUT:
 
 Hello, World!
@@ -134,7 +135,8 @@ When asked how I am doing, respond with "Thanks for asking "${question}", I'm do
 Put the above content in a file named `bob.gpt` and run the following command:
 ```shell
 $ gptscript bob.gpt
-
+```
+```
 OUTPUT:
 
 Bob said, "Thanks for asking 'How are you doing?', I'm doing great fellow friendly AI tool!"
