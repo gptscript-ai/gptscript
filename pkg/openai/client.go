@@ -87,6 +87,7 @@ func AzureMapperFunction(model string) string {
 	}
 	return map[string]string{
 		openai.GPT4TurboPreview: azureModel,
+		openai.GPT4:             azureModel,
 	}[model]
 }
 
