@@ -11,7 +11,6 @@ import (
 
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/types"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -121,8 +120,8 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 				Content:     *result.Result,
 			})
 			if err := recordStateMessage(result.State); err != nil {
-				// Log a warning message if failed to record state message so that it doesn't affect the main process if state can't be recorded
-				logrus.Warningf("Failed to record state message: %v", err)
+				// Log a message if failed to record state message so that it doesn't affect the main process if state can't be recorded
+				log.Infof("Failed to record state message: %v", err)
 			}
 			return *result.Result, nil
 		}
@@ -200,7 +199,7 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 	eg, subCtx := errgroup.WithContext(callCtx.Ctx)
 	for id, call := range lastReturn.Calls {
 		eg.Go(func() error {
-			callCtx, err := callCtx.SubCall(subCtx, call.ToolName, id)
+			callCtx, err := callCtx.SubCall(subCtx, call.ToolID, id)
 			if err != nil {
 				return err
 			}
@@ -213,7 +212,8 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 			resultLock.Lock()
 			defer resultLock.Unlock()
 			callResults = append(callResults, engine.CallResult{
-				ID:     id,
+				ToolID: call.ToolID,
+				CallID: id,
 				Result: result,
 			})
 

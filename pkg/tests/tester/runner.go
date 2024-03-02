@@ -54,8 +54,7 @@ func (c *Client) Call(_ context.Context, messageRequest types.CompletionRequest,
 	}
 
 	for i, tool := range messageRequest.Tools {
-		name := loader.ToolNormalizer(result.Func.Name)
-		if tool.Function.Name == name {
+		if tool.Function.Name == result.Func.Name {
 			return &types.CompletionMessage{
 				Role: types.CompletionMessageRoleTypeAssistant,
 				Content: []types.ContentPart{
@@ -75,7 +74,7 @@ func (c *Client) Call(_ context.Context, messageRequest types.CompletionRequest,
 	}
 
 	if result.Func.Name != "" {
-		c.t.Fatalf("failed to find tool %s, normalized as %s", result.Func.Name, loader.ToolNormalizer(result.Func.Name))
+		c.t.Fatalf("failed to find tool %s", result.Func.Name)
 	}
 
 	return &types.CompletionMessage{

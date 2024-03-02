@@ -4,12 +4,14 @@
   "Tools": [
     {
       "function": {
+        "toolID": "testdata/TestCwd/subtool/test.gpt:1",
         "name": "test",
         "parameters": null
       }
     },
     {
       "function": {
+        "toolID": "testdata/TestCwd/test.gpt:6",
         "name": "local",
         "parameters": null
       }

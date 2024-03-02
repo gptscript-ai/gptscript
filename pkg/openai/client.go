@@ -9,6 +9,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"slices"
 	"sort"
 	"strings"
 	"sync/atomic"
@@ -188,14 +189,38 @@ func toToolCall(call types.CompletionToolCall) openai.ToolCall {
 }
 
 func toMessages(request types.CompletionRequest) (result []openai.ChatCompletionMessage, err error) {
+	var (
+		systemPrompts []string
+		msgs          []types.CompletionMessage
+	)
+
 	if request.InternalSystemPrompt == nil || *request.InternalSystemPrompt {
-		result = append(result, openai.ChatCompletionMessage{
-			Role:    openai.ChatMessageRoleSystem,
-			Content: system.InternalSystemPrompt,
+		systemPrompts = append(systemPrompts, system.InternalSystemPrompt)
+	}
+
+	for i, message := range request.Messages {
+		if message.Role == types.CompletionMessageRoleTypeSystem {
+			// Append if the next message is system or user, otherwise set as user message
+			if i == len(request.Messages)-1 ||
+				(request.Messages[i].Role != types.CompletionMessageRoleTypeSystem &&
+					request.Messages[i].Role != types.CompletionMessageRoleTypeUser) {
+				message.Role = types.CompletionMessageRoleTypeUser
+			} else {
+				systemPrompts = append(systemPrompts, message.Content[0].Text)
+				continue
+			}
+		}
+		msgs = append(msgs, message)
+	}
+
+	if len(systemPrompts) > 0 {
+		msgs = slices.Insert(msgs, 0, types.CompletionMessage{
+			Role:    types.CompletionMessageRoleTypeSystem,
+			Content: types.Text(strings.Join(systemPrompts, "\n")),
 		})
 	}
 
-	for _, message := range request.Messages {
+	for _, message := range msgs {
 		chatMessage := openai.ChatCompletionMessage{
 			Role: string(message.Role),
 		}
@@ -230,6 +255,7 @@ func toMessages(request types.CompletionRequest) (result []openai.ChatCompletion
 
 		result = append(result, chatMessage)
 	}
+
 	return
 }
 
