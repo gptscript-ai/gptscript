@@ -20,6 +20,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
+	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/static"
 	"github.com/olahol/melody"
@@ -99,7 +100,7 @@ func (s *Server) list(rw http.ResponseWriter, req *http.Request) {
 	if req.URL.Path == "/sys" {
 		_ = enc.Encode(builtin.SysProgram())
 		return
-	} else if strings.HasSuffix(path, ".gpt") {
+	} else if strings.HasSuffix(path, system.Suffix) {
 		prg, err := loader.Program(req.Context(), path, req.URL.Query().Get("tool"))
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
@@ -121,7 +122,7 @@ func (s *Server) list(rw http.ResponseWriter, req *http.Request) {
 			return nil
 		}
 
-		if !d.IsDir() && strings.HasSuffix(d.Name(), ".gpt") {
+		if !d.IsDir() && strings.HasSuffix(d.Name(), system.Suffix) {
 			result = append(result, path)
 		}
 
@@ -137,8 +138,8 @@ func (s *Server) list(rw http.ResponseWriter, req *http.Request) {
 
 func (s *Server) run(rw http.ResponseWriter, req *http.Request) {
 	path := filepath.Join(".", req.URL.Path)
-	if !strings.HasSuffix(path, ".gpt") {
-		path += ".gpt"
+	if !strings.HasSuffix(path, system.Suffix) {
+		path += system.Suffix
 	}
 
 	prg, err := loader.Program(req.Context(), path, req.URL.Query().Get("tool"))
