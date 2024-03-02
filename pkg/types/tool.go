@@ -97,12 +97,12 @@ func (t Tool) String() string {
 }
 
 type ToolSource struct {
-	File   string `json:"file,omitempty"`
-	LineNo int    `json:"lineNo,omitempty"`
+	Location string `json:"location,omitempty"`
+	LineNo   int    `json:"lineNo,omitempty"`
 }
 
 func (t ToolSource) String() string {
-	return fmt.Sprintf("%s:%d", t.File, t.LineNo)
+	return fmt.Sprintf("%s:%d", t.Location, t.LineNo)
 }
 
 func (t Tool) IsCommand() bool {

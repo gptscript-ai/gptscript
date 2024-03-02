@@ -343,7 +343,7 @@ func (c callName) String() string {
 		tool := c.prg.ToolSet[currentCall.ToolID]
 		name := tool.Parameters.Name
 		if name == "" {
-			name = tool.Source.File
+			name = tool.Source.Location
 		}
 		if currentCall.ID != "1" {
 			name += "(" + c.prettyID + ")"
