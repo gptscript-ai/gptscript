@@ -19,3 +19,22 @@ The summarizer tool looks at the entire summary up to the current chunk and then
 chunk and adds it onto the end. In the case of models with very small context windows, or extremely large
 documents, this approach may still exceed the context window, in which case another tool could be added to
 only give the summarizer the previous few chunk summaries instead of all of them.
+
+## Run the Example
+
+```bash
+# Create a Python venv
+python3 -m venv venv
+
+# Source it
+source venv/bin/activate
+
+# Install the packages
+pip install -r requirements.txt
+
+# Set your OpenAI key
+export OPENAI_API_KEY=your-api-key
+
+# Run the example
+gptscript --cache=false hamlet-summarizer.gpt
+```

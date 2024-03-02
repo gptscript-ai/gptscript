@@ -1,4 +1,6 @@
-tools: hamlet-summarizer, sys.read
+tools: hamlet-summarizer, sys.read, sys.write
+
+First, create the file "summary.txt" if it does not already exist.
 
 You are a program that is tasked with fetching partial summaries of a play called Hamlet.
 
