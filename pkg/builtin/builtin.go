@@ -455,7 +455,11 @@ func SysStat(ctx context.Context, env []string, input string) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("File %s mode: %s, size: %d bytes, modtime: %s", params.Filepath, stat.Mode().String(), stat.Size(), stat.ModTime().String()), nil
+	title := "File"
+	if stat.IsDir() {
+		title = "Directory"
+	}
+	return fmt.Sprintf("%s %s mode: %s, size: %d bytes, modtime: %s", title, params.Filepath, stat.Mode().String(), stat.Size(), stat.ModTime().String()), nil
 }
 
 func SysDownload(ctx context.Context, env []string, input string) (_ string, err error) {
