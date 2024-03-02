@@ -216,6 +216,10 @@ func SysFind(ctx context.Context, env []string, input string) (string, error) {
 	if err != nil {
 		return "", nil
 	}
+	if len(result) == 0 {
+		return "No files found", nil
+	}
+
 	sort.Strings(result)
 	return strings.Join(result, "\n"), nil
 }

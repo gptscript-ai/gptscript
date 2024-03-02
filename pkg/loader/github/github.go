@@ -40,7 +40,7 @@ func getCommit(account, repo, ref string) (string, error) {
 		SHA string `json:"sha,omitempty"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&commit); err != nil {
-		return "", fmt.Errorf("failed to decode GitHub commit of %s/%s at %s: %w", err)
+		return "", fmt.Errorf("failed to decode GitHub commit of %s/%s at %s: %w", account, repo, url, err)
 	}
 
 	if commit.SHA == "" {
