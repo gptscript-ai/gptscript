@@ -1,19 +1,20 @@
-tools: story-writer, story-illustrator, sys.write, sys.read, sys.download
+tools: story-writer, story-illustrator, mkdir, sys.write, sys.read, sys.download
 description: Writes a children's book and generates illustrations for it.
 args: story: The story to write and illustrate. Can be a prompt or a complete story.
 args: pages: The number of pages to generate
 
 Do the following steps sequentially:
 
-1. If ${story} is a prompt and not a complete children's story, call story-writer
+1. Create the `pages` directory if it does not already exist.
+2. If ${story} is a prompt and not a complete children's story, call story-writer
    to write a story based on the prompt.
 3. Take ${story} and break it up into ${pages} logical "pages" of text.
-3. For each page:
+4. For each page:
    - Call story-illustrator to illustrate it. Be sure to include any relevant characters to include when 
      asking it to illustrate the page.
    - Download the illustration to a file at pages/<page_number>.png.
-4. For each page and its illustration write an html file with the text on top and the image below it to
-   pages/page<page number>.html. Add this style tag to the HTML file:
+5. For each page and its illustration write an html file with the text on top and image below it to pages/page<page number>.html.
+   Assume the illustration file is a sibling to the html file, Add this style tag to the HTML file:
    ```html
    <style>
       body {
@@ -36,7 +37,7 @@ Do the following steps sequentially:
       }
    </style>
    ```
-5. Edit the "pages" variable array in index.html to serve the pages you created. Do not 
+6. Edit the "pages" variable array in index.html to serve the pages you created. Do not 
    edit anything else. Do not edit the page select field.
 
 ---
@@ -57,3 +58,12 @@ include the name of any relevant characters in your prompt. Then use that prompt
 generate an illustration. Append any prompt that you have with ". In an pointilism cartoon
 children's book style with no text in it". Only return the URL of the illustration.
 
+---
+name: mkdir
+tools: sys.write
+description: Creates a specified directory
+args: dir: Path to the directory to be created
+
+#!bash
+
+mkdir ${dir}
