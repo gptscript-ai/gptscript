@@ -5,3 +5,5 @@
 **/package-lock.json
 **/__pycache__
 /docs/yarn.lock
+/releases
+/checksums.txt
