@@ -53,6 +53,13 @@ brew install gptscript-ai/tap/gptscript
 curl https://get.gptscript.ai/install.sh | sh
 ```
 
+### Scoop (Windows)
+
+```shell
+scoop bucket add extras # If 'extras' is not already enabled
+scoop install gptscript
+```
+
 #### WinGet (Windows)
 
 ```shell
