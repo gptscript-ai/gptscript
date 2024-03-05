@@ -83,7 +83,7 @@ Depending on the context window supported by the LLM, you can either send a larg
 
 ### Summarization
 
-Here is a GPTScript that sends a large document in batches to the LLM and produces a summary of the entire document. [Link to example here]
+Here is a GPTScript that sends a large document in batches to the LLM and produces a summary of the entire document. [hamlet-summarizer](../examples/hamlet-summarizer)
 
 Here is a GPTScript that reads the content of a large SQL database and produces a summary of the entire database. [Link to example here]
 
