@@ -422,7 +422,9 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 		} else if err != nil {
 			return nil, err
 		}
-		slog.Debug("stream", "content", response.Choices[0].Delta.Content)
+		if response.Choices != nil && len(response.Choices) > 0 {
+			slog.Debug("stream", "content", response.Choices[0].Delta.Content)
+		}
 		if partial != nil {
 			partialMessage = appendMessage(partialMessage, response)
 			partial <- types.CompletionStatus{
