@@ -14,13 +14,16 @@ referencing the tool's link in your GPTScript. For now, you can follow the steps
 git clone https://github.com/gptscript-ai/image-generation
 ```
 
-2. Run `make bootstrap` to setup the python venv and install the required dependencies.
+2. In the newly cloned repo, run `make bootstrap` to setup the python venv and install the required dependencies. Then activate the virtual environment.
 
 ```shell
 make bootstrap
+source .venv/bin/activate
 ```
 
-3. Reference `<path-to-the-repo>/tool.gpt` in your GPTScript.
+> Note: You can install the python dependencies manually by running `pip install -r requirements.txt` in the root of the cloned repository. This prevents the need to run `make bootstrap` or activate the virtual environment.
+
+3. In the same shell session that your virutal environment is activated, reference `<path-to-the-repo>/tool.gpt` in your GPTScript.
 
 ## Usage
 To use the Image Generation tool, you need to make sure that the OPENAI_API_KEY environment variable is set to your OpenAI API key. You can obtain an API key from the OpenAI platform if you don't already have one.
