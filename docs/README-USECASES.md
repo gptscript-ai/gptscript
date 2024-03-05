@@ -102,9 +102,12 @@ Here is a GPTScript that summarizes the the code stored under the current direct
 ## Vision, Image, and Audio
 
 ### Vision
+
 Here is an example of a web app that leverages GPTScript to recognize ingredients in a photo and suggest a recipe based on them: [recipe-generator](../examples/recipegenerator).
 
-[More details to come]
+### Image Generation
+
+Here is a GPTScript that takes a story prompt and generates an illustrated children's book: [story-book.gpt](../examples/story-book)
 
 ## Memory Management
 
