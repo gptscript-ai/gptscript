@@ -1,0 +1,20 @@
+{
+  "name": "examples",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@gptscript-ai/gptscript": "^0.1.2",
+    "express": "^4.18.3",
+    "express-ws": "^5.0.2",
+    "nodemon": "^3.1.0",
+    "ws": "^8.16.0"
+  }
+}
