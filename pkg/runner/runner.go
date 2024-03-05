@@ -11,8 +11,8 @@ import (
 
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/types"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
-	"google.golang.org/appengine/log"
 )
 
 type MonitorFactory interface {
@@ -121,7 +121,8 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 				Content:     *result.Result,
 			})
 			if err := recordStateMessage(result.State); err != nil {
-				log.Warningf(callCtx.Ctx, "Failed to record state message: %v", err)
+				// Log a warning message if failed to record state message so that it doesn't affect the main process if state can't be recorded
+				logrus.Warningf("Failed to record state message: %v", err)
 			}
 			return *result.Result, nil
 		}
