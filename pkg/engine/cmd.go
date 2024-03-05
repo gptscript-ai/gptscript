@@ -16,6 +16,12 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
 
+var (
+	reservedEnvNameList = map[string]struct{}{
+		"PATH": {},
+	}
+)
+
 func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) (cmdOut string, cmdErr error) {
 	id := fmt.Sprint(atomic.AddInt64(&completionID, 1))
 
@@ -93,24 +99,24 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, instructions
 			switch val := v.(type) {
 			case string:
 				envMap[envName] = val
-				env = append(env, envName+"="+val)
+				env = appendEnvName(env, envName, val)
 				envMap[k] = val
 				env = append(env, k+"="+val)
 			case json.Number:
 				envMap[envName] = string(val)
-				env = append(env, envName+"="+string(val))
+				env = appendEnvName(env, envName, string(val))
 				envMap[k] = string(val)
 				env = append(env, k+"="+string(val))
 			case bool:
 				envMap[envName] = fmt.Sprint(val)
-				env = append(env, envName+"="+fmt.Sprint(val))
+				env = appendEnvName(env, envName, fmt.Sprint(val))
 				envMap[k] = fmt.Sprint(val)
 				env = append(env, k+"="+fmt.Sprint(val))
 			default:
 				data, err := json.Marshal(val)
 				if err == nil {
 					envMap[envName] = string(data)
-					env = append(env, envName+"="+string(data))
+					env = appendEnvName(env, envName, string(data))
 					envMap[k] = string(data)
 					env = append(env, k+"="+string(data))
 				}
@@ -156,4 +162,12 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, instructions
 	cmd := exec.CommandContext(ctx, args[0], cmdArgs...)
 	cmd.Env = env
 	return cmd, stop, nil
+}
+
+// appendEnvName appends the name and value to the env slice if the name is not in the reservedEnvNameList
+func appendEnvName(env []string, name, value string) []string {
+	if _, ok := reservedEnvNameList[name]; ok {
+		return env
+	}
+	return append(env, name+"="+value)
 }
