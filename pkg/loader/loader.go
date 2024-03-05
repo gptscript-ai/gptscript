@@ -3,7 +3,6 @@ package loader
 import (
 	"bytes"
 	"context"
-	"crypto/md5"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -13,14 +12,12 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/parser"
-	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
@@ -182,48 +179,6 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 	return link(ctx, prg, base, mainTool, localTools)
 }
 
-var (
-	validToolName = regexp.MustCompile("^[a-zA-Z0-9_-]{1,64}$")
-	invalidChars  = regexp.MustCompile("[^a-zA-Z0-9_-]+")
-)
-
-func ToolNormalizer(tool string) string {
-	parts := strings.Split(tool, "/")
-	tool = parts[len(parts)-1]
-	if strings.HasSuffix(tool, system.Suffix) {
-		tool = strings.TrimSuffix(tool, filepath.Ext(tool))
-	}
-
-	if validToolName.MatchString(tool) {
-		return tool
-	}
-
-	name := invalidChars.ReplaceAllString(tool, "-")
-	if len(name) > 55 {
-		name = name[:55]
-	}
-
-	hash := md5.Sum([]byte(tool))
-	hexed := hex.EncodeToString(hash[:])
-
-	return name + "-" + hexed[:8]
-}
-
-func pickToolName(toolName string, existing map[string]struct{}) string {
-	if toolName == "" {
-		toolName = "external"
-	}
-
-	for {
-		testName := ToolNormalizer(toolName)
-		if _, ok := existing[testName]; !ok {
-			existing[testName] = struct{}{}
-			return testName
-		}
-		toolName += "0"
-	}
-}
-
 func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool, localTools types.ToolSet) (types.Tool, error) {
 	if existing, ok := prg.ToolSet[tool.ID]; ok {
 		return existing, nil
@@ -240,50 +195,39 @@ func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool
 	// The below is done in two loops so that local names stay as the tool names
 	// and don't get mangled by external references
 
-	for _, targetToolName := range tool.Parameters.Tools {
+	for _, targetToolName := range append(tool.Parameters.Tools, tool.Parameters.Export...) {
 		localTool, ok := localTools[targetToolName]
-		if !ok {
-			continue
-		}
-
-		var linkedTool types.Tool
-		if existing, ok := prg.ToolSet[localTool.ID]; ok {
-			linkedTool = existing
-		} else {
-			var err error
-			linkedTool, err = link(ctx, prg, base, localTool, localTools)
-			if err != nil {
-				return types.Tool{}, fmt.Errorf("failed linking %s at %s: %w", targetToolName, base, err)
+		if ok {
+			var linkedTool types.Tool
+			if existing, ok := prg.ToolSet[localTool.ID]; ok {
+				linkedTool = existing
+			} else {
+				var err error
+				linkedTool, err = link(ctx, prg, base, localTool, localTools)
+				if err != nil {
+					return types.Tool{}, fmt.Errorf("failed linking %s at %s: %w", targetToolName, base, err)
+				}
 			}
-		}
 
-		tool.ToolMapping[targetToolName] = linkedTool.ID
-		toolNames[targetToolName] = struct{}{}
-	}
-
-	for i, targetToolName := range tool.Parameters.Tools {
-		_, ok := localTools[targetToolName]
-		if ok {
-			continue
-		}
-
-		subTool, toolName, ok := strings.Cut(targetToolName, " from ")
-		if ok {
-			toolName = strings.TrimSpace(toolName)
-			subTool = strings.TrimSpace(subTool)
+			tool.ToolMapping[targetToolName] = linkedTool.ID
+			toolNames[targetToolName] = struct{}{}
 		} else {
-			toolName = targetToolName
-			subTool = ""
-		}
+			subTool, toolName, ok := strings.Cut(targetToolName, " from ")
+			if ok {
+				toolName = strings.TrimSpace(toolName)
+				subTool = strings.TrimSpace(subTool)
+			} else {
+				toolName = targetToolName
+				subTool = ""
+			}
 
-		resolvedTool, err := resolve(ctx, prg, base, toolName, subTool)
-		if err != nil {
-			return types.Tool{}, fmt.Errorf("failed resolving %s at %s: %w", targetToolName, base, err)
-		}
+			resolvedTool, err := resolve(ctx, prg, base, toolName, subTool)
+			if err != nil {
+				return types.Tool{}, fmt.Errorf("failed resolving %s at %s: %w", targetToolName, base, err)
+			}
 
-		newToolName := pickToolName(toolName, toolNames)
-		tool.ToolMapping[newToolName] = resolvedTool.ID
-		tool.Parameters.Tools[i] = newToolName
+			tool.ToolMapping[targetToolName] = resolvedTool.ID
+		}
 	}
 
 	for _, localTool := range localTools {

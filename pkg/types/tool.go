@@ -34,6 +34,7 @@ type Parameters struct {
 	InternalPrompt *bool       `json:"internalPrompt"`
 	Arguments      *JSONSchema `json:"arguments,omitempty"`
 	Tools          []string    `json:"tools,omitempty"`
+	Export         []string    `json:"export,omitempty"`
 }
 
 type Tool struct {
@@ -58,6 +59,9 @@ func (t Tool) String() string {
 	}
 	if len(t.Parameters.Tools) != 0 {
 		_, _ = fmt.Fprintf(buf, "Tools: %s\n", strings.Join(t.Parameters.Tools, ", "))
+	}
+	if len(t.Parameters.Export) != 0 {
+		_, _ = fmt.Fprintf(buf, "Export: %s\n", strings.Join(t.Parameters.Export, ", "))
 	}
 	if t.Parameters.MaxTokens != 0 {
 		_, _ = fmt.Fprintf(buf, "Max Tokens: %d\n", t.Parameters.MaxTokens)

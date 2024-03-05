@@ -45,21 +45,23 @@ type Return struct {
 }
 
 type Call struct {
-	ToolName string `json:"toolName,omitempty"`
-	Input    string `json:"input,omitempty"`
+	ToolID string `json:"toolID,omitempty"`
+	Input  string `json:"input,omitempty"`
 }
 
 type CallResult struct {
-	ID     string `json:"id,omitempty"`
+	ToolID string `json:"toolID,omitempty"`
+	CallID string `json:"callID,omitempty"`
 	Result string `json:"result,omitempty"`
 }
 
 type Context struct {
-	ID      string
-	Ctx     context.Context
-	Parent  *Context
-	Program *types.Program
-	Tool    types.Tool
+	ID        string
+	Ctx       context.Context
+	Parent    *Context
+	Program   *types.Program
+	Tool      types.Tool
+	toolNames map[string]struct{}
 }
 
 func (c *Context) ParentID() string {
@@ -97,10 +99,10 @@ func NewContext(ctx context.Context, prg *types.Program) Context {
 	return callCtx
 }
 
-func (c *Context) SubCall(ctx context.Context, toolName, callID string) (Context, error) {
-	tool, err := c.getTool(toolName)
-	if err != nil {
-		return Context{}, err
+func (c *Context) SubCall(ctx context.Context, toolID, callID string) (Context, error) {
+	tool, ok := c.Program.ToolSet[toolID]
+	if !ok {
+		return Context{}, fmt.Errorf("failed to file tool for id [%s]", toolID)
 	}
 	return Context{
 		ID:      callID,
@@ -111,8 +113,8 @@ func (c *Context) SubCall(ctx context.Context, toolName, callID string) (Context
 	}, nil
 }
 
-func (c *Context) getTool(name string) (types.Tool, error) {
-	toolID, ok := c.Tool.ToolMapping[name]
+func (c *Context) getTool(parent types.Tool, name string) (types.Tool, error) {
+	toolID, ok := parent.ToolMapping[name]
 	if !ok {
 		return types.Tool{}, &ErrToolNotFound{
 			ToolName: name,
@@ -125,6 +127,45 @@ func (c *Context) getTool(name string) (types.Tool, error) {
 		}
 	}
 	return tool, nil
+}
+
+func (c *Context) appendTool(completion *types.CompletionRequest, parentTool types.Tool, subToolName string) error {
+	subTool, err := c.getTool(parentTool, subToolName)
+	if err != nil {
+		return err
+	}
+
+	args := subTool.Parameters.Arguments
+	if args == nil && !subTool.IsCommand() {
+		args = &system.DefaultToolSchema
+	}
+
+	for _, existingTool := range completion.Tools {
+		if existingTool.Function.ToolID == subTool.ID {
+			return nil
+		}
+	}
+
+	if c.toolNames == nil {
+		c.toolNames = map[string]struct{}{}
+	}
+
+	completion.Tools = append(completion.Tools, types.CompletionTool{
+		Function: types.CompletionFunctionDefinition{
+			ToolID:      subTool.ID,
+			Name:        PickToolName(subToolName, c.toolNames),
+			Description: subTool.Parameters.Description,
+			Parameters:  args,
+		},
+	})
+
+	for _, export := range subTool.Export {
+		if err := c.appendTool(completion, subTool, export); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (e *Engine) Start(ctx Context, input string) (*Return, error) {
@@ -155,21 +196,9 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 	}
 
 	for _, subToolName := range tool.Parameters.Tools {
-		subTool, err := ctx.getTool(subToolName)
-		if err != nil {
+		if err := ctx.appendTool(&completion, ctx.Tool, subToolName); err != nil {
 			return nil, err
 		}
-		args := subTool.Parameters.Arguments
-		if args == nil && !subTool.IsCommand() {
-			args = &system.DefaultToolSchema
-		}
-		completion.Tools = append(completion.Tools, types.CompletionTool{
-			Function: types.CompletionFunctionDefinition{
-				Name:        subToolName,
-				Description: subTool.Parameters.Description,
-				Parameters:  args,
-			},
-		})
 	}
 
 	if tool.Instructions != "" {
@@ -225,10 +254,19 @@ func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 	state.Pending = map[string]types.CompletionToolCall{}
 	for _, content := range resp.Content {
 		if content.ToolCall != nil {
+			var toolID string
+			for _, tool := range state.Completion.Tools {
+				if tool.Function.Name == content.ToolCall.Function.Name {
+					toolID = tool.Function.ToolID
+				}
+			}
+			if toolID == "" {
+				return nil, fmt.Errorf("failed to find tool id for tool %s in tool_call result", content.ToolCall.Function.Name)
+			}
 			state.Pending[content.ToolCall.ID] = *content.ToolCall
 			ret.Calls[content.ToolCall.ID] = Call{
-				ToolName: content.ToolCall.Function.Name,
-				Input:    content.ToolCall.Function.Arguments,
+				ToolID: toolID,
+				Input:  content.ToolCall.Function.Arguments,
 			}
 		} else {
 			cp := content.Text
@@ -247,7 +285,7 @@ func (e *Engine) Continue(ctx context.Context, state *State, results ...CallResu
 	}
 
 	for _, result := range results {
-		state.Results[result.ID] = result
+		state.Results[result.CallID] = result
 	}
 
 	ret := Return{
@@ -262,8 +300,8 @@ func (e *Engine) Continue(ctx context.Context, state *State, results ...CallResu
 	for id, pending := range state.Pending {
 		if _, ok := state.Results[id]; !ok {
 			ret.Calls[id] = Call{
-				ToolName: pending.Function.Name,
-				Input:    pending.Function.Arguments,
+				ToolID: state.Completion.Tools[*pending.Index].Function.ToolID,
+				Input:  pending.Function.Arguments,
 			}
 		}
 	}
