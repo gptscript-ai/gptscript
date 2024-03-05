@@ -17,8 +17,10 @@ by `index.html` which has some JS/CSS to make the story styling consistent and r
     cd image-generation
     make bootstrap
     source .venv/bin/activate
-    cd - # returns you back to your original directory
+    cd ../gptscript # returns you back to your original directory
     ```
+
+    > Note: You can install the python dependencies manually by running `pip install -r requirements.txt` in the root of the cloned repository. This prevents the need to run `make bootstrap` or activate the virtual environment.
 
 2. **Run the `story-book.gpt` script.**
 
