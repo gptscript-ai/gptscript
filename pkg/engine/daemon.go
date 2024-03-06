@@ -74,6 +74,7 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 
 	instructions := strings.TrimPrefix(tool.Instructions, types.DaemonPrefix)
 	instructions, path := getPath(instructions)
+	tool.Instructions = types.CommandPrefix + instructions
 
 	port, ok := daemonPorts[tool.ID]
 	url := fmt.Sprintf("http://127.0.0.1:%d%s", port, path)
@@ -92,7 +93,7 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 	cmd, stop, err := e.newCommand(ctx, []string{
 		fmt.Sprintf("PORT=%d", port),
 	},
-		types.CommandPrefix+instructions,
+		tool,
 		"{}",
 	)
 	if err != nil {

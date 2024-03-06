@@ -8,6 +8,8 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"sort"
 	"strings"
 	"sync/atomic"
 
@@ -40,12 +42,7 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 		return tool.BuiltinFunc(ctx, e.Env, input)
 	}
 
-	var extraEnv []string
-	if tool.WorkingDir != "" {
-		extraEnv = append(extraEnv, "GPTSCRIPT_TOOL_DIR="+tool.WorkingDir)
-	}
-
-	cmd, stop, err := e.newCommand(ctx, extraEnv, tool.Instructions, input)
+	cmd, stop, err := e.newCommand(ctx, nil, tool, input)
 	if err != nil {
 		return "", err
 	}
@@ -74,60 +71,104 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 	return output.String(), nil
 }
 
-func (e *Engine) newCommand(ctx context.Context, extraEnv []string, instructions, input string) (*exec.Cmd, func(), error) {
-	env := append(e.Env[:], extraEnv...)
-	data := map[string]any{}
+func (e *Engine) getRuntimeEnv(ctx context.Context, tool types.Tool, cmd, env []string) ([]string, error) {
+	var (
+		workdir = tool.WorkingDir
+		err     error
+	)
+	if e.RuntimeManager != nil {
+		workdir, env, err = e.RuntimeManager.GetContext(ctx, tool, cmd, env)
+		if err != nil {
+			return nil, err
+		}
+		workdir = filepath.Join(workdir, tool.Source.Repo.Path)
+	}
+	return append(env, "GPTSCRIPT_TOOL_DIR="+workdir), nil
+}
 
+func envAsMapAndDeDup(env []string) (sortedEnv []string, _ map[string]string) {
+	envMap := map[string]string{}
+	var keys []string
+	for _, env := range env {
+		key, value, _ := strings.Cut(env, "=")
+		if _, existing := envMap[key]; !existing {
+			keys = append(keys, key)
+		}
+		envMap[key] = value
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		sortedEnv = append(sortedEnv, key+"="+envMap[key])
+	}
+
+	return sortedEnv, envMap
+}
+
+var ignoreENV = map[string]struct{}{
+	"PATH":               {},
+	"GPTSCRIPT_TOOL_DIR": {},
+}
+
+func appendEnv(env []string, k, v string) []string {
+	for _, k := range []string{k, strings.ToUpper(strings.ReplaceAll(k, "-", "_"))} {
+		if _, ignore := ignoreENV[k]; !ignore {
+			env = append(env, k+"="+v)
+		}
+	}
+	return env
+}
+
+func appendInputAsEnv(env []string, input string) []string {
+	data := map[string]any{}
 	dec := json.NewDecoder(bytes.NewReader([]byte(input)))
 	dec.UseNumber()
 
-	envMap := map[string]string{}
-	for _, env := range env {
-		key, value, _ := strings.Cut(env, "=")
-		envMap[key] = value
+	if err := json.Unmarshal([]byte(input), &data); err != nil {
+		// ignore invalid JSON
+		return env
 	}
 
-	if err := json.Unmarshal([]byte(input), &data); err == nil {
-		for k, v := range data {
-			envName := strings.ToUpper(strings.ReplaceAll(k, "-", "_"))
-			switch val := v.(type) {
-			case string:
-				envMap[envName] = val
-				env = append(env, envName+"="+val)
-				envMap[k] = val
-				env = append(env, k+"="+val)
-			case json.Number:
-				envMap[envName] = string(val)
-				env = append(env, envName+"="+string(val))
-				envMap[k] = string(val)
-				env = append(env, k+"="+string(val))
-			case bool:
-				envMap[envName] = fmt.Sprint(val)
-				env = append(env, envName+"="+fmt.Sprint(val))
-				envMap[k] = fmt.Sprint(val)
-				env = append(env, k+"="+fmt.Sprint(val))
-			default:
-				data, err := json.Marshal(val)
-				if err == nil {
-					envMap[envName] = string(data)
-					env = append(env, envName+"="+string(data))
-					envMap[k] = string(data)
-					env = append(env, k+"="+string(data))
-				}
+	for k, v := range data {
+		switch val := v.(type) {
+		case string:
+			env = appendEnv(env, k, val)
+		case json.Number:
+			env = appendEnv(env, k, string(val))
+		case bool:
+			env = appendEnv(env, k, fmt.Sprint(val))
+		default:
+			data, err := json.Marshal(val)
+			if err == nil {
+				env = appendEnv(env, k, string(data))
 			}
 		}
 	}
 
-	interpreter, rest, _ := strings.Cut(instructions, "\n")
-	interpreter = strings.TrimSpace(interpreter)[2:]
+	return env
+}
 
-	interpreter = os.Expand(interpreter, func(s string) string {
-		return envMap[s]
-	})
+func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.Tool, input string) (*exec.Cmd, func(), error) {
+	env := append(e.Env[:], extraEnv...)
+	env = appendInputAsEnv(env, input)
+
+	interpreter, rest, _ := strings.Cut(tool.Instructions, "\n")
+	interpreter = strings.TrimSpace(interpreter)[2:]
 
 	args, err := shlex.Split(interpreter)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	env, err = e.getRuntimeEnv(ctx, tool, args, env)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	env, envMap := envAsMapAndDeDup(env)
+	for i, arg := range args {
+		args[i] = os.Expand(arg, func(s string) string {
+			return envMap[s]
+		})
 	}
 
 	var (

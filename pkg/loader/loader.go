@@ -34,20 +34,7 @@ type source struct {
 	// be a valid URI or URL, used primarily for display.
 	Location string
 	// Repo The VCS repo where this tool was found, used to clone and provide the local tool code content
-	Repo *Repo
-}
-
-type Repo struct {
-	// VCS The VCS type, such as "github"
-	VCS string
-	// The URL where the VCS repo can be found
-	Root string
-	// The path in the repo of this source. This should refer to a directory and not the actual file
-	Path string
-	// The filename of the source in the repo, relative to Path
-	Name string
-	// The revision of this source
-	Revision string
+	Repo *types.Repo
 }
 
 func (s *source) String() string {
@@ -151,6 +138,7 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 	for i, tool := range tools {
 		tool.WorkingDir = base.Path
 		tool.Source.Location = base.Location
+		tool.Source.Repo = base.Repo
 
 		// Probably a better way to come up with an ID
 		tool.ID = tool.Source.String()

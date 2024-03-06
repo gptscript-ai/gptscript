@@ -7,9 +7,11 @@ import (
 	url2 "net/url"
 	"path/filepath"
 	"strings"
+
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
-type VCSLookup func(string) (string, *Repo, bool, error)
+type VCSLookup func(string) (string, *types.Repo, bool, error)
 
 var vcsLookups []VCSLookup
 
@@ -19,7 +21,7 @@ func AddVSC(lookup VCSLookup) {
 
 func loadURL(ctx context.Context, base *source, name string) (*source, bool, error) {
 	var (
-		repo *Repo
+		repo *types.Repo
 		url  = name
 	)
 
@@ -37,7 +39,7 @@ func loadURL(ctx context.Context, base *source, name string) (*source, bool, err
 
 	if repo == nil {
 		for _, vcs := range vcsLookups {
-			newURL, newRepo, ok, err := vcs(url)
+			newURL, newRepo, ok, err := vcs(name)
 			if err != nil {
 				return nil, false, err
 			} else if ok {

@@ -18,6 +18,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/monitor"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/openai"
+	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/server"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -225,6 +226,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 		MonitorFactory: monitor.NewConsole(monitor.Options(r.DisplayOptions), monitor.Options{
 			DisplayProgress: !*r.Quiet,
 		}),
+		RuntimeManager: runtimes.Default(cache.Complete(cache.Options(r.CacheOptions)).CacheDir),
 	})
 	if err != nil {
 		return err

@@ -10,6 +10,7 @@ import (
 
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/system"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 const (
@@ -50,7 +51,7 @@ func getCommit(account, repo, ref string) (string, error) {
 	return commit.SHA, nil
 }
 
-func Load(urlName string) (string, *loader.Repo, bool, error) {
+func Load(urlName string) (string, *types.Repo, bool, error) {
 	if !strings.HasPrefix(urlName, GithubPrefix) {
 		return "", nil, false, nil
 	}
@@ -61,8 +62,8 @@ func Load(urlName string) (string, *loader.Repo, bool, error) {
 	}
 
 	parts := strings.Split(url, "/")
-	// Must be at least 4 parts github.com/ACCOUNT/REPO/FILE
-	if len(parts) < 4 {
+	// Must be at least 3 parts github.com/ACCOUNT/REPO[/FILE]
+	if len(parts) < 3 {
 		return "", nil, false, nil
 	}
 
@@ -81,8 +82,8 @@ func Load(urlName string) (string, *loader.Repo, bool, error) {
 	}
 
 	downloadURL := fmt.Sprintf(githubDownloadURL, account, repo, ref, path)
-	return downloadURL, &loader.Repo{
-		VCS:      "github",
+	return downloadURL, &types.Repo{
+		VCS:      "git",
 		Root:     fmt.Sprintf(githubRepoURL, account, repo),
 		Path:     filepath.Dir(path),
 		Name:     filepath.Base(path),

@@ -6,13 +6,25 @@ import (
 	"encoding/json"
 )
 
+func ID(parts ...string) string {
+	d := sha256.New()
+	for i, part := range parts {
+		if i > 0 {
+			d.Write([]byte{0x00})
+		}
+		d.Write([]byte(part))
+	}
+	hash := d.Sum(nil)
+	return hex.EncodeToString(hash[:])
+}
+
 func Digest(obj any) string {
 	data, err := json.Marshal(obj)
 	if err != nil {
 		panic(err)
 	}
 
-	hash := sha256.Sum224(data)
+	hash := sha256.Sum256(data)
 	return hex.EncodeToString(hash[:])
 }
 
@@ -32,6 +44,6 @@ func Encode(obj any) string {
 		panic(err)
 	}
 
-	hash := sha256.Sum224(data)
+	hash := sha256.Sum256(data)
 	return hex.EncodeToString(hash[:])
 }

@@ -26,10 +26,15 @@ type Model interface {
 	Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error)
 }
 
+type RuntimeManager interface {
+	GetContext(ctx context.Context, tool types.Tool, cmd, env []string) (string, []string, error)
+}
+
 type Engine struct {
-	Model    Model
-	Env      []string
-	Progress chan<- types.CompletionStatus
+	Model          Model
+	RuntimeManager RuntimeManager
+	Env            []string
+	Progress       chan<- types.CompletionStatus
 }
 
 type State struct {

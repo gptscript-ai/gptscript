@@ -22,7 +22,7 @@ type Options struct {
 	CacheDir string `usage:"Directory to store cache (default: $XDG_CACHE_HOME/gptscript)"`
 }
 
-func complete(opts ...Options) (result Options) {
+func Complete(opts ...Options) (result Options) {
 	for _, opt := range opts {
 		result.CacheDir = types.FirstSet(opt.CacheDir, result.CacheDir)
 		result.Cache = types.FirstSet(opt.Cache, result.Cache)
@@ -48,7 +48,7 @@ func WithNoCache(ctx context.Context) context.Context {
 }
 
 func New(opts ...Options) (*Client, error) {
-	opt := complete(opts...)
+	opt := Complete(opts...)
 	if err := os.MkdirAll(opt.CacheDir, 0755); err != nil {
 		return nil, err
 	}
