@@ -422,7 +422,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 		} else if err != nil {
 			return nil, err
 		}
-		if response.Choices != nil && len(response.Choices) > 0 {
+		if len(response.Choices) > 0 {
 			slog.Debug("stream", "content", response.Choices[0].Delta.Content)
 		}
 		if partial != nil {
