@@ -34,3 +34,17 @@ by `index.html` which has some JS/CSS to make the story styling consistent and r
 3. **View the story.**
 
     Open `index.html` in your browser to view the generated story.
+
+4. (optional) **Generate a new story.**
+
+    To generate another story, you'll first need to delete the existing `pages` directory. In the `examples/story-book` directory, run the following command:
+
+    ```shell
+    rm -rf pages
+    ```
+
+    After that, you can generate a new story by running the `story-book.gpt` script again with a different prompt or number of pages.
+
+    ```shell
+    gptscript story-book.gpt --prompt "The Three Little Pigs" --pages 5
+    ```
