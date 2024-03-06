@@ -82,13 +82,17 @@ func complete(opts ...Options) (result Options, err error) {
 	return result, err
 }
 
-func AzureMapperFunction(model string) string {
+func GetAzureMapperFunction(defaultModel, azureModel string) func(string) string {
 	if azureModel == "" {
-		return model
+		return func(model string) string {
+			return model
+		}
 	}
-	return map[string]string{
-		openai.GPT4TurboPreview: azureModel,
-	}[model]
+	return func(model string) string {
+		return map[string]string{
+			defaultModel: azureModel,
+		}[model]
+	}
 }
 
 func NewClient(opts ...Options) (*Client, error) {
@@ -100,7 +104,7 @@ func NewClient(opts ...Options) (*Client, error) {
 	cfg := openai.DefaultConfig(opt.APIKey)
 	if strings.Contains(string(opt.APIType), "AZURE") {
 		cfg = openai.DefaultAzureConfig(key, url)
-		cfg.AzureModelMapperFunc = AzureMapperFunction
+		cfg.AzureModelMapperFunc = GetAzureMapperFunction(opt.DefaultModel, azureModel)
 	}
 
 	cfg.BaseURL = types.FirstSet(opt.BaseURL, cfg.BaseURL)
