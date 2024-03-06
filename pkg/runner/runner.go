@@ -245,6 +245,6 @@ func recordStateMessage(state *engine.State) error {
 		return err
 	}
 
-	filename := filepath.Join(tmpdir, fmt.Sprintf("gptscript-state-%v-%v", hostname, time.Now().Unix()))
+	filename := filepath.Join(tmpdir, fmt.Sprintf("gptscript-state-%v-%v", hostname, time.Now().UnixMilli()))
 	return os.WriteFile(filename, data, 0444)
 }
