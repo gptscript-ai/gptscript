@@ -10,7 +10,7 @@ calls. With GPTScript you can do just about anything, like [plan a vacation](./e
 [edit a file](./examples/add-go-mod-dep.gpt), [run some SQL](./examples/sqlite-download.gpt), or [build a mongodb/flask app](./examples/hacker-news-headlines.gpt).
 
 | :memo: | We are currently exploring options for interacting with local models using GPTScript. |
-|-|:-|
+| ------ | :------------------------------------------------------------------------------------ |
 
 ```yaml
 # example.gpt
@@ -28,15 +28,18 @@ the result of that.
 
 When done remove the database file and the downloaded content.
 ```
+
 ```shell
 $ gptscript ./example.gpt
 ```
+
 ```
 OUTPUT:
 
 The artist with the most number of albums in the database is Iron Maiden, with a total
 of 21 albums.
 ```
+
 ## Quick Start
 
 ### 1. Install the latest release
@@ -98,16 +101,21 @@ $env:OPENAI = 'your-api-key'
 ```shell
 gptscript https://get.gptscript.ai/echo.gpt --input 'Hello, World!'
 ```
+
 ```
 OUTPUT:
 
 Hello, World!
 ```
+
 The model used by default is `gpt-4-turbo-preview` and you must have access to that model in your OpenAI account.
+
+If using Azure OpenAI, make sure you configure the model to be one of the supported versions with the `--default-model` argument.
 
 ### 4. Extra Credit: Examples and Run Debugging UI
 
 Clone examples and run debugging UI
+
 ```shell
 git clone https://github.com/gptscript-ai/gptscript
 cd gptscript/examples
@@ -118,13 +126,14 @@ gptscript --server
 
 ## How it works
 
-***GPTScript is composed of tools.*** Each tool performs a series of actions similar to a function. Tools have available
+**_GPTScript is composed of tools._** Each tool performs a series of actions similar to a function. Tools have available
 to them other tools that can be invoked similar to a function call. While similar to a function, the tools are
-primarily implemented with a natural language prompt. ***The interaction of the tools is determined by the AI model***,
+primarily implemented with a natural language prompt. **_The interaction of the tools is determined by the AI model_**,
 the model determines if the tool needs to be invoked and what arguments to pass. Tools are intended to be implemented
 with a natural language prompt but can also be implemented with a command or HTTP call.
 
 ### Example
+
 Below are two tool definitions, separated by `---`. The first tool does not require a name or description, but
 every tool after name and description are required. The first tool, has the parameter `tools: bob` meaning that the tool named `bob` is available to be called if needed.
 
@@ -140,15 +149,19 @@ args: question: The question to ask Bob.
 
 When asked how I am doing, respond with "Thanks for asking "${question}", I'm doing great fellow friendly AI tool!"
 ```
+
 Put the above content in a file named `bob.gpt` and run the following command:
+
 ```shell
 $ gptscript bob.gpt
 ```
+
 ```
 OUTPUT:
 
 Bob said, "Thanks for asking 'How are you doing?', I'm doing great fellow friendly AI tool!"
 ```
+
 Tools can be implemented by invoking a program instead of a natural language prompt. The below
 example is the same as the previous example but implements Bob using python.
 
@@ -175,9 +188,11 @@ or external services.
 ## GPT File Reference
 
 ### Extension
+
 GPTScript files use the `.gpt` extension by convention.
 
 ### File Structure
+
 A GPTScript file has one or more tools in the file. Each tool is separated by three dashes `---` alone on a line.
 
 ```yaml
@@ -210,6 +225,7 @@ Args: arg1: The description of arg1
 
 Tool instructions go here.
 ```
+
 #### Tool Parameters
 
 Tool parameters are key-value pairs defined at the beginning of a tool block, before any instructional text. They are specified in the format `key: value`. The parser recognizes the following keys (case-insensitive and spaces are ignored):
