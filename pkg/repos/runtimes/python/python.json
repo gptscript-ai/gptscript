@@ -1,0 +1,107 @@
+[
+  {
+    "os": "darwin",
+    "arch": "arm64",
+    "version": "3.10",
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.10.13%2B20240107-aarch64-apple-darwin-install_only.tar.gz",
+    "digest": "4d19a0509c274f360a5c250d71a2af7263ebaf898ecdb71427f3532cbc6b2cf7"
+  },
+  {
+    "os": "linux",
+    "arch": "arm64",
+    "version": "3.10",
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.10.13%2B20240107-aarch64-unknown-linux-gnu-install_only.tar.gz",
+    "digest": "4793cab2b657d8656463ca423aae7cf9cdacf49059d9e4c01888f5650883e85e"
+  },
+  {
+    "os": "darwin",
+    "arch": "amd64",
+    "version": "3.10",
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.10.13%2B20240107-x86_64-apple-darwin-install_only.tar.gz",
+    "digest": "47da6831e269ad6af603f59bbd4767636c5749bd70a24363c9cf003c32c8ecfc"
+  },
+  {
+    "os": "windows",
+    "arch": "amd64",
+    "version": "3.10",
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.10.13%2B20240107-x86_64-pc-windows-msvc-static-install_only.tar.gz",
+    "digest": "8176713d446ff0a0b4b2bbf8f562398879cd1acbf493bbd6a381e2f5aa96070e"
+  },
+  {
+    "os": "linux",
+    "arch": "amd64",
+    "version": "3.10",
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.10.13%2B20240107-x86_64_v2-unknown-linux-gnu-install_only.tar.gz",
+    "digest": "6f30beb2b610ef11a87ede7c33d319f87a7d3a5b4c0d81435a6cce825e5818ed"
+  },
+  {
+    "os": "darwin",
+    "arch": "arm64",
+    "version": "3.11",
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.11.7%2B20240107-aarch64-apple-darwin-install_only.tar.gz",
+    "digest": "b042c966920cf8465385ca3522986b12d745151a72c060991088977ca36d3883"
+  },
+  {
+    "os": "linux",
+    "arch": "arm64",
+    "version": "3.11",
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.11.7%2B20240107-aarch64-unknown-linux-gnu-install_only.tar.gz",
+    "digest": "b102eaf865eb715aa98a8a2ef19037b6cc3ae7dfd4a632802650f29de635aa13"
+  },
+  {
+    "os": "darwin",
+    "arch": "amd64",
+    "version": "3.11",
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.11.7%2B20240107-x86_64-apple-darwin-install_only.tar.gz",
+    "digest": "a0e615eef1fafdc742da0008425a9030b7ea68a4ae4e73ac557ef27b112836d4"
+  },
+  {
+    "os": "windows",
+    "arch": "amd64",
+    "version": "3.11",
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.11.7%2B20240107-x86_64-pc-windows-msvc-static-install_only.tar.gz",
+    "digest": "36a8584ef16277f84a7fea81fca7fb941a8b8fa1defee28100afb39e90385926"
+  },
+  {
+    "os": "linux",
+    "arch": "amd64",
+    "version": "3.11",
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.11.7%2B20240107-x86_64_v2-unknown-linux-gnu-install_only.tar.gz",
+    "digest": "2cdd399100e647aa9d381e197e6a8c98e822ecb8fc1b6bda4b1eb554dbfb8177"
+  },
+  {
+    "os": "darwin",
+    "arch": "arm64",
+    "version": "3.12",
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.12.1%2B20240107-aarch64-apple-darwin-install_only.tar.gz",
+    "digest": "f93f8375ca6ac0a35d58ff007043cbd3a88d9609113f1cb59cf7c8d215f064af"
+  },
+  {
+    "os": "linux",
+    "arch": "arm64",
+    "version": "3.12",
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.12.1%2B20240107-aarch64-unknown-linux-gnu-install_only.tar.gz",
+    "digest": "236533ef20e665007a111c2f36efb59c87ae195ad7dca223b6dc03fb07064f0b"
+  },
+  {
+    "os": "darwin",
+    "arch": "amd64",
+    "version": "3.12",
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.12.1%2B20240107-x86_64-apple-darwin-install_only.tar.gz",
+    "digest": "eca96158c1568dedd9a0b3425375637a83764d1fa74446438293089a8bfac1f8"
+  },
+  {
+    "os": "windows",
+    "arch": "amd64",
+    "version": "3.12",
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.12.1%2B20240107-x86_64-pc-windows-msvc-static-install_only.tar.gz",
+    "digest": "7dde51352511697579d86c968881f431acff9e8b1eb3f42c54de27341fa5b7b2"
+  },
+  {
+    "os": "linux",
+    "arch": "amd64",
+    "version": "3.12",
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.12.1%2B20240107-x86_64_v2-unknown-linux-gnu-install_only.tar.gz",
+    "digest": "9dd6fc5a1326985896493d475e7eae0d07f6de0d932faef3c4b04bdd81b88c0c"
+  }
+]

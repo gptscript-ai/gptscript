@@ -100,9 +100,23 @@ func (t Tool) String() string {
 	return buf.String()
 }
 
+type Repo struct {
+	// VCS The VCS type, such as "git"
+	VCS string
+	// The URL where the VCS repo can be found
+	Root string
+	// The path in the repo of this source. This should refer to a directory and not the actual file
+	Path string
+	// The filename of the source in the repo, relative to Path
+	Name string
+	// The revision of this source
+	Revision string
+}
+
 type ToolSource struct {
 	Location string `json:"location,omitempty"`
 	LineNo   int    `json:"lineNo,omitempty"`
+	Repo     *Repo  `json:"repo,omitempty"`
 }
 
 func (t ToolSource) String() string {

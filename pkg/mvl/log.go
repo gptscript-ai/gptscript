@@ -114,6 +114,10 @@ func (l *Logger) Tracef(msg string, args ...any) {
 	l.log.WithFields(l.fields).Tracef(msg, args...)
 }
 
+func (l *Logger) IsDebug() bool {
+	return l.log.IsLevelEnabled(logrus.DebugLevel)
+}
+
 func (l *Logger) Debugf(msg string, args ...any) {
 	l.log.WithFields(l.fields).Debugf(msg, args...)
 }

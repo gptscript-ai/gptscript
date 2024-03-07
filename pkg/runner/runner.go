@@ -24,12 +24,14 @@ type Monitor interface {
 }
 
 type Options struct {
-	MonitorFactory MonitorFactory `usage:"-"`
+	MonitorFactory MonitorFactory        `usage:"-"`
+	RuntimeManager engine.RuntimeManager `usage:"-"`
 }
 
 func complete(opts ...Options) (result Options) {
 	for _, opt := range opts {
 		result.MonitorFactory = types.FirstSet(opt.MonitorFactory, result.MonitorFactory)
+		result.RuntimeManager = types.FirstSet(opt.RuntimeManager, result.RuntimeManager)
 	}
 	if result.MonitorFactory == nil {
 		result.MonitorFactory = noopFactory{}
@@ -38,16 +40,18 @@ func complete(opts ...Options) (result Options) {
 }
 
 type Runner struct {
-	c       engine.Model
-	factory MonitorFactory
+	c              engine.Model
+	factory        MonitorFactory
+	runtimeManager engine.RuntimeManager
 }
 
 func New(client engine.Model, opts ...Options) (*Runner, error) {
 	opt := complete(opts...)
 
 	return &Runner{
-		c:       client,
-		factory: opt.MonitorFactory,
+		c:              client,
+		factory:        opt.MonitorFactory,
+		runtimeManager: opt.RuntimeManager,
 	}, nil
 }
 
@@ -93,9 +97,10 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 	defer progressClose()
 
 	e := engine.Engine{
-		Model:    r.c,
-		Progress: progress,
-		Env:      env,
+		Model:          r.c,
+		RuntimeManager: r.runtimeManager,
+		Progress:       progress,
+		Env:            env,
 	}
 
 	monitor.Event(Event{
