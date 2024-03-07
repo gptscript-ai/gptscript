@@ -8,7 +8,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"sort"
 	"strings"
 	"sync/atomic"
@@ -81,7 +80,6 @@ func (e *Engine) getRuntimeEnv(ctx context.Context, tool types.Tool, cmd, env []
 		if err != nil {
 			return nil, err
 		}
-		workdir = filepath.Join(workdir, tool.Source.Repo.Path)
 	}
 	return append(env, "GPTSCRIPT_TOOL_DIR="+workdir), nil
 }
