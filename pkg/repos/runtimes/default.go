@@ -3,6 +3,7 @@ package runtimes
 import (
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/repos"
+	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes/node"
 	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes/python"
 )
 
@@ -16,6 +17,10 @@ var Runtimes = []repos.Runtime{
 	},
 	&python.Runtime{
 		Version: "3.10",
+	},
+	&node.Runtime{
+		Version: "21",
+		Default: true,
 	},
 }
 

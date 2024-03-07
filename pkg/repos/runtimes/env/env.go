@@ -1,5 +1,11 @@
 package env
 
+import (
+	"fmt"
+	"os"
+	"strings"
+)
+
 func execEquals(bin, check string) bool {
 	return bin == check ||
 		bin == check+".exe"
@@ -19,4 +25,16 @@ func Matches(cmd []string, bin string) bool {
 		return execEquals(cmd[1], bin)
 	}
 	return false
+}
+
+func AppendPath(env []string, binPath string) []string {
+	var newEnv []string
+	for _, path := range env {
+		v, ok := strings.CutPrefix(path, "PATH=")
+		if ok {
+			newEnv = append(newEnv, fmt.Sprintf("PATH=%s%s%s",
+				binPath, string(os.PathListSeparator), v))
+		}
+	}
+	return newEnv
 }
