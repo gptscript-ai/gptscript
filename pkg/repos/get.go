@@ -53,12 +53,13 @@ func New(cacheDir string, runtimes ...Runtime) *Manager {
 
 func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, env []string) (string, []string, error) {
 	target := filepath.Join(m.storageDir, tool.Source.Repo.Revision, runtime.ID())
+	targetFinal := filepath.Join(target, tool.Source.Repo.Path)
 	doneFile := target + ".done"
 	envData, err := os.ReadFile(doneFile)
 	if err == nil {
 		var savedEnv []string
 		if err := json.Unmarshal(envData, &savedEnv); err == nil {
-			return target, append(env, savedEnv...), nil
+			return targetFinal, append(env, savedEnv...), nil
 		}
 	} else if !errors.Is(err, fs.ErrNotExist) {
 		return "", nil, err
@@ -88,7 +89,7 @@ func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, e
 		return "", nil, err
 	}
 
-	return target, append(env, newEnv...), os.Rename(doneFile+".tmp", doneFile)
+	return targetFinal, append(env, newEnv...), os.Rename(doneFile+".tmp", doneFile)
 }
 
 func (m *Manager) GetContext(ctx context.Context, tool types.Tool, cmd, env []string) (string, []string, error) {
