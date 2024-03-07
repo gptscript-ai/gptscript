@@ -34,6 +34,7 @@ type Parameters struct {
 	InternalPrompt *bool       `json:"internalPrompt"`
 	Arguments      *JSONSchema `json:"arguments,omitempty"`
 	Tools          []string    `json:"tools,omitempty"`
+	Export         []string    `json:"export,omitempty"`
 }
 
 type Tool struct {
@@ -45,6 +46,7 @@ type Tool struct {
 	LocalTools  map[string]string `json:"localTools,omitempty"`
 	BuiltinFunc BuiltinFunc       `json:"-"`
 	Source      ToolSource        `json:"source,omitempty"`
+	WorkingDir  string            `json:"workingDir,omitempty"`
 }
 
 func (t Tool) String() string {
@@ -57,6 +59,9 @@ func (t Tool) String() string {
 	}
 	if len(t.Parameters.Tools) != 0 {
 		_, _ = fmt.Fprintf(buf, "Tools: %s\n", strings.Join(t.Parameters.Tools, ", "))
+	}
+	if len(t.Parameters.Export) != 0 {
+		_, _ = fmt.Fprintf(buf, "Export: %s\n", strings.Join(t.Parameters.Export, ", "))
 	}
 	if t.Parameters.MaxTokens != 0 {
 		_, _ = fmt.Fprintf(buf, "Max Tokens: %d\n", t.Parameters.MaxTokens)
@@ -96,12 +101,12 @@ func (t Tool) String() string {
 }
 
 type ToolSource struct {
-	File   string `json:"file,omitempty"`
-	LineNo int    `json:"lineNo,omitempty"`
+	Location string `json:"location,omitempty"`
+	LineNo   int    `json:"lineNo,omitempty"`
 }
 
 func (t ToolSource) String() string {
-	return fmt.Sprintf("%s:%d", t.File, t.LineNo)
+	return fmt.Sprintf("%s:%d", t.Location, t.LineNo)
 }
 
 func (t Tool) IsCommand() bool {

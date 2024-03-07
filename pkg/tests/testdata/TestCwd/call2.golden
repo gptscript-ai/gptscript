@@ -1,0 +1,64 @@
+`{
+  "Model": "gpt-4-turbo-preview",
+  "InternalSystemPrompt": null,
+  "Tools": [
+    {
+      "function": {
+        "toolID": "testdata/TestCwd/subtool/test.gpt:1",
+        "name": "test",
+        "parameters": null
+      }
+    },
+    {
+      "function": {
+        "toolID": "testdata/TestCwd/test.gpt:6",
+        "name": "local",
+        "parameters": null
+      }
+    }
+  ],
+  "Messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "noop"
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "toolCall": {
+            "index": 0,
+            "id": "call_1",
+            "function": {
+              "name": "test"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "content": [
+        {
+          "text": "sub\nsub"
+        }
+      ],
+      "toolCall": {
+        "index": 0,
+        "id": "call_1",
+        "function": {
+          "name": "test"
+        }
+      }
+    }
+  ],
+  "MaxTokens": 0,
+  "Temperature": null,
+  "JSONResponse": false,
+  "Grammar": "",
+  "Cache": null
+}`

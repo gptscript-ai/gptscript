@@ -1,0 +1,8 @@
+tools: frommain, sub/child.gpt
+
+---
+name: frommain
+export: parent-local, fromchild from sub/child.gpt
+
+---
+name: parent-local

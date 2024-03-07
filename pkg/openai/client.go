@@ -9,6 +9,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"slices"
 	"sort"
 	"strings"
 	"sync/atomic"
@@ -27,6 +28,7 @@ const (
 var (
 	key          = os.Getenv("OPENAI_API_KEY")
 	url          = os.Getenv("OPENAI_URL")
+	azureModel   = os.Getenv("OPENAI_AZURE_DEPLOYMENT")
 	completionID int64
 )
 
@@ -80,6 +82,19 @@ func complete(opts ...Options) (result Options, err error) {
 	return result, err
 }
 
+func GetAzureMapperFunction(defaultModel, azureModel string) func(string) string {
+	if azureModel == "" {
+		return func(model string) string {
+			return model
+		}
+	}
+	return func(model string) string {
+		return map[string]string{
+			defaultModel: azureModel,
+		}[model]
+	}
+}
+
 func NewClient(opts ...Options) (*Client, error) {
 	opt, err := complete(opts...)
 	if err != nil {
@@ -89,6 +104,7 @@ func NewClient(opts ...Options) (*Client, error) {
 	cfg := openai.DefaultConfig(opt.APIKey)
 	if strings.Contains(string(opt.APIType), "AZURE") {
 		cfg = openai.DefaultAzureConfig(key, url)
+		cfg.AzureModelMapperFunc = GetAzureMapperFunction(opt.DefaultModel, azureModel)
 	}
 
 	cfg.BaseURL = types.FirstSet(opt.BaseURL, cfg.BaseURL)
@@ -177,14 +193,38 @@ func toToolCall(call types.CompletionToolCall) openai.ToolCall {
 }
 
 func toMessages(request types.CompletionRequest) (result []openai.ChatCompletionMessage, err error) {
+	var (
+		systemPrompts []string
+		msgs          []types.CompletionMessage
+	)
+
 	if request.InternalSystemPrompt == nil || *request.InternalSystemPrompt {
-		result = append(result, openai.ChatCompletionMessage{
-			Role:    openai.ChatMessageRoleSystem,
-			Content: system.InternalSystemPrompt,
+		systemPrompts = append(systemPrompts, system.InternalSystemPrompt)
+	}
+
+	for i, message := range request.Messages {
+		if message.Role == types.CompletionMessageRoleTypeSystem {
+			// Append if the next message is system or user, otherwise set as user message
+			if i == len(request.Messages)-1 ||
+				(request.Messages[i].Role != types.CompletionMessageRoleTypeSystem &&
+					request.Messages[i].Role != types.CompletionMessageRoleTypeUser) {
+				message.Role = types.CompletionMessageRoleTypeUser
+			} else {
+				systemPrompts = append(systemPrompts, message.Content[0].Text)
+				continue
+			}
+		}
+		msgs = append(msgs, message)
+	}
+
+	if len(systemPrompts) > 0 {
+		msgs = slices.Insert(msgs, 0, types.CompletionMessage{
+			Role:    types.CompletionMessageRoleTypeSystem,
+			Content: types.Text(strings.Join(systemPrompts, "\n")),
 		})
 	}
 
-	for _, message := range request.Messages {
+	for _, message := range msgs {
 		chatMessage := openai.ChatCompletionMessage{
 			Role: string(message.Role),
 		}
@@ -219,6 +259,7 @@ func toMessages(request types.CompletionRequest) (result []openai.ChatCompletion
 
 		result = append(result, chatMessage)
 	}
+
 	return
 }
 
@@ -236,15 +277,16 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	}
 
 	request := openai.ChatCompletionRequest{
-		Model:       messageRequest.Model,
-		Messages:    msgs,
-		MaxTokens:   messageRequest.MaxTokens,
-		Temperature: messageRequest.Temperature,
-		Grammar:     messageRequest.Grammar,
+		Model:     messageRequest.Model,
+		Messages:  msgs,
+		MaxTokens: messageRequest.MaxTokens,
 	}
 
-	if request.Temperature == nil {
-		request.Temperature = new(float32)
+	if messageRequest.Temperature == nil {
+		// this is a hack because the field is marked as omitempty, so we need it to be set to a non-zero value but arbitrarily small
+		request.Temperature = 1e-08
+	} else {
+		request.Temperature = *messageRequest.Temperature
 	}
 
 	if messageRequest.JSONResponse {
@@ -260,7 +302,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		}
 		request.Tools = append(request.Tools, openai.Tool{
 			Type: openai.ToolTypeFunction,
-			Function: openai.FunctionDefinition{
+			Function: &openai.FunctionDefinition{
 				Name:        tool.Function.Name,
 				Description: tool.Function.Description,
 				Parameters:  params,
@@ -410,7 +452,9 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 		} else if err != nil {
 			return nil, err
 		}
-		slog.Debug("stream", "content", response.Choices[0].Delta.Content)
+		if len(response.Choices) > 0 {
+			slog.Debug("stream", "content", response.Choices[0].Delta.Content)
+		}
 		if partial != nil {
 			partialMessage = appendMessage(partialMessage, response)
 			partial <- types.CompletionStatus{

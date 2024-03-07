@@ -1,0 +1,114 @@
+`{
+  "Model": "gpt-4-turbo-preview",
+  "InternalSystemPrompt": null,
+  "Tools": [
+    {
+      "function": {
+        "toolID": "testdata/TestExport/parent.gpt:4",
+        "name": "frommain",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "defaultPromptParameter": {
+              "description": "Prompt to send to the tool or assistant. This may be instructions or question.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "defaultPromptParameter"
+          ]
+        }
+      }
+    },
+    {
+      "function": {
+        "toolID": "testdata/TestExport/parent.gpt:8",
+        "name": "parent-local",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "defaultPromptParameter": {
+              "description": "Prompt to send to the tool or assistant. This may be instructions or question.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "defaultPromptParameter"
+          ]
+        }
+      }
+    },
+    {
+      "function": {
+        "toolID": "testdata/TestExport/sub/child.gpt:4",
+        "name": "child",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "defaultPromptParameter": {
+              "description": "Prompt to send to the tool or assistant. This may be instructions or question.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "defaultPromptParameter"
+          ]
+        }
+      }
+    },
+    {
+      "function": {
+        "toolID": "testdata/TestExport/sub/child.gpt:8",
+        "name": "transient",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "defaultPromptParameter": {
+              "description": "Prompt to send to the tool or assistant. This may be instructions or question.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "defaultPromptParameter"
+          ]
+        }
+      }
+    }
+  ],
+  "Messages": [
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "toolCall": {
+            "index": 3,
+            "id": "call_1",
+            "function": {
+              "name": "transient"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "content": [
+        {
+          "text": "TEST RESULT CALL: 2"
+        }
+      ],
+      "toolCall": {
+        "index": 3,
+        "id": "call_1",
+        "function": {
+          "name": "transient"
+        }
+      }
+    }
+  ],
+  "MaxTokens": 0,
+  "Temperature": null,
+  "JSONResponse": false,
+  "Grammar": "",
+  "Cache": null
+}`

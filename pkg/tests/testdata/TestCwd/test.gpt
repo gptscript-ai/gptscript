@@ -1,0 +1,15 @@
+tools: ./subtool/test.gpt, local
+
+noop
+
+---
+name: local
+
+#!/bin/bash
+set -e -x
+
+[ "" = "${TOOL_DIR}" ]
+P=$(pwd)
+echo ${GPTSCRIPT_TOOL_DIR##${P}}
+cd $GPTSCRIPT_TOOL_DIR
+cat data.txt

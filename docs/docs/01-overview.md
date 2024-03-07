@@ -27,9 +27,10 @@ the result of that.
 
 When done remove the database file and the downloaded content.
 ```
-```
+```shell
 $ gptscript ./example.gpt
-
+```
+```
 OUTPUT:
 
 The artist with the most number of albums in the database is Iron Maiden, with a total

@@ -3,7 +3,6 @@ package loader
 import (
 	"bytes"
 	"context"
-	"crypto/md5"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -11,11 +10,8 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"net/http"
-	url2 "net/url"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
@@ -25,17 +21,33 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
-const (
-	GithubPrefix = "github.com/"
-	githubRawURL = "https://raw.githubusercontent.com/"
-)
-
 type source struct {
+	// Content The content of the source
 	Content io.ReadCloser
-	Remote  bool
-	Path    string
-	Name    string
-	File    string
+	// Remote indicates that this file was loaded from a remote source (not local disk)
+	Remote bool
+	// Path is the path of this source used to find any relative references to this source
+	Path string
+	// Name is the filename of this source, it does not include the path in it
+	Name string
+	// Location is a string representation representing the source. It's not assume to
+	// be a valid URI or URL, used primarily for display.
+	Location string
+	// Repo The VCS repo where this tool was found, used to clone and provide the local tool code content
+	Repo *Repo
+}
+
+type Repo struct {
+	// VCS The VCS type, such as "github"
+	VCS string
+	// The URL where the VCS repo can be found
+	Root string
+	// The path in the repo of this source. This should refer to a directory and not the actual file
+	Path string
+	// The filename of the source in the repo, relative to Path
+	Name string
+	// The revision of this source
+	Revision string
 }
 
 func (s *source) String() string {
@@ -67,74 +79,11 @@ func loadLocal(base *source, name string) (*source, bool, error) {
 	log.Debugf("opened %s", path)
 
 	return &source{
-		Content: content,
-		Remote:  false,
-		Path:    filepath.Dir(path),
-		Name:    filepath.Base(path),
-		File:    path,
-	}, true, nil
-}
-
-func githubURL(urlName string) (string, bool) {
-	if !strings.HasPrefix(urlName, GithubPrefix) {
-		return "", false
-	}
-
-	url, version, _ := strings.Cut(urlName, "@")
-	if version == "" {
-		version = "HEAD"
-	}
-
-	parts := strings.Split(url, "/")
-	// Must be at least 4 parts github.com/ACCOUNT/REPO/FILE
-	if len(parts) < 4 {
-		return "", false
-	}
-
-	url = githubRawURL + parts[1] + "/" + parts[2] + "/" + version + "/" + strings.Join(parts[3:], "/")
-	return url, true
-}
-
-func loadURL(ctx context.Context, base *source, name string) (*source, bool, error) {
-	url := name
-	if base.Path != "" {
-		url = base.Path + "/" + name
-	}
-	if githubURL, ok := githubURL(url); ok {
-		url = githubURL
-	}
-	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-		return nil, false, nil
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, false, err
-	}
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, false, err
-	} else if resp.StatusCode != http.StatusOK {
-		return nil, false, fmt.Errorf("error loading %s: %s", url, resp.Status)
-	}
-
-	log.Debugf("opened %s", url)
-
-	parsed, err := url2.Parse(url)
-	if err != nil {
-		return nil, false, err
-	}
-
-	pathURL := *parsed
-	pathURL.Path = filepath.Dir(parsed.Path)
-
-	return &source{
-		Content: resp.Body,
-		Remote:  true,
-		Path:    pathURL.String(),
-		Name:    filepath.Base(parsed.Path),
-		File:    url,
+		Content:  content,
+		Remote:   false,
+		Path:     filepath.Dir(path),
+		Name:     filepath.Base(path),
+		Location: path,
 	}, true, nil
 }
 
@@ -200,7 +149,8 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 	)
 
 	for i, tool := range tools {
-		tool.Source.File = base.File
+		tool.WorkingDir = base.Path
+		tool.Source.Location = base.Location
 
 		// Probably a better way to come up with an ID
 		tool.ID = tool.Source.String()
@@ -210,7 +160,7 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 		}
 
 		if i != 0 && tool.Parameters.Name == "" {
-			return types.Tool{}, parser.NewErrLine(tool.Source.File, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have no name"))
+			return types.Tool{}, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have no name"))
 		}
 
 		if targetToolName != "" && tool.Parameters.Name == targetToolName {
@@ -218,8 +168,8 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 		}
 
 		if existing, ok := localTools[tool.Parameters.Name]; ok {
-			return types.Tool{}, parser.NewErrLine(tool.Source.File, tool.Source.LineNo,
-				fmt.Errorf("duplicate tool name [%s] in %s found at lines %d and %d", tool.Parameters.Name, tool.Source.File,
+			return types.Tool{}, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo,
+				fmt.Errorf("duplicate tool name [%s] in %s found at lines %d and %d", tool.Parameters.Name, tool.Source.Location,
 					tool.Source.LineNo, existing.Source.LineNo))
 		}
 
@@ -227,47 +177,6 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 	}
 
 	return link(ctx, prg, base, mainTool, localTools)
-}
-
-var (
-	validToolName = regexp.MustCompile("^[a-zA-Z0-9_-]{1,64}$")
-	invalidChars  = regexp.MustCompile("[^a-zA-Z0-9_-]+")
-)
-
-func toolNormalizer(tool string) string {
-	if validToolName.MatchString(tool) {
-		return tool
-	}
-
-	name := invalidChars.ReplaceAllString(tool, "-")
-	if len(name) > 55 {
-		name = name[:55]
-	}
-
-	hash := md5.Sum([]byte(tool))
-	hexed := hex.EncodeToString(hash[:])
-
-	return name + "-" + hexed[:8]
-}
-
-func pickToolName(toolName string, existing map[string]struct{}) string {
-	newName, suffix, ok := strings.Cut(toolName, "/")
-	if ok {
-		newName = suffix
-	}
-	newName = strings.TrimSuffix(newName, filepath.Ext(newName))
-	if newName == "" {
-		newName = "external"
-	}
-
-	for {
-		testName := toolNormalizer(newName)
-		if _, ok := existing[testName]; !ok {
-			existing[testName] = struct{}{}
-			return testName
-		}
-		newName += "0"
-	}
 }
 
 func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool, localTools types.ToolSet) (types.Tool, error) {
@@ -286,50 +195,39 @@ func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool
 	// The below is done in two loops so that local names stay as the tool names
 	// and don't get mangled by external references
 
-	for _, targetToolName := range tool.Parameters.Tools {
+	for _, targetToolName := range append(tool.Parameters.Tools, tool.Parameters.Export...) {
 		localTool, ok := localTools[targetToolName]
-		if !ok {
-			continue
-		}
-
-		var linkedTool types.Tool
-		if existing, ok := prg.ToolSet[localTool.ID]; ok {
-			linkedTool = existing
-		} else {
-			var err error
-			linkedTool, err = link(ctx, prg, base, localTool, localTools)
-			if err != nil {
-				return types.Tool{}, fmt.Errorf("failed linking %s at %s: %w", targetToolName, base, err)
+		if ok {
+			var linkedTool types.Tool
+			if existing, ok := prg.ToolSet[localTool.ID]; ok {
+				linkedTool = existing
+			} else {
+				var err error
+				linkedTool, err = link(ctx, prg, base, localTool, localTools)
+				if err != nil {
+					return types.Tool{}, fmt.Errorf("failed linking %s at %s: %w", targetToolName, base, err)
+				}
 			}
-		}
 
-		tool.ToolMapping[targetToolName] = linkedTool.ID
-		toolNames[targetToolName] = struct{}{}
-	}
-
-	for i, targetToolName := range tool.Parameters.Tools {
-		_, ok := localTools[targetToolName]
-		if ok {
-			continue
-		}
-
-		subTool, toolName, ok := strings.Cut(targetToolName, " from ")
-		if ok {
-			toolName = strings.TrimSpace(toolName)
-			subTool = strings.TrimSpace(subTool)
+			tool.ToolMapping[targetToolName] = linkedTool.ID
+			toolNames[targetToolName] = struct{}{}
 		} else {
-			toolName = targetToolName
-			subTool = ""
-		}
+			subTool, toolName, ok := strings.Cut(targetToolName, " from ")
+			if ok {
+				toolName = strings.TrimSpace(toolName)
+				subTool = strings.TrimSpace(subTool)
+			} else {
+				toolName = targetToolName
+				subTool = ""
+			}
 
-		resolvedTool, err := resolve(ctx, prg, base, toolName, subTool)
-		if err != nil {
-			return types.Tool{}, fmt.Errorf("failed resolving %s at %s: %w", targetToolName, base, err)
-		}
+			resolvedTool, err := resolve(ctx, prg, base, toolName, subTool)
+			if err != nil {
+				return types.Tool{}, fmt.Errorf("failed resolving %s at %s: %w", targetToolName, base, err)
+			}
 
-		newToolName := pickToolName(toolName, toolNames)
-		tool.ToolMapping[newToolName] = resolvedTool.ID
-		tool.Parameters.Tools[i] = newToolName
+			tool.ToolMapping[targetToolName] = resolvedTool.ID
+		}
 	}
 
 	for _, localTool := range localTools {
@@ -347,8 +245,8 @@ func ProgramFromSource(ctx context.Context, content, subToolName string) (types.
 		ToolSet: types.ToolSet{},
 	}
 	tool, err := readTool(ctx, &prg, &source{
-		Content: io.NopCloser(strings.NewReader(content)),
-		File:    "inline",
+		Content:  io.NopCloser(strings.NewReader(content)),
+		Location: "inline",
 	}, subToolName)
 	if err != nil {
 		return types.Program{}, err

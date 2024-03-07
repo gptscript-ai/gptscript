@@ -40,7 +40,12 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 		return tool.BuiltinFunc(ctx, e.Env, input)
 	}
 
-	cmd, stop, err := e.newCommand(ctx, nil, tool.Instructions, input)
+	var extraEnv []string
+	if tool.WorkingDir != "" {
+		extraEnv = append(extraEnv, "GPTSCRIPT_TOOL_DIR="+tool.WorkingDir)
+	}
+
+	cmd, stop, err := e.newCommand(ctx, extraEnv, tool.Instructions, input)
 	if err != nil {
 		return "", err
 	}
@@ -79,10 +84,6 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, instructions
 	envMap := map[string]string{}
 	for _, env := range env {
 		key, value, _ := strings.Cut(env, "=")
-		key, ok := strings.CutPrefix(key, "GPTSCRIPT_VAR_")
-		if !ok {
-			continue
-		}
 		envMap[key] = value
 	}
 

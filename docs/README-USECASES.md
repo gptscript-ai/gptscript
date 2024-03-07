@@ -1,0 +1,122 @@
+# Use Cases of GPTScript
+
+## Retrieval
+
+Retrieval-Augmented Generation (RAG) leverages a knowledge base outside of the training data before consulting the LLM to generate a response.
+The following GPTScript implements RAG:
+
+```yaml
+name: rag
+description: implements retrieval-augmented generation
+args: prompt: a string
+tools: query
+
+First query the ${prompt} in the knowledge base, then construsts an answer to ${prompt} based on the result of the query.
+
+---
+
+name: query
+description: queries the prompt in the knowledge base
+args: prompt: a string
+
+... (implementation of knowledge base query follows) ...
+```
+
+The idea behind RAG is simple. Its core logic can be implemented in one GPTScript statement: `First query the ${prompt} in the knowledge base, then construsts an answer to ${prompt} based on the result of the query.` The real work of building RAG lies in the tool that queries your knowledge base.
+
+You construct the appropriate query tool based on the type of knowledge base you have.
+
+| Knowledge Base | Query Tool |
+|------|------|
+| A vector database storing common document types such as text, HTML, PDF, and Word | Integrate with LlamaIndex for vector database support [Link to example]|
+| Use the public or private internet to supply up-to-date knowledge | Implement query tools using a search engine, as shown in [`search.gpt`](../examples/search.gpt)|
+| A structured database supporting SQL such as sqlite, MySQL, PostgreSQL, and Oracle DB | Implement query tools using database command line tools such as `sqlite` and `mysql` [Link to example]|
+| An ElasticSearch/OpenSearch database storing logs or other text files | Implement query tools using database command line tools [Link to example]|
+| Other databases such as graph or time series databases | Implement query tools using database command line tools [Link to example]|
+
+## Task Automation
+
+### Planning
+
+Here is a GPTScript that produces a detailed travel itenirary based on inputs from a user: [`travel-agent.gpt`](../examples/travel-agent.gpt)
+
+### Web UI Automation
+
+GPTScript enables the automation of data collection and analysis from websites through seamless interaction with a Chrome web browser. Here's an example to illustrate how it works:
+
+1. Please install the browsing tool and configure it to operate continuously in the background as a service.
+
+```sh
+git clone https://github.com/gptscript-ai/browser
+
+cd browser
+
+npm install
+
+npm run server
+```
+
+2. Let's explore a brief example on how to navigate through the Coachella Festival offerings and retrieve ticketing details
+
+```sh
+# Go to the browser repo you just cloned
+cd browser 
+
+gpscript ./example/coachella-browse.gpt
+```
+
+For additional examples, please explore [here](https://github.com/gptscript-ai/browser?tab=readme-ov-file#examples).
+
+### CLI Automation
+
+Here is a GPTScript that automates Kubernetes operations by driving the `kubectl` command line. [Link to example here]
+
+## Agents and Assistants
+
+Agents and assistants are synonyms. They are software programs that leverage LLM to carry out tasks.
+
+In GPTScript, agents and assistants are implemented using tools. Tools can use other tools. Tools can be implemented using natural language prompts or using traditional programming languages such as Python or JavaScript. You can therefore build arbitrarily complex agents and assistants in GPTScript. Here is an example of an assistant that leverages an HTTP client, MongoDB, and Python code generation to display Hacker News headlines: [`hacker-news-headlines.gpt`](../examples/hacker-news-headlines.gpt)
+
+## Data Analysis
+
+Depending on the context window supported by the LLM, you can either send a large amount of data to the LLM to analyze in one shot or supply data in batches.
+
+### Summarization
+
+Here is a GPTScript that sends a large document in batches to the LLM and produces a summary of the entire document. [hamlet-summarizer](../examples/hamlet-summarizer)
+
+Here is a GPTScript that reads the content of a large SQL database and produces a summary of the entire database. [Link to example here]
+
+### Tagging
+
+Here is a GPTScript that performs sentiment analysis on the input text. [Link to example here]
+
+### CSV Files
+
+Here is a GPTScript that summarizes the content of a CSV file. [Link to example here]
+
+### Understanding Code
+
+Here is a GPTScript that summarizes the the code stored under the current directory: [`describe-code.gpt`](../examples/describe-code.gpt)
+
+## Vision, Image, and Audio
+
+### Vision
+
+Here is an example of a web app that leverages GPTScript to recognize ingredients in a photo and suggest a recipe based on them: [recipe-generator](../examples/recipegenerator).
+
+### Image Generation
+
+Here is a GPTScript that takes a story prompt and generates an illustrated children's book: [story-book.gpt](../examples/story-book)
+
+## Memory Management
+
+LLMs are stateless. That's why GPTScript by default caches LLM invocations. LLM apps need to keep memory outside of the model.
+
+GPTScript provides a means to manage memory that persists across multiple LLM invocations. The relevant information can be extracted and passed into the LLM as part of the context. In addition, LLM can utilize tools to obtain additional data from the memory maintained in GPTScript.
+
+[More details to follow.]
+
+## Chatbots
+
+GPTScript in combination with Rubra UI provide you with a turn-key implementation of chatbots. [More details to follow]

@@ -2,8 +2,6 @@ module github.com/gptscript-ai/gptscript
 
 go 1.22.0
 
-replace github.com/sashabaranov/go-openai => github.com/gptscript-ai/go-openai v0.0.0-20240227161457-daa30caa3185
-
 require (
 	github.com/BurntSushi/locker v0.0.0-20171006230638-a6e239ea1c69
 	github.com/acorn-io/broadcaster v0.0.0-20240105011354-bfadd4a7b45d
@@ -14,7 +12,7 @@ require (
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
 	github.com/olahol/melody v1.1.4
 	github.com/rs/cors v1.10.1
-	github.com/sashabaranov/go-openai v1.18.3
+	github.com/sashabaranov/go-openai v1.20.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4

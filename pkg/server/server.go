@@ -20,6 +20,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
+	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/static"
 	"github.com/olahol/melody"
@@ -45,9 +46,7 @@ func New(model engine.Model, opts ...Options) (*Server, error) {
 
 	opt := complete(opts)
 	r, err := runner.New(model, runner.Options{
-		MonitorFactory: &SessionFactory{
-			events: events,
-		},
+		MonitorFactory: NewSessionFactory(events),
 	})
 	if err != nil {
 		return nil, err
@@ -84,6 +83,14 @@ var (
 
 type execKey struct{}
 
+func ContextWithNewID(ctx context.Context) context.Context {
+	return context.WithValue(ctx, execKey{}, fmt.Sprint(atomic.AddInt64(&execID, 1)))
+}
+
+func IDFromContext(ctx context.Context) string {
+	return ctx.Value(execKey{}).(string)
+}
+
 func (s *Server) list(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	enc := json.NewEncoder(rw)
@@ -93,7 +100,7 @@ func (s *Server) list(rw http.ResponseWriter, req *http.Request) {
 	if req.URL.Path == "/sys" {
 		_ = enc.Encode(builtin.SysProgram())
 		return
-	} else if strings.HasSuffix(path, ".gpt") {
+	} else if strings.HasSuffix(path, system.Suffix) {
 		prg, err := loader.Program(req.Context(), path, req.URL.Query().Get("tool"))
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
@@ -115,7 +122,7 @@ func (s *Server) list(rw http.ResponseWriter, req *http.Request) {
 			return nil
 		}
 
-		if !d.IsDir() && strings.HasSuffix(d.Name(), ".gpt") {
+		if !d.IsDir() && strings.HasSuffix(d.Name(), system.Suffix) {
 			result = append(result, path)
 		}
 
@@ -131,8 +138,8 @@ func (s *Server) list(rw http.ResponseWriter, req *http.Request) {
 
 func (s *Server) run(rw http.ResponseWriter, req *http.Request) {
 	path := filepath.Join(".", req.URL.Path)
-	if !strings.HasSuffix(path, ".gpt") {
-		path += ".gpt"
+	if !strings.HasSuffix(path, system.Suffix) {
+		path += system.Suffix
 	}
 
 	prg, err := loader.Program(req.Context(), path, req.URL.Query().Get("tool"))
@@ -274,6 +281,12 @@ func (s *Server) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 type SessionFactory struct {
 	events *broadcaster.Broadcaster[Event]
+}
+
+func NewSessionFactory(events *broadcaster.Broadcaster[Event]) *SessionFactory {
+	return &SessionFactory{
+		events: events,
+	}
 }
 
 func (s SessionFactory) Start(ctx context.Context, prg *types.Program, env []string, input string) (runner.Monitor, error) {

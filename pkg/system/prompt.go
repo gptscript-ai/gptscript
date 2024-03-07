@@ -8,6 +8,9 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
+// Suffix is default suffix of gptscript files
+const Suffix = ".gpt"
+
 // InternalSystemPrompt is added to all threads. Changing this is very dangerous as it has a
 // terrible global effect and changes the behavior of all scripts.
 var InternalSystemPrompt = `

@@ -46,9 +46,12 @@ func SetError() {
 
 func Package() Logger {
 	_, p, _, _ := runtime.Caller(1)
-	_, suffix, _ := strings.Cut(p, "gptscript/")
+	_, suffix, _ := strings.Cut(p, "gptscript")
 	i := strings.LastIndex(suffix, "/")
-	return New(suffix[:i])
+	if i > 0 {
+		return New(suffix[:i])
+	}
+	return New(p)
 }
 
 func New(name string) Logger {

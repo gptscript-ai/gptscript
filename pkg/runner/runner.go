@@ -2,6 +2,10 @@ package runner
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -115,6 +119,10 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 				Type:        EventTypeCallFinish,
 				Content:     *result.Result,
 			})
+			if err := recordStateMessage(result.State); err != nil {
+				// Log a message if failed to record state message so that it doesn't affect the main process if state can't be recorded
+				log.Infof("Failed to record state message: %v", err)
+			}
 			return *result.Result, nil
 		}
 
@@ -191,7 +199,7 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 	eg, subCtx := errgroup.WithContext(callCtx.Ctx)
 	for id, call := range lastReturn.Calls {
 		eg.Go(func() error {
-			callCtx, err := callCtx.SubCall(subCtx, call.ToolName, id)
+			callCtx, err := callCtx.SubCall(subCtx, call.ToolID, id)
 			if err != nil {
 				return err
 			}
@@ -204,7 +212,8 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 			resultLock.Lock()
 			defer resultLock.Unlock()
 			callResults = append(callResults, engine.CallResult{
-				ID:     id,
+				ToolID: call.ToolID,
+				CallID: id,
 				Result: result,
 			})
 
@@ -217,4 +226,25 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 	}
 
 	return
+}
+
+// recordStateMessage record the final state of the openai request and fetch messages and tools for analysis purpose
+// The name follows `gptscript-state-${hostname}-${unixtimestamp}`
+func recordStateMessage(state *engine.State) error {
+	if state == nil {
+		return nil
+	}
+	tmpdir := os.TempDir()
+	data, err := json.Marshal(state)
+	if err != nil {
+		return err
+	}
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		return err
+	}
+
+	filename := filepath.Join(tmpdir, fmt.Sprintf("gptscript-state-%v-%v", hostname, time.Now().UnixMilli()))
+	return os.WriteFile(filename, data, 0444)
 }

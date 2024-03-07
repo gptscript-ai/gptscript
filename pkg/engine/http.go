@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -15,7 +16,17 @@ import (
 const DaemonURLSuffix = ".daemon.gpt.local"
 
 func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Tool, input string) (cmdRet *Return, cmdErr error) {
+	envMap := map[string]string{}
+
+	for _, env := range e.Env {
+		k, v, _ := strings.Cut(env, "=")
+		envMap[k] = v
+	}
+
 	toolURL := strings.Split(tool.Instructions, "\n")[0][2:]
+	toolURL = os.Expand(toolURL, func(s string) string {
+		return envMap[s]
+	})
 
 	parsed, err := url.Parse(toolURL)
 	if err != nil {

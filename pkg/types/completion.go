@@ -22,6 +22,7 @@ type CompletionTool struct {
 }
 
 type CompletionFunctionDefinition struct {
+	ToolID      string      `json:"toolID,omitempty"`
 	Name        string      `json:"name"`
 	Description string      `json:"description,omitempty"`
 	Domain      string      `json:"domain,omitempty"`

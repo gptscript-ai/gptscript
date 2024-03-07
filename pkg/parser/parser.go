@@ -90,6 +90,8 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 			return false, err
 		}
 		tool.Parameters.InternalPrompt = &v
+	case "export":
+		tool.Parameters.Export = append(tool.Parameters.Export, csv(strings.ToLower(value))...)
 	case "tools":
 		tool.Parameters.Tools = append(tool.Parameters.Tools, csv(strings.ToLower(value))...)
 	case "args":
@@ -161,7 +163,7 @@ type context struct {
 
 func (c *context) finish(tools *[]types.Tool) {
 	c.tool.Instructions = strings.TrimSpace(strings.Join(c.instructions, ""))
-	if c.tool.Instructions != "" || c.tool.Parameters.Name != "" {
+	if c.tool.Instructions != "" || c.tool.Parameters.Name != "" || len(c.tool.Export) > 0 || len(c.tool.Tools) > 0 {
 		*tools = append(*tools, c.tool)
 	}
 	*c = context{}
