@@ -11,12 +11,11 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 
 	"github.com/gptscript-ai/gptscript/pkg/debugcmd"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/repos/download"
-	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes/env"
+	runtimeEnv "github.com/gptscript-ai/gptscript/pkg/repos/runtimes/env"
 )
 
 //go:embed python.json
@@ -44,13 +43,13 @@ func (r *Runtime) ID() string {
 }
 
 func (r *Runtime) Supports(cmd []string) bool {
-	if env.Matches(cmd, r.ID()) {
+	if runtimeEnv.Matches(cmd, r.ID()) {
 		return true
 	}
 	if !r.Default {
 		return false
 	}
-	return env.Matches(cmd, "python") || env.Matches(cmd, "python3")
+	return runtimeEnv.Matches(cmd, "python") || runtimeEnv.Matches(cmd, "python3")
 }
 
 func (r *Runtime) installVenv(ctx context.Context, binDir, venvPath string) error {
@@ -77,14 +76,7 @@ func (r *Runtime) Setup(ctx context.Context, dataRoot, toolSource string, env []
 		return nil, err
 	}
 
-	var newEnv []string
-	for _, path := range env {
-		v, ok := strings.CutPrefix(path, "PATH=")
-		if ok {
-			newEnv = append(newEnv, fmt.Sprintf("PATH=%s%s%s",
-				venvBinPath, string(os.PathListSeparator), v))
-		}
-	}
+	newEnv := runtimeEnv.AppendPath(env, venvBinPath)
 	newEnv = append(newEnv, "VIRTUAL_ENV="+venvPath)
 
 	if err := r.runPip(ctx, toolSource, binPath, append(env, newEnv...)); err != nil {
