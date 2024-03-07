@@ -42,7 +42,7 @@ of 21 albums.
 
 ## Quick Start
 
-### 1. Install the latest release
+### 1. Install the latest release.
 
 #### Homebrew (macOS and Linux)
 
