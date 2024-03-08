@@ -97,7 +97,7 @@ Here is a GPTScript that summarizes the content of a CSV file. [Link to example 
 
 ### Understanding Code
 
-Here is a GPTScript that summarizes the the code stored under the current directory: [`describe-code.gpt`](../examples/describe-code.gpt)
+Here is a GPTScript that summarizes the code stored under the current directory: [`describe-code.gpt`](../examples/describe-code.gpt)
 
 ## Vision, Image, and Audio
 
