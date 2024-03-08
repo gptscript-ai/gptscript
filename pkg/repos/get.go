@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/BurntSushi/locker"
 	"github.com/gptscript-ai/gptscript/pkg/repos/git"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
@@ -52,6 +53,9 @@ func New(cacheDir string, runtimes ...Runtime) *Manager {
 }
 
 func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, env []string) (string, []string, error) {
+	locker.Lock(tool.ID)
+	defer locker.Unlock(tool.ID)
+
 	target := filepath.Join(m.storageDir, tool.Source.Repo.Revision, runtime.ID())
 	targetFinal := filepath.Join(target, tool.Source.Repo.Path)
 	doneFile := target + ".done"

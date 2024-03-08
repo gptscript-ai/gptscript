@@ -19,7 +19,8 @@ func cloneBare(ctx context.Context, repo, toDir string) error {
 }
 
 func gitWorktreeAdd(ctx context.Context, gitDir, commitDir, commit string) error {
-	cmd := newGitCommand(ctx, "--git-dir", gitDir, "worktree", "add", "-f", commitDir, commit)
+	// The double -f is intentional
+	cmd := newGitCommand(ctx, "--git-dir", gitDir, "worktree", "add", "-f", "-f", commitDir, commit)
 	return cmd.Run()
 }
 
