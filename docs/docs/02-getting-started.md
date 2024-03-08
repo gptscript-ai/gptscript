@@ -32,13 +32,13 @@ Download and install the archive for your platform and architecture from the [re
 export OPENAI_API_KEY="your-api-key"
 ```
 
-Alternatively Azure OpenAI can be utilized
+Alternatively Azure OpenAI can be utilized. If the [Azure deployment name is different than the model being used](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/switching-endpoints#keyword-argument-for-model), be sure to include the `OPENAI_AZURE_DEPLOYMENT` argument.
 
 ```shell
 export OPENAI_API_KEY="your-api-key"
-export OPENAI_BASE_URL="your-endpiont"
+export OPENAI_BASE_URL="https://<your-endpoint>.openai.azure.com/"
 export OPENAI_API_TYPE="AZURE"
-export OPENAI_AZURE_DEPLOYMENT="your-deployment-name"
+export OPENAI_AZURE_DEPLOYMENT="<your-deployment-name>"
 ```
 
 #### Windows
