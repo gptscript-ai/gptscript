@@ -1,0 +1,45 @@
+tools: sys.write, get-tweet-text, sentiments
+description: get the sentiments expressed in a tweet
+args: url: URL of the tweet to analyze
+
+Perform the actions in the following order:
+
+Get the text of the tweet referenced by "${url} and save it in the file content.txt
+Next analyze the sentiments expressed in this file
+
+---
+name: get-tweet-text
+description: get text content of a tweet
+args: url: url towards a tweet
+
+#!python
+import os
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+# Setup WebDriver options
+options = webdriver.ChromeOptions()
+options.add_argument("--headless")
+options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36")
+driver = webdriver.Chrome(options=options)
+
+# Navigate to the page and get field
+driver.get(os.environ["url"])
+try:
+    element = WebDriverWait(driver, 50).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "div[data-testid='tweetText'] > span"))
+    )
+    print(element.text)
+finally:
+    driver.quit()
+
+---
+name: sentiments
+description: Get the sentiment of the writer
+args: content: any string
+
+You are a program designed to assess the sentiments expressed by a writer in a text.
+
+Do not give too many details, just the overall sentiments that is expressed in "${content}"
