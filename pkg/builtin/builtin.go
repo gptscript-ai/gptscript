@@ -203,13 +203,14 @@ func SysFind(ctx context.Context, env []string, input string) (string, error) {
 		if err != nil {
 			return err
 		}
-		if d.IsDir() {
-			return nil
-		}
 		if ok, err := filepath.Match(params.Pattern, d.Name()); err != nil {
 			return err
 		} else if ok {
-			result = append(result, filepath.Join(params.Directory, pathname))
+			path := filepath.Join(params.Directory, pathname)
+			if d.IsDir() {
+				path += "/"
+			}
+			result = append(result, path)
 		}
 		return nil
 	})
