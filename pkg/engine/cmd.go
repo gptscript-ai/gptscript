@@ -57,7 +57,6 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 
 	output := &bytes.Buffer{}
 	all := &bytes.Buffer{}
-	cmd.Stdin = strings.NewReader(input)
 	cmd.Stderr = io.MultiWriter(all, os.Stderr)
 	cmd.Stdout = io.MultiWriter(all, output)
 
@@ -142,6 +141,7 @@ func appendInputAsEnv(env []string, input string) []string {
 		}
 	}
 
+	env = appendEnv(env, "GPTSCRIPT_INPUT", input)
 	return env
 }
 
