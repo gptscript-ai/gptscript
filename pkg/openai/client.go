@@ -206,8 +206,8 @@ func toMessages(request types.CompletionRequest) (result []openai.ChatCompletion
 		if message.Role == types.CompletionMessageRoleTypeSystem {
 			// Append if the next message is system or user, otherwise set as user message
 			if i == len(request.Messages)-1 ||
-				(request.Messages[i].Role != types.CompletionMessageRoleTypeSystem &&
-					request.Messages[i].Role != types.CompletionMessageRoleTypeUser) {
+				(request.Messages[i+1].Role != types.CompletionMessageRoleTypeSystem &&
+					request.Messages[i+1].Role != types.CompletionMessageRoleTypeUser) {
 				message.Role = types.CompletionMessageRoleTypeUser
 			} else {
 				systemPrompts = append(systemPrompts, message.Content[0].Text)
