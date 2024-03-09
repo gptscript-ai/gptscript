@@ -30,6 +30,8 @@ func Extract(ctx context.Context, downloadURL, digest, targetDir string) error {
 	}
 	defer resp.Body.Close()
 
+	// NOTE: Because I'm validating the hash at the same time as extracting this isn't actually secure.
+	// Security is still assumed the source is trusted.  Which is bad and should be changed.
 	digester := sha256.New()
 	input := io.TeeReader(resp.Body, digester)
 
