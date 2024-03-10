@@ -37,7 +37,7 @@ Notable things to point out:
 
 #### Tools
 
-The `tools` directive was used here to reference the `vision` and the `sys.write` tools.  GPTScript will know the tools availble to it and will use them when it sees fit in the script.
+The `tools` directive was used here to reference the `vision` and the `sys.write` tools.  GPTScript will know the tools available to it and will use them when it sees fit in the script.
 
 #### Args
 

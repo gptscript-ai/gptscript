@@ -23,7 +23,7 @@ source .venv/bin/activate
 
 > Note: You can install the python dependencies manually by running `pip install -r requirements.txt` in the root of the cloned repository. This prevents the need to run `make bootstrap` or activate the virtual environment.
 
-3. In the same shell session that your virutal environment is activated, reference `<path-to-the-repo>/tool.gpt` in your GPTScript.
+3. In the same shell session that your virtual environment is activated, reference `<path-to-the-repo>/tool.gpt` in your GPTScript.
 
 ## Usage
 To use the Image Generation tool, you need to make sure that the OPENAI_API_KEY environment variable is set to your OpenAI API key. You can obtain an API key from the OpenAI platform if you don't already have one.
