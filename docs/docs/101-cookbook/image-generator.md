@@ -35,11 +35,11 @@ in a specific style that we tell the tool to use.
 This will generate an image of a city skyline at night in the style of a 17th century impressionist oil painting and write the resulting image to a file named `painting.png`.
 
 ## Recap
-In this example, we have created a GPTScript that leverages the `image-generation` tool to generate an image based on a prompt. We gave it some flexibility by specifiying an argument `prompt` that the user can provide when running the script. We also specified gave the script a specific style of the image that we want to generate, that being a 17th century impressionist oil painter.
+In this example, we have created a GPTScript that leverages the `image-generation` tool to generate an image based on a prompt. We gave it some flexibility by specifying an argument `prompt` that the user can provide when running the script. We also specified gave the script a specific style of the image that we want to generate, that being a 17th century impressionist oil painter.
 
 Notable things to point out:
 #### Tools
-The `tools` directive was used here to reference the `image-generation` tool and the `sys.download` and `sys.write` system tools. GPTScript will know the tools availble to it and will use them when it sees fit in the script.
+The `tools` directive was used here to reference the `image-generation` tool and the `sys.download` and `sys.write` system tools. GPTScript will know the tools available to it and will use them when it sees fit in the script.
 
 #### Args
 We used the `args` directive to specify the `prompt` argument that the user can provide when running the script. This is a required argument and the user must provide it when running the script.
