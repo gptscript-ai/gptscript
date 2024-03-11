@@ -2,7 +2,16 @@
   "Model": "gpt-4-turbo-preview",
   "InternalSystemPrompt": null,
   "Tools": null,
-  "Messages": null,
+  "Messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "the transient"
+        }
+      ]
+    }
+  ],
   "MaxTokens": 0,
   "Temperature": null,
   "JSONResponse": false,
