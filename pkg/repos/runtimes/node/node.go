@@ -101,6 +101,7 @@ func (r *Runtime) getReleaseAndDigest() (string, string, error) {
 }
 
 func (r *Runtime) runNPM(ctx context.Context, toolSource, binDir string, env []string) error {
+	log.Infof("Running npm in %s", toolSource)
 	cmd := debugcmd.New(ctx, filepath.Join(binDir, "npm"), "install")
 	cmd.Env = env
 	cmd.Dir = toolSource
