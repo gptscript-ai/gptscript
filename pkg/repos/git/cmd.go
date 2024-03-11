@@ -2,14 +2,12 @@ package git
 
 import (
 	"context"
-	"os/exec"
 
 	"github.com/gptscript-ai/gptscript/pkg/debugcmd"
 )
 
-func newGitCommand(ctx context.Context, args ...string) *exec.Cmd {
-	cmd := exec.CommandContext(ctx, "git", args...)
-	debugcmd.SetupDebug(cmd)
+func newGitCommand(ctx context.Context, args ...string) *debugcmd.WrappedCmd {
+	cmd := debugcmd.New(ctx, "git", args...)
 	return cmd
 }
 
