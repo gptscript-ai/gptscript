@@ -21,11 +21,12 @@ func AddVSC(lookup VCSLookup) {
 
 func loadURL(ctx context.Context, base *source, name string) (*source, bool, error) {
 	var (
-		repo *types.Repo
-		url  = name
+		repo     *types.Repo
+		url      = name
+		relative = strings.HasPrefix(name, ".") || !strings.Contains(name, "/")
 	)
 
-	if base.Path != "" {
+	if base.Path != "" && relative {
 		url = base.Path + "/" + name
 	}
 
@@ -37,7 +38,7 @@ func loadURL(ctx context.Context, base *source, name string) (*source, bool, err
 		repo = &newRepo
 	}
 
-	if repo == nil {
+	if repo == nil || !relative {
 		for _, vcs := range vcsLookups {
 			newURL, newRepo, ok, err := vcs(name)
 			if err != nil {
