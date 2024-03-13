@@ -14,9 +14,9 @@ import (
 	"strings"
 
 	"github.com/gptscript-ai/gptscript/pkg/debugcmd"
+	runtimeEnv "github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/repos/download"
-	runtimeEnv "github.com/gptscript-ai/gptscript/pkg/repos/runtimes/env"
 )
 
 //go:embed digests.txt
