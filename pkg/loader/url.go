@@ -64,7 +64,6 @@ func loadURL(ctx context.Context, base *source, name string) (*source, bool, err
 	pathURL.Path = path.Dir(parsed.Path)
 	pathString := pathURL.String()
 	name = path.Base(parsed.Path)
-	url = pathString + "/" + name
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
