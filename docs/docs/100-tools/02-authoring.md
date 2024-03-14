@@ -16,11 +16,11 @@ args: number: (optional) The number of images to generate. Defaults to 1.
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/cli.py --prompt="${prompt}" --size="${size}" --quality="${quality}" --number="${number}"
 ```
 
-At the bottom you'll notice a shebang line that specifies the command to run when the tool is invoked. This is the exact command that will be executed when the tool is used in a GPTScript.
+At the bottom you'll notice a shebang (`#!/usr/bin/env ...`) line that specifies the command to run when the tool is invoked. This is the exact command that will be executed when the tool is used in a GPTScript.
 If there is no shebang line, then it will be treated as natural language for the LLM to process.
 
 :::tip
-Every arg becomes an environment variable when the tool is invoked.
+Every arg becomes an environment variable when the tool is invoked. So instead of accepting args using flags like `--size="${size}", your program can just read the `size` environment variable.
 :::
 
 ## Binary Tools

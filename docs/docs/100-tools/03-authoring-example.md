@@ -37,3 +37,13 @@ will be able to find the `tool.py` file no matter what the user's current workin
 If you make the tool available in a public GitHub repo, then you will be able to refer to it by
 the URL, i.e. `github.com/<user>/<repo name>`. GPTScript will automatically set up a Python virtual
 environment, install the required packages, and execute the tool.
+
+## 3. Use the tool
+
+Here is an example of how you can use the tool once it is on GitHub:
+
+```
+tools: github.com/<user>/<repo name>
+
+Get the contents of https://github.com
+```
