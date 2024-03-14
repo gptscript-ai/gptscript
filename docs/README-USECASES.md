@@ -38,32 +38,11 @@ You construct the appropriate query tool based on the type of knowledge base you
 
 ### Planning
 
-Here is a GPTScript that produces a detailed travel itenirary based on inputs from a user: [`travel-agent.gpt`](../examples/travel-agent.gpt)
+Here is a GPTScript that produces a detailed travel itinerary based on inputs from a user: [`travel-agent.gpt`](../examples/travel-agent.gpt)
 
 ### Web UI Automation
 
-GPTScript enables the automation of data collection and analysis from websites through seamless interaction with a Chrome web browser. Here's an example to illustrate how it works:
-
-1. Please install the browsing tool and configure it to operate continuously in the background as a service.
-
-```sh
-git clone https://github.com/gptscript-ai/browser
-
-cd browser
-
-npm install
-
-npm run server
-```
-
-2. Let's explore a brief example on how to navigate through the Coachella Festival offerings and retrieve ticketing details
-
-```sh
-# Go to the browser repo you just cloned
-cd browser 
-
-gpscript ./example/coachella-browse.gpt
-```
+Here is a GPTScript that automates a web browser to browse and navigate website, extract information: [coachella-browse.gpt](https://github.com/gptscript-ai/browser/blob/main/examples/coachella-browse.gpt)
 
 For additional examples, please explore [here](https://github.com/gptscript-ai/browser?tab=readme-ov-file#examples).
 
@@ -101,7 +80,7 @@ Here is a GPTScript that performs sentiment analysis on the input text: [Social 
 
 ### CSV Files
 
-Here is a GPTScript that summarizes the content of a CSV file. [Link to example here]
+Here is a GPTScript that reads the content of a CSV file and make query using natural language: [csv-reader.gpt](https://github.com/gptscript-ai/csv-reader/blob/main/examples/csv-reader.gpt)
 
 ### Understanding Code
 
