@@ -78,7 +78,7 @@ func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, e
 		return "", nil, err
 	}
 
-	newEnv, err := runtime.Setup(ctx, m.runtimeDir, target, env)
+	newEnv, err := runtime.Setup(ctx, m.runtimeDir, targetFinal, env)
 	if err != nil {
 		return "", nil, err
 	}
