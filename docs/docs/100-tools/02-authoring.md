@@ -1,21 +1,23 @@
 # Authoring Tools
 
-You can author your own tools for your use or to share with others. The process for authoring a tool is as simple as creating a `tool.gpt` file in the root directory of your project. This file is itself a GPTScript that defines the tool's name, description, and what it should do.
+You can author your own tools for your use or to share with others.
+The process for authoring a tool is as simple as creating a `tool.gpt` file in the root directory of your project.
+This file is itself a GPTScript that defines the tool's name, description, and what it should do.
 
 Here's an example of the `tool.gpt` file for the `image-generation` tool:
 
-```yaml
-description: I am a tool that can generate images based on arguments that are sent to me. I return a list of URLs to the generated images.
+```
+description: Generates images based on the specified parameters and returns a list of URLs to the generated images.
 args: prompt: (required) The text prompt based on which the GPT model will generate a response
-args: model: (optional) The model to use for image generation. Defaults to "dall-e-3".
 args: size: (optional) The size of the image to generate, format WxH (e.g. 1024x1024). Defaults to 1024x1024.
 args: quality: (optional) The quality of the generated image. Allowed values are "standard" or "hd". Default is "standard".
 args: number: (optional) The number of images to generate. Defaults to 1.
 
-#!/usr/bin/env python3 ./cli.py --prompt="${prompt}" --model="${model}" --size="${size}" --quality="${quality}" --number="${number}"
+#!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/cli.py --prompt="${prompt}" --size="${size}" --quality="${quality}" --number="${number}"
 ```
 
-At the bottom you'll notice a shebang line that specifies the command to run when the tool is invoked. This is the exact command that will be executed when the tool is used in a GPTScript. Doing this with tools allows for a high degree of reliability that the tool would not otherwise have.
+At the bottom you'll notice a shebang line that specifies the command to run when the tool is invoked. This is the exact command that will be executed when the tool is used in a GPTScript.
+If there is no shebang line, then it will be treated as natural language for the LLM to process.
 
 :::tip
 Every arg becomes an environment variable when the tool is invoked.
