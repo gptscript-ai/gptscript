@@ -7,10 +7,20 @@
 GPTScript is a new scripting language to automate your interaction with a Large Language Model (LLM), namely OpenAI. The ultimate goal is to create a natural language programming experience. The syntax of GPTScript is largely natural language, making it very easy to learn and use.
 Natural language prompts can be mixed with traditional scripts such as bash and python or even external HTTP service
 calls. With GPTScript you can do just about anything, like [plan a vacation](./examples/travel-agent.gpt),
-[edit a file](./examples/add-go-mod-dep.gpt), [run some SQL](./examples/sqlite-download.gpt), or [build a mongodb/flask app](./examples/hacker-news-headlines.gpt).
+[edit a file](./examples/add-go-mod-dep.gpt), [run some SQL](./examples/sqlite-download.gpt), or [build a mongodb/flask app](./examples/hacker-news-headlines.gpt). Here are some common use cases for GPTScript:
+
+1. [Retrieval-Augmented Generation (RAG)](./docs/README-USECASES.md#retrieval)
+2. [Task Automation](./docs/README-USECASES.md#task-automation)
+3. [Agents and Assistants](./docs/README-USECASES.md#agents-and-assistants)
+4. [Data Analysis](./docs/README-USECASES.md#data-analysis)
+5. [Vision, Image, and Audio](./docs/README-USECASES.md#vision-image-and-audio)
+6. [Memory Management](./docs/README-USECASES.md#memory-management)
+7. [Chatbots](./docs/README-USECASES.md#chatbots)
 
 | :memo: | We are currently exploring options for interacting with local models using GPTScript. |
 | ------ | :------------------------------------------------------------------------------------ |
+
+The following example illustrates how GPTScript allows you to accomplish complex tasks by writing what resembles pseudocode in English:
 
 ```yaml
 # example.gpt
