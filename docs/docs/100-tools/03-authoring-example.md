@@ -9,41 +9,15 @@ Create a file called `tool.py` with the following contents:
 
 ```python
 import os
-
-# Third party
 import requests
-from markdownify import markdownify as md
 
-
-def parse_url(link: str) -> str:
-    try:
-        resp = requests.get(link)
-        if resp.status_code != 200:
-            print(f"unexpected status code when getting {link}: {resp.status_code}")
-            exit(0)
-
-        # Convert HTML to Markdown
-        return md(resp.text)
-    except Exception as e:
-        print(f"Error in parse_url: {e}")
-        exit(0)
-
-
-# Begin execution
-
-link = os.getenv("url")
-if link is None:
-    print("please provide a URL")
-    exit(1)
-
-print(parse_url(link))
+print(requests.get(os.getenv("url")).text)
 ```
 
 Create a file called `requirements.txt` with the following contents:
 
 ```
 requests
-markdownify
 ```
 
 ## 2. Create the tool
@@ -51,7 +25,7 @@ markdownify
 Create a file called `tool.gpt` with the following contents:
 
 ```
-description: Returns the contents of a webpage as Markdown.
+description: Returns the contents of a webpage.
 args: url: The URL of the webpage.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/tool.py
