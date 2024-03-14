@@ -284,6 +284,14 @@ func SysWrite(ctx context.Context, env []string, input string) (string, error) {
 	locker.Lock(params.Filename)
 	defer locker.Unlock(params.Filename)
 
+	dir := filepath.Dir(params.Filename)
+	if _, err := os.Stat(dir); errors.Is(err, fs.ErrNotExist) {
+		log.Debugf("Creating dir %s", dir)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return "", fmt.Errorf("creating dir %s: %w", dir, err)
+		}
+	}
+
 	data := []byte(params.Content)
 	log.Debugf("Wrote %d bytes to file %s", len(data), params.Filename)
 
