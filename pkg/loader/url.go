@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	url2 "net/url"
-	"path/filepath"
+	"path"
 	"strings"
 
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -32,9 +32,9 @@ func loadURL(ctx context.Context, base *source, name string) (*source, bool, err
 
 	if base.Repo != nil {
 		newRepo := *base.Repo
-		newPath := filepath.Join(newRepo.Path, name)
-		newRepo.Path = filepath.Dir(newPath)
-		newRepo.Name = filepath.Base(newPath)
+		newPath := path.Join(newRepo.Path, name)
+		newRepo.Path = path.Dir(newPath)
+		newRepo.Name = path.Base(newPath)
 		repo = &newRepo
 	}
 
@@ -61,10 +61,10 @@ func loadURL(ctx context.Context, base *source, name string) (*source, bool, err
 	}
 
 	pathURL := *parsed
-	pathURL.Path = filepath.Dir(parsed.Path)
-	path := pathURL.String()
-	name = filepath.Base(parsed.Path)
-	url = path + "/" + name
+	pathURL.Path = path.Dir(parsed.Path)
+	pathString := pathURL.String()
+	name = path.Base(parsed.Path)
+	url = pathString + "/" + name
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
@@ -83,7 +83,7 @@ func loadURL(ctx context.Context, base *source, name string) (*source, bool, err
 	return &source{
 		Content:  resp.Body,
 		Remote:   true,
-		Path:     path,
+		Path:     pathString,
 		Name:     name,
 		Location: url,
 		Repo:     repo,

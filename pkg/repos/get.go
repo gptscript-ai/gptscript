@@ -93,6 +93,10 @@ func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, e
 		return "", nil, err
 	}
 
+	if err := out.Close(); err != nil {
+		return "", nil, err
+	}
+
 	return targetFinal, append(env, newEnv...), os.Rename(doneFile+".tmp", doneFile)
 }
 
