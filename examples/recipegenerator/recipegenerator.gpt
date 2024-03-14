@@ -2,8 +2,9 @@ tools: sys.find, sys.read, sys.write, recipegenerator, tool.gpt
 
 Perform the following steps in order:
 
-1. Give me a list of 5 to 10 ingredients from the picture grocery.png located in the current directory and put those extracted ingredients into a list.
-2. Based on these ingredients list, suggest me one recipe that is quick to cook and create a new recipe.md file with the recipe
+1. Give me a list of ingredients from the pictures named with grocery in their name located in the current directory and put those extracted ingredients into a list.
+2. For each picture analyzed in the previous step, write the ingredients identified into one file name ingredients.md.
+3. Based on these ingredients list, suggest me one recipe that is quick to cook and create a new recipe.md file with the recipe
 
 
 ---
