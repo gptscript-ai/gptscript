@@ -58,7 +58,7 @@ func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, e
 
 	target := filepath.Join(m.storageDir, tool.Source.Repo.Revision, runtime.ID())
 	targetFinal := filepath.Join(target, tool.Source.Repo.Path)
-	doneFile := target + ".done"
+	doneFile := targetFinal + ".done"
 	envData, err := os.ReadFile(doneFile)
 	if err == nil {
 		var savedEnv []string
