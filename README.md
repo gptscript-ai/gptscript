@@ -20,7 +20,7 @@ calls. With GPTScript you can do just about anything, like [plan a vacation](./e
 | :memo: | We are currently exploring options for interacting with local models using GPTScript. |
 | ------ | :------------------------------------------------------------------------------------ |
 
-The following example illustrates how GPTScript allows you to accomplish complex tasks by writing what resembles pseudocode in English:
+The following example illustrates how GPTScript allows you to accomplish a complex task by writing instructions in English:
 
 ```yaml
 # example.gpt
