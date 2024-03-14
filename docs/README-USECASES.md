@@ -89,7 +89,7 @@ Here is a GPTScript that reads the content of a large SQL database and produces 
 
 ### Tagging
 
-Here is a GPTScript that performs sentiment analysis on the input text. [Link to example here]
+Here is a GPTScript that performs sentiment analysis on the input text: [Social Media Post Sentiment Analyzer](../examples/sentiments)
 
 ### CSV Files
 
