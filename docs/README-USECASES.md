@@ -67,6 +67,14 @@ gpscript ./example/coachella-browse.gpt
 
 For additional examples, please explore [here](https://github.com/gptscript-ai/browser?tab=readme-ov-file#examples).
 
+### API Automation
+
+Here are a few GPTScripts that interact with issues on GitHub:
+
+- [Create GitHub Issues](https://github.com/gptscript-ai/create-github-issues/blob/main/examples/example.gpt)
+- [Modify GitHub Issues](https://github.com/gptscript-ai/modify-github-issues/blob/main/examples/example.gpt)
+- [Query GitHub Issues](https://github.com/gptscript-ai/query-github-issues/blob/main/examples/example.gpt)
+
 ### CLI Automation
 
 Here is a GPTScript that automates Kubernetes operations by driving the `kubectl` command line. [Link to example here]
