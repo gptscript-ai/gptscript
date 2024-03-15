@@ -27,6 +27,7 @@ func loadURL(ctx context.Context, base *source, name string) (*source, bool, err
 	)
 
 	if base.Path != "" && relative {
+		// Don't use path.Join because this is a URL and will break the :// protocol by cleaning it
 		url = base.Path + "/" + name
 	}
 
@@ -64,7 +65,14 @@ func loadURL(ctx context.Context, base *source, name string) (*source, bool, err
 	pathURL.Path = path.Dir(parsed.Path)
 	pathString := pathURL.String()
 	name = path.Base(parsed.Path)
-	url = pathString + "/" + name
+
+	// Append to pathString name. This is not the same as the original URL. This is an attempt to end up
+	// with a clean URL with no ../ in it.
+	if strings.HasSuffix(pathString, "/") {
+		url = pathString + name
+	} else {
+		url = pathString + "/" + name
+	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
