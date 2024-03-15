@@ -82,6 +82,10 @@ Here is a GPTScript that performs sentiment analysis on the input text: [Social 
 
 Here is a GPTScript that reads the content of a CSV file and make query using natural language: [csv-reader.gpt](https://github.com/gptscript-ai/csv-reader/blob/main/examples/csv-reader.gpt)
 
+### JSON Files
+
+Here is a GPTScript that uses the Python module to query JSON data in a jupyter notebook: [json-notebook](../examples/json-notebook)
+
 ### Understanding Code
 
 Here is a GPTScript that summarizes the code stored under the current directory: [`describe-code.gpt`](../examples/describe-code.gpt)
