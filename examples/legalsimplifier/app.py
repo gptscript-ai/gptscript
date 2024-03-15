@@ -32,7 +32,7 @@ def upload_file():
 
 def process_file(file):
     try:
-        # Execute the script to generate the recipe
+        # Execute the script to generate the summary
         subprocess.run(f"gptscript {SCRIPT_PATH}", shell=True, check=True)  
             
         # Read summary.md file
