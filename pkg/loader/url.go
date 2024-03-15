@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	url2 "net/url"
-	"path/filepath"
+	"path"
 	"strings"
 
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -21,23 +21,25 @@ func AddVSC(lookup VCSLookup) {
 
 func loadURL(ctx context.Context, base *source, name string) (*source, bool, error) {
 	var (
-		repo *types.Repo
-		url  = name
+		repo     *types.Repo
+		url      = name
+		relative = strings.HasPrefix(name, ".") || !strings.Contains(name, "/")
 	)
 
-	if base.Path != "" {
+	if base.Path != "" && relative {
+		// Don't use path.Join because this is a URL and will break the :// protocol by cleaning it
 		url = base.Path + "/" + name
 	}
 
 	if base.Repo != nil {
 		newRepo := *base.Repo
-		newPath := filepath.Join(newRepo.Path, name)
-		newRepo.Path = filepath.Dir(newPath)
-		newRepo.Name = filepath.Base(newPath)
+		newPath := path.Join(newRepo.Path, name)
+		newRepo.Path = path.Dir(newPath)
+		newRepo.Name = path.Base(newPath)
 		repo = &newRepo
 	}
 
-	if repo == nil {
+	if repo == nil || !relative {
 		for _, vcs := range vcsLookups {
 			newURL, newRepo, ok, err := vcs(name)
 			if err != nil {
@@ -60,10 +62,17 @@ func loadURL(ctx context.Context, base *source, name string) (*source, bool, err
 	}
 
 	pathURL := *parsed
-	pathURL.Path = filepath.Dir(parsed.Path)
-	path := pathURL.String()
-	name = filepath.Base(parsed.Path)
-	url = path + "/" + name
+	pathURL.Path = path.Dir(parsed.Path)
+	pathString := pathURL.String()
+	name = path.Base(parsed.Path)
+
+	// Append to pathString name. This is not the same as the original URL. This is an attempt to end up
+	// with a clean URL with no ../ in it.
+	if strings.HasSuffix(pathString, "/") {
+		url = pathString + name
+	} else {
+		url = pathString + "/" + name
+	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
@@ -82,7 +91,7 @@ func loadURL(ctx context.Context, base *source, name string) (*source, bool, err
 	return &source{
 		Content:  resp.Body,
 		Remote:   true,
-		Path:     path,
+		Path:     pathString,
 		Name:     name,
 		Location: url,
 		Repo:     repo,

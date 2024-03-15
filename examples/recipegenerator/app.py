@@ -18,27 +18,34 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    if 'file' not in request.files:
+    if 'images' not in request.files:
         return jsonify({'error': 'No file part'}), 400
-    file = request.files['file']
-    if file.filename == '':
+    
+    files = request.files.getlist('images')
+    
+    if not files or files[0].filename == '':
         return jsonify({'error': 'No selected file'}), 400
-    if file:
-        filename = os.path.join(app.config['UPLOAD_FOLDER'], GROCERY_PHOTO_FILE_NAME)
-        file.save(filename)
-        try:
-            # Execute the script to generate the recipe
-            subprocess.Popen(f"gptscript {SCRIPT_PATH}", shell=True, stdout=subprocess.PIPE, cwd=base_dir).stdout.read()
-            
-            # Read recipe.md file
-            recipe_file_path = os.path.join(app.config['UPLOAD_FOLDER'], RECIPE_FILE_NAME)
-            with open(recipe_file_path, 'r') as recipe_file:
-                recipe_content = recipe_file.read()
-            
-            # Return recipe content
-            return jsonify({'recipe': recipe_content})
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
+    
+    # Initialize a counter for file naming
+    file_counter = 1
+    for file in files:
+        if file:
+            # Format the filename as "GroceryX.png"
+            filename = f"grocery{file_counter}.png"
+            save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(save_path)
+            file_counter += 1  # Increment the counter for the next file
+
+    try:
+        # Calling the recipegenerator.gpt script
+        subprocess.Popen(f"gptscript {SCRIPT_PATH}", shell=True, stdout=subprocess.PIPE).stdout.read()
+        recipe_file_path = os.path.join(app.config['UPLOAD_FOLDER'], RECIPE_FILE_NAME)
+        with open(recipe_file_path, 'r') as recipe_file:
+            recipe_content = recipe_file.read()
+        # Return the recipe content
+        return jsonify({'recipe': recipe_content})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=False)

@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/BurntSushi/locker"
 	"github.com/gptscript-ai/gptscript/pkg/repos/git"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
@@ -52,9 +53,12 @@ func New(cacheDir string, runtimes ...Runtime) *Manager {
 }
 
 func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, env []string) (string, []string, error) {
+	locker.Lock(tool.ID)
+	defer locker.Unlock(tool.ID)
+
 	target := filepath.Join(m.storageDir, tool.Source.Repo.Revision, runtime.ID())
 	targetFinal := filepath.Join(target, tool.Source.Repo.Path)
-	doneFile := target + ".done"
+	doneFile := targetFinal + ".done"
 	envData, err := os.ReadFile(doneFile)
 	if err == nil {
 		var savedEnv []string
@@ -74,7 +78,7 @@ func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, e
 		return "", nil, err
 	}
 
-	newEnv, err := runtime.Setup(ctx, m.runtimeDir, target, env)
+	newEnv, err := runtime.Setup(ctx, m.runtimeDir, targetFinal, env)
 	if err != nil {
 		return "", nil, err
 	}
@@ -86,6 +90,10 @@ func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, e
 	defer out.Close()
 
 	if err := json.NewEncoder(out).Encode(newEnv); err != nil {
+		return "", nil, err
+	}
+
+	if err := out.Close(); err != nil {
 		return "", nil, err
 	}
 

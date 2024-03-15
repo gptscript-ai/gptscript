@@ -8,11 +8,13 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime"
 	"sort"
 	"strings"
 	"sync/atomic"
 
 	"github.com/google/shlex"
+	"github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
@@ -57,7 +59,6 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 
 	output := &bytes.Buffer{}
 	all := &bytes.Buffer{}
-	cmd.Stdin = strings.NewReader(input)
 	cmd.Stderr = io.MultiWriter(all, os.Stderr)
 	cmd.Stdout = io.MultiWriter(all, output)
 
@@ -104,6 +105,7 @@ func envAsMapAndDeDup(env []string) (sortedEnv []string, _ map[string]string) {
 
 var ignoreENV = map[string]struct{}{
 	"PATH":               {},
+	"Path":               {},
 	"GPTSCRIPT_TOOL_DIR": {},
 }
 
@@ -142,12 +144,13 @@ func appendInputAsEnv(env []string, input string) []string {
 		}
 	}
 
+	env = appendEnv(env, "GPTSCRIPT_INPUT", input)
 	return env
 }
 
 func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.Tool, input string) (*exec.Cmd, func(), error) {
-	env := append(e.Env[:], extraEnv...)
-	env = appendInputAsEnv(env, input)
+	envvars := append(e.Env[:], extraEnv...)
+	envvars = appendInputAsEnv(envvars, input)
 
 	interpreter, rest, _ := strings.Cut(tool.Instructions, "\n")
 	interpreter = strings.TrimSpace(interpreter)[2:]
@@ -157,16 +160,20 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 		return nil, nil, err
 	}
 
-	env, err = e.getRuntimeEnv(ctx, tool, args, env)
+	envvars, err = e.getRuntimeEnv(ctx, tool, args, envvars)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	env, envMap := envAsMapAndDeDup(env)
+	envvars, envMap := envAsMapAndDeDup(envvars)
 	for i, arg := range args {
 		args[i] = os.Expand(arg, func(s string) string {
 			return envMap[s]
 		})
+	}
+
+	if runtime.GOOS == "windows" && (args[0] == "/usr/bin/env" || args[0] == "/bin/env") {
+		args = args[1:]
 	}
 
 	var (
@@ -192,7 +199,7 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 		cmdArgs = append(cmdArgs, f.Name())
 	}
 
-	cmd := exec.CommandContext(ctx, args[0], cmdArgs...)
-	cmd.Env = env
+	cmd := exec.CommandContext(ctx, env.Lookup(envvars, args[0]), cmdArgs...)
+	cmd.Env = envvars
 	return cmd, stop, nil
 }

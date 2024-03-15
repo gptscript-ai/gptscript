@@ -203,13 +203,14 @@ func SysFind(ctx context.Context, env []string, input string) (string, error) {
 		if err != nil {
 			return err
 		}
-		if d.IsDir() {
-			return nil
-		}
 		if ok, err := filepath.Match(params.Pattern, d.Name()); err != nil {
 			return err
 		} else if ok {
-			result = append(result, filepath.Join(params.Directory, pathname))
+			path := filepath.Join(params.Directory, pathname)
+			if d.IsDir() {
+				path += "/"
+			}
+			result = append(result, path)
 		}
 		return nil
 	})
@@ -282,6 +283,14 @@ func SysWrite(ctx context.Context, env []string, input string) (string, error) {
 	// Lock the file to prevent concurrent writes from other tool calls.
 	locker.Lock(params.Filename)
 	defer locker.Unlock(params.Filename)
+
+	dir := filepath.Dir(params.Filename)
+	if _, err := os.Stat(dir); errors.Is(err, fs.ErrNotExist) {
+		log.Debugf("Creating dir %s", dir)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return "", fmt.Errorf("creating dir %s: %w", dir, err)
+		}
+	}
 
 	data := []byte(params.Content)
 	log.Debugf("Wrote %d bytes to file %s", len(data), params.Filename)

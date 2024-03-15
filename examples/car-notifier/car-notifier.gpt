@@ -1,0 +1,32 @@
+tools: send_email, sys.http.html2text, sys.write, sys.exec?
+
+Visit https://phoenix.craigslist.org/search/cta?postedToday=1&query=4runner&sort=date to get information about the
+4Runners listed today.
+
+Check the PostgreSQL database and see if any of these vehicles have already been stored. If they have been, ignore them.
+The `psql` command is available. The database connection string is in the environment variable PGURL. The table is
+called "vehicles". If the table doesn't exist yet, create it. The only thing that needs to be stored in the table
+is the URL for each vehicle. Don't add any other fields.
+
+For each vehicle that was not already in the database, store the information about it into the database, and send
+an email with information about those vehicles. If there are no new vehicles, then don't send an email.
+
+---
+name: send_email
+description: sends an email with the provided contents
+args: contents: the contents of the email to send
+tools: sys.http.html2text, sys.exec?
+
+IMPORTANT: when setting --header or -H on a cURL command, always use double quotes, never single quotes!
+IMPORTANT: when setting --data or -d on a cURL command, always use single quotes, never double quotes! And always escape newlines! (They should look like "\\n")
+
+The SendGrid API key is in the environment variable SENDGRID_API_KEY.
+
+Perform the following actions in this order:
+1. View the contents of https://docs.sendgrid.com/for-developers/sending-email/api-getting-started to learn about the SendGrid API.
+2. Run a cURL command to send an email using the SendGrid API, with the following information:
+   to: <email address> (name: <name>)
+   from: <email address> (name: <name>)
+   reply to: <email address> (name: <name>)
+   subject: "4Runner Listings"
+   content: $contents

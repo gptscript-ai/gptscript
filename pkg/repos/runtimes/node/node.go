@@ -14,9 +14,9 @@ import (
 	"strings"
 
 	"github.com/gptscript-ai/gptscript/pkg/debugcmd"
+	runtimeEnv "github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/repos/download"
-	runtimeEnv "github.com/gptscript-ai/gptscript/pkg/repos/runtimes/env"
 )
 
 //go:embed SHASUMS256.txt.asc
@@ -84,7 +84,7 @@ func arch() string {
 
 func (r *Runtime) getReleaseAndDigest() (string, string, error) {
 	scanner := bufio.NewScanner(bytes.NewReader(releasesData))
-	key := osName() + "-" + arch()
+	key := "-" + osName() + "-" + arch()
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.Contains(line, "node-v"+r.Version) && strings.Contains(line, key) {
@@ -101,6 +101,7 @@ func (r *Runtime) getReleaseAndDigest() (string, string, error) {
 }
 
 func (r *Runtime) runNPM(ctx context.Context, toolSource, binDir string, env []string) error {
+	log.Infof("Running npm in %s", toolSource)
 	cmd := debugcmd.New(ctx, filepath.Join(binDir, "npm"), "install")
 	cmd.Env = env
 	cmd.Dir = toolSource
@@ -115,6 +116,11 @@ func (r *Runtime) binDir(rel string) (string, error) {
 
 	for _, entry := range entries {
 		if entry.IsDir() {
+			if _, err := os.Stat(filepath.Join(rel, entry.Name(), "node.exe")); err == nil {
+				return filepath.Join(rel, entry.Name()), nil
+			} else if !errors.Is(err, fs.ErrNotExist) {
+				return "", err
+			}
 			return filepath.Join(rel, entry.Name(), "bin"), nil
 		}
 	}

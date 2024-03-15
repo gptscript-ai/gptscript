@@ -13,7 +13,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
-const DaemonURLSuffix = ".daemon.gpt.local"
+const DaemonURLSuffix = ".daemon.gptscript.local"
 
 func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Tool, input string) (cmdRet *Return, cmdErr error) {
 	envMap := map[string]string{}

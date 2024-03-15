@@ -42,7 +42,7 @@ type GPTScript struct {
 	Output        string `usage:"Save output to a file, or - for stdout" short:"o"`
 	Input         string `usage:"Read input from a file (\"-\" for stdin)" short:"f"`
 	SubTool       string `usage:"Use tool of this name, not the first tool in file"`
-	Assemble      bool   `usage:"Assemble tool to a single artifact, saved to --output"`
+	Assemble      bool   `usage:"Assemble tool to a single artifact, saved to --output" hidden:"true"`
 	ListModels    bool   `usage:"List the models available and exit"`
 	ListTools     bool   `usage:"List built-in tools and exit"`
 	Server        bool   `usage:"Start server"`

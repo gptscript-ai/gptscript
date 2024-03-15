@@ -24,6 +24,13 @@ func Extract(ctx context.Context, downloadURL, digest, targetDir string) error {
 		return fmt.Errorf("mkdir %s: %w", targetDir, err)
 	}
 
+	tmpFile, err := os.CreateTemp("", "gptscript-download")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmpFile.Name())
+	defer tmpFile.Close()
+
 	resp, err := http.Get(downloadURL)
 	if err != nil {
 		return err
@@ -33,12 +40,27 @@ func Extract(ctx context.Context, downloadURL, digest, targetDir string) error {
 	digester := sha256.New()
 	input := io.TeeReader(resp.Body, digester)
 
+	if _, err = io.Copy(tmpFile, input); err != nil {
+		return err
+	}
+
+	resultDigest := digester.Sum(nil)
+	resultDigestString := hex.EncodeToString(resultDigest[:])
+
+	if resultDigestString != digest {
+		return fmt.Errorf("downloaded %s and expected digest %s but got %s", downloadURL, digest, resultDigestString)
+	}
+
 	parsedURL, err := url.Parse(downloadURL)
 	if err != nil {
 		return err
 	}
 
-	format, input, err := archiver.Identify(filepath.Base(parsedURL.Path), input)
+	if _, err := tmpFile.Seek(0, 0); err != nil {
+		return err
+	}
+
+	format, input, err := archiver.Identify(filepath.Base(parsedURL.Path), tmpFile)
 	if err != nil {
 		return err
 	}
@@ -86,13 +108,6 @@ func Extract(ctx context.Context, downloadURL, digest, targetDir string) error {
 	})
 	if err != nil {
 		return err
-	}
-
-	resultDigest := digester.Sum(nil)
-	resultDigestString := hex.EncodeToString(resultDigest[:])
-
-	if resultDigestString != digest {
-		return fmt.Errorf("downloaded %s and expected digest %s but got %s", downloadURL, digest, resultDigestString)
 	}
 
 	return nil

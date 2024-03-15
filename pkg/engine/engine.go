@@ -155,14 +155,18 @@ func (c *Context) appendTool(completion *types.CompletionRequest, parentTool typ
 		c.toolNames = map[string]struct{}{}
 	}
 
-	completion.Tools = append(completion.Tools, types.CompletionTool{
-		Function: types.CompletionFunctionDefinition{
-			ToolID:      subTool.ID,
-			Name:        PickToolName(subToolName, c.toolNames),
-			Description: subTool.Parameters.Description,
-			Parameters:  args,
-		},
-	})
+	if subTool.Instructions == "" {
+		log.Debugf("Skipping zero instruction tool %s (%s)", subToolName, subTool.ID)
+	} else {
+		completion.Tools = append(completion.Tools, types.CompletionTool{
+			Function: types.CompletionFunctionDefinition{
+				ToolID:      subTool.ID,
+				Name:        PickToolName(subToolName, c.toolNames),
+				Description: subTool.Parameters.Description,
+				Parameters:  args,
+			},
+		})
+	}
 
 	for _, export := range subTool.Export {
 		if err := c.appendTool(completion, subTool, export); err != nil {

@@ -100,6 +100,12 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 		return url, err
 	}
 
+	r, w, err := os.Pipe()
+	if err != nil {
+		return "", err
+	}
+
+	cmd.Stdin = r
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	log.Infof("launched [%s][%s] port [%d] %v", tool.Parameters.Name, tool.ID, port, cmd.Args)
@@ -121,6 +127,8 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 		if err != nil {
 			log.Errorf("daemon exited tool [%s] %v: %v", tool.Parameters.Name, cmd.Args, err)
 		}
+		_ = r.Close()
+		_ = w.Close()
 
 		cancel(err)
 		stop()
@@ -133,7 +141,7 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 	daemonWG.Add(1)
 	context.AfterFunc(ctx, func() {
 		if err := cmd.Process.Kill(); err != nil {
-			log.Errorf("daemon failed to kill tool [%s] process: %v", tool.Parameters.Name, err)
+			log.Debugf("daemon failed to kill tool [%s] process: %v", tool.Parameters.Name, err)
 		}
 		daemonWG.Done()
 	})
