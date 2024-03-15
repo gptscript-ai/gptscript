@@ -47,6 +47,7 @@ type GPTScript struct {
 	ListTools     bool   `usage:"List built-in tools and exit"`
 	Server        bool   `usage:"Start server"`
 	ListenAddress string `usage:"Server listen address" default:"127.0.0.1:9090"`
+	Chdir         string `usage:"Change current working directory" short:"C"`
 
 	_client llm.Client `usage:"-"`
 }
@@ -130,6 +131,13 @@ func (r *GPTScript) listModels(ctx context.Context) error {
 }
 
 func (r *GPTScript) Pre(*cobra.Command, []string) error {
+	// chdir as soon as possible
+	if r.Chdir != "" {
+		if err := os.Chdir(r.Chdir); err != nil {
+			return err
+		}
+	}
+
 	if r.DefaultModel != "" {
 		builtin.SetDefaultModel(r.DefaultModel)
 	}
