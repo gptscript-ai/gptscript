@@ -1,0 +1,91 @@
+# Use Cases
+
+## Retrieval
+
+Retrieval-Augmented Generation (RAG) leverages a knowledge base outside of the training data before consulting the LLM to generate a response.
+The following GPTScript implements RAG:
+
+```yaml
+name: rag
+description: implements retrieval-augmented generation
+args: prompt: a string
+tools: query
+
+First query the ${prompt} in the knowledge base, then construsts an answer to ${prompt} based on the result of the query.
+
+---
+
+name: query
+description: queries the prompt in the knowledge base
+args: prompt: a string
+
+... (implementation of knowledge base query follows) ...
+```
+
+The idea behind RAG is simple. Its core logic can be implemented in one GPTScript statement: `First query the ${prompt} in the knowledge base, then construsts an answer to ${prompt} based on the result of the query.` The real work of building RAG lies in the tool that queries your knowledge base.
+
+You construct the appropriate query tool based on the type of knowledge base you have.
+
+| Knowledge Base | Query Tool |
+|------|------|
+| A vector database storing common document types such as text, HTML, PDF, and Word | Integrate with LlamaIndex for vector database support [Link to example]|
+| Use the public or private internet to supply up-to-date knowledge | Implement query tools using a search engine, as shown in [`search.gpt`](https://github.com/gptscript-ai/gptscript/tree/main/examples/search.gpt)|
+| A structured database supporting SQL such as sqlite, MySQL, PostgreSQL, and Oracle DB | Implement query tools using database command line tools such as `sqlite` and `mysql` [Link to example]|
+| An ElasticSearch/OpenSearch database storing logs or other text files | Implement query tools using database command line tools [Link to example]|
+| Other databases such as graph or time series databases | Implement query tools using database command line tools [Link to example]|
+
+## Task Automation
+
+### Planning
+
+Here is a GPTScript that produces a detailed travel itinerary based on inputs from a user: [`travel-agent.gpt`](https://github.com/gptscript-ai/gptscript/tree/main/examples/travel-agent.gpt)
+
+### Web UI Automation
+
+Here is a GPTScript that automates a web browser to browse and navigate website, extract information: [coachella-browse.gpt](https://github.com/gptscript-ai/browser/tree/main/examples/coachella-browse.gpt)
+
+For additional examples, please explore [here](https://github.com/gptscript-ai/browser?tab=readme-ov-file#examples).
+
+### API Automation
+
+Here are a few GPTScripts that interact with issues on GitHub:
+
+- [Create GitHub Issues](https://github.com/gptscript-ai/create-github-issues/tree/main/examples/example.gpt)
+- [Modify GitHub Issues](https://github.com/gptscript-ai/modify-github-issues/tree/main/examples/example.gpt)
+- [Query GitHub Issues](https://github.com/gptscript-ai/gptscriptquery-github-issues/tree/main/examples/example.gpt)
+
+## Agents and Assistants
+
+Agents and assistants are synonyms. They are software programs that leverage LLM to carry out tasks.
+
+In GPTScript, agents and assistants are implemented using tools. Tools can use other tools. Tools can be implemented using natural language prompts or using traditional programming languages such as Python or JavaScript. You can therefore build arbitrarily complex agents and assistants in GPTScript. Here is an example of an assistant that leverages an HTTP client, MongoDB, and Python code generation to display Hacker News headlines: [`hacker-news-headlines.gpt`](https://github.com/gptscript-ai/gptscript/tree/main/examples/hacker-news-headlines.gpt)
+
+## Data Analysis
+
+Depending on the context window supported by the LLM, you can either send a large amount of data to the LLM to analyze in one shot or supply data in batches.
+
+### Summarization
+
+Here is a GPTScript that sends a large document in batches to the LLM and produces a summary of the entire document. [hamlet-summarizer](https://github.com/gptscript-ai/gptscript/tree/main/examples/hamlet-summarizer)
+
+### Tagging
+
+Here is a GPTScript that performs sentiment analysis on the input text: [Social Media Post Sentiment Analyzer](https://github.com/gptscript-ai/gptscript/tree/main/examples/sentiments)
+
+### CSV Files
+
+Here is a GPTScript that reads the content of a CSV file and make query using natural language: [csv-reader.gpt](https://github.com/gptscript-ai/csv-reader/tree/main/examples/csv-reader.gpt)
+
+### Understanding Code
+
+Here is a GPTScript that summarizes the code stored under the current directory: [`describe-code.gpt`](https://github.com/gptscript-ai/gptscript/tree/main/examples/describe-code.gpt)
+
+## Vision, Image, and Audio
+
+### Vision
+
+Here is an example of a web app that leverages GPTScript to recognize ingredients in a photo and suggest a recipe based on them: [recipe-generator](https://github.com/gptscript-ai/gptscript/tree/main/examples/recipegenerator).
+
+### Image Generation
+
+Here is a GPTScript that takes a story prompt and generates an illustrated children's book: [story-book.gpt](https://github.com/gptscript-ai/gptscript/tree/main/examples/story-book)
