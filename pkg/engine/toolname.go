@@ -1,8 +1,6 @@
 package engine
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -21,20 +19,18 @@ func ToolNormalizer(tool string) string {
 	if strings.HasSuffix(tool, system.Suffix) {
 		tool = strings.TrimSuffix(tool, filepath.Ext(tool))
 	}
+	tool = strings.TrimPrefix(tool, "sys.")
 
 	if validToolName.MatchString(tool) {
 		return tool
 	}
 
-	name := invalidChars.ReplaceAllString(tool, "-")
+	name := invalidChars.ReplaceAllString(tool, "_")
 	if len(name) > 55 {
 		name = name[:55]
 	}
 
-	hash := md5.Sum([]byte(tool))
-	hexed := hex.EncodeToString(hash[:])
-
-	return name + "-" + hexed[:8]
+	return name
 }
 
 func PickToolName(toolName string, existing map[string]struct{}) string {
