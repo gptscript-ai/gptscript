@@ -55,6 +55,12 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 		toolURL = parsed.String()
 	}
 
+	if tool.Blocking {
+		return &Return{
+			Result: &toolURL,
+		}, nil
+	}
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, toolURL, strings.NewReader(input))
 	if err != nil {
 		return nil, err

@@ -109,13 +109,13 @@ var ignoreENV = map[string]struct{}{
 	"GPTSCRIPT_TOOL_DIR": {},
 }
 
-func appendEnv(env []string, k, v string) []string {
-	for _, k := range []string{k, strings.ToUpper(strings.ReplaceAll(k, "-", "_"))} {
+func appendEnv(envs []string, k, v string) []string {
+	for _, k := range []string{k, env.ToEnvLike(k)} {
 		if _, ignore := ignoreENV[k]; !ignore {
-			env = append(env, k+"="+v)
+			envs = append(envs, k+"="+v)
 		}
 	}
-	return env
+	return envs
 }
 
 func appendInputAsEnv(env []string, input string) []string {

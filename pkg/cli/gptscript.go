@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"os"
@@ -12,15 +11,12 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/confirm"
-	"github.com/gptscript-ai/gptscript/pkg/engine"
+	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/input"
-	"github.com/gptscript-ai/gptscript/pkg/llm"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/monitor"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/openai"
-	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes"
-	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/server"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
@@ -50,8 +46,6 @@ type GPTScript struct {
 	Server        bool   `usage:"Start server"`
 	ListenAddress string `usage:"Server listen address" default:"127.0.0.1:9090"`
 	Chdir         string `usage:"Change current working directory" short:"C"`
-
-	_client llm.Client `usage:"-"`
 }
 
 func New() *cobra.Command {
@@ -78,57 +72,12 @@ func (r *GPTScript) Customize(cmd *cobra.Command) {
 	}
 }
 
-func (r *GPTScript) getClient(ctx context.Context) (llm.Client, error) {
-	if r._client != nil {
-		return r._client, nil
-	}
-
-	cacheClient, err := cache.New(cache.Options(r.CacheOptions))
-	if err != nil {
-		return nil, err
-	}
-
-	oaClient, err := openai.NewClient(openai.Options(r.OpenAIOptions), openai.Options{
-		Cache: cacheClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	registry := llm.NewRegistry()
-
-	if err := registry.AddClient(ctx, oaClient); err != nil {
-		return nil, err
-	}
-
-	r._client = registry
-	return r._client, nil
-}
-
 func (r *GPTScript) listTools() error {
 	var lines []string
 	for _, tool := range builtin.ListTools() {
 		lines = append(lines, tool.String())
 	}
 	fmt.Println(strings.Join(lines, "\n---\n"))
-	return nil
-}
-
-func (r *GPTScript) listModels(ctx context.Context) error {
-	c, err := r.getClient(ctx)
-	if err != nil {
-		return err
-	}
-
-	models, err := c.ListModels(ctx)
-	if err != nil {
-		return err
-	}
-
-	for _, model := range models {
-		fmt.Println(model)
-	}
-
 	return nil
 }
 
@@ -164,28 +113,42 @@ func (r *GPTScript) Pre(*cobra.Command, []string) error {
 }
 
 func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
-	defer engine.CloseDaemons()
-
-	if r.ListModels {
-		return r.listModels(cmd.Context())
-	}
-
-	if r.ListTools {
-		return r.listTools()
+	gptOpt := gptscript.Options{
+		Cache:   cache.Options(r.CacheOptions),
+		OpenAI:  openai.Options(r.OpenAIOptions),
+		Monitor: monitor.Options(r.DisplayOptions),
+		Quiet:   r.Quiet,
+		Env:     os.Environ(),
 	}
 
 	if r.Server {
-		c, err := r.getClient(cmd.Context())
-		if err != nil {
-			return err
-		}
-		s, err := server.New(c, server.Options{
+		s, err := server.New(&server.Options{
 			ListenAddress: r.ListenAddress,
+			GPTScript:     gptOpt,
 		})
 		if err != nil {
 			return err
 		}
+		defer s.Close()
 		return s.Start(cmd.Context())
+	}
+
+	gptScript, err := gptscript.New(&gptOpt)
+	if err != nil {
+		return err
+	}
+	defer gptScript.Close()
+
+	if r.ListModels {
+		models, err := gptScript.ListModels(cmd.Context())
+		if err != nil {
+			return err
+		}
+		fmt.Println(strings.Join(models, "\n"))
+	}
+
+	if r.ListTools {
+		return r.listTools()
 	}
 
 	if len(args) == 0 {
@@ -194,7 +157,6 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 
 	var (
 		prg types.Program
-		err error
 	)
 
 	if args[0] == "-" {
@@ -227,21 +189,6 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 		return assemble.Assemble(prg, out)
 	}
 
-	client, err := r.getClient(cmd.Context())
-	if err != nil {
-		return err
-	}
-
-	runner, err := runner.New(client, runner.Options{
-		MonitorFactory: monitor.NewConsole(monitor.Options(r.DisplayOptions), monitor.Options{
-			DisplayProgress: !*r.Quiet,
-		}),
-		RuntimeManager: runtimes.Default(cache.Complete(cache.Options(r.CacheOptions)).CacheDir),
-	})
-	if err != nil {
-		return err
-	}
-
 	toolInput, err := input.FromCLI(r.Input, args)
 	if err != nil {
 		return err
@@ -251,7 +198,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 	if r.Confirm {
 		ctx = confirm.WithConfirm(ctx, confirm.TextPrompt{})
 	}
-	s, err := runner.Run(ctx, prg, os.Environ(), toolInput)
+	s, err := gptScript.Run(ctx, prg, os.Environ(), toolInput)
 	if err != nil {
 		return err
 	}
