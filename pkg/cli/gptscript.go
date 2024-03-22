@@ -11,6 +11,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
+	"github.com/gptscript-ai/gptscript/pkg/confirm"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/input"
 	"github.com/gptscript-ai/gptscript/pkg/llm"
@@ -37,6 +38,7 @@ type GPTScript struct {
 	CacheOptions
 	OpenAIOptions
 	DisplayOptions
+	Confirm       bool   `usage:"Prompt before running potentially dangerous commands"`
 	Debug         bool   `usage:"Enable debug logging"`
 	Quiet         *bool  `usage:"No output logging (set --quiet=false to force on even when there is no TTY)" short:"q"`
 	Output        string `usage:"Save output to a file, or - for stdout" short:"o"`
@@ -47,6 +49,7 @@ type GPTScript struct {
 	ListTools     bool   `usage:"List built-in tools and exit"`
 	Server        bool   `usage:"Start server"`
 	ListenAddress string `usage:"Server listen address" default:"127.0.0.1:9090"`
+	Chdir         string `usage:"Change current working directory" short:"C"`
 
 	_client llm.Client `usage:"-"`
 }
@@ -130,6 +133,13 @@ func (r *GPTScript) listModels(ctx context.Context) error {
 }
 
 func (r *GPTScript) Pre(*cobra.Command, []string) error {
+	// chdir as soon as possible
+	if r.Chdir != "" {
+		if err := os.Chdir(r.Chdir); err != nil {
+			return err
+		}
+	}
+
 	if r.DefaultModel != "" {
 		builtin.SetDefaultModel(r.DefaultModel)
 	}
@@ -237,7 +247,11 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	s, err := runner.Run(cmd.Context(), prg, os.Environ(), toolInput)
+	ctx := cmd.Context()
+	if r.Confirm {
+		ctx = confirm.WithConfirm(ctx, confirm.TextPrompt{})
+	}
+	s, err := runner.Run(ctx, prg, os.Environ(), toolInput)
 	if err != nil {
 		return err
 	}

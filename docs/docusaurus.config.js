@@ -65,6 +65,11 @@ const config = {
             label: "Discord",
             position: "right",
           },
+          {
+            href: "https://tools.gptscript.ai/",
+            label: "Tool Search",
+            position: "right",
+          },
         ],
       },
       footer: {
