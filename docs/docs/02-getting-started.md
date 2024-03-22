@@ -44,7 +44,7 @@ export OPENAI_AZURE_DEPLOYMENT="<your-deployment-name>"
 #### Windows
 
 ```powershell
-$env:OPENAI = 'your-api-key'
+$env:OPENAI_API_KEY = 'your-api-key'
 ```
 
 ### 3. Run Hello World
