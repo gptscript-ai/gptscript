@@ -17,7 +17,7 @@ import (
 	"github.com/acorn-io/broadcaster"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
-	"github.com/gptscript-ai/gptscript/pkg/engine"
+	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/system"
@@ -29,25 +29,29 @@ import (
 
 type Options struct {
 	ListenAddress string
+	GPTScript     gptscript.Options
 }
 
-func complete(opts []Options) (result Options) {
-	for _, opt := range opts {
-		result.ListenAddress = types.FirstSet(opt.ListenAddress, result.ListenAddress)
+func complete(opts *Options) (result *Options) {
+	result = opts
+	if result == nil {
+		result = &Options{}
 	}
+
+	result.ListenAddress = types.FirstSet(result.ListenAddress, result.ListenAddress)
 	if result.ListenAddress == "" {
 		result.ListenAddress = "127.0.0.1:9090"
 	}
+
 	return
 }
 
-func New(model engine.Model, opts ...Options) (*Server, error) {
+func New(opts *Options) (*Server, error) {
 	events := broadcaster.New[Event]()
+	opts = complete(opts)
+	opts.GPTScript.Runner.MonitorFactory = NewSessionFactory(events)
 
-	opt := complete(opts)
-	r, err := runner.New(model, runner.Options{
-		MonitorFactory: NewSessionFactory(events),
-	})
+	g, err := gptscript.New(&opts.GPTScript)
 	if err != nil {
 		return nil, err
 	}
@@ -55,8 +59,8 @@ func New(model engine.Model, opts ...Options) (*Server, error) {
 	return &Server{
 		melody:        melody.New(),
 		events:        events,
-		runner:        r,
-		listenAddress: opt.ListenAddress,
+		runner:        g,
+		listenAddress: opts.ListenAddress,
 	}, nil
 }
 
@@ -72,7 +76,7 @@ type Event struct {
 type Server struct {
 	ctx           context.Context
 	melody        *melody.Melody
-	runner        *runner.Runner
+	runner        *gptscript.GPTScript
 	events        *broadcaster.Broadcaster[Event]
 	listenAddress string
 }
@@ -89,6 +93,10 @@ func ContextWithNewID(ctx context.Context) context.Context {
 
 func IDFromContext(ctx context.Context) string {
 	return ctx.Value(execKey{}).(string)
+}
+
+func (s *Server) Close() {
+	s.runner.Close()
 }
 
 func (s *Server) list(rw http.ResponseWriter, req *http.Request) {
