@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"golang.org/x/exp/maps"
 )
 
 const (
@@ -21,6 +23,15 @@ type Program struct {
 	Exports     map[string]string `json:"exports,omitempty"`
 }
 
+func (p Program) SetBlocking() Program {
+	tool := p.ToolSet[p.EntryToolID]
+	tool.Blocking = true
+	tools := maps.Clone(p.ToolSet)
+	tools[p.EntryToolID] = tool
+	p.ToolSet = tools
+	return p
+}
+
 type BuiltinFunc func(ctx context.Context, env []string, input string) (string, error)
 
 type Parameters struct {
@@ -35,6 +46,7 @@ type Parameters struct {
 	Arguments      *JSONSchema `json:"arguments,omitempty"`
 	Tools          []string    `json:"tools,omitempty"`
 	Export         []string    `json:"export,omitempty"`
+	Blocking       bool        `json:"-"`
 }
 
 type Tool struct {

@@ -358,6 +358,14 @@ func SysAppend(ctx context.Context, env []string, input string) (string, error) 
 	return "", nil
 }
 
+func urlExt(u string) string {
+	url, err := url.Parse(u)
+	if err != nil {
+		return ""
+	}
+	return filepath.Ext(url.Path)
+}
+
 func fixQueries(u string) (string, error) {
 	url, err := url.Parse(u)
 	if err != nil {
@@ -525,8 +533,17 @@ func SysDownload(ctx context.Context, env []string, input string) (_ string, err
 	}
 
 	checkExists := true
+	tmpDir := ""
+
+	if params.Location != "" {
+		if s, err := os.Stat(params.Location); err == nil && s.IsDir() {
+			tmpDir = params.Location
+			params.Location = ""
+		}
+	}
+
 	if params.Location == "" {
-		f, err := os.CreateTemp("", "gpt-download")
+		f, err := os.CreateTemp(tmpDir, "gpt-download*"+urlExt(params.URL))
 		if err != nil {
 			return "", err
 		}

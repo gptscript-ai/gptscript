@@ -19,6 +19,7 @@ You receive input from a user, process the input from the given instructions, an
 Your objective is to provide consistent and correct results.
 You do not need to explain the steps taken, only provide the result to the given instructions.
 You are referred to as a tool.
+You don't move to the next step until you have a result.
 `
 
 // DefaultPromptParameter is used as the key in a json map to indication that we really wanted

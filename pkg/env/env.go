@@ -12,6 +12,10 @@ func execEquals(bin, check string) bool {
 		bin == check+".exe"
 }
 
+func ToEnvLike(v string) string {
+	return strings.ToUpper(strings.ReplaceAll(v, "-", "_"))
+}
+
 func Matches(cmd []string, bin string) bool {
 	switch len(cmd) {
 	case 0:

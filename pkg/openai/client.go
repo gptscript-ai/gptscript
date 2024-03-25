@@ -119,6 +119,14 @@ func NewClient(opts ...Options) (*Client, error) {
 	}, nil
 }
 
+func (c *Client) Supports(ctx context.Context, modelName string) (bool, error) {
+	models, err := c.ListModels(ctx)
+	if err != nil {
+		return false, err
+	}
+	return slices.Contains(models, modelName), nil
+}
+
 func (c *Client) ListModels(ctx context.Context) (result []string, _ error) {
 	models, err := c.c.ListModels(ctx)
 	if err != nil {
@@ -335,6 +343,13 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		result = appendMessage(result, response)
 	}
 
+	for i, content := range result.Content {
+		if content.ToolCall != nil && content.ToolCall.ID == "" {
+			content.ToolCall.ID = "call_" + hash.ID(content.ToolCall.Function.Name, content.ToolCall.Function.Arguments)[:8]
+			result.Content[i] = content
+		}
+	}
+
 	status <- types.CompletionStatus{
 		CompletionID: id,
 		Chunks:       response,
@@ -354,10 +369,10 @@ func appendMessage(msg types.CompletionMessage, response openai.ChatCompletionSt
 	msg.Role = types.CompletionMessageRoleType(override(string(msg.Role), delta.Role))
 
 	for _, tool := range delta.ToolCalls {
-		if tool.Index == nil {
-			continue
+		idx := 0
+		if tool.Index != nil {
+			idx = *tool.Index
 		}
-		idx := *tool.Index
 		for len(msg.Content)-1 < idx {
 			msg.Content = append(msg.Content, types.ContentPart{
 				ToolCall: &types.CompletionToolCall{

@@ -58,6 +58,10 @@ func New(opts ...Options) (*Client, error) {
 	}, nil
 }
 
+func (c *Client) CacheDir() string {
+	return c.dir
+}
+
 func (c *Client) Store(key string, content []byte) error {
 	if c == nil || c.noop {
 		return nil

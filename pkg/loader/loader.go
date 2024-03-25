@@ -87,7 +87,12 @@ func loadProgram(data []byte, into *types.Program, targetToolName string) (types
 		return types.Tool{}, err
 	}
 
+	into.ToolSet = make(map[string]types.Tool, len(ext.ToolSet))
 	for k, v := range ext.ToolSet {
+		if builtinTool, ok := builtin.Builtin(k); ok {
+			v = builtinTool
+		}
+
 		for tk, tv := range v.ToolMapping {
 			v.ToolMapping[tk] = tv + id
 		}
@@ -200,15 +205,7 @@ func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool
 			tool.ToolMapping[targetToolName] = linkedTool.ID
 			toolNames[targetToolName] = struct{}{}
 		} else {
-			subTool, toolName, ok := strings.Cut(targetToolName, " from ")
-			if ok {
-				toolName = strings.TrimSpace(toolName)
-				subTool = strings.TrimSpace(subTool)
-			} else {
-				toolName = targetToolName
-				subTool = ""
-			}
-
+			toolName, subTool := SplitToolRef(targetToolName)
 			resolvedTool, err := resolve(ctx, prg, base, toolName, subTool)
 			if err != nil {
 				return types.Tool{}, fmt.Errorf("failed resolving %s at %s: %w", targetToolName, base, err)
@@ -291,4 +288,16 @@ func input(ctx context.Context, base *source, name string) (*source, error) {
 	}
 
 	return nil, fmt.Errorf("can not load tools path=%s name=%s", base.Path, name)
+}
+
+func SplitToolRef(targetToolName string) (toolName, subTool string) {
+	subTool, toolName, ok := strings.Cut(targetToolName, " from ")
+	if ok {
+		toolName = strings.TrimSpace(toolName)
+		subTool = strings.TrimSpace(subTool)
+	} else {
+		toolName = targetToolName
+		subTool = ""
+	}
+	return
 }

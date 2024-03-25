@@ -2,6 +2,7 @@ package llm
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 
@@ -11,32 +12,29 @@ import (
 type Client interface {
 	Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error)
 	ListModels(ctx context.Context) (result []string, _ error)
+	Supports(ctx context.Context, modelName string) (bool, error)
 }
 
 type Registry struct {
-	clientsByModel map[string]Client
+	clients []Client
 }
 
 func NewRegistry() *Registry {
-	return &Registry{
-		clientsByModel: map[string]Client{},
-	}
+	return &Registry{}
 }
 
-func (r *Registry) AddClient(ctx context.Context, client Client) error {
-	models, err := client.ListModels(ctx)
-	if err != nil {
-		return err
-	}
-	for _, model := range models {
-		r.clientsByModel[model] = client
-	}
+func (r *Registry) AddClient(client Client) error {
+	r.clients = append(r.clients, client)
 	return nil
 }
 
-func (r *Registry) ListModels(_ context.Context) (result []string, _ error) {
-	for k := range r.clientsByModel {
-		result = append(result, k)
+func (r *Registry) ListModels(ctx context.Context) (result []string, _ error) {
+	for _, v := range r.clients {
+		models, err := v.ListModels(ctx)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, models...)
 	}
 	sort.Strings(result)
 	return result, nil
@@ -46,9 +44,17 @@ func (r *Registry) Call(ctx context.Context, messageRequest types.CompletionRequ
 	if messageRequest.Model == "" {
 		return nil, fmt.Errorf("model is required")
 	}
-	client, ok := r.clientsByModel[messageRequest.Model]
-	if !ok {
-		return nil, fmt.Errorf("model not found: %s", messageRequest.Model)
+	var errs []error
+	for _, client := range r.clients {
+		ok, err := client.Supports(ctx, messageRequest.Model)
+		if err != nil {
+			errs = append(errs, err)
+		} else if ok {
+			return client.Call(ctx, messageRequest, status)
+		}
 	}
-	return client.Call(ctx, messageRequest, status)
+	if len(errs) == 0 {
+		return nil, fmt.Errorf("failed to find a model provider for model [%s]", messageRequest.Model)
+	}
+	return nil, errors.Join(errs...)
 }
