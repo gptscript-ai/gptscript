@@ -8,6 +8,7 @@ require (
 	github.com/acorn-io/broadcaster v0.0.0-20240105011354-bfadd4a7b45d
 	github.com/acorn-io/cmd v0.0.0-20240203032901-e9e631185ddb
 	github.com/adrg/xdg v0.4.0
+	github.com/fatih/color v1.16.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/hexops/autogold/v2 v2.1.0
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
@@ -34,7 +35,6 @@ require (
 	github.com/connesc/cipherio v0.2.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
-	github.com/fatih/color v1.16.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
