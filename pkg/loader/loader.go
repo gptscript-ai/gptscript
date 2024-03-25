@@ -87,7 +87,12 @@ func loadProgram(data []byte, into *types.Program, targetToolName string) (types
 		return types.Tool{}, err
 	}
 
+	into.ToolSet = make(map[string]types.Tool, len(ext.ToolSet))
 	for k, v := range ext.ToolSet {
+		if builtinTool, ok := builtin.Builtin(k); ok {
+			v = builtinTool
+		}
+
 		for tk, tv := range v.ToolMapping {
 			v.ToolMapping[tk] = tv + id
 		}
