@@ -113,6 +113,14 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 			return false, err
 		}
 		tool.Parameters.Cache = &b
+	case "jsonmode":
+		fallthrough
+	case "json":
+		fallthrough
+	case "jsonoutput":
+		fallthrough
+	case "jsonformat":
+		fallthrough
 	case "jsonresponse":
 		tool.Parameters.JSONResponse, err = toBool(value)
 		if err != nil {
