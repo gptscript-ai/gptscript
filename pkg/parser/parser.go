@@ -74,13 +74,9 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 	}
 	value = strings.TrimSpace(value)
 	switch normalize(key) {
-	case "tool":
-		fallthrough
 	case "name":
 		tool.Parameters.Name = strings.ToLower(value)
-	case "model":
-		fallthrough
-	case "modelname":
+	case "model", "modelname":
 		tool.Parameters.ModelName = value
 	case "description":
 		tool.Parameters.Description = value
@@ -92,17 +88,13 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		tool.Parameters.InternalPrompt = &v
 	case "export":
 		tool.Parameters.Export = append(tool.Parameters.Export, csv(strings.ToLower(value))...)
-	case "tools":
+	case "tool", "tools":
 		tool.Parameters.Tools = append(tool.Parameters.Tools, csv(strings.ToLower(value))...)
-	case "args":
-		fallthrough
-	case "arg":
+	case "args", "arg", "param", "params", "parameters", "parameter":
 		if err := addArg(value, tool); err != nil {
 			return false, err
 		}
-	case "maxtoken":
-		fallthrough
-	case "maxtokens":
+	case "maxtoken", "maxtokens":
 		tool.Parameters.MaxTokens, err = strconv.Atoi(value)
 		if err != nil {
 			return false, err
@@ -113,15 +105,7 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 			return false, err
 		}
 		tool.Parameters.Cache = &b
-	case "jsonmode":
-		fallthrough
-	case "json":
-		fallthrough
-	case "jsonoutput":
-		fallthrough
-	case "jsonformat":
-		fallthrough
-	case "jsonresponse":
+	case "jsonmode", "json", "jsonoutput", "jsonformat", "jsonresponse":
 		tool.Parameters.JSONResponse, err = toBool(value)
 		if err != nil {
 			return false, err
