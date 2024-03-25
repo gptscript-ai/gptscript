@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/acorn-io/cmd"
+	"github.com/fatih/color"
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
@@ -34,6 +35,7 @@ type GPTScript struct {
 	CacheOptions
 	OpenAIOptions
 	DisplayOptions
+	Color         *bool  `usage:"Use color in output (default true)" default:"true"`
 	Confirm       bool   `usage:"Prompt before running potentially dangerous commands"`
 	Debug         bool   `usage:"Enable debug logging"`
 	Quiet         *bool  `usage:"No output logging (set --quiet=false to force on even when there is no TTY)" short:"q"`
@@ -113,6 +115,10 @@ func (r *GPTScript) Pre(*cobra.Command, []string) error {
 }
 
 func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
+	if r.Color != nil {
+		color.NoColor = !*r.Color
+	}
+
 	gptOpt := gptscript.Options{
 		Cache:   cache.Options(r.CacheOptions),
 		OpenAI:  openai.Options(r.OpenAIOptions),
