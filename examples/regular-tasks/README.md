@@ -1,6 +1,6 @@
-This example shows how to use GPTScript to run regular tasks. It involde the creation of a VM and define a crontab entry onto that one.  
+This example shows how to use GPTScript to run regular tasks. It involves the creation of a VM and defines a crontab entry onto that one.  
 
-This example check if a specific URL is reachable and send the status code to an external webhook. If you want to test this example, you need to follow the steps below:
+This example checks if a specific URL is reachable and sends the status code to an external webhook. If you want to test this example, you need to follow the steps below:
 
 - Create a DigitalOcean PAT token and export it in the DIGITALOCEAN_ACCESS_TOKEN environment variable
 
@@ -27,3 +27,5 @@ gptscript --cache=false ./regular-task.gpt --url https://fakely.app --token 1e10
 - Check the message coming every minute on the [Webhooks dashboard](https://webhooks.app/dashboard)
 
 ![webhooks](./picts/webhooks-2.png)
+
+- Once you'r done do not forget to remove the DigitalOcean VM created in the process
