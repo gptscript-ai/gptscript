@@ -21,16 +21,6 @@ git clone https://github.com/gptscript-ai/gptscript.git
 
 1. Navigate to the 'examples/nodejs-imagegen' directory and install dependencies.
 
-Python:
-
-*note: You can use a virtual environment to install the python dependencies, just make sure it is activated before running the server.*
-
-```bash
-pip install -r requirements.txt
-```
-
-this will install the python dependencies for the image generation tool.
-
 Node:
 
 ```bash
