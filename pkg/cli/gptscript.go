@@ -151,6 +151,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		fmt.Println(strings.Join(models, "\n"))
+		return nil
 	}
 
 	if r.ListTools {
