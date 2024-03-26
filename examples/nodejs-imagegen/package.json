@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@gptscript-ai/gptscript": "^0.1.2",
+    "@gptscript-ai/gptscript": "^0.2.0",
     "express": "^4.18.3",
     "express-ws": "^5.0.2",
     "nodemon": "^3.1.0",

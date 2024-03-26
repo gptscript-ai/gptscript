@@ -32,8 +32,7 @@ app.get('/', (req, res) => {
 app.post('/generate-logo', async (req, res) => {
     const description = req.body.description;
     const artists = getArtistsData();
-    const prompt = `
-    tools: ./tool.gpt
+    const instructions = `
     For each of the three amazing and capable artists described here
     ${JSON.stringify(artists)}
     make sure to include the artistName field in the response. 
@@ -51,8 +50,14 @@ app.post('/generate-logo', async (req, res) => {
         }]
     }
 `;
+    const tool = new gptscript.Tool({
+        tools: ['github.com/gptscript-ai/image-generation'],
+        jsonResponse: true,
+        instructions: instructions,
+    })
+
     try {
-        const output = await gptscript.exec(prompt);
+        const output = await gptscript.exec(tool);
         const cleanedResp = output.trim().replace(/^```json.*/, '').replace(/```/g, '');
         res.json(JSON.parse(cleanedResp));
     } catch (error) {
@@ -63,9 +68,7 @@ app.post('/generate-logo', async (req, res) => {
 
 // Route to request new artists
 app.post('/new-artists', async (req, res) => {
-    const prompt = `
-    tools: sys.write
-
+    const instructions = `
 Create three short graphic artist descriptions and their muses. 
 These should be descriptive and explain their point of view.
 Also come up with a made up name, they each should be from different
@@ -80,8 +83,14 @@ the response format should be json and MUST NOT have other content or formatting
   }]
 }
 `;
+    const tool = new gptscript.Tool({
+        tools: ['sys.write'],
+        jsonResponse: true,
+        instructions: instructions,
+    });
+
     try {
-        const output = await gptscript.exec(prompt);
+        const output = await gptscript.exec(tool);
         const cleanedResp = output.trim().replace(/^```json.*/, '').replace(/```/g, '');
         newArtistsData = JSON.parse(cleanedResp);
         res.json(newArtistsData);
