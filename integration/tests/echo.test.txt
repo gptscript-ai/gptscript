@@ -1,0 +1,13 @@
+# Test Cases for echo.gpt
+
+## Test Case 1: Simple String
+- Input: "Hello, World!"
+- Expected Output: "Hello, World!"
+
+## Test Case 2: Empty String
+- Input: ""
+- Expected Output: ""
+
+## Test Case 3: String with Special Characters
+- Input: "Hello, World! @$%^&*()"
+- Expected Output: "Hello, World! @$%^&*()"

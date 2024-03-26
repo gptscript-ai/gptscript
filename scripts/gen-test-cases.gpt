@@ -1,0 +1,11 @@
+tools: sys.read, sys.find, sys.write
+
+For each of the examples .gpt files in the examples directory,
+please read them and determine logical test cases. Be sure to include
+input and expected output for each test case. Think about potential
+edge cases and how the program should handle them. Update their associated
+.test.txt files in the integration/tests directory with the tests cases
+you have determined.
+
+Do not remove the existing test cases and ensure they follow the same
+format as the existing tests.
