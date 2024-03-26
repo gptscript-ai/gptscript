@@ -1,8 +1,0 @@
-description: I am a tool that can generate images based on arguments that are sent to me. I return a list of URLs to the generated images.
-args: prompt: (required) The text prompt based on which the GPT model will generate a response
-args: model: (optional) The model to use for image generation. Defaults to "dall-e-3".
-args: size: (optional) The size of the image to generate, format WxH (e.g. 1024x1024). Defaults to 1024x1024.
-args: quality: (optional) The quality of the generated image. Allowed values are "standard" or "hd". Default is "standard".
-args: number: (optional) The number of images to generate. Defaults to 1.
-
-#!/usr/bin/env python3 ./cli.py --prompt="${prompt}" --model="${model}" --size="${size}" --quality="${quality}" --number="${number}"
