@@ -1,10 +1,10 @@
-# Alternative Models
+# Alternative Model Providers
 
 
 ## Usage
 
 You can use GPTScript with a model that is not provided by OpenAI by passing a reference to the model name and the git
-repo you want to pull a compatability shim from.
+repo you want to pull a compatibility shim from.
 
 ```bash
 gptscript --default-model="mistral-large-latest from github.com/gptscript-ai/mistral-openai-shim" examples/helloworld.gpt"
