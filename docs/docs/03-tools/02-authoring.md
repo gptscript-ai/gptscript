@@ -37,7 +37,7 @@ Args: url: The URL of the webpage.
 ```
 
 :::tip
-Every arg becomes an environment variable when the tool is invoked. So instead of accepting args using flags like `--size="${size}", your program can just read the `size` environment variable.
+Every arg becomes an environment variable when the tool is invoked. So instead of accepting args using flags like `--size="${size}"`, your program can just read the `size` environment variable.
 :::
 
 The `GPTSCRIPT_TOOL_DIR` environment variable is automatically populated by GPTScript so that the tool
