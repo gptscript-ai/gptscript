@@ -26,6 +26,7 @@ args: question: The question to ask Bob.
 When asked how I am doing, respond with "Thanks for asking "${question}", I'm doing great fellow friendly AI tool!"
 ```
 
+Each shim has different requirements for authentication. Please check the readme for the shim you are trying to use.
 
 ## Available Models
 
