@@ -39,6 +39,9 @@ func AppendPath(env []string, binPath string) []string {
 		if ok {
 			newEnv = append(newEnv, fmt.Sprintf("PATH=%s%s%s",
 				binPath, string(os.PathListSeparator), v))
+		} else if v, ok := strings.CutPrefix(path, "Path="); ok {
+			newEnv = append(newEnv, fmt.Sprintf("Path=%s%s%s",
+				binPath, string(os.PathListSeparator), v))
 		}
 	}
 	return newEnv
@@ -53,10 +56,12 @@ func Lookup(env []string, bin string) string {
 			if !ok {
 				continue
 			}
+			log.Debugf("Looking for %s in %s", bin, suffix)
 			for _, path := range strings.Split(suffix, string(os.PathListSeparator)) {
 				testPath := filepath.Join(path, bin)
 
 				if stat, err := os.Stat(testPath); err == nil && !stat.IsDir() {
+					log.Debugf("Found %s for %s in %s", testPath, bin, suffix)
 					return testPath
 				}
 
@@ -66,6 +71,7 @@ func Lookup(env []string, bin string) string {
 					}
 
 					if stat, err := os.Stat(testPath + ext); err == nil && !stat.IsDir() {
+						log.Debugf("Found %s for %s in %s", testPath+ext, bin, suffix)
 						return testPath + ext
 					}
 				}
