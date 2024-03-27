@@ -1,0 +1,46 @@
+tools: create-regular-task
+args: url: URL of the website to check
+args: token: webhook token
+
+Create a task which verifies every minute if the website ${url} is reachable and sends the status code to the following HTTP POST request:
+- URL is https://webhooks.app/data
+- Authorization bearer is ${token}
+- A json payload must be returned, containing a "message" property with the value of the ${url} and the status code returned
+
+---
+tools: create-vm, create-crontab-entry
+name: create-regular-task
+decription: Manage the creation of a crontab on a remove VM
+args: command: command to be run in a crontab without the schedule part
+args: schedule: schedule to be used in a crontab
+
+Perform the actions in the following order:
+
+1. Create a virtual machine on DigitalOcean, wait for its IP to be returned and save it in ./vm.ip
+2. Create a crontab entry for command ${command} and schedule ${schedule} in the VM which IP address is in file ./vm.ip
+
+---
+tools: sys.exec, sys.write
+name: create-crontab-entry
+description: Create a crontab entry in a remote VM
+args: command: command to run in a crontab on the remote VM
+args: schedule: schedule for the crontab
+
+Perform the step in this exact order taking into account that if you need to call a ssh command you must use user root and the IP address which value is in ./vm.ip
+
+1. Create a bash file containing the ${command} to run without the schedule part, make it executable, and make sure the components are correctly escaped first.
+2. Send this file to the remote VM via ssh saving it to /tmp/cron.sh on the remove VM
+3. Create a crontab entry calling /tmp/cron.sh file for the schedule specified in the ${command}
+
+---
+tools: sys.exec
+name: create-vm
+description: create a virtual machine on DigitalOcean
+
+You are an operator which can use the doctl command line tool to interact with DigitalOcean infrastructure
+
+Perform the actions in this exact order:
+
+1. Get the ID of the ssh-key named gptscript and save it in ./key.id
+2. Create a Virtual Machine in the new-york datacenter named cron making sure to provide the id from ./key.id as the ssh-key of the new droplet
+3. Wait for the VM to be up and running and save its IP address in ./vm.ip
