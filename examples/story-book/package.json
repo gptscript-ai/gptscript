@@ -1,0 +1,22 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@gptscript-ai/gptscript": "^0.2.0",
+    "@nuxt/ui": "^2.15.0",
+    "@pinia/nuxt": "^0.5.1",
+    "jspdf": "^2.5.1",
+    "nuxt": "^3.11.1",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.0"
+  }
+}

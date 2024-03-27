@@ -1,0 +1,47 @@
+tools: story-writer, story-illustrator, mkdir, sys.write, sys.read, sys.download
+description: Writes a children's book and generates illustrations for it.
+args: story: The story to write and illustrate. Can be a prompt or a complete story.
+args: pages: The number of pages to generate
+
+Do the following steps sequentially:
+
+1. Come up with an appropriate title for the story based on the ${prompt}
+2. Create the `public/stories/${story-title}` directory if it does not already exist.
+3. If ${story} is a prompt and not a complete children's story, call story-writer
+   to write a story based on the prompt.
+4. Take ${story} and break it up into ${pages} logical "pages" of text.
+5. For each page:
+   - For the content of the page, write it to `public/stories/${story-title}/page<page-number>.txt and add appropriate newline
+     characters.
+   - Call story-illustrator to illustrate it. Be sure to include any relevant characters to include when
+     asking it to illustrate the page.
+   - Download the illustration to a file at `public/stories/${story-title}/page<page_number>.png`.
+
+---
+name: story-writer
+description: Writes a story for children
+args: prompt: The prompt to use for the story
+temperature: 1
+
+Write a story with a tone for children based on ${prompt}.
+
+---
+name: story-illustrator
+tools: github.com/gptscript-ai/image-generation
+description: Generates a illustration for a children's story
+args: text: The text of the page to illustrate
+
+Think of a good prompt to generate an image to represent $text. Make sure to
+include the name of any relevant characters in your prompt. Then use that prompt to
+generate an illustration. Append any prompt that you have with ". In an pointilism cartoon
+children's book style with no text in it". Only return the URL of the illustration.
+
+---
+name: mkdir
+tools: sys.write
+description: Creates a specified directory
+args: dir: Path to the directory to be created. Will create parent directories.
+
+#!bash
+
+mkdir -p "${dir}"
