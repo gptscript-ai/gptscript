@@ -28,12 +28,18 @@ When asked how I am doing, respond with "Thanks for asking "${question}", I'm do
 
 Each shim has different requirements for authentication. Please check the readme for the shim you are trying to use.
 
-## Available Models
+## Available Model Providers
 
 The following shims are currently available:
 * github.com/gptscript-ai/mistral-openai-shim
 * github.com/gptscript-ai/claude3-openai-shim
 * github.com/gptscript-ai/gemini-openai-shim
+
+For each of these providers you can list available models
+
+```bash
+gptscript --list-models github.com/gptscript-ai/claude3-openai-shim
+```
 
 
 ## Compatibility
