@@ -11,7 +11,7 @@ export const useContext = defineStore('context', {
     baseUrl: () => {
       let base = ''
 
-      if ( process.server ) {
+      if ( import.meta.server ) {
         const headers = useRequestHeaders()
 
         base = `http://${ headers.host }`
