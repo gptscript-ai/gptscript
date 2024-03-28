@@ -54,7 +54,8 @@ func New(opts *Options) (*GPTScript, error) {
 	}
 
 	oAIClient, err := openai.NewClient(append([]openai.Options{opts.OpenAI}, openai.Options{
-		Cache: cacheClient,
+		Cache:   cacheClient,
+		SetSeed: true,
 	})...)
 	if err != nil {
 		return nil, err

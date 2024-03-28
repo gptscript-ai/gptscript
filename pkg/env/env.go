@@ -13,7 +13,9 @@ func execEquals(bin, check string) bool {
 }
 
 func ToEnvLike(v string) string {
-	return strings.ToUpper(strings.ReplaceAll(v, "-", "_"))
+	v = strings.ReplaceAll(v, ".", "_")
+	v = strings.ReplaceAll(v, "-", "_")
+	return strings.ToUpper(v)
 }
 
 func Matches(cmd []string, bin string) bool {

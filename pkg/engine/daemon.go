@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"os"
 	"strings"
@@ -18,7 +19,7 @@ var (
 	daemonLock  sync.Mutex
 
 	startPort, endPort int64
-	nextPort           int64
+	usedPorts          map[int64]struct{}
 	daemonCtx          context.Context
 	daemonClose        func()
 	daemonWG           sync.WaitGroup
@@ -41,10 +42,29 @@ func (e *Engine) getNextPort() int64 {
 		startPort = 10240
 		endPort = 11240
 	}
-	count := endPort - startPort
-	nextPort++
-	nextPort = nextPort % count
-	return startPort + nextPort
+	// This is pretty simple and inefficient approach, but also never releases ports
+	count := endPort - startPort + 1
+	toTry := make([]int64, 0, count)
+	for i := startPort; i <= endPort; i++ {
+		toTry = append(toTry, i)
+	}
+
+	rand.Shuffle(len(toTry), func(i, j int) {
+		toTry[i], toTry[j] = toTry[j], toTry[i]
+	})
+
+	for _, nextPort := range toTry {
+		if _, ok := usedPorts[nextPort]; ok {
+			continue
+		}
+		if usedPorts == nil {
+			usedPorts = map[int64]struct{}{}
+		}
+		usedPorts[nextPort] = struct{}{}
+		return nextPort
+	}
+
+	panic("Ran out of usable ports")
 }
 
 func getPath(instructions string) (string, string) {
@@ -92,6 +112,7 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 
 	cmd, stop, err := e.newCommand(ctx, []string{
 		fmt.Sprintf("PORT=%d", port),
+		fmt.Sprintf("GPTSCRIPT_PORT=%d", port),
 	},
 		tool,
 		"{}",
