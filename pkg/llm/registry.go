@@ -11,7 +11,7 @@ import (
 
 type Client interface {
 	Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error)
-	ListModels(ctx context.Context) (result []string, _ error)
+	ListModels(ctx context.Context, providers ...string) (result []string, _ error)
 	Supports(ctx context.Context, modelName string) (bool, error)
 }
 
@@ -28,9 +28,9 @@ func (r *Registry) AddClient(client Client) error {
 	return nil
 }
 
-func (r *Registry) ListModels(ctx context.Context) (result []string, _ error) {
+func (r *Registry) ListModels(ctx context.Context, providers ...string) (result []string, _ error) {
 	for _, v := range r.clients {
-		models, err := v.ListModels(ctx)
+		models, err := v.ListModels(ctx, providers...)
 		if err != nil {
 			return nil, err
 		}
