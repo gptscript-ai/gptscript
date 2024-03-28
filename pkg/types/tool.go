@@ -11,6 +11,7 @@ import (
 
 const (
 	DaemonPrefix  = "#!sys.daemon"
+	OpenAPIPrefix = "#!sys.openapi"
 	CommandPrefix = "#!"
 )
 
@@ -141,6 +142,10 @@ func (t Tool) IsCommand() bool {
 
 func (t Tool) IsDaemon() bool {
 	return strings.HasPrefix(t.Instructions, DaemonPrefix)
+}
+
+func (t Tool) IsOpenAPI() bool {
+	return strings.HasPrefix(t.Instructions, OpenAPIPrefix)
 }
 
 func (t Tool) IsHTTP() bool {

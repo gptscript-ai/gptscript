@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
@@ -126,9 +127,17 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 		return loadProgram(data, prg, targetToolName)
 	}
 
-	tools, err := parser.Parse(bytes.NewReader(data))
-	if err != nil {
-		return types.Tool{}, err
+	var tools []types.Tool
+	if t, err := openapi3.NewLoader().LoadFromData(data); err == nil {
+		tools, err = getOpenAPITools(t)
+		if err != nil {
+			return types.Tool{}, fmt.Errorf("error parsing OpenAPI definition: %w", err)
+		}
+	} else {
+		tools, err = parser.Parse(bytes.NewReader(data))
+		if err != nil {
+			return types.Tool{}, err
+		}
 	}
 
 	if len(tools) == 0 {
@@ -156,7 +165,7 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 			return types.Tool{}, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have no name"))
 		}
 
-		if targetToolName != "" && tool.Parameters.Name == targetToolName {
+		if targetToolName != "" && strings.EqualFold(tool.Parameters.Name, targetToolName) {
 			mainTool = tool
 		}
 
