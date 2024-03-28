@@ -47,10 +47,8 @@ func csv(line string) (result []string) {
 func addArg(line string, tool *types.Tool) error {
 	if tool.Parameters.Arguments == nil {
 		tool.Parameters.Arguments = &types.JSONSchema{
-			Property: types.Property{
-				Type: "object",
-			},
-			Properties: map[string]types.Property{},
+			Type:       "object",
+			Properties: map[string]types.JSONSchema{},
 		}
 	}
 
@@ -59,7 +57,7 @@ func addArg(line string, tool *types.Tool) error {
 		return fmt.Errorf("invalid arg format: %s", line)
 	}
 
-	tool.Parameters.Arguments.Properties[key] = types.Property{
+	tool.Parameters.Arguments.Properties[key] = types.JSONSchema{
 		Description: value,
 		Type:        "string",
 	}
