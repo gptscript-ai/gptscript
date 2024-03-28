@@ -235,10 +235,10 @@ func handlePathParameters(path string, params []Parameter, input string) string 
 						strs[i] = item.String()
 					}
 
-					if param.Explode != nil && *param.Explode {
-						path = strings.Replace(path, "{"+param.Name+"}", "."+strings.Join(strs, "."), 1)
-					} else {
+					if param.Explode == nil || !*param.Explode { // default is to not explode
 						path = strings.Replace(path, "{"+param.Name+"}", "."+strings.Join(strs, ","), 1)
+					} else {
+						path = strings.Replace(path, "{"+param.Name+"}", "."+strings.Join(strs, "."), 1)
 					}
 				case "matrix":
 					strs := make([]string, len(res.Array()))
@@ -246,14 +246,14 @@ func handlePathParameters(path string, params []Parameter, input string) string 
 						strs[i] = item.String()
 					}
 
-					if param.Explode != nil && *param.Explode {
+					if param.Explode == nil || !*param.Explode { // default is to not explode
+						path = strings.Replace(path, "{"+param.Name+"}", ";"+param.Name+"="+strings.Join(strs, ","), 1)
+					} else {
 						s := ""
 						for _, str := range strs {
 							s += ";" + param.Name + "=" + str
 						}
 						path = strings.Replace(path, "{"+param.Name+"}", s, 1)
-					} else {
-						path = strings.Replace(path, "{"+param.Name+"}", ";"+param.Name+"="+strings.Join(strs, ","), 1)
 					}
 				}
 			} else if res.IsObject() {
@@ -273,32 +273,32 @@ func handlePathParameters(path string, params []Parameter, input string) string 
 						path = strings.Replace(path, "{"+param.Name+"}", strings.Join(strs, ","), 1)
 					}
 				case "label":
-					if param.Explode != nil && *param.Explode {
-						s := ""
-						for k, v := range res.Map() {
-							s += "." + k + "=" + v.String()
-						}
-						path = strings.Replace(path, "{"+param.Name+"}", s, 1)
-					} else {
+					if param.Explode == nil || !*param.Explode { // default is to not explode
 						var strs []string
 						for k, v := range res.Map() {
 							strs = append(strs, k, v.String())
 						}
 						path = strings.Replace(path, "{"+param.Name+"}", "."+strings.Join(strs, ","), 1)
-					}
-				case "matrix":
-					if param.Explode != nil && *param.Explode {
+					} else {
 						s := ""
 						for k, v := range res.Map() {
-							s += ";" + k + "=" + v.String()
+							s += "." + k + "=" + v.String()
 						}
 						path = strings.Replace(path, "{"+param.Name+"}", s, 1)
-					} else {
+					}
+				case "matrix":
+					if param.Explode == nil || !*param.Explode { // default is to not explode
 						var strs []string
 						for k, v := range res.Map() {
 							strs = append(strs, k, v.String())
 						}
 						path = strings.Replace(path, "{"+param.Name+"}", ";"+param.Name+"="+strings.Join(strs, ","), 1)
+					} else {
+						s := ""
+						for k, v := range res.Map() {
+							s += ";" + k + "=" + v.String()
+						}
+						path = strings.Replace(path, "{"+param.Name+"}", s, 1)
 					}
 				}
 			} else {
