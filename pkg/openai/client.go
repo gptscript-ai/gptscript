@@ -332,9 +332,13 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 
 	for _, tool := range messageRequest.Tools {
 		params := tool.Function.Parameters
-		if params != nil && params.Type == "object" && params.Properties == nil {
-			params.Properties = map[string]types.Property{}
+		if params != nil {
+			params.Properties = recursiveSetProperties(params.Properties)
+			if params.Items != nil {
+				params.Items.Properties = recursiveSetProperties(params.Items.Properties)
+			}
 		}
+
 		request.Tools = append(request.Tools, openai.Tool{
 			Type: openai.ToolTypeFunction,
 			Function: &openai.FunctionDefinition{
@@ -387,6 +391,22 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	}
 
 	return &result, nil
+}
+
+// recursiveSetProperties ensures that the Properties map is not nil for each property.
+// OpenAI will get mad and reject the function schema if any of these maps are left nil.
+func recursiveSetProperties(p map[string]types.JSONSchema) map[string]types.JSONSchema {
+	if p == nil {
+		return map[string]types.JSONSchema{}
+	}
+	for k, v := range p {
+		v.Properties = recursiveSetProperties(v.Properties)
+		if v.Items != nil {
+			v.Items.Properties = recursiveSetProperties(v.Items.Properties)
+		}
+		p[k] = v
+	}
+	return p
 }
 
 func appendMessage(msg types.CompletionMessage, response openai.ChatCompletionStreamResponse) types.CompletionMessage {

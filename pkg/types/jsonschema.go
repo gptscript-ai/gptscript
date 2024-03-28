@@ -3,11 +3,15 @@ package types
 import "encoding/json"
 
 type JSONSchema struct {
-	Property
+	Description string      `json:"description,omitempty"`
+	Type        string      `json:"type,omitempty"`
+	Ref         string      `json:"$ref,omitempty"`
+	Items       *JSONSchema `json:"items,omitempty"`
+	Enum        []string    `json:"enum,omitempty"`
 
 	ID         string                `json:"$id,omitempty"`
 	Title      string                `json:"title,omitempty"`
-	Properties map[string]Property   `json:"properties"`
+	Properties map[string]JSONSchema `json:"properties"`
 	Required   []string              `json:"required,omitempty"`
 	Defs       map[string]JSONSchema `json:"defs,omitempty"`
 
@@ -16,27 +20,18 @@ type JSONSchema struct {
 
 func ObjectSchema(kv ...string) *JSONSchema {
 	s := &JSONSchema{
-		Property: Property{
-			Type: "object",
-		},
-		Properties: map[string]Property{},
+		Type:       "object",
+		Properties: map[string]JSONSchema{},
 	}
 	for i, v := range kv {
 		if i%2 == 1 {
-			s.Properties[kv[i-1]] = Property{
+			s.Properties[kv[i-1]] = JSONSchema{
 				Description: v,
 				Type:        "string",
 			}
 		}
 	}
 	return s
-}
-
-type Property struct {
-	Description string       `json:"description,omitempty"`
-	Type        string       `json:"type,omitempty"`
-	Ref         string       `json:"$ref,omitempty"`
-	Items       []JSONSchema `json:"items,omitempty"`
 }
 
 type Type []string

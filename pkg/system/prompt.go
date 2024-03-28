@@ -27,10 +27,8 @@ You don't move to the next step until you have a result.
 var DefaultPromptParameter = "defaultPromptParameter"
 
 var DefaultToolSchema = types.JSONSchema{
-	Property: types.Property{
-		Type: "object",
-	},
-	Properties: map[string]types.Property{
+	Type: "object",
+	Properties: map[string]types.JSONSchema{
 		DefaultPromptParameter: {
 			Description: "Prompt to send to the tool or assistant. This may be instructions or question.",
 			Type:        "string",
