@@ -18,6 +18,10 @@ List all the pets. After you get a response, create a new pet named Mark. He is 
 
 You can also use a local file path instead of a URL.
 
+:::tip
+The file must have extension `.json`, `.yaml`, or `.yml`.
+:::
+
 ## Servers
 
 GPTScript will look at the top-level `servers` array in the file and choose the first HTTPS server it finds.

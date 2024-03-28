@@ -128,16 +128,20 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 	}
 
 	var tools []types.Tool
-	if t, err := openapi3.NewLoader().LoadFromData(data); err == nil {
-		tools, err = getOpenAPITools(t)
-		if err != nil {
-			return types.Tool{}, fmt.Errorf("error parsing OpenAPI definition: %w", err)
+	if strings.HasSuffix(base.Name, ".json") ||
+		strings.HasSuffix(base.Name, ".yaml") ||
+		strings.HasSuffix(base.Name, ".yml") {
+		if t, err := openapi3.NewLoader().LoadFromData(data); err == nil {
+			tools, err = getOpenAPITools(t)
+			if err != nil {
+				return types.Tool{}, fmt.Errorf("error parsing OpenAPI definition: %w", err)
+			}
 		}
-	} else {
-		tools, err = parser.Parse(bytes.NewReader(data))
-		if err != nil {
-			return types.Tool{}, err
-		}
+	}
+
+	tools, err = parser.Parse(bytes.NewReader(data))
+	if err != nil {
+		return types.Tool{}, err
 	}
 
 	if len(tools) == 0 {
