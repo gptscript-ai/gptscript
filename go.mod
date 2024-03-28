@@ -21,6 +21,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
+	github.com/tidwall/gjson v1.17.1
 	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc
 	golang.org/x/sync v0.6.0
 	golang.org/x/term v0.16.0
@@ -73,7 +74,6 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
 	github.com/therootcompany/xz v1.0.1 // indirect
-	github.com/tidwall/gjson v1.17.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
