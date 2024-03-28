@@ -67,11 +67,10 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 				Parameters: types.Parameters{
 					Name:        operation.OperationID,
 					Description: toolDesc,
-					Arguments: &types.JSONSchema{
+					Arguments: &openapi3.Schema{
 						Type:       "object",
-						Properties: map[string]types.JSONSchema{},
+						Properties: openapi3.Schemas{},
 						Required:   []string{},
-						Defs:       map[string]types.JSONSchema{},
 					},
 				},
 				Source: types.ToolSource{
@@ -91,7 +90,7 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 					return nil, err
 				}
 
-				arg := types.JSONSchema{}
+				arg := openapi3.Schema{}
 				if err := json.Unmarshal(raw, &arg); err != nil {
 					return nil, err
 				}
@@ -101,7 +100,7 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 				}
 
 				// Add the new arg to the tool's arguments
-				tool.Parameters.Arguments.Properties[param.Value.Name] = arg
+				tool.Parameters.Arguments.Properties[param.Value.Name] = &openapi3.SchemaRef{Value: &arg}
 
 				// Check whether it is required
 				if param.Value.Required {
@@ -141,7 +140,7 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 						return nil, err
 					}
 
-					arg := types.JSONSchema{}
+					arg := openapi3.Schema{}
 					if err := json.Unmarshal(raw, &arg); err != nil {
 						return nil, err
 					}
@@ -152,13 +151,19 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 
 					// Unfortunately, the request body doesn't contain any good descriptor for it,
 					// so we just use "requestBodyContent" as the name of the arg.
-					tool.Parameters.Arguments.Properties["requestBodyContent"] = arg
+					tool.Parameters.Arguments.Properties["requestBodyContent"] = &openapi3.SchemaRef{Value: &arg}
 					break
 				}
 
 				if bodyMIME == "" {
 					return nil, fmt.Errorf("no supported MIME types found for request body in operation %s", operation.OperationID)
 				}
+			}
+
+			// OpenAI will get upset if we have an object schema with no properties,
+			// so we just nil this out if there were no properties added.
+			if len(tool.Arguments.Properties) == 0 {
+				tool.Arguments = nil
 			}
 
 			var err error

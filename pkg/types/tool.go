@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"golang.org/x/exp/maps"
 )
 
@@ -36,19 +37,19 @@ func (p Program) SetBlocking() Program {
 type BuiltinFunc func(ctx context.Context, env []string, input string) (string, error)
 
 type Parameters struct {
-	Name           string      `json:"name,omitempty"`
-	Description    string      `json:"description,omitempty"`
-	MaxTokens      int         `json:"maxTokens,omitempty"`
-	ModelName      string      `json:"modelName,omitempty"`
-	ModelProvider  bool        `json:"modelProvider,omitempty"`
-	JSONResponse   bool        `json:"jsonResponse,omitempty"`
-	Temperature    *float32    `json:"temperature,omitempty"`
-	Cache          *bool       `json:"cache,omitempty"`
-	InternalPrompt *bool       `json:"internalPrompt"`
-	Arguments      *JSONSchema `json:"arguments,omitempty"`
-	Tools          []string    `json:"tools,omitempty"`
-	Export         []string    `json:"export,omitempty"`
-	Blocking       bool        `json:"-"`
+	Name           string           `json:"name,omitempty"`
+	Description    string           `json:"description,omitempty"`
+	MaxTokens      int              `json:"maxTokens,omitempty"`
+	ModelName      string           `json:"modelName,omitempty"`
+	ModelProvider  bool             `json:"modelProvider,omitempty"`
+	JSONResponse   bool             `json:"jsonResponse,omitempty"`
+	Temperature    *float32         `json:"temperature,omitempty"`
+	Cache          *bool            `json:"cache,omitempty"`
+	InternalPrompt *bool            `json:"internalPrompt"`
+	Arguments      *openapi3.Schema `json:"arguments,omitempty"`
+	Tools          []string         `json:"tools,omitempty"`
+	Export         []string         `json:"export,omitempty"`
+	Blocking       bool             `json:"-"`
 }
 
 type Tool struct {
@@ -103,7 +104,7 @@ func (t Tool) String() string {
 		sort.Strings(keys)
 		for _, key := range keys {
 			prop := t.Parameters.Arguments.Properties[key]
-			_, _ = fmt.Fprintf(buf, "Args: %s: %s\n", key, prop.Description)
+			_, _ = fmt.Fprintf(buf, "Args: %s: %s\n", key, prop.Value.Description)
 		}
 	}
 	if t.Parameters.InternalPrompt != nil {

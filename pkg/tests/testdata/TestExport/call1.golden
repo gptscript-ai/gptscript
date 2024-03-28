@@ -7,22 +7,16 @@
         "toolID": "testdata/TestExport/parent.gpt:5",
         "name": "frommain",
         "parameters": {
-          "type": "object",
           "properties": {
             "defaultPromptParameter": {
               "description": "Prompt to send to the tool or assistant. This may be instructions or question.",
-              "type": "string",
-              "properties": null,
-              "additionalProperties": {
-                "Has": null,
-                "Schema": null
-              }
+              "type": "string"
             }
           },
           "required": [
             "defaultPromptParameter"
           ],
-          "additionalProperties": null
+          "type": "object"
         }
       }
     },
@@ -31,22 +25,16 @@
         "toolID": "testdata/TestExport/parent.gpt:11",
         "name": "parent-local",
         "parameters": {
-          "type": "object",
           "properties": {
             "defaultPromptParameter": {
               "description": "Prompt to send to the tool or assistant. This may be instructions or question.",
-              "type": "string",
-              "properties": null,
-              "additionalProperties": {
-                "Has": null,
-                "Schema": null
-              }
+              "type": "string"
             }
           },
           "required": [
             "defaultPromptParameter"
           ],
-          "additionalProperties": null
+          "type": "object"
         }
       }
     },
@@ -55,22 +43,16 @@
         "toolID": "testdata/TestExport/sub/child.gpt:8",
         "name": "transient",
         "parameters": {
-          "type": "object",
           "properties": {
             "defaultPromptParameter": {
               "description": "Prompt to send to the tool or assistant. This may be instructions or question.",
-              "type": "string",
-              "properties": null,
-              "additionalProperties": {
-                "Has": null,
-                "Schema": null
-              }
+              "type": "string"
             }
           },
           "required": [
             "defaultPromptParameter"
           ],
-          "additionalProperties": null
+          "type": "object"
         }
       }
     }

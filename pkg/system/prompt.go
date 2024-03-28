@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gptscript-ai/gptscript/pkg/types"
+	"github.com/getkin/kin-openapi/openapi3"
 )
 
 // Suffix is default suffix of gptscript files
@@ -26,12 +26,14 @@ You don't move to the next step until you have a result.
 // to just send pure text but the interface required JSON (as that is the fundamental interface of tools in OpenAI)
 var DefaultPromptParameter = "defaultPromptParameter"
 
-var DefaultToolSchema = types.JSONSchema{
+var DefaultToolSchema = openapi3.Schema{
 	Type: "object",
-	Properties: map[string]types.JSONSchema{
-		DefaultPromptParameter: {
-			Description: "Prompt to send to the tool or assistant. This may be instructions or question.",
-			Type:        "string",
+	Properties: openapi3.Schemas{
+		DefaultPromptParameter: &openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				Description: "Prompt to send to the tool or assistant. This may be instructions or question.",
+				Type:        "string",
+			},
 		},
 	},
 	Required: []string{DefaultPromptParameter},
