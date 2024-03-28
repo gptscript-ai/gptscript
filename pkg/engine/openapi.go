@@ -72,7 +72,7 @@ func (e *Engine) runOpenAPI(tool types.Tool, input string) (*Return, error) {
 	// Check for a bearer token (only if using HTTPS)
 	if u.Scheme == "https" {
 		// For "https://example.com" the bearer token env name would be GPTSCRIPT_EXAMPLE_COM_BEARER_TOKEN
-		bearerEnv := "GPTSCRIPT_" + strings.ToUpper(strings.Replace(u.Host, ".", "_", -1)) + "_BEARER_TOKEN"
+		bearerEnv := "GPTSCRIPT_" + strings.ToUpper(strings.Replace(u.Hostname(), ".", "_", -1)) + "_BEARER_TOKEN"
 		if bearerToken, ok := envMap[bearerEnv]; ok {
 			req.Header.Set("Authorization", "Bearer "+bearerToken)
 		}
