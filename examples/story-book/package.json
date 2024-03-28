@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@gptscript-ai/gptscript": "^0.2.0",
     "@nuxt/ui": "^2.15.0",
     "@pinia/nuxt": "^0.5.1",
     "nuxt": "^3.11.1",

@@ -1,12 +1,18 @@
-import { exec } from 'child_process'
-import type { ChildProcess } from 'child_process'
+import gptscript from '@gptscript-ai/gptscript'
+import { Readable } from 'stream'
 
 type Request = {
     prompt: string;
     pages: number;
 }
 
-export const commands: Record<string, ChildProcess>= {}
+export type RunningScript = {
+    stdout: Readable;
+    stderr: Readable;
+    promise: Promise<void>;
+}
+
+export const runningScripts: Record<string, RunningScript>= {}
 
 export default defineEventHandler(async (event) => {
     const request = await readBody(event) as Request
@@ -25,7 +31,7 @@ export default defineEventHandler(async (event) => {
         });
     }
 
-    const command = `gptscript story-book.gpt --story ${request.prompt}, '--pages', ${`${request.pages}`}`
+    const {stdout, stderr, promise} = await gptscript.streamExecFile('story-book.gpt', `--story ${request.prompt} --pages ${request.pages}`, {})
 
     setHeaders(event,{
         'Access-Control-Allow-Origin': '*',
@@ -36,6 +42,9 @@ export default defineEventHandler(async (event) => {
 
     setResponseStatus(event, 202)
 
-    const child = exec(command)
-    commands[request.prompt] = child
+    runningScripts[request.prompt] = {
+        stdout: stdout,
+        stderr: stderr,
+        promise: promise
+    }
 })

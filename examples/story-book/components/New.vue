@@ -27,7 +27,8 @@ async function onSubmit () {
 
         const es = new EventSource(`/api/story/sse?prompt=${state.prompt}`)
         es.onmessage = function(event) {
-            if ((event.data as string).includes('Command exited with code 0')) {
+            store.addPendingStoryMessage(state.prompt, event.data)
+            if ((event.data as string) === 'done') {
                 es.close()
                 store.removePendingStory(state.prompt)
                 store.fetchStories()

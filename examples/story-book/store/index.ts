@@ -5,6 +5,7 @@ export const useMainStore = defineStore({
     id: 'main',
     state: () => ({
         pendingStories: {} as Record<string, EventSource>,
+        pendingStoryMessages: {} as Record<string, string[]>,
         stories: [] as string[]
     }),
     actions: {
@@ -14,6 +15,16 @@ export const useMainStore = defineStore({
         removePendingStory(name: string) {
             this.pendingStories[name].close()
             delete this.pendingStories[name]
+        },
+        addPendingStoryMessage(name: string, message: string) {
+            // implement a queue with a length of 10 that removes the oldest message when the length is reached
+            if (!this.pendingStoryMessages[name]) {
+                this.pendingStoryMessages[name] = []
+            }
+            this.pendingStoryMessages[name].push(message)
+            if (this.pendingStoryMessages[name].length > 12) {
+                this.pendingStoryMessages[name].shift()
+            }
         },
         addStory(name: string) {
             this.stories.push(name)
@@ -32,5 +43,6 @@ export const useMainStore = defineStore({
         async fetchStories() {
             this.addStories(await $fetch('/api/story') as string[])
         }
+
     }
 })
