@@ -80,9 +80,14 @@ func TestHelloWorld(t *testing.T) {
           "input": {
             "description": " Any string",
             "type": "string",
-            "properties": null
+            "properties": null,
+            "additionalProperties": {
+              "Has": null,
+              "Schema": null
+            }
           }
-        }
+        },
+        "additionalProperties": null
       },
       "instructions": "echo \"${input}\"",
       "id": "https://get.gptscript.ai/echo.gpt:1",

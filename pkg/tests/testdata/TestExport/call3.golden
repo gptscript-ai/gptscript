@@ -12,12 +12,17 @@
             "defaultPromptParameter": {
               "description": "Prompt to send to the tool or assistant. This may be instructions or question.",
               "type": "string",
-              "properties": null
+              "properties": null,
+              "additionalProperties": {
+                "Has": null,
+                "Schema": null
+              }
             }
           },
           "required": [
             "defaultPromptParameter"
-          ]
+          ],
+          "additionalProperties": null
         }
       }
     },
@@ -31,12 +36,17 @@
             "defaultPromptParameter": {
               "description": "Prompt to send to the tool or assistant. This may be instructions or question.",
               "type": "string",
-              "properties": null
+              "properties": null,
+              "additionalProperties": {
+                "Has": null,
+                "Schema": null
+              }
             }
           },
           "required": [
             "defaultPromptParameter"
-          ]
+          ],
+          "additionalProperties": null
         }
       }
     },
@@ -50,12 +60,17 @@
             "defaultPromptParameter": {
               "description": "Prompt to send to the tool or assistant. This may be instructions or question.",
               "type": "string",
-              "properties": null
+              "properties": null,
+              "additionalProperties": {
+                "Has": null,
+                "Schema": null
+              }
             }
           },
           "required": [
             "defaultPromptParameter"
-          ]
+          ],
+          "additionalProperties": null
         }
       }
     }

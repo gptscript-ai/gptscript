@@ -2,6 +2,26 @@ package types
 
 import "encoding/json"
 
+type AdditionalProperties struct {
+	Has    *bool
+	Schema *JSONSchema
+}
+
+func (a *AdditionalProperties) UnmarshalJSON(data []byte) error {
+	if data[0] == '{' {
+		a.Schema = &JSONSchema{}
+		return json.Unmarshal(data, a.Schema)
+	}
+	return json.Unmarshal(data, a.Has)
+}
+
+func (a *AdditionalProperties) MarshalJSON() ([]byte, error) {
+	if a.Schema != nil {
+		return json.Marshal(a.Schema)
+	}
+	return json.Marshal(a.Has)
+}
+
 type JSONSchema struct {
 	Description string      `json:"description,omitempty"`
 	Type        string      `json:"type,omitempty"`
@@ -15,7 +35,7 @@ type JSONSchema struct {
 	Required   []string              `json:"required,omitempty"`
 	Defs       map[string]JSONSchema `json:"defs,omitempty"`
 
-	AdditionalProperties bool `json:"additionalProperties,omitempty"`
+	AdditionalProperties AdditionalProperties `json:"additionalProperties,omitempty"`
 }
 
 func ObjectSchema(kv ...string) *JSONSchema {
