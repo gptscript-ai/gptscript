@@ -11,6 +11,10 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
+// getOpenAPITools parses an OpenAPI definition and generates a set of tools from it.
+// Each operation will become a tool definition.
+// The tool's Instructions will be in the format "#!sys.openapi '{JSON Instructions}'",
+// where the JSON Instructions are a JSON-serialized engine.OpenAPIInstructions struct.
 func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 	if len(t.Servers) == 0 {
 		return nil, fmt.Errorf("no servers found in OpenAPI spec")
@@ -46,6 +50,8 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 				}
 			}
 
+			// Each operation can have a description and a summary. Use the Description if one exists,
+			// otherwise us the summary.
 			toolDesc := operation.Description
 			if toolDesc == "" {
 				toolDesc = operation.Summary
@@ -81,17 +87,21 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 			// Handle query, path, and header parameters
 			for _, param := range operation.Parameters {
 				// Marshal the param's schema to a string, and then into our JSONSchema struct
-				arg := types.JSONSchema{}
 				raw, err := param.Value.Schema.Value.MarshalJSON()
 				if err != nil {
 					return nil, err
 				}
+
+				arg := types.JSONSchema{}
 				if err := json.Unmarshal(raw, &arg); err != nil {
 					return nil, err
 				}
+
 				if arg.Description == "" {
 					arg.Description = param.Value.Description
 				}
+
+				// Add the new arg to the tool's arguments
 				tool.Parameters.Arguments.Properties[param.Value.Name] = arg
 
 				// Check whether it is required
@@ -99,13 +109,12 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 					tool.Parameters.Arguments.Required = append(tool.Parameters.Arguments.Required, param.Value.Name)
 				}
 
-				// Add the parameter to the appropriate list
+				// Add the parameter to the appropriate list for the tool's instructions
 				p := engine.Parameter{
 					Name:    param.Value.Name,
 					Style:   param.Value.Style,
 					Explode: param.Value.Explode,
 				}
-
 				switch param.Value.In {
 				case "query":
 					queryParameters = append(queryParameters, p)
@@ -118,25 +127,32 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 				}
 			}
 
+			// Handle the request body, if one exists
 			if operation.RequestBody != nil {
 				for mime, content := range operation.RequestBody.Value.Content {
+					// Each MIME type needs to be handled individually, so we
+					// keep a list of the ones we support.
 					if !slices.Contains(engine.SupportedMIMETypes, mime) {
 						continue
 					}
 					bodyMIME = mime
 
-					arg := types.JSONSchema{}
 					raw, err := content.Schema.Value.MarshalJSON()
 					if err != nil {
 						return nil, err
 					}
+
+					arg := types.JSONSchema{}
 					if err := json.Unmarshal(raw, &arg); err != nil {
 						return nil, err
 					}
+
 					if arg.Description == "" {
 						arg.Description = content.Schema.Value.Description
 					}
 
+					// Unfortunately, the request body doesn't contain any good descriptor for it,
+					// so we just use "requestBodyContent" as the name of the arg.
 					tool.Parameters.Arguments.Properties["requestBodyContent"] = arg
 					break
 				}
@@ -157,6 +173,7 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 		}
 	}
 
+	// The first tool we generate is a special tool that just exports all the others.
 	exportTool := types.Tool{
 		Parameters: types.Parameters{
 			Description: fmt.Sprintf("This is a tool set for the %s OpenAPI spec", t.Info.Title),
@@ -166,9 +183,8 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 			LineNo: 0,
 		},
 	}
+	// Add it to the front of the slice.
 	tools = append([]types.Tool{exportTool}, tools...)
-
-	// TODO - get defs?
 
 	return tools, nil
 }
@@ -206,7 +222,7 @@ func parseServer(server *openapi3.Server) (string, error) {
 		}
 	}
 	if !strings.HasPrefix(s, "http") {
-		return "", fmt.Errorf("invalid server URL: %s (must use HTTP or HTTPs, relative URLs not supported)", s)
+		return "", fmt.Errorf("invalid server URL: %s (must use HTTP or HTTPS; relative URLs not supported)", s)
 	}
 	return s, nil
 }
