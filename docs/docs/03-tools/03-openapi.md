@@ -44,7 +44,7 @@ Will be resolved as `https://api.example.com/v1`.
 
 ## Authentication
 
-GPTScript currently ignores any security schemes and authorization information in the OpenAPI definition file. This might change in the future.
+GPTScript currently ignores any security schemes and authentication/authorization information in the OpenAPI definition file. This might change in the future.
 
 For now, the only supported type of authentication is bearer tokens. GPTScript will look for a special environment variable based
 on the hostname of the server. It looks for the format `GPTSCRIPT_<HOST>_BEARER_TOKEN`, where `<HOST>` is the hostname, but in all caps and
