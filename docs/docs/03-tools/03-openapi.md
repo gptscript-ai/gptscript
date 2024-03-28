@@ -64,9 +64,3 @@ In OpenAPI definitions, request bodies are described with a MIME type. Currently
 
 GPTScript will return an error when parsing the OpenAPI definition if it finds a request body that does not specify
 at least one of these supported MIME types.
-
-## Limitations
-
-In addition to the limitations mentioned above, there are some portions of JSONSchema that are not implemented
-in GPTScript yet, such as `oneOf`, `anyOf`, and `allOf`. These will likely be implemented in the future.
-There may be some other aspects of OpenAPI definitions that are not yet handled by GPTScript.

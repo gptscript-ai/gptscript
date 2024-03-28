@@ -84,23 +84,14 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 
 			// Handle query, path, and header parameters
 			for _, param := range operation.Parameters {
-				// Marshal the param's schema to a string, and then into our JSONSchema struct
-				raw, err := param.Value.Schema.Value.MarshalJSON()
-				if err != nil {
-					return nil, err
-				}
-
-				arg := openapi3.Schema{}
-				if err := json.Unmarshal(raw, &arg); err != nil {
-					return nil, err
-				}
+				arg := param.Value.Schema.Value
 
 				if arg.Description == "" {
 					arg.Description = param.Value.Description
 				}
 
 				// Add the new arg to the tool's arguments
-				tool.Parameters.Arguments.Properties[param.Value.Name] = &openapi3.SchemaRef{Value: &arg}
+				tool.Parameters.Arguments.Properties[param.Value.Name] = &openapi3.SchemaRef{Value: arg}
 
 				// Check whether it is required
 				if param.Value.Required {
@@ -135,23 +126,14 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 					}
 					bodyMIME = mime
 
-					raw, err := content.Schema.Value.MarshalJSON()
-					if err != nil {
-						return nil, err
-					}
-
-					arg := openapi3.Schema{}
-					if err := json.Unmarshal(raw, &arg); err != nil {
-						return nil, err
-					}
-
+					arg := content.Schema.Value
 					if arg.Description == "" {
 						arg.Description = content.Schema.Value.Description
 					}
 
 					// Unfortunately, the request body doesn't contain any good descriptor for it,
 					// so we just use "requestBodyContent" as the name of the arg.
-					tool.Parameters.Arguments.Properties["requestBodyContent"] = &openapi3.SchemaRef{Value: &arg}
+					tool.Parameters.Arguments.Properties["requestBodyContent"] = &openapi3.SchemaRef{Value: arg}
 					break
 				}
 
