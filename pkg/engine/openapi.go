@@ -2,7 +2,6 @@ package engine
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -15,22 +14,12 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-var (
-	SupportedMIMETypes       = []string{"application/json", "text/plain", "multipart/form-data"}
-	SupportedSecuritySchemes = []string{"oauth2"}
-)
+var SupportedMIMETypes = []string{"application/json", "text/plain", "multipart/form-data"}
 
 type Parameter struct {
 	Name    string `json:"name"`
 	Style   string `json:"style"`
 	Explode *bool  `json:"explode"`
-}
-
-type OAuthInfo struct {
-	AuthorizationURL string   `json:"authorizationURL"`
-	TokenURL         string   `json:"tokenURL"`
-	Flow             string   `json:"flow"`
-	Scopes           []string `json:"scopes"`
 }
 
 type OpenAPIInstructions struct {
@@ -44,7 +33,11 @@ type OpenAPIInstructions struct {
 	CookieParameters []Parameter `json:"cookieParameters"`
 }
 
-func (e *Engine) runOpenAPI(ctx context.Context, prg *types.Program, tool types.Tool, input string) (*Return, error) {
+// runOpenAPI runs a tool that was generated from an OpenAPI definition.
+// The tool itself will have instructions regarding the HTTP request that needs to be made.
+// The tools Instructions field will be in the format "#!sys.openapi '{Instructions JSON}'",
+// where {Instructions JSON} is a JSON string of type OpenAPIInstructions.
+func (e *Engine) runOpenAPI(tool types.Tool, input string) (*Return, error) {
 	envMap := map[string]string{}
 
 	for _, env := range e.Env {
@@ -325,6 +318,7 @@ func handlePathParameters(path string, params []Parameter, input string) string 
 	return path
 }
 
+// handleHeaderParameters extracts each header parameter from the input JSON and adds it to the request headers.
 func handleHeaderParameters(req *http.Request, params []Parameter, input string) {
 	for _, param := range params {
 		res := gjson.Get(input, param.Name)
@@ -355,6 +349,7 @@ func handleHeaderParameters(req *http.Request, params []Parameter, input string)
 	}
 }
 
+// handleCookieParameters extracts each cookie parameter from the input JSON and adds it to the request cookies.
 func handleCookieParameters(req *http.Request, params []Parameter, input string) {
 	for _, param := range params {
 		res := gjson.Get(input, param.Name)
