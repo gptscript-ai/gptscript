@@ -92,7 +92,6 @@ func TestPathParameterSerialization(t *testing.T) {
 			path = handlePathParameters(path, params, string(inputStr))
 			require.Contains(t, test.expectedPaths, path)
 		})
-
 	}
 }
 
