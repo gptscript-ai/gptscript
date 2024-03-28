@@ -24,7 +24,6 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 		return nil, err
 	}
 
-	// TODO - support security schemes?
 	var (
 		toolNames    []string
 		tools        []types.Tool
