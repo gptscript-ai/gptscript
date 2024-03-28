@@ -10,6 +10,8 @@ const state = reactive({
     pages: 0,
 })
 
+console.log(Object.keys(store.pendingStories))
+
 async function onSubmit () {
     const response = await fetch('/api/story', {
         method: 'POST',
@@ -26,7 +28,7 @@ async function onSubmit () {
         })
 
         const es = new EventSource(`/api/story/sse?prompt=${state.prompt}`)
-        es.onmessage = function(event) {
+        es.onmessage = async (event) => {
             store.addPendingStoryMessage(state.prompt, event.data)
             if ((event.data as string) === 'done') {
                 es.close()
@@ -37,6 +39,17 @@ async function onSubmit () {
                     title: 'Story Created',
                     description: 'A story you requested has been created.',
                     icon: 'i-heroicons-check-circle-solid',
+                })
+            } else if ((event.data as string).includes('error')) {
+                es.close()
+                store.removePendingStory(state.prompt)
+
+                toast.add({
+                    id: 'story-generating-failed',
+                    title: 'Story Generation Failed',
+                    description: `Your story could not be generated due to an error.\n\n${event.data}.`,
+                    icon: 'i-heroicons-x-mark',
+                    timeout: 30000,
                 })
             }
         }
@@ -58,7 +71,7 @@ async function onSubmit () {
 
 
 <template>
-    <UPopover v-model:open="open" class="overflow-visible">
+    <UPopover v-if="Object.keys(store.pendingStories).length === 0" v-model:open="open" class="overflow-visible">
         <UButton size="lg" class="w-full text-xl" icon="i-heroicons-plus">New Story</UButton>
         <template #panel>
             <UForm class="w-[15vw] p-8" :state=state @submit="onSubmit">

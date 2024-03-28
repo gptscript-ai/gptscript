@@ -37,5 +37,9 @@ export default defineEventHandler(async (event) => {
     await runningScript.promise.then(() => {
         event.node.res.write('data: done\n\n');
         event.node.res.end();
+    }).catch((error) => {
+        setResponseStatus(event, 500);
+        event.node.res.write(`data: error: ${error}\n\n`);
+        event.node.res.end();
     });
 });

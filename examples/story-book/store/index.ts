@@ -41,7 +41,9 @@ export const useMainStore = defineStore({
             this.stories = this.stories.filter(s => s !== name)
         },
         async fetchStories() {
-            this.addStories(await $fetch('/api/story') as string[])
+            if (Object.keys(this.pendingStories).length === 0) {
+                this.addStories(await $fetch('/api/story') as string[])
+            }
         }
 
     }
