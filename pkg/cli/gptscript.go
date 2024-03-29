@@ -119,7 +119,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 		color.NoColor = !*r.Color
 	}
 
-	if r.DefaultModel != "" {
+	if r.DefaultModel != "gpt-4-turbo-preview" {
 		log.Infof("WARNING: Changing the default model can have unknown behavior for existing tools. Use the model field per tool instead.")
 	}
 
