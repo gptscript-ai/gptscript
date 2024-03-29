@@ -332,9 +332,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 
 	for _, tool := range messageRequest.Tools {
 		params := tool.Function.Parameters
-		if params != nil && params.Type == "object" && params.Properties == nil {
-			params.Properties = map[string]types.Property{}
-		}
+
 		request.Tools = append(request.Tools, openai.Tool{
 			Type: openai.ToolTypeFunction,
 			Function: &openai.FunctionDefinition{
