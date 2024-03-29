@@ -76,6 +76,8 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 	switch normalize(key) {
 	case "name":
 		tool.Parameters.Name = strings.ToLower(value)
+	case "modelprovider":
+		tool.Parameters.ModelProvider = true
 	case "model", "modelname":
 		tool.Parameters.ModelName = value
 	case "description":

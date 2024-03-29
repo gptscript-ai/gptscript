@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"slices"
 	"sort"
 	"strings"
 	"sync"
 
 	"github.com/gptscript-ai/gptscript/pkg/cache"
+	env2 "github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/openai"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
@@ -78,15 +78,6 @@ func (c *Client) Supports(ctx context.Context, modelName string) (bool, error) {
 		return false, err
 	}
 
-	models, err := client.ListModels(ctx)
-	if err != nil {
-		return false, err
-	}
-
-	if !slices.Contains(models, modelNameSuffix) {
-		return false, fmt.Errorf("Failed in find model [%s], supported [%s]", modelNameSuffix, strings.Join(models, ", "))
-	}
-
 	c.clientsLock.Lock()
 	defer c.clientsLock.Unlock()
 
@@ -108,7 +99,7 @@ func (c *Client) clientFromURL(apiURL string) (*openai.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	env := strings.ToUpper(strings.ReplaceAll(parsed.Hostname(), ".", "_")) + "_API_KEY"
+	env := "GPTSCRIPT_PROVIDER_" + env2.ToEnvLike(parsed.Hostname()) + "_API_KEY"
 	apiKey := os.Getenv(env)
 	if apiKey == "" {
 		apiKey = "<unset>"
@@ -159,8 +150,9 @@ func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, err
 	}
 
 	client, err = openai.NewClient(openai.Options{
-		BaseURL: url,
-		Cache:   c.cache,
+		BaseURL:  url,
+		Cache:    c.cache,
+		CacheKey: prg.EntryToolID,
 	})
 	if err != nil {
 		return nil, err

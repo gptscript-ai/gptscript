@@ -151,6 +151,9 @@ func appendInputAsEnv(env []string, input string) []string {
 func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.Tool, input string) (*exec.Cmd, func(), error) {
 	envvars := append(e.Env[:], extraEnv...)
 	envvars = appendInputAsEnv(envvars, input)
+	if log.IsDebug() {
+		envvars = append(envvars, "GPTSCRIPT_DEBUG=true")
+	}
 
 	interpreter, rest, _ := strings.Cut(tool.Instructions, "\n")
 	interpreter = strings.TrimSpace(interpreter)[2:]

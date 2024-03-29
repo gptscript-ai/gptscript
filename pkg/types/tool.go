@@ -39,6 +39,7 @@ type Parameters struct {
 	Description    string      `json:"description,omitempty"`
 	MaxTokens      int         `json:"maxTokens,omitempty"`
 	ModelName      string      `json:"modelName,omitempty"`
+	ModelProvider  bool        `json:"modelProvider,omitempty"`
 	JSONResponse   bool        `json:"jsonResponse,omitempty"`
 	Temperature    *float32    `json:"temperature,omitempty"`
 	Cache          *bool       `json:"cache,omitempty"`
@@ -80,6 +81,9 @@ func (t Tool) String() string {
 	}
 	if t.Parameters.ModelName != "" {
 		_, _ = fmt.Fprintf(buf, "Model Name: %s\n", t.Parameters.ModelName)
+	}
+	if t.Parameters.ModelProvider {
+		_, _ = fmt.Fprintf(buf, "Model Provider: true\n")
 	}
 	if t.Parameters.JSONResponse {
 		_, _ = fmt.Fprintln(buf, "JSON Response: true")

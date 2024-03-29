@@ -2,6 +2,8 @@ module github.com/gptscript-ai/gptscript
 
 go 1.22.0
 
+replace github.com/sashabaranov/go-openai => github.com/gptscript-ai/go-openai v0.0.0-20240328093028-7993661f9eab
+
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/BurntSushi/locker v0.0.0-20171006230638-a6e239ea1c69
