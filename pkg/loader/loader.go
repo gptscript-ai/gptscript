@@ -20,6 +20,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/parser"
 	"github.com/gptscript-ai/gptscript/pkg/types"
+	"gopkg.in/yaml.v3"
 )
 
 type source struct {
@@ -128,9 +129,7 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 	}
 
 	var tools []types.Tool
-	if strings.HasSuffix(base.Name, ".json") ||
-		strings.HasSuffix(base.Name, ".yaml") ||
-		strings.HasSuffix(base.Name, ".yml") {
+	if isOpenAPI(data) {
 		if t, err := openapi3.NewLoader().LoadFromData(data); err == nil {
 			tools, err = getOpenAPITools(t)
 			if err != nil {
@@ -316,4 +315,17 @@ func SplitToolRef(targetToolName string) (toolName, subTool string) {
 		subTool = ""
 	}
 	return
+}
+
+func isOpenAPI(data []byte) bool {
+	var version struct {
+		OpenAPI string `json:"openapi" yaml:"openapi"`
+	}
+
+	if err := json.Unmarshal(data, &version); err != nil {
+		if err := yaml.Unmarshal(data, &version); err != nil {
+			return false
+		}
+	}
+	return strings.HasPrefix(version.OpenAPI, "3.")
 }
