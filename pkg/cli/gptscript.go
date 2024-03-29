@@ -119,6 +119,10 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 		color.NoColor = !*r.Color
 	}
 
+	if r.DefaultModel != "" {
+		log.Infof("WARNING: Changing the default model can have unknown behavior for existing tools. Use the model field per tool instead.")
+	}
+
 	gptOpt := gptscript.Options{
 		Cache:   cache.Options(r.CacheOptions),
 		OpenAI:  openai.Options(r.OpenAIOptions),

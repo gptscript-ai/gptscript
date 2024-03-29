@@ -2,7 +2,7 @@ module github.com/gptscript-ai/gptscript
 
 go 1.22.0
 
-replace github.com/sashabaranov/go-openai => github.com/gptscript-ai/go-openai v0.0.0-20240328093028-7993661f9eab
+replace github.com/sashabaranov/go-openai => github.com/gptscript-ai/go-openai v0.0.0-20240329145331-9325362ed457
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
