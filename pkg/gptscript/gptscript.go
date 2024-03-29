@@ -103,6 +103,6 @@ func (g *GPTScript) GetModel() engine.Model {
 	return g.Registry
 }
 
-func (g *GPTScript) ListModels(ctx context.Context) ([]string, error) {
-	return g.Registry.ListModels(ctx)
+func (g *GPTScript) ListModels(ctx context.Context, providers ...string) ([]string, error) {
+	return g.Registry.ListModels(ctx, providers...)
 }

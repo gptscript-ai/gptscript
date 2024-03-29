@@ -15,7 +15,6 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/openai"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/types"
-	"golang.org/x/exp/maps"
 )
 
 type Client struct {
@@ -49,13 +48,23 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	return client.Call(ctx, messageRequest, status)
 }
 
-func (c *Client) ListModels(_ context.Context) (result []string, _ error) {
-	c.clientsLock.Lock()
-	defer c.clientsLock.Unlock()
+func (c *Client) ListModels(ctx context.Context, providers ...string) (result []string, _ error) {
+	for _, provider := range providers {
+		client, err := c.load(ctx, provider)
+		if err != nil {
+			return nil, err
+		}
+		models, err := client.ListModels(ctx, "")
+		if err != nil {
+			return nil, err
+		}
+		for _, model := range models {
+			result = append(result, model+" from "+provider)
+		}
+	}
 
-	keys := maps.Keys(c.models)
-	sort.Strings(keys)
-	return keys, nil
+	sort.Strings(result)
+	return
 }
 
 func (c *Client) Supports(ctx context.Context, modelName string) (bool, error) {

@@ -127,7 +127,12 @@ func (c *Client) Supports(ctx context.Context, modelName string) (bool, error) {
 	return slices.Contains(models, modelName), nil
 }
 
-func (c *Client) ListModels(ctx context.Context) (result []string, _ error) {
+func (c *Client) ListModels(ctx context.Context, providers ...string) (result []string, _ error) {
+	// Only serve if providers is empty or "" is in the list
+	if len(providers) != 0 && !slices.Contains(providers, "") {
+		return nil, nil
+	}
+
 	models, err := c.c.ListModels(ctx)
 	if err != nil {
 		return nil, err

@@ -146,7 +146,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 	defer gptScript.Close()
 
 	if r.ListModels {
-		models, err := gptScript.ListModels(cmd.Context())
+		models, err := gptScript.ListModels(cmd.Context(), args...)
 		if err != nil {
 			return err
 		}
