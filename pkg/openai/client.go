@@ -263,6 +263,8 @@ func toMessages(request types.CompletionRequest) (result []openai.ChatCompletion
 
 		if message.ToolCall != nil {
 			chatMessage.ToolCallID = message.ToolCall.ID
+			// This field is not documented but specifically Azure thinks it should be set
+			chatMessage.Name = message.ToolCall.Function.Name
 		}
 
 		for _, content := range message.Content {
