@@ -77,7 +77,7 @@ func TestHelloWorld(t *testing.T) {
       "arguments": {
         "properties": {
           "input": {
-            "description": " Any string",
+            "description": "Any string",
             "type": "string"
           }
         },
