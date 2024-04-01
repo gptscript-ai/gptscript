@@ -43,6 +43,7 @@ type Runner struct {
 	c              engine.Model
 	factory        MonitorFactory
 	runtimeManager engine.RuntimeManager
+	ports          engine.Ports
 }
 
 func New(client engine.Model, opts ...Options) (*Runner, error) {
@@ -53,6 +54,10 @@ func New(client engine.Model, opts ...Options) (*Runner, error) {
 		factory:        opt.MonitorFactory,
 		runtimeManager: opt.RuntimeManager,
 	}, nil
+}
+
+func (r *Runner) Close() {
+	r.ports.CloseDaemons()
 }
 
 func (r *Runner) Run(ctx context.Context, prg types.Program, env []string, input string) (output string, err error) {
@@ -101,6 +106,7 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 		RuntimeManager: r.runtimeManager,
 		Progress:       progress,
 		Env:            env,
+		Ports:          &r.ports,
 	}
 
 	monitor.Event(Event{

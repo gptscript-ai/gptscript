@@ -35,6 +35,7 @@ type Engine struct {
 	RuntimeManager RuntimeManager
 	Env            []string
 	Progress       chan<- types.CompletionStatus
+	Ports          *Ports
 }
 
 type State struct {
