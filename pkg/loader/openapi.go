@@ -211,7 +211,6 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 
 				if len(current) > 0 {
 					infos = append(infos, current)
-					break
 				}
 			}
 
