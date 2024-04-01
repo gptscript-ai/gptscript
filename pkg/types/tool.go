@@ -19,10 +19,16 @@ const (
 type ToolSet map[string]Tool
 
 type Program struct {
-	Name        string            `json:"name,omitempty"`
-	EntryToolID string            `json:"entryToolId,omitempty"`
-	ToolSet     ToolSet           `json:"toolSet,omitempty"`
-	Exports     map[string]string `json:"exports,omitempty"`
+	Name        string  `json:"name,omitempty"`
+	EntryToolID string  `json:"entryToolId,omitempty"`
+	ToolSet     ToolSet `json:"toolSet,omitempty"`
+}
+
+func (p Program) TopLevelTools() (result []Tool) {
+	for _, tool := range p.ToolSet[p.EntryToolID].LocalTools {
+		result = append(result, p.ToolSet[tool])
+	}
+	return
 }
 
 func (p Program) SetBlocking() Program {
@@ -82,7 +88,7 @@ func (t Tool) String() string {
 		_, _ = fmt.Fprintf(buf, "Max Tokens: %d\n", t.Parameters.MaxTokens)
 	}
 	if t.Parameters.ModelName != "" {
-		_, _ = fmt.Fprintf(buf, "Model Name: %s\n", t.Parameters.ModelName)
+		_, _ = fmt.Fprintf(buf, "Model: %s\n", t.Parameters.ModelName)
 	}
 	if t.Parameters.ModelProvider {
 		_, _ = fmt.Fprintf(buf, "Model Provider: true\n")

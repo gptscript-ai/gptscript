@@ -14,7 +14,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
-var (
+type Ports struct {
 	daemonPorts map[string]int64
 	daemonLock  sync.Mutex
 
@@ -23,29 +23,29 @@ var (
 	daemonCtx          context.Context
 	daemonClose        func()
 	daemonWG           sync.WaitGroup
-)
-
-func CloseDaemons() {
-	daemonLock.Lock()
-	if daemonCtx == nil {
-		daemonLock.Unlock()
-		return
-	}
-	daemonLock.Unlock()
-
-	daemonClose()
-	daemonWG.Wait()
 }
 
-func (e *Engine) getNextPort() int64 {
-	if startPort == 0 {
-		startPort = 10240
-		endPort = 11240
+func (p *Ports) CloseDaemons() {
+	p.daemonLock.Lock()
+	if p.daemonCtx == nil {
+		p.daemonLock.Unlock()
+		return
+	}
+	p.daemonLock.Unlock()
+
+	p.daemonClose()
+	p.daemonWG.Wait()
+}
+
+func (p *Ports) NextPort() int64 {
+	if p.startPort == 0 {
+		p.startPort = 10240
+		p.endPort = 11240
 	}
 	// This is pretty simple and inefficient approach, but also never releases ports
-	count := endPort - startPort + 1
+	count := p.endPort - p.startPort + 1
 	toTry := make([]int64, 0, count)
-	for i := startPort; i <= endPort; i++ {
+	for i := p.startPort; i <= p.endPort; i++ {
 		toTry = append(toTry, i)
 	}
 
@@ -54,13 +54,13 @@ func (e *Engine) getNextPort() int64 {
 	})
 
 	for _, nextPort := range toTry {
-		if _, ok := usedPorts[nextPort]; ok {
+		if _, ok := p.usedPorts[nextPort]; ok {
 			continue
 		}
-		if usedPorts == nil {
-			usedPorts = map[int64]struct{}{}
+		if p.usedPorts == nil {
+			p.usedPorts = map[int64]struct{}{}
 		}
-		usedPorts[nextPort] = struct{}{}
+		p.usedPorts[nextPort] = struct{}{}
 		return nextPort
 	}
 
@@ -89,25 +89,25 @@ func getPath(instructions string) (string, string) {
 }
 
 func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error) {
-	daemonLock.Lock()
-	defer daemonLock.Unlock()
+	e.Ports.daemonLock.Lock()
+	defer e.Ports.daemonLock.Unlock()
 
 	instructions := strings.TrimPrefix(tool.Instructions, types.DaemonPrefix)
 	instructions, path := getPath(instructions)
 	tool.Instructions = types.CommandPrefix + instructions
 
-	port, ok := daemonPorts[tool.ID]
+	port, ok := e.Ports.daemonPorts[tool.ID]
 	url := fmt.Sprintf("http://127.0.0.1:%d%s", port, path)
 	if ok {
 		return url, nil
 	}
 
-	if daemonCtx == nil {
-		daemonCtx, daemonClose = context.WithCancel(context.Background())
+	if e.Ports.daemonCtx == nil {
+		e.Ports.daemonCtx, e.Ports.daemonClose = context.WithCancel(context.Background())
 	}
 
-	ctx := daemonCtx
-	port = e.getNextPort()
+	ctx := e.Ports.daemonCtx
+	port = e.Ports.NextPort()
 	url = fmt.Sprintf("http://127.0.0.1:%d%s", port, path)
 
 	cmd, stop, err := e.newCommand(ctx, []string{
@@ -135,10 +135,10 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 		return url, err
 	}
 
-	if daemonPorts == nil {
-		daemonPorts = map[string]int64{}
+	if e.Ports.daemonPorts == nil {
+		e.Ports.daemonPorts = map[string]int64{}
 	}
-	daemonPorts[tool.ID] = port
+	e.Ports.daemonPorts[tool.ID] = port
 
 	killedCtx, cancel := context.WithCancelCause(ctx)
 	defer cancel(nil)
@@ -153,18 +153,18 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 
 		cancel(err)
 		stop()
-		daemonLock.Lock()
-		defer daemonLock.Unlock()
+		e.Ports.daemonLock.Lock()
+		defer e.Ports.daemonLock.Unlock()
 
-		delete(daemonPorts, tool.ID)
+		delete(e.Ports.daemonPorts, tool.ID)
 	}()
 
-	daemonWG.Add(1)
+	e.Ports.daemonWG.Add(1)
 	context.AfterFunc(ctx, func() {
 		if err := cmd.Process.Kill(); err != nil {
 			log.Debugf("daemon failed to kill tool [%s] process: %v", tool.Parameters.Name, err)
 		}
-		daemonWG.Done()
+		e.Ports.daemonWG.Done()
 	})
 
 	for i := 0; i < 20; i++ {

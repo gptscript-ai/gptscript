@@ -1,9 +1,11 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/acorn-io/cmd"
@@ -41,17 +43,38 @@ type GPTScript struct {
 	Quiet         *bool  `usage:"No output logging (set --quiet=false to force on even when there is no TTY)" short:"q"`
 	Output        string `usage:"Save output to a file, or - for stdout" short:"o"`
 	Input         string `usage:"Read input from a file (\"-\" for stdin)" short:"f"`
-	SubTool       string `usage:"Use tool of this name, not the first tool in file"`
-	Assemble      bool   `usage:"Assemble tool to a single artifact, saved to --output" hidden:"true"`
-	ListModels    bool   `usage:"List the models available and exit"`
-	ListTools     bool   `usage:"List built-in tools and exit"`
-	Server        bool   `usage:"Start server"`
-	ListenAddress string `usage:"Server listen address" default:"127.0.0.1:9090"`
+	SubTool       string `usage:"Use tool of this name, not the first tool in file" local:"true"`
+	Assemble      bool   `usage:"Assemble tool to a single artifact, saved to --output" hidden:"true" local:"true"`
+	ListModels    bool   `usage:"List the models available and exit" local:"true"`
+	ListTools     bool   `usage:"List built-in tools and exit" local:"true"`
+	Server        bool   `usage:"Start server" local:"true"`
+	ListenAddress string `usage:"Server listen address" default:"127.0.0.1:9090" local:"true"`
 	Chdir         string `usage:"Change current working directory" short:"C"`
 }
 
 func New() *cobra.Command {
-	return cmd.Command(&GPTScript{})
+	root := &GPTScript{}
+	return cmd.Command(root, &Eval{
+		gptscript: root,
+	})
+}
+
+func (r *GPTScript) NewRunContext(cmd *cobra.Command) context.Context {
+	ctx := cmd.Context()
+	if r.Confirm {
+		ctx = confirm.WithConfirm(ctx, confirm.TextPrompt{})
+	}
+	return ctx
+}
+
+func (r *GPTScript) NewGPTScriptOpts() gptscript.Options {
+	return gptscript.Options{
+		Cache:   cache.Options(r.CacheOptions),
+		OpenAI:  openai.Options(r.OpenAIOptions),
+		Monitor: monitor.Options(r.DisplayOptions),
+		Quiet:   r.Quiet,
+		Env:     os.Environ(),
+	}
 }
 
 func (r *GPTScript) Customize(cmd *cobra.Command) {
@@ -74,16 +97,27 @@ func (r *GPTScript) Customize(cmd *cobra.Command) {
 	}
 }
 
-func (r *GPTScript) listTools() error {
+func (r *GPTScript) listTools(ctx context.Context, gptScript *gptscript.GPTScript, prg types.Program) error {
+	tools := gptScript.ListTools(ctx, prg)
+	sort.Slice(tools, func(i, j int) bool {
+		return tools[i].Name < tools[j].Name
+	})
 	var lines []string
-	for _, tool := range builtin.ListTools() {
+	for _, tool := range tools {
+		if tool.Name == "" {
+			tool.Name = prg.Name
+		}
+
+		// Don't print instructions
+		tool.Instructions = ""
+
 		lines = append(lines, tool.String())
 	}
 	fmt.Println(strings.Join(lines, "\n---\n"))
 	return nil
 }
 
-func (r *GPTScript) Pre(*cobra.Command, []string) error {
+func (r *GPTScript) PersistentPre(*cobra.Command, []string) error {
 	// chdir as soon as possible
 	if r.Chdir != "" {
 		if err := os.Chdir(r.Chdir); err != nil {
@@ -111,10 +145,7 @@ func (r *GPTScript) Pre(*cobra.Command, []string) error {
 			mvl.SetError()
 		}
 	}
-	return nil
-}
 
-func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 	if r.Color != nil {
 		color.NoColor = !*r.Color
 	}
@@ -123,13 +154,63 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 		log.Infof("WARNING: Changing the default model can have unknown behavior for existing tools. Use the model field per tool instead.")
 	}
 
-	gptOpt := gptscript.Options{
-		Cache:   cache.Options(r.CacheOptions),
-		OpenAI:  openai.Options(r.OpenAIOptions),
-		Monitor: monitor.Options(r.DisplayOptions),
-		Quiet:   r.Quiet,
-		Env:     os.Environ(),
+	return nil
+}
+
+func (r *GPTScript) listModels(ctx context.Context, gptScript *gptscript.GPTScript, args []string) error {
+	models, err := gptScript.ListModels(ctx, args...)
+	if err != nil {
+		return err
 	}
+	fmt.Println(strings.Join(models, "\n"))
+	return nil
+}
+
+func (r *GPTScript) readProgram(ctx context.Context, args []string) (prg types.Program, err error) {
+	if len(args) == 0 {
+		return
+	}
+
+	if args[0] == "-" {
+		data, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			return prg, err
+		}
+		prg, err = loader.ProgramFromSource(ctx, string(data), r.SubTool)
+		if err != nil {
+			return prg, err
+		}
+	}
+
+	return loader.Program(ctx, args[0], r.SubTool)
+}
+
+func (r *GPTScript) PrintOutput(toolInput, toolOutput string) (err error) {
+	if r.Output != "" {
+		err = os.WriteFile(r.Output, []byte(toolOutput), 0644)
+		if err != nil {
+			return err
+		}
+	} else {
+		if !*r.Quiet {
+			if toolInput != "" {
+				_, _ = fmt.Fprint(os.Stderr, "\nINPUT:\n\n")
+				_, _ = fmt.Fprintln(os.Stderr, toolInput)
+			}
+			_, _ = fmt.Fprint(os.Stderr, "\nOUTPUT:\n\n")
+		}
+		fmt.Print(toolOutput)
+		if !strings.HasSuffix(toolOutput, "\n") {
+			fmt.Println()
+		}
+	}
+
+	return
+}
+
+func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
+	gptOpt := r.NewGPTScriptOpts()
+	ctx := cmd.Context()
 
 	if r.Server {
 		s, err := server.New(&server.Options{
@@ -140,7 +221,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		defer s.Close()
-		return s.Start(cmd.Context())
+		return s.Start(ctx)
 	}
 
 	gptScript, err := gptscript.New(&gptOpt)
@@ -150,40 +231,20 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 	defer gptScript.Close()
 
 	if r.ListModels {
-		models, err := gptScript.ListModels(cmd.Context(), args...)
-		if err != nil {
-			return err
-		}
-		fmt.Println(strings.Join(models, "\n"))
-		return nil
+		return r.listModels(ctx, gptScript, args)
+	}
+
+	prg, err := r.readProgram(ctx, args)
+	if err != nil {
+		return err
 	}
 
 	if r.ListTools {
-		return r.listTools()
+		return r.listTools(ctx, gptScript, prg)
 	}
 
 	if len(args) == 0 {
 		return cmd.Help()
-	}
-
-	var (
-		prg types.Program
-	)
-
-	if args[0] == "-" {
-		data, err := io.ReadAll(os.Stdin)
-		if err != nil {
-			return err
-		}
-		prg, err = loader.ProgramFromSource(cmd.Context(), string(data), r.SubTool)
-		if err != nil {
-			return err
-		}
-	} else {
-		prg, err = loader.Program(cmd.Context(), args[0], r.SubTool)
-		if err != nil {
-			return err
-		}
 	}
 
 	if r.Assemble {
@@ -205,33 +266,10 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	ctx := cmd.Context()
-	if r.Confirm {
-		ctx = confirm.WithConfirm(ctx, confirm.TextPrompt{})
-	}
-	s, err := gptScript.Run(ctx, prg, os.Environ(), toolInput)
+	s, err := gptScript.Run(r.NewRunContext(cmd), prg, os.Environ(), toolInput)
 	if err != nil {
 		return err
 	}
 
-	if r.Output != "" {
-		err = os.WriteFile(r.Output, []byte(s), 0644)
-		if err != nil {
-			return err
-		}
-	} else {
-		if !*r.Quiet {
-			if toolInput != "" {
-				_, _ = fmt.Fprint(os.Stderr, "\nINPUT:\n\n")
-				_, _ = fmt.Fprintln(os.Stderr, toolInput)
-			}
-			_, _ = fmt.Fprint(os.Stderr, "\nOUTPUT:\n\n")
-		}
-		fmt.Print(s)
-		if !strings.HasSuffix(s, "\n") {
-			fmt.Println()
-		}
-	}
-
-	return nil
+	return r.PrintOutput(toolInput, s)
 }
