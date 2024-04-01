@@ -88,6 +88,13 @@ func (e *Engine) runOpenAPI(tool types.Tool, input string) (*Return, error) {
 		if err := handleAuths(req, envMap, instructions.SecurityInfos); err != nil {
 			return nil, fmt.Errorf("error setting up authentication: %w", err)
 		}
+
+		// If there is a bearer token set for the whole server, and no Authorization header has been defined, use it.
+		if token, ok := envMap["GPTSCRIPT_"+env.ToEnvLike(u.Hostname())+"_BEARER_TOKEN"]; ok {
+			if req.Header.Get("Authorization") == "" {
+				req.Header.Set("Authorization", "Bearer "+token)
+			}
+		}
 	}
 
 	// Handle query parameters
