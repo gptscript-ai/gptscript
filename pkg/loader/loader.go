@@ -131,7 +131,7 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 	var tools []types.Tool
 	if isOpenAPI(data) {
 		if t, err := openapi3.NewLoader().LoadFromData(data); err == nil {
-			tools, err = getOpenAPITools(t)
+			tools, err = getOpenAPITools(t, base.Location)
 			if err != nil {
 				return types.Tool{}, fmt.Errorf("error parsing OpenAPI definition: %w", err)
 			}
@@ -256,6 +256,9 @@ func ProgramFromSource(ctx context.Context, content, subToolName string) (types.
 }
 
 func Program(ctx context.Context, name, subToolName string) (types.Program, error) {
+	if subToolName == "" {
+		name, subToolName = SplitToolRef(name)
+	}
 	prg := types.Program{
 		Name:    name,
 		ToolSet: types.ToolSet{},
@@ -306,7 +309,7 @@ func input(ctx context.Context, base *source, name string) (*source, error) {
 }
 
 func SplitToolRef(targetToolName string) (toolName, subTool string) {
-	subTool, toolName, ok := strings.Cut(targetToolName, " from ")
+	subTool, toolName, ok := strings.Cut(strings.ReplaceAll(targetToolName, "\t", " "), " from ")
 	if ok {
 		toolName = strings.TrimSpace(toolName)
 		subTool = strings.TrimSpace(subTool)
@@ -318,14 +321,14 @@ func SplitToolRef(targetToolName string) (toolName, subTool string) {
 }
 
 func isOpenAPI(data []byte) bool {
-	var version struct {
-		OpenAPI string `json:"openapi" yaml:"openapi"`
+	var fragment struct {
+		Paths map[string]any `json:"paths,omitempty"`
 	}
 
-	if err := json.Unmarshal(data, &version); err != nil {
-		if err := yaml.Unmarshal(data, &version); err != nil {
+	if err := json.Unmarshal(data, &fragment); err != nil {
+		if err := yaml.Unmarshal(data, &fragment); err != nil {
 			return false
 		}
 	}
-	return strings.HasPrefix(version.OpenAPI, "3.")
+	return len(fragment.Paths) > 0
 }

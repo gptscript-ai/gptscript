@@ -3,6 +3,7 @@ package loader
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"slices"
 	"strings"
 
@@ -15,11 +16,8 @@ import (
 // Each operation will become a tool definition.
 // The tool's Instructions will be in the format "#!sys.openapi '{JSON Instructions}'",
 // where the JSON Instructions are a JSON-serialized engine.OpenAPIInstructions struct.
-func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
-	if len(t.Servers) == 0 {
-		return nil, fmt.Errorf("no servers found in OpenAPI spec")
-	}
-	defaultServer, err := parseServer(t.Servers[0])
+func getOpenAPITools(t *openapi3.T, serverHint string) ([]types.Tool, error) {
+	defaultServer, err := parseServer(t.Servers, serverHint)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +31,7 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 		// Handle path-level server override, if one exists
 		pathServer := defaultServer
 		if pathObj.Servers != nil && len(pathObj.Servers) > 0 {
-			pathServer, err = parseServer(pathObj.Servers[0])
+			pathServer, err = parseServer(pathObj.Servers, "")
 			if err != nil {
 				return nil, err
 			}
@@ -43,7 +41,7 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 			// Handle operation-level server override, if one exists
 			operationServer := pathServer
 			if operation.Servers != nil && len(*operation.Servers) > 0 {
-				operationServer, err = parseServer((*operation.Servers)[0])
+				operationServer, err = parseServer(*operation.Servers, "")
 				if err != nil {
 					return nil, err
 				}
@@ -79,8 +77,6 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 					LineNo: operationNum,
 				},
 			}
-
-			toolNames = append(toolNames, tool.Parameters.Name)
 
 			// Handle query, path, and header parameters
 			for _, param := range operation.Parameters {
@@ -138,6 +134,7 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 				}
 
 				if bodyMIME == "" {
+					continue
 					return nil, fmt.Errorf("no supported MIME types found for request body in operation %s", operation.OperationID)
 				}
 			}
@@ -154,15 +151,22 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 				return nil, err
 			}
 
+			// Register
+			toolNames = append(toolNames, tool.Parameters.Name)
 			tools = append(tools, tool)
 			operationNum++
 		}
 	}
 
 	// The first tool we generate is a special tool that just exports all the others.
+	title := serverHint
+	if t.Info != nil && t.Info.Title != "" {
+		title = t.Info.Title
+	}
+
 	exportTool := types.Tool{
 		Parameters: types.Parameters{
-			Description: fmt.Sprintf("This is a tool set for the %s OpenAPI spec", t.Info.Title),
+			Description: fmt.Sprintf("This is a tool set for the %s OpenAPI spec", title),
 			Export:      toolNames,
 		},
 		Source: types.ToolSource{
@@ -194,7 +198,17 @@ func instructionString(server, method, path, bodyMIME string, queryParameters, p
 	return fmt.Sprintf("%s '%s'", types.OpenAPIPrefix, string(instBytes)), nil
 }
 
-func parseServer(server *openapi3.Server) (string, error) {
+func parseServer(servers []*openapi3.Server, serverHint string) (string, error) {
+	if len(servers) == 0 {
+		u, err := url.Parse(serverHint)
+		if err == nil && u.Host != "" {
+			u.Path = "/"
+			return u.String(), nil
+		}
+		return "", fmt.Errorf("no servers found in OpenAPI spec")
+	}
+
+	server := servers[0]
 	s := server.URL
 	for name, variable := range server.Variables {
 		if variable == nil {
