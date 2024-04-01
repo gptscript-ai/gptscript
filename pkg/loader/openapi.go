@@ -24,10 +24,25 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 		return nil, err
 	}
 
+	var globalSecurity []map[string]any
+	if t.Security != nil {
+		for _, item := range t.Security {
+			current := map[string]any{}
+			for name := range item {
+				if scheme, ok := t.Components.SecuritySchemes[name]; ok && slices.Contains(engine.SupportedSecurityTypes, scheme.Value.Type) {
+					current[name] = true
+				}
+			}
+			if len(current) > 0 {
+				globalSecurity = append(globalSecurity, current)
+			}
+		}
+	}
+
 	var (
 		toolNames    []string
 		tools        []types.Tool
-		operationNum = 1
+		operationNum = 1 // Each tool gets an operation number, beginning with 1
 	)
 	for pathString, pathObj := range t.Paths.Map() {
 		// Handle path-level server override, if one exists
@@ -57,6 +72,14 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 			}
 
 			var (
+				// auths are represented as a list of maps, where each map contains the names of the required security schemes.
+				// Items within the same map are a logical AND. The maps themselves are a logical OR. For example:
+				//	 security: # (A AND B) OR (C AND D)
+				//   - A
+				//     B
+				//   - C
+				//     D
+				auths            []map[string]any
 				queryParameters  []engine.Parameter
 				pathParameters   []engine.Parameter
 				headerParameters []engine.Parameter
@@ -142,6 +165,56 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 				}
 			}
 
+			// See if there is any auth defined for this operation
+			var noAuth bool
+			if operation.Security != nil {
+				if len(*operation.Security) == 0 {
+					noAuth = true
+				}
+				for _, req := range *operation.Security {
+					current := map[string]any{}
+					for name := range req {
+						current[name] = true
+					}
+					if len(current) > 0 {
+						auths = append(auths, current)
+					}
+				}
+			}
+
+			// Use the global security if it was not overridden for this operation
+			if !noAuth && len(auths) == 0 {
+				auths = append(auths, globalSecurity...)
+			}
+
+			// For each set of auths, turn them into SecurityInfos, and drop ones that contain unsupported types.
+			var infos [][]engine.SecurityInfo
+		outer:
+			for _, auth := range auths {
+				var current []engine.SecurityInfo
+				for name := range auth {
+					if scheme, ok := t.Components.SecuritySchemes[name]; ok {
+						if !slices.Contains(engine.SupportedSecurityTypes, scheme.Value.Type) {
+							// There is an unsupported type in this auth, so move on to the next one.
+							continue outer
+						}
+
+						current = append(current, engine.SecurityInfo{
+							Type:       scheme.Value.Type,
+							Name:       name,
+							In:         scheme.Value.In,
+							Scheme:     scheme.Value.Scheme,
+							APIKeyName: scheme.Value.Name,
+						})
+					}
+				}
+
+				if len(current) > 0 {
+					infos = append(infos, current)
+					break
+				}
+			}
+
 			// OpenAI will get upset if we have an object schema with no properties,
 			// so we just nil this out if there were no properties added.
 			if len(tool.Arguments.Properties) == 0 {
@@ -149,7 +222,7 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 			}
 
 			var err error
-			tool.Instructions, err = instructionString(operationServer, method, pathString, bodyMIME, queryParameters, pathParameters, headerParameters, cookieParameters)
+			tool.Instructions, err = instructionString(operationServer, method, pathString, bodyMIME, queryParameters, pathParameters, headerParameters, cookieParameters, infos)
 			if err != nil {
 				return nil, err
 			}
@@ -175,12 +248,13 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 	return tools, nil
 }
 
-func instructionString(server, method, path, bodyMIME string, queryParameters, pathParameters, headerParameters, cookieParameters []engine.Parameter) (string, error) {
+func instructionString(server, method, path, bodyMIME string, queryParameters, pathParameters, headerParameters, cookieParameters []engine.Parameter, infos [][]engine.SecurityInfo) (string, error) {
 	inst := engine.OpenAPIInstructions{
 		Server:           server,
 		Path:             path,
 		Method:           method,
 		BodyContentMIME:  bodyMIME,
+		SecurityInfos:    infos,
 		QueryParameters:  queryParameters,
 		PathParameters:   pathParameters,
 		HeaderParameters: headerParameters,
