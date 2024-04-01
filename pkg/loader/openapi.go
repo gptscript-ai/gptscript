@@ -66,6 +66,7 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 			}
 		}
 
+	operations:
 		for method, operation := range pathObj.Operations() {
 			// Handle operation-level server override, if one exists
 			operationServer := pathServer
@@ -169,6 +170,11 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 					// so we just use "requestBodyContent" as the name of the arg.
 					tool.Parameters.Arguments.Properties["requestBodyContent"] = &openapi3.SchemaRef{Value: arg}
 					break
+				}
+
+				if bodyMIME == "" {
+					// No supported MIME types found, so just skip this operation and move on.
+					continue operations
 				}
 			}
 
