@@ -60,7 +60,7 @@ func addArg(line string, tool *types.Tool) error {
 
 	tool.Parameters.Arguments.Properties[key] = &openapi3.SchemaRef{
 		Value: &openapi3.Schema{
-			Description: value,
+			Description: strings.TrimSpace(value),
 			Type:        "string",
 		},
 	}
