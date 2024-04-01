@@ -3,6 +3,7 @@ package loader
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"slices"
 	"strings"
 
@@ -15,9 +16,19 @@ import (
 // Each operation will become a tool definition.
 // The tool's Instructions will be in the format "#!sys.openapi '{JSON Instructions}'",
 // where the JSON Instructions are a JSON-serialized engine.OpenAPIInstructions struct.
-func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
+func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
+	// Determine the default server.
 	if len(t.Servers) == 0 {
-		return nil, fmt.Errorf("no servers found in OpenAPI spec")
+		if defaultHost != "" {
+			u, err := url.Parse(defaultHost)
+			if err != nil {
+				return nil, fmt.Errorf("invalid default host URL: %w", err)
+			}
+			u.Path = "/"
+			t.Servers = []*openapi3.Server{{URL: u.String()}}
+		} else {
+			return nil, fmt.Errorf("no servers found in OpenAPI spec")
+		}
 	}
 	defaultServer, err := parseServer(t.Servers[0])
 	if err != nil {
@@ -39,6 +50,7 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 		}
 	}
 
+	// Generate a tool for each operation.
 	var (
 		toolNames    []string
 		tools        []types.Tool
@@ -103,10 +115,9 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 				},
 			}
 
-			toolNames = append(toolNames, tool.Parameters.Name)
-
-			// Handle query, path, and header parameters
-			for _, param := range operation.Parameters {
+			// Handle query, path, and header parameters, based on the parameters for this operation
+			// and the parameters for this path.
+			for _, param := range append(operation.Parameters, pathObj.Parameters...) {
 				arg := param.Value.Schema.Value
 
 				if arg.Description == "" {
@@ -158,10 +169,6 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 					// so we just use "requestBodyContent" as the name of the arg.
 					tool.Parameters.Arguments.Properties["requestBodyContent"] = &openapi3.SchemaRef{Value: arg}
 					break
-				}
-
-				if bodyMIME == "" {
-					return nil, fmt.Errorf("no supported MIME types found for request body in operation %s", operation.OperationID)
 				}
 			}
 
@@ -226,6 +233,8 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 				return nil, err
 			}
 
+			// Register
+			toolNames = append(toolNames, tool.Parameters.Name)
 			tools = append(tools, tool)
 			operationNum++
 		}
