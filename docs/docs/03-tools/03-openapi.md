@@ -118,5 +118,4 @@ In OpenAPI definitions, request bodies are described with a MIME type. Currently
 - `text/plain`
 - `multipart/form-data`
 
-GPTScript will return an error when parsing the OpenAPI definition if it finds a request body that does not specify
-at least one of these supported MIME types.
+GPTScript will ignore any operations that have a request body without a supported MIME type.
