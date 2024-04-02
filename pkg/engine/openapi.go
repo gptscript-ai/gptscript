@@ -15,7 +15,10 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-var SupportedMIMETypes = []string{"application/json", "text/plain", "multipart/form-data"}
+var (
+	SupportedMIMETypes     = []string{"application/json", "text/plain", "multipart/form-data"}
+	SupportedSecurityTypes = []string{"apiKey", "http"}
+)
 
 type Parameter struct {
 	Name    string `json:"name"`
@@ -23,15 +26,25 @@ type Parameter struct {
 	Explode *bool  `json:"explode"`
 }
 
+// A SecurityInfo represents a security scheme in OpenAPI.
+type SecurityInfo struct {
+	Name       string `json:"name"`       // name as defined in the security schemes
+	Type       string `json:"type"`       // http or apiKey
+	Scheme     string `json:"scheme"`     // bearer or basic, for type==http
+	APIKeyName string `json:"apiKeyName"` // name of the API key, for type==apiKey
+	In         string `json:"in"`         // header, query, or cookie, for type==apiKey
+}
+
 type OpenAPIInstructions struct {
-	Server           string      `json:"server"`
-	Path             string      `json:"path"`
-	Method           string      `json:"method"`
-	BodyContentMIME  string      `json:"bodyContentMIME"`
-	QueryParameters  []Parameter `json:"queryParameters"`
-	PathParameters   []Parameter `json:"pathParameters"`
-	HeaderParameters []Parameter `json:"headerParameters"`
-	CookieParameters []Parameter `json:"cookieParameters"`
+	Server           string           `json:"server"`
+	Path             string           `json:"path"`
+	Method           string           `json:"method"`
+	BodyContentMIME  string           `json:"bodyContentMIME"`
+	SecurityInfos    [][]SecurityInfo `json:"apiKeyInfos"`
+	QueryParameters  []Parameter      `json:"queryParameters"`
+	PathParameters   []Parameter      `json:"pathParameters"`
+	HeaderParameters []Parameter      `json:"headerParameters"`
+	CookieParameters []Parameter      `json:"cookieParameters"`
 }
 
 // runOpenAPI runs a tool that was generated from an OpenAPI definition.
@@ -70,12 +83,17 @@ func (e *Engine) runOpenAPI(tool types.Tool, input string) (*Return, error) {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	// Check for a bearer token (only if using HTTPS)
-	if u.Scheme == "https" {
-		// For "https://example.com" the bearer token env name would be GPTSCRIPT_EXAMPLE_COM_BEARER_TOKEN
-		bearerEnv := "GPTSCRIPT_" + env.ToEnvLike(u.Hostname()) + "_BEARER_TOKEN"
-		if bearerToken, ok := envMap[bearerEnv]; ok {
-			req.Header.Set("Authorization", "Bearer "+bearerToken)
+	// Check for authentication (only if using HTTPS)
+	if u.Scheme == "https" && len(instructions.SecurityInfos) > 0 {
+		if err := handleAuths(req, envMap, instructions.SecurityInfos); err != nil {
+			return nil, fmt.Errorf("error setting up authentication: %w", err)
+		}
+
+		// If there is a bearer token set for the whole server, and no Authorization header has been defined, use it.
+		if token, ok := envMap["GPTSCRIPT_"+env.ToEnvLike(u.Hostname())+"_BEARER_TOKEN"]; ok {
+			if req.Header.Get("Authorization") == "" {
+				req.Header.Set("Authorization", "Bearer "+token)
+			}
 		}
 	}
 
@@ -141,6 +159,69 @@ func (e *Engine) runOpenAPI(tool types.Tool, input string) (*Return, error) {
 	return &Return{
 		Result: &resultStr,
 	}, nil
+}
+
+// handleAuths will set up the request with the necessary authentication information.
+// A set of sets of SecurityInfo is passed in, where each represents a possible set of security options.
+func handleAuths(req *http.Request, envMap map[string]string, infoSets [][]SecurityInfo) error {
+	var missingVariables [][]string
+
+	// We need to find a set of infos where we have all the needed environment variables.
+	for _, infoSet := range infoSets {
+		var missing []string // Keep track of any missing environment variables
+		for _, info := range infoSet {
+			envNames := []string{"GPTSCRIPT_" + env.ToEnvLike(req.URL.Hostname()) + "_" + env.ToEnvLike(info.Name)}
+			if info.Type == "http" && info.Scheme == "basic" {
+				envNames = []string{
+					"GPTSCRIPT_" + env.ToEnvLike(req.URL.Hostname()) + "_" + env.ToEnvLike(info.Name) + "_USERNAME",
+					"GPTSCRIPT_" + env.ToEnvLike(req.URL.Hostname()) + "_" + env.ToEnvLike(info.Name) + "_PASSWORD",
+				}
+			}
+
+			for _, envName := range envNames {
+				if _, ok := envMap[envName]; !ok {
+					missing = append(missing, envName)
+				}
+			}
+		}
+		if len(missing) > 0 {
+			missingVariables = append(missingVariables, missing)
+			continue
+		}
+
+		// We're using this info set, because no environment variables were missing.
+		// Set up the request as needed.
+		for _, info := range infoSet {
+			envName := "GPTSCRIPT_" + env.ToEnvLike(req.URL.Hostname()) + "_" + env.ToEnvLike(info.Name)
+			switch info.Type {
+			case "apiKey":
+				switch info.In {
+				case "header":
+					req.Header.Set(info.APIKeyName, envMap[envName])
+				case "query":
+					v := url.Values{}
+					v.Add(info.APIKeyName, envMap[envName])
+					req.URL.RawQuery = v.Encode()
+				case "cookie":
+					req.AddCookie(&http.Cookie{
+						Name:  info.APIKeyName,
+						Value: envMap[envName],
+					})
+				}
+			case "http":
+				switch info.Scheme {
+				case "bearer":
+					req.Header.Set("Authorization", "Bearer "+envMap[envName])
+				case "basic":
+					req.SetBasicAuth(envMap[envName+"_USERNAME"], envMap[envName+"_PASSWORD"])
+				}
+			}
+		}
+		return nil
+	}
+
+	return fmt.Errorf("did not find the needed environment variables for any of the security options. "+
+		"At least one of these sets of environment variables must be provided: %v", missingVariables)
 }
 
 // handleQueryParameters extracts each query parameter from the input JSON and adds it to the URL query.
