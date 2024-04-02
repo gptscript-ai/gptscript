@@ -24,13 +24,13 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 		return nil, err
 	}
 
-	var globalSecurity []map[string]any
+	var globalSecurity []map[string]struct{}
 	if t.Security != nil {
 		for _, item := range t.Security {
-			current := map[string]any{}
+			current := map[string]struct{}{}
 			for name := range item {
 				if scheme, ok := t.Components.SecuritySchemes[name]; ok && slices.Contains(engine.SupportedSecurityTypes, scheme.Value.Type) {
-					current[name] = true
+					current[name] = struct{}{}
 				}
 			}
 			if len(current) > 0 {
@@ -79,7 +79,7 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 				//     B
 				//   - C
 				//     D
-				auths            []map[string]any
+				auths            []map[string]struct{}
 				queryParameters  []engine.Parameter
 				pathParameters   []engine.Parameter
 				headerParameters []engine.Parameter
@@ -172,9 +172,9 @@ func getOpenAPITools(t *openapi3.T) ([]types.Tool, error) {
 					noAuth = true
 				}
 				for _, req := range *operation.Security {
-					current := map[string]any{}
+					current := map[string]struct{}{}
 					for name := range req {
-						current[name] = true
+						current[name] = struct{}{}
 					}
 					if len(current) > 0 {
 						auths = append(auths, current)
