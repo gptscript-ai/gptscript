@@ -14,11 +14,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/parser"
 	"github.com/gptscript-ai/gptscript/pkg/types"
+	"gopkg.in/yaml.v3"
 )
 
 type source struct {
@@ -126,9 +128,26 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 		return loadProgram(data, prg, targetToolName)
 	}
 
-	tools, err := parser.Parse(bytes.NewReader(data))
-	if err != nil {
-		return types.Tool{}, err
+	var tools []types.Tool
+	if isOpenAPI(data) {
+		if t, err := openapi3.NewLoader().LoadFromData(data); err == nil {
+			if base.Remote {
+				tools, err = getOpenAPITools(t, base.Location)
+			} else {
+				tools, err = getOpenAPITools(t, "")
+			}
+			if err != nil {
+				return types.Tool{}, fmt.Errorf("error parsing OpenAPI definition: %w", err)
+			}
+		}
+	}
+
+	// If we didn't get any tools from trying to parse it as OpenAPI, try to parse it as a GPTScript
+	if len(tools) == 0 {
+		tools, err = parser.Parse(bytes.NewReader(data))
+		if err != nil {
+			return types.Tool{}, err
+		}
 	}
 
 	if len(tools) == 0 {
@@ -156,7 +175,7 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 			return types.Tool{}, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have no name"))
 		}
 
-		if targetToolName != "" && tool.Parameters.Name == targetToolName {
+		if targetToolName != "" && strings.EqualFold(tool.Parameters.Name, targetToolName) {
 			mainTool = tool
 		}
 
@@ -241,6 +260,9 @@ func ProgramFromSource(ctx context.Context, content, subToolName string) (types.
 }
 
 func Program(ctx context.Context, name, subToolName string) (types.Program, error) {
+	if subToolName == "" {
+		name, subToolName = SplitToolRef(name)
+	}
 	prg := types.Program{
 		Name:    name,
 		ToolSet: types.ToolSet{},
@@ -291,7 +313,7 @@ func input(ctx context.Context, base *source, name string) (*source, error) {
 }
 
 func SplitToolRef(targetToolName string) (toolName, subTool string) {
-	subTool, toolName, ok := strings.Cut(targetToolName, " from ")
+	subTool, toolName, ok := strings.Cut(strings.ReplaceAll(targetToolName, "\t", " "), " from ")
 	if ok {
 		toolName = strings.TrimSpace(toolName)
 		subTool = strings.TrimSpace(subTool)
@@ -300,4 +322,17 @@ func SplitToolRef(targetToolName string) (toolName, subTool string) {
 		subTool = ""
 	}
 	return
+}
+
+func isOpenAPI(data []byte) bool {
+	var fragment struct {
+		Paths map[string]any `json:"paths,omitempty"`
+	}
+
+	if err := json.Unmarshal(data, &fragment); err != nil {
+		if err := yaml.Unmarshal(data, &fragment); err != nil {
+			return false
+		}
+	}
+	return len(fragment.Paths) > 0
 }

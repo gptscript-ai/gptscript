@@ -35,19 +35,34 @@ Select a number at random between 1 and 100 and return only the number.
 ```
 
 ### External Tools
-
-This is where the real power of GPTScript starts to become evident. For this example lets use the external [image-generation](https://github.com/gptscript-ai/image-generation) and [search](https://github.com/gptscript-ai/search) tools to generate an image and then search the web for similar images.
-
-:::note
-There will be better packaging and distribution for external tools in the future. For now, this assumes you have the tools cloned locally and are pointing to their repos directly.
-:::
+You can refer to GPTScript tool files that are served on the web or stored locally. This is useful for sharing tools across multiple scripts or for using tools that are not part of the core GPTScript distribution.
 
 ```yaml
-tools: ./image-generation/tool.gpt, ./vision/tool.gpt, sys.read
+tools: https://get.gptscript.ai/echo.gpt
+
+Echo the phrase "Hello, World!".
+```
+
+Or, if the file is stored locally in "echo.gpt":
+
+```yaml
+tools: echo.gpt
+
+Echo the phrase "Hello, World!".
+```
+
+You can also refer to OpenAPI definition files as though they were GPTScript tool files. GPTScript will treat each operation in the file as a separate tool. For more details, see [OpenAPI Tools](03-openapi.md).
+
+### Packaged Tools on GitHub
+GPTScript tools can be packaged and shared on GitHub, and referred to by their GitHub URL. For example:
+
+```yaml
+tools: github.com/gptscript-ai/image-generation, github.com/gptscript-ai/vision, sys.read
 
 Generate an image of a city skyline at night and write the resulting image to a file called city_skyline.png.
 
 Take this image and write a description of it in the style of pirate.
 ```
 
-External tools are tools that are defined by a `tool.gpt` file in their root directory. They can be imported into a GPTScript by specifying the path to the tool's root directory.
+When this script is run, GPTScript will locally clone the referenced GitHub repos and run the tools referenced inside them.
+For more info on how this works, see [Authoring Tools](02-authoring.md).

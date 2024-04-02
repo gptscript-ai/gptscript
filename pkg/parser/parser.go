@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
@@ -46,11 +47,9 @@ func csv(line string) (result []string) {
 
 func addArg(line string, tool *types.Tool) error {
 	if tool.Parameters.Arguments == nil {
-		tool.Parameters.Arguments = &types.JSONSchema{
-			Property: types.Property{
-				Type: "object",
-			},
-			Properties: map[string]types.Property{},
+		tool.Parameters.Arguments = &openapi3.Schema{
+			Type:       "object",
+			Properties: openapi3.Schemas{},
 		}
 	}
 
@@ -59,9 +58,11 @@ func addArg(line string, tool *types.Tool) error {
 		return fmt.Errorf("invalid arg format: %s", line)
 	}
 
-	tool.Parameters.Arguments.Properties[key] = types.Property{
-		Description: value,
-		Type:        "string",
+	tool.Parameters.Arguments.Properties[key] = &openapi3.SchemaRef{
+		Value: &openapi3.Schema{
+			Description: strings.TrimSpace(value),
+			Type:        "string",
+		},
 	}
 
 	return nil
@@ -76,6 +77,8 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 	switch normalize(key) {
 	case "name":
 		tool.Parameters.Name = strings.ToLower(value)
+	case "modelprovider":
+		tool.Parameters.ModelProvider = true
 	case "model", "modelname":
 		tool.Parameters.ModelName = value
 	case "description":

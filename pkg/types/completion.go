@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/getkin/kin-openapi/openapi3"
 )
 
 type CompletionRequest struct {
@@ -24,11 +25,11 @@ type CompletionTool struct {
 }
 
 type CompletionFunctionDefinition struct {
-	ToolID      string      `json:"toolID,omitempty"`
-	Name        string      `json:"name"`
-	Description string      `json:"description,omitempty"`
-	Domain      string      `json:"domain,omitempty"`
-	Parameters  *JSONSchema `json:"parameters"`
+	ToolID      string           `json:"toolID,omitempty"`
+	Name        string           `json:"name"`
+	Description string           `json:"description,omitempty"`
+	Domain      string           `json:"domain,omitempty"`
+	Parameters  *openapi3.Schema `json:"parameters"`
 }
 
 // Chat message role defined by the OpenAI API.

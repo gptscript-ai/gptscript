@@ -33,11 +33,12 @@ var (
 )
 
 type Client struct {
-	url          string
-	key          string
 	defaultModel string
 	c            *openai.Client
 	cache        *cache.Client
+	invalidAuth  bool
+	cacheKeyBase string
+	setSeed      bool
 }
 
 type Options struct {
@@ -47,6 +48,8 @@ type Options struct {
 	APIType      openai.APIType `usage:"OpenAI API Type (valid: OPEN_AI, AZURE, AZURE_AD)" name:"openai-api-type" env:"OPENAI_API_TYPE"`
 	OrgID        string         `usage:"OpenAI organization ID" name:"openai-org-id" env:"OPENAI_ORG_ID"`
 	DefaultModel string         `usage:"Default LLM model to use" default:"gpt-4-turbo-preview"`
+	SetSeed      bool           `usage:"-"`
+	CacheKey     string         `usage:"-"`
 	Cache        *cache.Client
 }
 
@@ -59,6 +62,8 @@ func complete(opts ...Options) (result Options, err error) {
 		result.APIVersion = types.FirstSet(opt.APIVersion, result.APIVersion)
 		result.APIType = types.FirstSet(opt.APIType, result.APIType)
 		result.DefaultModel = types.FirstSet(opt.DefaultModel, result.DefaultModel)
+		result.SetSeed = types.FirstSet(opt.SetSeed, result.SetSeed)
+		result.CacheKey = types.FirstSet(opt.CacheKey, result.CacheKey)
 	}
 
 	if result.Cache == nil {
@@ -73,10 +78,6 @@ func complete(opts ...Options) (result Options, err error) {
 
 	if result.APIKey == "" && key != "" {
 		result.APIKey = key
-	}
-
-	if result.APIKey == "" && result.BaseURL == "" {
-		return result, fmt.Errorf("OPENAI_API_KEY is not set. Please set the OPENAI_API_KEY environment variable")
 	}
 
 	return result, err
@@ -112,11 +113,26 @@ func NewClient(opts ...Options) (*Client, error) {
 	cfg.APIVersion = types.FirstSet(opt.APIVersion, cfg.APIVersion)
 	cfg.APIType = types.FirstSet(opt.APIType, cfg.APIType)
 
+	cacheKeyBase := opt.CacheKey
+	if cacheKeyBase == "" {
+		cacheKeyBase = hash.ID(opt.APIKey, opt.BaseURL)
+	}
+
 	return &Client{
 		c:            openai.NewClientWithConfig(cfg),
 		cache:        opt.Cache,
 		defaultModel: opt.DefaultModel,
+		cacheKeyBase: cacheKeyBase,
+		invalidAuth:  opt.APIKey == "" && opt.BaseURL == "",
+		setSeed:      opt.SetSeed,
 	}, nil
+}
+
+func (c *Client) ValidAuth() error {
+	if c.invalidAuth {
+		return fmt.Errorf("OPENAI_API_KEY is not set. Please set the OPENAI_API_KEY environment variable")
+	}
+	return nil
 }
 
 func (c *Client) Supports(ctx context.Context, modelName string) (bool, error) {
@@ -127,7 +143,16 @@ func (c *Client) Supports(ctx context.Context, modelName string) (bool, error) {
 	return slices.Contains(models, modelName), nil
 }
 
-func (c *Client) ListModels(ctx context.Context) (result []string, _ error) {
+func (c *Client) ListModels(ctx context.Context, providers ...string) (result []string, _ error) {
+	// Only serve if providers is empty or "" is in the list
+	if len(providers) != 0 && !slices.Contains(providers, "") {
+		return nil, nil
+	}
+
+	if err := c.ValidAuth(); err != nil {
+		return nil, err
+	}
+
 	models, err := c.c.ListModels(ctx)
 	if err != nil {
 		return nil, err
@@ -141,8 +166,7 @@ func (c *Client) ListModels(ctx context.Context) (result []string, _ error) {
 
 func (c *Client) cacheKey(request openai.ChatCompletionRequest) string {
 	return hash.Encode(map[string]any{
-		"url":     c.url,
-		"key":     c.key,
+		"base":    c.cacheKeyBase,
 		"request": request,
 	})
 }
@@ -239,6 +263,8 @@ func toMessages(request types.CompletionRequest) (result []openai.ChatCompletion
 
 		if message.ToolCall != nil {
 			chatMessage.ToolCallID = message.ToolCall.ID
+			// This field is not documented but specifically Azure thinks it should be set
+			chatMessage.Name = message.ToolCall.Function.Name
 		}
 
 		for _, content := range message.Content {
@@ -272,6 +298,10 @@ func toMessages(request types.CompletionRequest) (result []openai.ChatCompletion
 }
 
 func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error) {
+	if err := c.ValidAuth(); err != nil {
+		return nil, err
+	}
+
 	if messageRequest.Model == "" {
 		messageRequest.Model = c.defaultModel
 	}
@@ -291,10 +321,9 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	}
 
 	if messageRequest.Temperature == nil {
-		// this is a hack because the field is marked as omitempty, so we need it to be set to a non-zero value but arbitrarily small
-		request.Temperature = 1e-08
+		request.Temperature = new(float32)
 	} else {
-		request.Temperature = *messageRequest.Temperature
+		request.Temperature = messageRequest.Temperature
 	}
 
 	if messageRequest.JSONResponse {
@@ -305,9 +334,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 
 	for _, tool := range messageRequest.Tools {
 		params := tool.Function.Parameters
-		if params != nil && params.Type == "object" && params.Properties == nil {
-			params.Properties = map[string]types.Property{}
-		}
+
 		request.Tools = append(request.Tools, openai.Tool{
 			Type: openai.ToolTypeFunction,
 			Function: &openai.FunctionDefinition{
@@ -325,7 +352,9 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	}
 
 	var cacheResponse bool
-	request.Seed = ptr(c.seed(request))
+	if c.setSeed {
+		request.Seed = ptr(c.seed(request))
+	}
 	response, ok, err := c.fromCache(ctx, messageRequest, request)
 	if err != nil {
 		return nil, err

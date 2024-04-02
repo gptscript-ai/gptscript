@@ -75,13 +75,13 @@ func TestHelloWorld(t *testing.T) {
       "modelName": "gpt-4-turbo-preview",
       "internalPrompt": null,
       "arguments": {
-        "type": "object",
         "properties": {
           "input": {
-            "description": " Any string",
+            "description": "Any string",
             "type": "string"
           }
-        }
+        },
+        "type": "object"
       },
       "instructions": "echo \"${input}\"",
       "id": "https://get.gptscript.ai/echo.gpt:1",

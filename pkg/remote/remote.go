@@ -3,17 +3,18 @@ package remote
 import (
 	"context"
 	"fmt"
-	"slices"
+	"net/url"
+	"os"
 	"sort"
 	"strings"
 	"sync"
 
 	"github.com/gptscript-ai/gptscript/pkg/cache"
+	env2 "github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/openai"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/types"
-	"golang.org/x/exp/maps"
 )
 
 type Client struct {
@@ -47,13 +48,23 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	return client.Call(ctx, messageRequest, status)
 }
 
-func (c *Client) ListModels(_ context.Context) (result []string, _ error) {
-	c.clientsLock.Lock()
-	defer c.clientsLock.Unlock()
+func (c *Client) ListModels(ctx context.Context, providers ...string) (result []string, _ error) {
+	for _, provider := range providers {
+		client, err := c.load(ctx, provider)
+		if err != nil {
+			return nil, err
+		}
+		models, err := client.ListModels(ctx, "")
+		if err != nil {
+			return nil, err
+		}
+		for _, model := range models {
+			result = append(result, model+" from "+provider)
+		}
+	}
 
-	keys := maps.Keys(c.models)
-	sort.Strings(keys)
-	return keys, nil
+	sort.Strings(result)
+	return
 }
 
 func (c *Client) Supports(ctx context.Context, modelName string) (bool, error) {
@@ -67,15 +78,6 @@ func (c *Client) Supports(ctx context.Context, modelName string) (bool, error) {
 		return false, err
 	}
 
-	models, err := client.ListModels(ctx)
-	if err != nil {
-		return false, err
-	}
-
-	if !slices.Contains(models, modelNameSuffix) {
-		return false, fmt.Errorf("Failed in find model [%s], supported [%s]", modelNameSuffix, strings.Join(models, ", "))
-	}
-
 	c.clientsLock.Lock()
 	defer c.clientsLock.Unlock()
 
@@ -87,6 +89,28 @@ func (c *Client) Supports(ctx context.Context, modelName string) (bool, error) {
 	return true, nil
 }
 
+func isHTTPURL(toolName string) bool {
+	return strings.HasPrefix(toolName, "http://") ||
+		strings.HasPrefix(toolName, "https://")
+}
+
+func (c *Client) clientFromURL(apiURL string) (*openai.Client, error) {
+	parsed, err := url.Parse(apiURL)
+	if err != nil {
+		return nil, err
+	}
+	env := "GPTSCRIPT_PROVIDER_" + env2.ToEnvLike(parsed.Hostname()) + "_API_KEY"
+	apiKey := os.Getenv(env)
+	if apiKey == "" {
+		apiKey = "<unset>"
+	}
+	return openai.NewClient(openai.Options{
+		BaseURL: apiURL,
+		Cache:   c.cache,
+		APIKey:  apiKey,
+	})
+}
+
 func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, error) {
 	c.clientsLock.Lock()
 	defer c.clientsLock.Unlock()
@@ -94,6 +118,19 @@ func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, err
 	client, ok := c.clients[toolName]
 	if ok {
 		return client, nil
+	}
+
+	if c.clients == nil {
+		c.clients = make(map[string]*openai.Client)
+	}
+
+	if isHTTPURL(toolName) {
+		remoteClient, err := c.clientFromURL(toolName)
+		if err != nil {
+			return nil, err
+		}
+		c.clients[toolName] = remoteClient
+		return remoteClient, nil
 	}
 
 	prg, err := loader.Program(ctx, toolName, "")
@@ -113,15 +150,12 @@ func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, err
 	}
 
 	client, err = openai.NewClient(openai.Options{
-		BaseURL: url,
-		Cache:   c.cache,
+		BaseURL:  url,
+		Cache:    c.cache,
+		CacheKey: prg.EntryToolID,
 	})
 	if err != nil {
 		return nil, err
-	}
-
-	if c.clients == nil {
-		c.clients = make(map[string]*openai.Client)
 	}
 
 	c.clients[toolName] = client

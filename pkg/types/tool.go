@@ -6,21 +6,29 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"golang.org/x/exp/maps"
 )
 
 const (
 	DaemonPrefix  = "#!sys.daemon"
+	OpenAPIPrefix = "#!sys.openapi"
 	CommandPrefix = "#!"
 )
 
 type ToolSet map[string]Tool
 
 type Program struct {
-	Name        string            `json:"name,omitempty"`
-	EntryToolID string            `json:"entryToolId,omitempty"`
-	ToolSet     ToolSet           `json:"toolSet,omitempty"`
-	Exports     map[string]string `json:"exports,omitempty"`
+	Name        string  `json:"name,omitempty"`
+	EntryToolID string  `json:"entryToolId,omitempty"`
+	ToolSet     ToolSet `json:"toolSet,omitempty"`
+}
+
+func (p Program) TopLevelTools() (result []Tool) {
+	for _, tool := range p.ToolSet[p.EntryToolID].LocalTools {
+		result = append(result, p.ToolSet[tool])
+	}
+	return
 }
 
 func (p Program) SetBlocking() Program {
@@ -35,18 +43,19 @@ func (p Program) SetBlocking() Program {
 type BuiltinFunc func(ctx context.Context, env []string, input string) (string, error)
 
 type Parameters struct {
-	Name           string      `json:"name,omitempty"`
-	Description    string      `json:"description,omitempty"`
-	MaxTokens      int         `json:"maxTokens,omitempty"`
-	ModelName      string      `json:"modelName,omitempty"`
-	JSONResponse   bool        `json:"jsonResponse,omitempty"`
-	Temperature    *float32    `json:"temperature,omitempty"`
-	Cache          *bool       `json:"cache,omitempty"`
-	InternalPrompt *bool       `json:"internalPrompt"`
-	Arguments      *JSONSchema `json:"arguments,omitempty"`
-	Tools          []string    `json:"tools,omitempty"`
-	Export         []string    `json:"export,omitempty"`
-	Blocking       bool        `json:"-"`
+	Name           string           `json:"name,omitempty"`
+	Description    string           `json:"description,omitempty"`
+	MaxTokens      int              `json:"maxTokens,omitempty"`
+	ModelName      string           `json:"modelName,omitempty"`
+	ModelProvider  bool             `json:"modelProvider,omitempty"`
+	JSONResponse   bool             `json:"jsonResponse,omitempty"`
+	Temperature    *float32         `json:"temperature,omitempty"`
+	Cache          *bool            `json:"cache,omitempty"`
+	InternalPrompt *bool            `json:"internalPrompt"`
+	Arguments      *openapi3.Schema `json:"arguments,omitempty"`
+	Tools          []string         `json:"tools,omitempty"`
+	Export         []string         `json:"export,omitempty"`
+	Blocking       bool             `json:"-"`
 }
 
 type Tool struct {
@@ -79,7 +88,10 @@ func (t Tool) String() string {
 		_, _ = fmt.Fprintf(buf, "Max Tokens: %d\n", t.Parameters.MaxTokens)
 	}
 	if t.Parameters.ModelName != "" {
-		_, _ = fmt.Fprintf(buf, "Model Name: %s\n", t.Parameters.ModelName)
+		_, _ = fmt.Fprintf(buf, "Model: %s\n", t.Parameters.ModelName)
+	}
+	if t.Parameters.ModelProvider {
+		_, _ = fmt.Fprintf(buf, "Model Provider: true\n")
 	}
 	if t.Parameters.JSONResponse {
 		_, _ = fmt.Fprintln(buf, "JSON Response: true")
@@ -98,7 +110,7 @@ func (t Tool) String() string {
 		sort.Strings(keys)
 		for _, key := range keys {
 			prop := t.Parameters.Arguments.Properties[key]
-			_, _ = fmt.Fprintf(buf, "Args: %s: %s\n", key, prop.Description)
+			_, _ = fmt.Fprintf(buf, "Args: %s: %s\n", key, prop.Value.Description)
 		}
 	}
 	if t.Parameters.InternalPrompt != nil {
@@ -141,6 +153,10 @@ func (t Tool) IsCommand() bool {
 
 func (t Tool) IsDaemon() bool {
 	return strings.HasPrefix(t.Instructions, DaemonPrefix)
+}
+
+func (t Tool) IsOpenAPI() bool {
+	return strings.HasPrefix(t.Instructions, OpenAPIPrefix)
 }
 
 func (t Tool) IsHTTP() bool {

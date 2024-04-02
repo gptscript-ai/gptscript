@@ -111,6 +111,7 @@ func (m *Manager) GetContext(ctx context.Context, tool types.Tool, cmd, env []st
 
 	for _, runtime := range m.runtimes {
 		if runtime.Supports(cmd) {
+			log.Debugf("Runtime %s supports %v", runtime.ID(), cmd)
 			return m.setup(ctx, runtime, tool, env)
 		}
 	}

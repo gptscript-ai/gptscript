@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/llm"
@@ -54,7 +55,8 @@ func New(opts *Options) (*GPTScript, error) {
 	}
 
 	oAIClient, err := openai.NewClient(append([]openai.Options{opts.OpenAI}, openai.Options{
-		Cache: cacheClient,
+		Cache:   cacheClient,
+		SetSeed: true,
 	})...)
 	if err != nil {
 		return nil, err
@@ -96,13 +98,20 @@ func (g *GPTScript) Run(ctx context.Context, prg types.Program, envs []string, i
 }
 
 func (g *GPTScript) Close() {
-	engine.CloseDaemons()
+	g.Runner.Close()
 }
 
 func (g *GPTScript) GetModel() engine.Model {
 	return g.Registry
 }
 
-func (g *GPTScript) ListModels(ctx context.Context) ([]string, error) {
-	return g.Registry.ListModels(ctx)
+func (g *GPTScript) ListTools(_ context.Context, prg types.Program) []types.Tool {
+	if prg.EntryToolID == "" {
+		return builtin.ListTools()
+	}
+	return prg.TopLevelTools()
+}
+
+func (g *GPTScript) ListModels(ctx context.Context, providers ...string) ([]string, error) {
+	return g.Registry.ListModels(ctx, providers...)
 }

@@ -35,6 +35,7 @@ type Engine struct {
 	RuntimeManager RuntimeManager
 	Env            []string
 	Progress       chan<- types.CompletionStatus
+	Ports          *Ports
 }
 
 type State struct {
@@ -185,6 +186,8 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 			return e.runHTTP(ctx.Ctx, ctx.Program, tool, input)
 		} else if tool.IsDaemon() {
 			return e.runDaemon(ctx.Ctx, ctx.Program, tool, input)
+		} else if tool.IsOpenAPI() {
+			return e.runOpenAPI(tool, input)
 		}
 		s, err := e.runCommand(ctx.Ctx, tool, input)
 		if err != nil {
