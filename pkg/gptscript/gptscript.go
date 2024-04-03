@@ -22,12 +22,13 @@ type GPTScript struct {
 }
 
 type Options struct {
-	Cache   cache.Options
-	OpenAI  openai.Options
-	Monitor monitor.Options
-	Runner  runner.Options
-	Quiet   *bool    `usage:"No output logging (set --quiet=false to force on even when there is no TTY)" short:"q"`
-	Env     []string `usage:"-"`
+	Cache             cache.Options
+	OpenAI            openai.Options
+	Monitor           monitor.Options
+	Runner            runner.Options
+	CredentialContext string   `usage:"Context name in which to store credentials" default:"default"`
+	Quiet             *bool    `usage:"No output logging (set --quiet=false to force on even when there is no TTY)" short:"q"`
+	Env               []string `usage:"-"`
 }
 
 func complete(opts *Options) (result *Options) {
@@ -76,7 +77,7 @@ func New(opts *Options) (*GPTScript, error) {
 		opts.Runner.RuntimeManager = runtimes.Default(cacheClient.CacheDir())
 	}
 
-	runner, err := runner.New(registry, opts.Runner)
+	runner, err := runner.New(registry, opts.CredentialContext, opts.Runner)
 	if err != nil {
 		return nil, err
 	}

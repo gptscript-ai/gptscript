@@ -48,6 +48,7 @@ type Options struct {
 	APIType      openai.APIType `usage:"OpenAI API Type (valid: OPEN_AI, AZURE, AZURE_AD)" name:"openai-api-type" env:"OPENAI_API_TYPE"`
 	OrgID        string         `usage:"OpenAI organization ID" name:"openai-org-id" env:"OPENAI_ORG_ID"`
 	DefaultModel string         `usage:"Default LLM model to use" default:"gpt-4-turbo-preview"`
+	ConfigFile   string         `usage:"Path to GPTScript config file" name:"config"`
 	SetSeed      bool           `usage:"-"`
 	CacheKey     string         `usage:"-"`
 	Cache        *cache.Client

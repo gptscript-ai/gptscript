@@ -60,6 +60,7 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 
 	output := &bytes.Buffer{}
 	all := &bytes.Buffer{}
+	cmd.Stdin = os.Stdin
 	cmd.Stderr = io.MultiWriter(all, os.Stderr)
 	cmd.Stdout = io.MultiWriter(all, output)
 
