@@ -3,8 +3,6 @@ package loader
 import (
 	"bytes"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -78,11 +76,7 @@ func loadLocal(base *source, name string) (*source, bool, error) {
 func loadProgram(data []byte, into *types.Program, targetToolName string) (types.Tool, error) {
 	var (
 		ext types.Program
-		id  string
 	)
-
-	summed := sha256.Sum256(data)
-	id = "@" + hex.EncodeToString(summed[:])[:12]
 
 	if err := json.Unmarshal(data[len(assemble.Header):], &ext); err != nil {
 		return types.Tool{}, err
@@ -93,15 +87,10 @@ func loadProgram(data []byte, into *types.Program, targetToolName string) (types
 		if builtinTool, ok := builtin.Builtin(k); ok {
 			v = builtinTool
 		}
-
-		for tk, tv := range v.ToolMapping {
-			v.ToolMapping[tk] = tv + id
-		}
-		v.ID = k + id
-		into.ToolSet[v.ID] = v
+		into.ToolSet[k] = v
 	}
 
-	tool := into.ToolSet[ext.EntryToolID+id]
+	tool := into.ToolSet[ext.EntryToolID]
 	if targetToolName == "" {
 		return tool, nil
 	}
