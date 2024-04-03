@@ -7,20 +7,11 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
 
 var completionID int64
-
-type ErrToolNotFound struct {
-	ToolName string
-}
-
-func (e *ErrToolNotFound) Error() string {
-	return fmt.Sprintf("tool not found: %s", e.ToolName)
-}
 
 type Model interface {
 	Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error)
@@ -62,12 +53,11 @@ type CallResult struct {
 }
 
 type Context struct {
-	ID        string
-	Ctx       context.Context
-	Parent    *Context
-	Program   *types.Program
-	Tool      types.Tool
-	toolNames map[string]struct{}
+	ID      string
+	Ctx     context.Context
+	Parent  *Context
+	Program *types.Program
+	Tool    types.Tool
 }
 
 func (c *Context) ParentID() string {
@@ -119,65 +109,6 @@ func (c *Context) SubCall(ctx context.Context, toolID, callID string) (Context, 
 	}, nil
 }
 
-func (c *Context) getTool(parent types.Tool, name string) (types.Tool, error) {
-	toolID, ok := parent.ToolMapping[name]
-	if !ok {
-		return types.Tool{}, &ErrToolNotFound{
-			ToolName: name,
-		}
-	}
-	tool, ok := c.Program.ToolSet[toolID]
-	if !ok {
-		return types.Tool{}, &ErrToolNotFound{
-			ToolName: name,
-		}
-	}
-	return tool, nil
-}
-
-func (c *Context) appendTool(completion *types.CompletionRequest, parentTool types.Tool, subToolName string) error {
-	subTool, err := c.getTool(parentTool, subToolName)
-	if err != nil {
-		return err
-	}
-
-	args := subTool.Parameters.Arguments
-	if args == nil && !subTool.IsCommand() {
-		args = &system.DefaultToolSchema
-	}
-
-	for _, existingTool := range completion.Tools {
-		if existingTool.Function.ToolID == subTool.ID {
-			return nil
-		}
-	}
-
-	if c.toolNames == nil {
-		c.toolNames = map[string]struct{}{}
-	}
-
-	if subTool.Instructions == "" {
-		log.Debugf("Skipping zero instruction tool %s (%s)", subToolName, subTool.ID)
-	} else {
-		completion.Tools = append(completion.Tools, types.CompletionTool{
-			Function: types.CompletionFunctionDefinition{
-				ToolID:      subTool.ID,
-				Name:        PickToolName(subToolName, c.toolNames),
-				Description: subTool.Parameters.Description,
-				Parameters:  args,
-			},
-		})
-	}
-
-	for _, export := range subTool.Export {
-		if err := c.appendTool(completion, subTool, export); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 	tool := ctx.Tool
 
@@ -207,10 +138,10 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 		InternalSystemPrompt: tool.Parameters.InternalPrompt,
 	}
 
-	for _, subToolName := range tool.Parameters.Tools {
-		if err := ctx.appendTool(&completion, ctx.Tool, subToolName); err != nil {
-			return nil, err
-		}
+	var err error
+	completion.Tools, err = tool.GetCompletionTools(*ctx.Program)
+	if err != nil {
+		return nil, err
 	}
 
 	if tool.Instructions != "" {

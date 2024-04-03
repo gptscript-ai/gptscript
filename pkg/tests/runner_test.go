@@ -3,7 +3,6 @@ package tests
 import (
 	"testing"
 
-	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/tests/tester"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/stretchr/testify/assert"
@@ -15,7 +14,7 @@ func TestCwd(t *testing.T) {
 
 	runner.RespondWith(tester.Result{
 		Func: types.CompletionFunctionCall{
-			Name: engine.ToolNormalizer("./subtool/test.gpt"),
+			Name: types.ToolNormalizer("./subtool/test.gpt"),
 		},
 	})
 	runner.RespondWith(tester.Result{

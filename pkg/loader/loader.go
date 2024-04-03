@@ -17,7 +17,6 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
-	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/parser"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"gopkg.in/yaml.v3"
@@ -109,7 +108,7 @@ func loadProgram(data []byte, into *types.Program, targetToolName string) (types
 
 	tool, ok := into.ToolSet[tool.LocalTools[targetToolName]]
 	if !ok {
-		return tool, &engine.ErrToolNotFound{
+		return tool, &types.ErrToolNotFound{
 			ToolName: targetToolName,
 		}
 	}
