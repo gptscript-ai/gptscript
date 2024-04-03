@@ -9,6 +9,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gptscript-ai/gptscript/pkg/config"
+	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"golang.org/x/sync/errgroup"
@@ -119,6 +121,14 @@ var (
 func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, input string) (string, error) {
 	progress, progressClose := streamProgress(&callCtx, monitor)
 	defer progressClose()
+
+	if len(callCtx.Tool.Credentials) > 0 {
+		var err error
+		env, err = r.handleCredentials(callCtx, monitor, env)
+		if err != nil {
+			return "", err
+		}
+	}
 
 	e := engine.Engine{
 		Model:          r.c,
@@ -277,4 +287,62 @@ func recordStateMessage(state *engine.State) error {
 
 	filename := filepath.Join(tmpdir, fmt.Sprintf("gptscript-state-%v-%v", hostname, time.Now().UnixMilli()))
 	return os.WriteFile(filename, data, 0444)
+}
+
+func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env []string) ([]string, error) {
+	c, err := config.ReadCLIConfig("")
+	if err != nil {
+		return nil, fmt.Errorf("failed to read CLI config: %w", err)
+	}
+
+	store, err := credentials.NewStore(c)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create credentials store: %w", err)
+	}
+
+	for _, credToolName := range callCtx.Tool.Credentials {
+		cred, exists, err := store.Get(credToolName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get credentials for tool %s: %w", credToolName, err)
+		}
+
+		// If the credential doesn't already exist in the store, run the credential tool in order to get the value,
+		// and save it in the store.
+		if !exists {
+			credToolID, ok := callCtx.Tool.ToolMapping[credToolName]
+			if !ok {
+				return nil, fmt.Errorf("failed to find ID for tool %s", credToolName)
+			}
+
+			subCtx, err := callCtx.SubCall(callCtx.Ctx, credToolID, "") // leaving callID as "" will cause it to be set by the engine
+			if err != nil {
+				return nil, fmt.Errorf("failed to create subcall context for tool %s: %w", credToolName, err)
+			}
+			res, err := r.call(subCtx, monitor, env, "")
+			if err != nil {
+				return nil, fmt.Errorf("failed to run credential tool %s: %w", credToolName, err)
+			}
+
+			var envMap struct {
+				Env map[string]string `json:"env"`
+			}
+			if err := json.Unmarshal([]byte(res), &envMap); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal credential tool %s response: %w", credToolName, err)
+			}
+
+			cred = &credentials.Credential{
+				ToolID: credToolID,
+				Env:    envMap.Env,
+			}
+			if err := store.Add(*cred); err != nil {
+				return nil, fmt.Errorf("failed to add credential for tool %s: %w", credToolName, err)
+			}
+		}
+
+		for k, v := range cred.Env {
+			env = append(env, fmt.Sprintf("%s=%s", k, v))
+		}
+	}
+
+	return env, nil
 }

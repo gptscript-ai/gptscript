@@ -100,6 +100,11 @@ func (c *Context) SubCall(ctx context.Context, toolID, callID string) (Context, 
 	if !ok {
 		return Context{}, fmt.Errorf("failed to file tool for id [%s]", toolID)
 	}
+
+	if callID == "" {
+		callID = fmt.Sprint(atomic.AddInt32(&execID, 1))
+	}
+
 	return Context{
 		ID:      callID,
 		Ctx:     ctx,

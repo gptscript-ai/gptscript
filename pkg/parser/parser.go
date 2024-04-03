@@ -118,6 +118,8 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		if err != nil {
 			return false, err
 		}
+	case "credentials", "creds", "credential", "cred":
+		tool.Parameters.Credentials = append(tool.Parameters.Credentials, csv(strings.ToLower(value))...)
 	default:
 		return false, nil
 	}

@@ -8,6 +8,8 @@ require (
 	github.com/acorn-io/broadcaster v0.0.0-20240105011354-bfadd4a7b45d
 	github.com/acorn-io/cmd v0.0.0-20240404013709-34f690bde37b
 	github.com/adrg/xdg v0.4.0
+	github.com/docker/cli v26.0.0+incompatible
+	github.com/docker/docker-credential-helpers v0.8.1
 	github.com/fatih/color v1.16.0
 	github.com/getkin/kin-openapi v0.123.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510

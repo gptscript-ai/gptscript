@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/BurntSushi/locker"
 	"github.com/google/shlex"
 	"github.com/gptscript-ai/gptscript/pkg/confirm"
@@ -148,6 +149,17 @@ var tools = map[string]types.Tool{
 			),
 		},
 		BuiltinFunc: SysStat,
+	},
+	"sys.prompt": {
+		Parameters: types.Parameters{
+			Description: "Prompts the user for input",
+			Arguments: types.ObjectSchema(
+				"message", "The message to display to the user",
+				"fields", "A comma-separated list of fields to prompt for",
+				"sensitive", "(true or false) Whether the input should be hidden",
+			),
+		},
+		BuiltinFunc: SysPrompt,
 	},
 }
 
@@ -632,4 +644,40 @@ func SysDownload(ctx context.Context, env []string, input string) (_ string, err
 	}
 
 	return params.Location, nil
+}
+
+func SysPrompt(_ context.Context, _ []string, input string) (_ string, err error) {
+	var params struct {
+		Message   string `json:"message,omitempty"`
+		Fields    string `json:"fields,omitempty"`
+		Sensitive string `json:"sensitive,omitempty"`
+	}
+	if err := json.Unmarshal([]byte(input), &params); err != nil {
+		return "", err
+	}
+
+	if params.Message != "" {
+		fmt.Println(params.Message)
+	}
+
+	results := map[string]string{}
+	for _, f := range strings.Split(params.Fields, ",") {
+		var value string
+		if params.Sensitive == "true" {
+			err = survey.AskOne(&survey.Password{Message: f}, &value)
+		} else {
+			err = survey.AskOne(&survey.Input{Message: f}, &value)
+		}
+		if err != nil {
+			return "", err
+		}
+		results[f] = value
+	}
+
+	resultsStr, err := json.Marshal(results)
+	if err != nil {
+		return "", err
+	}
+
+	return string(resultsStr), nil
 }

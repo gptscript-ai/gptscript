@@ -195,7 +195,7 @@ func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool
 	// The below is done in two loops so that local names stay as the tool names
 	// and don't get mangled by external references
 
-	for _, targetToolName := range append(tool.Parameters.Tools, tool.Parameters.Export...) {
+	for _, targetToolName := range append(tool.Parameters.Tools, append(tool.Parameters.Credentials, tool.Parameters.Export...)...) {
 		localTool, ok := localTools[targetToolName]
 		if ok {
 			var linkedTool types.Tool

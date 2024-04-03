@@ -75,6 +75,7 @@ type Parameters struct {
 	Arguments      *openapi3.Schema `json:"arguments,omitempty"`
 	Tools          []string         `json:"tools,omitempty"`
 	Export         []string         `json:"export,omitempty"`
+	Credentials    []string         `json:"credentials,omitempty"`
 	Blocking       bool             `json:"-"`
 }
 
@@ -139,6 +140,9 @@ func (t Tool) String() string {
 	if t.Instructions != "" && t.BuiltinFunc == nil {
 		_, _ = fmt.Fprintln(buf)
 		_, _ = fmt.Fprintln(buf, t.Instructions)
+	}
+	if len(t.Parameters.Credentials) > 0 {
+		_, _ = fmt.Fprintf(buf, "Credentials: %s\n", strings.Join(t.Parameters.Credentials, ", "))
 	}
 
 	return buf.String()
