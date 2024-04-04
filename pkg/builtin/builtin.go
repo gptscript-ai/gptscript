@@ -290,7 +290,7 @@ func SysLs(_ context.Context, _ []string, input string) (string, error) {
 
 	entries, err := os.ReadDir(params.Dir)
 	if errors.Is(err, fs.ErrNotExist) {
-		return "", fmt.Errorf("directory does not exist: %s", params.Dir)
+		return fmt.Sprintf("directory does not exist: %s", params.Dir), nil
 	} else if err != nil {
 		return "", err
 	}
@@ -321,10 +321,15 @@ func SysRead(ctx context.Context, env []string, input string) (string, error) {
 
 	log.Debugf("Reading file %s", params.Filename)
 	data, err := os.ReadFile(params.Filename)
-	if err != nil {
+	if errors.Is(err, fs.ErrNotExist) {
+		return fmt.Sprintf("The file %s does not exist", params.Filename), nil
+	} else if err != nil {
 		return "", err
 	}
 
+	if len(data) == 0 {
+		return fmt.Sprintf("The file %s has no contents", params.Filename), nil
+	}
 	return string(data), nil
 }
 
