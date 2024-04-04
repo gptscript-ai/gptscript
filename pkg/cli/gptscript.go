@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/acorn-io/cmd"
@@ -50,6 +51,8 @@ type GPTScript struct {
 	Server        bool   `usage:"Start server" local:"true"`
 	ListenAddress string `usage:"Server listen address" default:"127.0.0.1:9090" local:"true"`
 	Chdir         string `usage:"Change current working directory" short:"C"`
+	Daemon        bool   `usage:"Run tool as a daemon" local:"true" hidden:"true"`
+	Ports         string `usage:"The port range to use for ephemeral daemon ports (ex: 11000-12000)" hidden:"true"`
 }
 
 func New() *cobra.Command {
@@ -67,14 +70,33 @@ func (r *GPTScript) NewRunContext(cmd *cobra.Command) context.Context {
 	return ctx
 }
 
-func (r *GPTScript) NewGPTScriptOpts() gptscript.Options {
-	return gptscript.Options{
+func (r *GPTScript) NewGPTScriptOpts() (gptscript.Options, error) {
+	opts := gptscript.Options{
 		Cache:   cache.Options(r.CacheOptions),
 		OpenAI:  openai.Options(r.OpenAIOptions),
 		Monitor: monitor.Options(r.DisplayOptions),
 		Quiet:   r.Quiet,
 		Env:     os.Environ(),
 	}
+
+	if r.Ports != "" {
+		start, end, _ := strings.Cut(r.Ports, "-")
+		startNum, err := strconv.ParseInt(strings.TrimSpace(start), 10, 64)
+		if err != nil {
+			return gptscript.Options{}, fmt.Errorf("invalid port range: %s", r.Ports)
+		}
+		var endNum int64
+		if end != "" {
+			endNum, err = strconv.ParseInt(strings.TrimSpace(end), 10, 64)
+			if err != nil {
+				return gptscript.Options{}, fmt.Errorf("invalid port range: %s", r.Ports)
+			}
+		}
+		opts.Runner.StartPort = startNum
+		opts.Runner.EndPort = endNum
+	}
+
+	return opts, nil
 }
 
 func (r *GPTScript) Customize(cmd *cobra.Command) {
@@ -205,8 +227,12 @@ func (r *GPTScript) PrintOutput(toolInput, toolOutput string) (err error) {
 	return
 }
 
-func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
-	gptOpt := r.NewGPTScriptOpts()
+func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
+	gptOpt, err := r.NewGPTScriptOpts()
+	if err != nil {
+		return err
+	}
+
 	ctx := cmd.Context()
 
 	if r.Server {
@@ -234,6 +260,15 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) error {
 	prg, err := r.readProgram(ctx, args)
 	if err != nil {
 		return err
+	}
+
+	if r.Daemon {
+		prg = prg.SetBlocking()
+		defer func() {
+			if retErr == nil {
+				<-ctx.Done()
+			}
+		}()
 	}
 
 	if r.ListTools {

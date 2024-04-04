@@ -25,6 +25,11 @@ type Ports struct {
 	daemonWG           sync.WaitGroup
 }
 
+func (p *Ports) SetPorts(start, end int64) {
+	p.startPort = start
+	p.endPort = end
+}
+
 func (p *Ports) CloseDaemons() {
 	p.daemonLock.Lock()
 	if p.daemonCtx == nil {

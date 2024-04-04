@@ -26,15 +26,25 @@ type Monitor interface {
 type Options struct {
 	MonitorFactory MonitorFactory        `usage:"-"`
 	RuntimeManager engine.RuntimeManager `usage:"-"`
+	StartPort      int64                 `usage:"-"`
+	EndPort        int64                 `usage:"-"`
 }
 
 func complete(opts ...Options) (result Options) {
 	for _, opt := range opts {
 		result.MonitorFactory = types.FirstSet(opt.MonitorFactory, result.MonitorFactory)
 		result.RuntimeManager = types.FirstSet(opt.RuntimeManager, result.RuntimeManager)
+		result.StartPort = types.FirstSet(opt.StartPort, result.StartPort)
+		result.EndPort = types.FirstSet(opt.EndPort, result.EndPort)
 	}
 	if result.MonitorFactory == nil {
 		result.MonitorFactory = noopFactory{}
+	}
+	if result.EndPort == 0 {
+		result.EndPort = result.StartPort
+	}
+	if result.StartPort == 0 {
+		result.StartPort = result.EndPort
 	}
 	return
 }
@@ -49,11 +59,20 @@ type Runner struct {
 func New(client engine.Model, opts ...Options) (*Runner, error) {
 	opt := complete(opts...)
 
-	return &Runner{
+	runner := &Runner{
 		c:              client,
 		factory:        opt.MonitorFactory,
 		runtimeManager: opt.RuntimeManager,
-	}, nil
+	}
+
+	if opt.StartPort != 0 {
+		if opt.EndPort < opt.StartPort {
+			return nil, fmt.Errorf("invalid port range: %d-%d", opt.StartPort, opt.EndPort)
+		}
+		runner.ports.SetPorts(opt.StartPort, opt.EndPort)
+	}
+
+	return runner, nil
 }
 
 func (r *Runner) Close() {
