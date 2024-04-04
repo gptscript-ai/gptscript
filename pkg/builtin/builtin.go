@@ -25,6 +25,14 @@ import (
 )
 
 var tools = map[string]types.Tool{
+	"sys.ls": {
+		Parameters: types.Parameters{
+			Description: "Lists the contents of a directory",
+			Arguments: types.ObjectSchema(
+				"dir", "The directory to list"),
+		},
+		BuiltinFunc: SysLs,
+	},
 	"sys.read": {
 		Parameters: types.Parameters{
 			Description: "Reads the contents of a file",
@@ -266,6 +274,37 @@ func SysExec(ctx context.Context, env []string, input string) (string, error) {
 		_, _ = os.Stdout.Write(out)
 	}
 	return string(out), err
+}
+
+func SysLs(_ context.Context, _ []string, input string) (string, error) {
+	var params struct {
+		Dir string `json:"dir,omitempty"`
+	}
+	if err := json.Unmarshal([]byte(input), &params); err != nil {
+		return "", err
+	}
+
+	if params.Dir == "" {
+		params.Dir = "."
+	}
+
+	entries, err := os.ReadDir(params.Dir)
+	if errors.Is(err, fs.ErrNotExist) {
+		return "", fmt.Errorf("directory does not exist: %s", params.Dir)
+	} else if err != nil {
+		return "", err
+	}
+
+	var result []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			result = append(result, entry.Name()+"/")
+		} else {
+			result = append(result, entry.Name())
+		}
+	}
+
+	return strings.Join(result, "\n"), nil
 }
 
 func SysRead(ctx context.Context, env []string, input string) (string, error) {
