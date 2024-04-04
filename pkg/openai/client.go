@@ -14,11 +14,11 @@ import (
 	"strings"
 	"sync/atomic"
 
+	openai "github.com/gptscript-ai/chat-completion-client"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
-	"github.com/sashabaranov/go-openai"
 )
 
 const (
