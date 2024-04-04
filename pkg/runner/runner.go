@@ -182,7 +182,7 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 	}
 }
 
-func streamProgress(callCtx *engine.Context, monitor Monitor) (chan types.CompletionStatus, func()) {
+func streamProgress(callCtx *engine.Context, monitor Monitor) (chan<- types.CompletionStatus, func()) {
 	progress := make(chan types.CompletionStatus)
 
 	wg := sync.WaitGroup{}
