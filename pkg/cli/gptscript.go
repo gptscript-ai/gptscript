@@ -176,10 +176,7 @@ func (r *GPTScript) readProgram(ctx context.Context, args []string) (prg types.P
 		if err != nil {
 			return prg, err
 		}
-		prg, err = loader.ProgramFromSource(ctx, string(data), r.SubTool)
-		if err != nil {
-			return prg, err
-		}
+		return loader.ProgramFromSource(ctx, string(data), r.SubTool)
 	}
 
 	return loader.Program(ctx, args[0], r.SubTool)
