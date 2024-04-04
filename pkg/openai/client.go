@@ -214,9 +214,8 @@ func (c *Client) fromCache(ctx context.Context, messageRequest types.CompletionR
 
 func toToolCall(call types.CompletionToolCall) openai.ToolCall {
 	return openai.ToolCall{
-		Index: call.Index,
-		ID:    call.ID,
-		Type:  openai.ToolTypeFunction,
+		ID:   call.ID,
+		Type: openai.ToolTypeFunction,
 		Function: openai.FunctionCall{
 			Name:      call.Function.Name,
 			Arguments: call.Function.Arguments,
@@ -471,7 +470,7 @@ func (c *Client) store(ctx context.Context, key string, responses []openai.ChatC
 
 func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest, transactionID string, partial chan<- types.CompletionStatus) (responses []openai.ChatCompletionStreamResponse, _ error) {
 	cacheKey := c.cacheKey(request)
-	request.Stream = true
+	request.Stream = os.Getenv("GPTSCRIPT_INTERNAL_OPENAI_STREAMING") != "false"
 
 	partial <- types.CompletionStatus{
 		CompletionID: transactionID,
@@ -482,6 +481,34 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 	}
 
 	slog.Debug("calling openai", "message", request.Messages)
+
+	if !request.Stream {
+		resp, err := c.c.CreateChatCompletion(ctx, request)
+		if err != nil {
+			return nil, err
+		}
+		return []openai.ChatCompletionStreamResponse{
+			{
+				ID:      resp.ID,
+				Object:  resp.Object,
+				Created: resp.Created,
+				Model:   resp.Model,
+				Choices: []openai.ChatCompletionStreamChoice{
+					{
+						Index: resp.Choices[0].Index,
+						Delta: openai.ChatCompletionStreamChoiceDelta{
+							Content:      resp.Choices[0].Message.Content,
+							Role:         resp.Choices[0].Message.Role,
+							FunctionCall: resp.Choices[0].Message.FunctionCall,
+							ToolCalls:    resp.Choices[0].Message.ToolCalls,
+						},
+						FinishReason: resp.Choices[0].FinishReason,
+					},
+				},
+			},
+		}, nil
+	}
+
 	stream, err := c.c.CreateChatCompletionStream(ctx, request)
 	if err != nil {
 		return nil, err
