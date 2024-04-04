@@ -9,7 +9,7 @@ import (
 )
 
 type Confirm interface {
-	Confirm(prompt string) error
+	Confirm(ctx context.Context, prompt string) error
 }
 
 type confirmer struct{}
@@ -23,13 +23,13 @@ func Promptf(ctx context.Context, fmtString string, args ...any) error {
 	if !ok {
 		return nil
 	}
-	return c.Confirm(fmt.Sprintf(fmtString, args...))
+	return c.Confirm(ctx, fmt.Sprintf(fmtString, args...))
 }
 
 type TextPrompt struct {
 }
 
-func (t TextPrompt) Confirm(prompt string) error {
+func (t TextPrompt) Confirm(_ context.Context, prompt string) error {
 	var result bool
 	err := survey.AskOne(&survey.Confirm{
 		Message: prompt,

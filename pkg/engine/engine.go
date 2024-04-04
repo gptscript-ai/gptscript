@@ -109,6 +109,17 @@ func (c *Context) SubCall(ctx context.Context, toolID, callID string) (Context, 
 	}, nil
 }
 
+type engineContext struct{}
+
+func FromContext(ctx context.Context) (*Context, bool) {
+	c, ok := ctx.Value(engineContext{}).(*Context)
+	return c, ok
+}
+
+func (c *Context) WrappedContext() context.Context {
+	return context.WithValue(c.Ctx, engineContext{}, c)
+}
+
 func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 	tool := ctx.Tool
 
@@ -120,7 +131,7 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 		} else if tool.IsOpenAPI() {
 			return e.runOpenAPI(tool, input)
 		}
-		s, err := e.runCommand(ctx.Ctx, tool, input)
+		s, err := e.runCommand(ctx.WrappedContext(), tool, input)
 		if err != nil {
 			return nil, err
 		}
