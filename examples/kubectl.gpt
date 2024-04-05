@@ -30,9 +30,9 @@ helm ${arguments}
 
 ---
 name: browser
-description: open a browser window
+tools: sys.exec
 args: url: the url to open
+description: open a browser window
 
-!#/bin/bash
-
-open ${url}
+You are only in charge of opening a browser window on the requested url
+You can only use the sys.exec tool to open a browser window
