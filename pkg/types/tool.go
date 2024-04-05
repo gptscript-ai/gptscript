@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/gptscript-ai/gptscript/pkg/system"
 	"golang.org/x/exp/maps"
 )
 
@@ -16,12 +17,31 @@ const (
 	CommandPrefix = "#!"
 )
 
+type ErrToolNotFound struct {
+	ToolName string
+}
+
+func (e *ErrToolNotFound) Error() string {
+	return fmt.Sprintf("tool not found: %s", e.ToolName)
+}
+
 type ToolSet map[string]Tool
 
 type Program struct {
 	Name        string  `json:"name,omitempty"`
 	EntryToolID string  `json:"entryToolId,omitempty"`
 	ToolSet     ToolSet `json:"toolSet,omitempty"`
+}
+
+func (p Program) GetCompletionTools() (result []CompletionTool, err error) {
+	return Tool{
+		Parameters: Parameters{
+			Tools: []string{"main"},
+		},
+		ToolMapping: map[string]string{
+			"main": p.EntryToolID,
+		},
+	}.GetCompletionTools(p)
 }
 
 func (p Program) TopLevelTools() (result []Tool) {
@@ -122,6 +142,75 @@ func (t Tool) String() string {
 	}
 
 	return buf.String()
+}
+
+func (t Tool) GetCompletionTools(prg Program) (result []CompletionTool, err error) {
+	toolNames := map[string]struct{}{}
+
+	for _, subToolName := range t.Parameters.Tools {
+		result, err = appendTool(result, prg, t, subToolName, toolNames)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return result, nil
+}
+
+func getTool(prg Program, parent Tool, name string) (Tool, error) {
+	toolID, ok := parent.ToolMapping[name]
+	if !ok {
+		return Tool{}, &ErrToolNotFound{
+			ToolName: name,
+		}
+	}
+	tool, ok := prg.ToolSet[toolID]
+	if !ok {
+		return Tool{}, &ErrToolNotFound{
+			ToolName: name,
+		}
+	}
+	return tool, nil
+}
+
+func appendTool(completionTools []CompletionTool, prg Program, parentTool Tool, subToolName string, toolNames map[string]struct{}) ([]CompletionTool, error) {
+	subTool, err := getTool(prg, parentTool, subToolName)
+	if err != nil {
+		return nil, err
+	}
+
+	args := subTool.Parameters.Arguments
+	if args == nil && !subTool.IsCommand() {
+		args = &system.DefaultToolSchema
+	}
+
+	for _, existingTool := range completionTools {
+		if existingTool.Function.ToolID == subTool.ID {
+			return completionTools, nil
+		}
+	}
+
+	if subTool.Instructions == "" {
+		log.Debugf("Skipping zero instruction tool %s (%s)", subToolName, subTool.ID)
+	} else {
+		completionTools = append(completionTools, CompletionTool{
+			Function: CompletionFunctionDefinition{
+				ToolID:      subTool.ID,
+				Name:        PickToolName(subToolName, toolNames),
+				Description: subTool.Parameters.Description,
+				Parameters:  args,
+			},
+		})
+	}
+
+	for _, export := range subTool.Export {
+		completionTools, err = appendTool(completionTools, prg, subTool, export, toolNames)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return completionTools, nil
 }
 
 type Repo struct {
