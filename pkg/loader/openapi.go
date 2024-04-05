@@ -84,6 +84,10 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 				toolDesc = operation.Summary
 			}
 
+			if len(toolDesc) > 1024 {
+				toolDesc = toolDesc[:1024]
+			}
+
 			var (
 				// auths are represented as a list of maps, where each map contains the names of the required security schemes.
 				// Items within the same map are a logical AND. The maps themselves are a logical OR. For example:

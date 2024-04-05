@@ -84,9 +84,11 @@ func (e *Engine) runOpenAPI(tool types.Tool, input string) (*Return, error) {
 	}
 
 	// Check for authentication (only if using HTTPS)
-	if u.Scheme == "https" && len(instructions.SecurityInfos) > 0 {
-		if err := handleAuths(req, envMap, instructions.SecurityInfos); err != nil {
-			return nil, fmt.Errorf("error setting up authentication: %w", err)
+	if u.Scheme == "https" {
+		if len(instructions.SecurityInfos) > 0 {
+			if err := handleAuths(req, envMap, instructions.SecurityInfos); err != nil {
+				return nil, fmt.Errorf("error setting up authentication: %w", err)
+			}
 		}
 
 		// If there is a bearer token set for the whole server, and no Authorization header has been defined, use it.
