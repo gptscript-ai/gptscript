@@ -131,6 +131,10 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 		return "", err
 	}
 
+	// Loop back to gptscript to help with process supervision
+	cmd.Args = append([]string{os.Args[0], "sys.daemon", cmd.Path}, cmd.Args[1:]...)
+	cmd.Path = self()
+
 	cmd.Stdin = r
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
