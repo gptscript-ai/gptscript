@@ -68,7 +68,7 @@ func complete(opts ...Options) (result Options, err error) {
 
 	if result.Cache == nil {
 		result.Cache, err = cache.New(cache.Options{
-			Cache: new(bool),
+			DisableCache: true,
 		})
 	}
 
