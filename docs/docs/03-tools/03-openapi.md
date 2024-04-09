@@ -1,9 +1,5 @@
 # OpenAPI Tools
 
-:::note
-This is a new feature and might be buggy.
-:::
-
 GPTScript can treat OpenAPI v3 definition files as though they were tool files.
 Each operation (a path and HTTP method) in the file will become a simple tool that makes an HTTP request.
 GPTScript will automatically and internally generate the necessary code to make the request and parse the response.
