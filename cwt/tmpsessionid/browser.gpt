@@ -1,0 +1,5 @@
+export: github.com/gptscript-ai/browser
+
+#!/bin/bash
+
+echo "Your browser sessionID is foo, you must pass to each tool that has a sessionID parameter"

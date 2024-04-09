@@ -59,6 +59,8 @@ func New() *cobra.Command {
 	root := &GPTScript{}
 	return cmd.Command(root, &Eval{
 		gptscript: root,
+	}, &Repl{
+		gptscript: root,
 	})
 }
 

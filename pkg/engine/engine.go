@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -53,11 +54,17 @@ type CallResult struct {
 }
 
 type Context struct {
-	ID      string
-	Ctx     context.Context
-	Parent  *Context
-	Program *types.Program
-	Tool    types.Tool
+	ID           string
+	Ctx          context.Context
+	Parent       *Context
+	Program      *types.Program
+	Tool         types.Tool
+	InputContext []InputContext
+}
+
+type InputContext struct {
+	ToolName string `json:"toolName,omitempty"`
+	Content  string `json:"content,omitempty"`
 }
 
 func (c *Context) ParentID() string {
@@ -77,9 +84,10 @@ func (c *Context) MarshalJSON() ([]byte, error) {
 		parentID = c.Parent.ID
 	}
 	return json.Marshal(map[string]any{
-		"id":       c.ID,
-		"parentID": parentID,
-		"tool":     c.Tool,
+		"id":           c.ID,
+		"parentID":     parentID,
+		"tool":         c.Tool,
+		"inputContext": c.InputContext,
 	})
 }
 
@@ -160,10 +168,20 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 		return nil, err
 	}
 
+	var instructions []string
+
+	for _, context := range ctx.InputContext {
+		instructions = append(instructions, context.Content)
+	}
+
 	if tool.Instructions != "" {
+		instructions = append(instructions, tool.Instructions)
+	}
+
+	if len(instructions) > 0 {
 		completion.Messages = append(completion.Messages, types.CompletionMessage{
 			Role:    types.CompletionMessageRoleTypeSystem,
-			Content: types.Text(tool.Instructions),
+			Content: types.Text(strings.Join(instructions, "\n")),
 		})
 	}
 

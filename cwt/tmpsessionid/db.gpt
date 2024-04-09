@@ -1,0 +1,25 @@
+export: sqlite query
+
+#!/bin/bash
+
+echo "You have the sqlite database data.db available to you"
+
+if [ -e data.db ]; then
+    SCHEMA="$(sqlite3 data.db .schema)"
+    if [ "$SCHEMA" == "" ]; then
+        echo There are currently no tables in the database. Inform the user as such if they ask to query something
+    else
+        echo
+        echo "$SCHEMA"
+    fi
+else
+    echo There are currently no tables in the database. Inform the user as such if they ask to query something
+fi
+
+---
+name: sqlite query
+params: cmd: The SQL command to run against the data.db sqlite database
+
+#!/bin/bash
+
+sqlite3 data.db "${cmd}"

@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -195,7 +196,10 @@ func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool
 	// The below is done in two loops so that local names stay as the tool names
 	// and don't get mangled by external references
 
-	for _, targetToolName := range append(tool.Parameters.Tools, append(tool.Parameters.Credentials, tool.Parameters.Export...)...) {
+	for _, targetToolName := range slices.Concat(tool.Parameters.Tools,
+		tool.Parameters.Credentials,
+		tool.Parameters.Export,
+		tool.Parameters.Context) {
 		localTool, ok := localTools[targetToolName]
 		if ok {
 			var linkedTool types.Tool
@@ -309,6 +313,7 @@ func SplitToolRef(targetToolName string) (toolName, subTool string) {
 		toolName = targetToolName
 		subTool = ""
 	}
+	toolName = strings.Split(toolName, " ")[0]
 	return
 }
 

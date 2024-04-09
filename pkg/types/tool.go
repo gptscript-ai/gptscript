@@ -74,6 +74,7 @@ type Parameters struct {
 	InternalPrompt *bool            `json:"internalPrompt"`
 	Arguments      *openapi3.Schema `json:"arguments,omitempty"`
 	Tools          []string         `json:"tools,omitempty"`
+	Context        []string         `json:"context,omitempty"`
 	Export         []string         `json:"export,omitempty"`
 	Credentials    []string         `json:"credentials,omitempty"`
 	Blocking       bool             `json:"-"`
@@ -104,6 +105,9 @@ func (t Tool) String() string {
 	}
 	if len(t.Parameters.Export) != 0 {
 		_, _ = fmt.Fprintf(buf, "Export: %s\n", strings.Join(t.Parameters.Export, ", "))
+	}
+	if len(t.Parameters.Context) != 0 {
+		_, _ = fmt.Fprintf(buf, "Context: %s\n", strings.Join(t.Parameters.Context, ", "))
 	}
 	if t.Parameters.MaxTokens != 0 {
 		_, _ = fmt.Fprintf(buf, "Max Tokens: %d\n", t.Parameters.MaxTokens)
@@ -158,6 +162,13 @@ func (t Tool) GetCompletionTools(prg Program) (result []CompletionTool, err erro
 		}
 	}
 
+	for _, subToolName := range t.Parameters.Context {
+		result, err = appendExports(result, prg, t, subToolName, toolNames)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return result, nil
 }
 
@@ -175,6 +186,22 @@ func getTool(prg Program, parent Tool, name string) (Tool, error) {
 		}
 	}
 	return tool, nil
+}
+
+func appendExports(completionTools []CompletionTool, prg Program, parentTool Tool, subToolName string, toolNames map[string]struct{}) ([]CompletionTool, error) {
+	subTool, err := getTool(prg, parentTool, subToolName)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, export := range subTool.Export {
+		completionTools, err = appendTool(completionTools, prg, subTool, export, toolNames)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return completionTools, nil
 }
 
 func appendTool(completionTools []CompletionTool, prg Program, parentTool Tool, subToolName string, toolNames map[string]struct{}) ([]CompletionTool, error) {

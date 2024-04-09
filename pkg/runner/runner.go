@@ -118,16 +118,36 @@ var (
 	EventTypeCallFinish   = EventType("callFinish")
 )
 
+func (r *Runner) getContext(callCtx engine.Context, monitor Monitor, env []string) (result []engine.InputContext, _ error) {
+	for _, contextToolName := range callCtx.Tool.Context {
+		_, content, err := r.subCall(callCtx, monitor, env, contextToolName, "")
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, engine.InputContext{
+			ToolName: contextToolName,
+			Content:  content,
+		})
+	}
+	return result, nil
+}
+
 func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, input string) (string, error) {
 	progress, progressClose := streamProgress(&callCtx, monitor)
 	defer progressClose()
 
+	var err error
+
 	if len(callCtx.Tool.Credentials) > 0 {
-		var err error
 		env, err = r.handleCredentials(callCtx, monitor, env)
 		if err != nil {
 			return "", err
 		}
+	}
+
+	callCtx.InputContext, err = r.getContext(callCtx, monitor, env)
+	if err != nil {
+		return "", err
 	}
 
 	e := engine.Engine{
@@ -231,6 +251,23 @@ func streamProgress(callCtx *engine.Context, monitor Monitor) (chan<- types.Comp
 	}
 }
 
+func (r *Runner) subCall(parentContext engine.Context, monitor Monitor, env []string, toolName, input string) (string, string, error) {
+	toolID, ok := parentContext.Tool.ToolMapping[toolName]
+	if !ok {
+		return "", "", &types.ErrToolNotFound{
+			ToolName: toolName,
+		}
+	}
+
+	callCtx, err := parentContext.SubCall(parentContext.Ctx, toolID, "")
+	if err != nil {
+		return "", "", err
+	}
+
+	res, err := r.call(callCtx, monitor, env, input)
+	return toolID, res, err
+}
+
 func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string, lastReturn *engine.Return) (callResults []engine.CallResult, _ error) {
 	var (
 		resultLock sync.Mutex
@@ -309,16 +346,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 		// If the credential doesn't already exist in the store, run the credential tool in order to get the value,
 		// and save it in the store.
 		if !exists {
-			credToolID, ok := callCtx.Tool.ToolMapping[credToolName]
-			if !ok {
-				return nil, fmt.Errorf("failed to find ID for tool %s", credToolName)
-			}
-
-			subCtx, err := callCtx.SubCall(callCtx.Ctx, credToolID, "") // leaving callID as "" will cause it to be set by the engine
-			if err != nil {
-				return nil, fmt.Errorf("failed to create subcall context for tool %s: %w", credToolName, err)
-			}
-			res, err := r.call(subCtx, monitor, env, "")
+			credToolID, res, err := r.subCall(callCtx, monitor, env, credToolName, "")
 			if err != nil {
 				return nil, fmt.Errorf("failed to run credential tool %s: %w", credToolName, err)
 			}

@@ -93,6 +93,8 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		tool.Parameters.Export = append(tool.Parameters.Export, csv(strings.ToLower(value))...)
 	case "tool", "tools":
 		tool.Parameters.Tools = append(tool.Parameters.Tools, csv(strings.ToLower(value))...)
+	case "context":
+		tool.Parameters.Context = append(tool.Parameters.Context, csv(strings.ToLower(value))...)
 	case "args", "arg", "param", "params", "parameters", "parameter":
 		if err := addArg(value, tool); err != nil {
 			return false, err

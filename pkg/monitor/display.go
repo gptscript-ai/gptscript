@@ -211,10 +211,10 @@ func (d *display) Event(event runner.Event) {
 	}
 
 	callName := callName{
-		prettyID: prettyID,
-		call:     &currentCall,
-		prg:      d.dump.Program,
-		calls:    d.dump.Calls,
+		prettyIDMap: d.callIDMap,
+		call:        &currentCall,
+		prg:         d.dump.Program,
+		calls:       d.dump.Calls,
 	}
 
 	switch event.Type {
@@ -327,10 +327,10 @@ func (j jsonDump) String() string {
 }
 
 type callName struct {
-	prettyID string
-	call     *call
-	prg      *types.Program
-	calls    []call
+	prettyIDMap map[string]string
+	call        *call
+	prg         *types.Program
+	calls       []call
 }
 
 func (c callName) String() string {
@@ -346,7 +346,7 @@ func (c callName) String() string {
 			name = tool.Source.Location
 		}
 		if currentCall.ID != "1" {
-			name += "(" + c.prettyID + ")"
+			name += "(" + c.prettyIDMap[currentCall.ID] + ")"
 		}
 		msg = append(msg, name)
 		found := false
