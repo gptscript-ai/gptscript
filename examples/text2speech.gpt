@@ -1,0 +1,19 @@
+tools: github.com/nw0rn/text2speech-gptscript, playback-audio
+
+Come up with a joke.
+Turn the text into a speech. The output file should be a mp3 file named "joke". The voice is "fable".  
+Pass in the name of the generated output file and playback the sound. 
+
+--- 
+name: playback-audio
+description: playback the an audio file 
+args: file_name: path to the file which should be played 
+
+#!/bin/bash
+
+#afplay is preinstalled on MacOS - Windows/Linux users need to open the file manually
+if command -v "afplay" >/dev/null 2>&1; then
+    afplay ${file_name}  
+else
+    echo "Please open the ${file_name} file."
+fi
