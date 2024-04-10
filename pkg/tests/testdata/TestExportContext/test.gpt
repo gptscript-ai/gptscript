@@ -1,0 +1,30 @@
+tools: subtool
+context: fromcontext
+
+This is from tool
+
+---
+name: fromcontext
+export: sampletool
+
+#!/bin/bash
+echo this is from context
+
+---
+name: sampletool
+description: sample
+args: foo: foo description
+
+Dummy body
+
+---
+name: subtool
+export context: fromexportcontext
+
+Dummy body
+
+---
+name: fromexportcontext
+
+#!/bin/bash
+echo this is from external context

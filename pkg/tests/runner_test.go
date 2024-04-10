@@ -9,6 +9,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestExportContext(t *testing.T) {
+	runner := tester.NewRunner(t)
+	x := runner.RunDefault()
+	assert.Equal(t, "TEST RESULT CALL: 1", x)
+}
+
+func TestContext(t *testing.T) {
+	runner := tester.NewRunner(t)
+	x := runner.RunDefault()
+	assert.Equal(t, "TEST RESULT CALL: 1", x)
+}
+
 func TestCwd(t *testing.T) {
 	runner := tester.NewRunner(t)
 
