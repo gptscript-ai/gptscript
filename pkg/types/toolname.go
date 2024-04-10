@@ -26,6 +26,10 @@ func ToolNormalizer(tool string) string {
 	}
 
 	name := invalidChars.ReplaceAllString(tool, "_")
+	for strings.HasSuffix(name, "_") {
+		name = strings.TrimSuffix(name, "_")
+	}
+
 	if len(name) > 55 {
 		name = name[:55]
 	}
