@@ -21,6 +21,12 @@ type ErrToolNotFound struct {
 	ToolName string
 }
 
+func NewErrToolNotFound(toolName string) *ErrToolNotFound {
+	return &ErrToolNotFound{
+		ToolName: toolName,
+	}
+}
+
 func (e *ErrToolNotFound) Error() string {
 	return fmt.Sprintf("tool not found: %s", e.ToolName)
 }
@@ -31,6 +37,44 @@ type Program struct {
 	Name        string  `json:"name,omitempty"`
 	EntryToolID string  `json:"entryToolId,omitempty"`
 	ToolSet     ToolSet `json:"toolSet,omitempty"`
+}
+
+func (p Program) GetContextToolIDs(toolID string) (result []string, _ error) {
+	seen := map[string]struct{}{}
+	tool := p.ToolSet[toolID]
+
+	subToolIDs, err := tool.GetToolIDsFromNames(tool.Tools)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, subToolID := range subToolIDs {
+		subTool := p.ToolSet[subToolID]
+		exportContextToolIDs, err := subTool.GetToolIDsFromNames(subTool.ExportContext)
+		if err != nil {
+			return nil, err
+		}
+		for _, exportContextToolID := range exportContextToolIDs {
+			if _, ok := seen[exportContextToolID]; !ok {
+				seen[exportContextToolID] = struct{}{}
+				result = append(result, exportContextToolID)
+			}
+		}
+	}
+
+	contextToolIDs, err := p.ToolSet[toolID].GetToolIDsFromNames(p.ToolSet[toolID].Context)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, contextToolID := range contextToolIDs {
+		if _, ok := seen[contextToolID]; !ok {
+			seen[contextToolID] = struct{}{}
+			result = append(result, contextToolID)
+		}
+	}
+
+	return
 }
 
 func (p Program) GetCompletionTools() (result []CompletionTool, err error) {
@@ -74,6 +118,8 @@ type Parameters struct {
 	InternalPrompt *bool            `json:"internalPrompt"`
 	Arguments      *openapi3.Schema `json:"arguments,omitempty"`
 	Tools          []string         `json:"tools,omitempty"`
+	Context        []string         `json:"context,omitempty"`
+	ExportContext  []string         `json:"exportContext,omitempty"`
 	Export         []string         `json:"export,omitempty"`
 	Blocking       bool             `json:"-"`
 }
@@ -90,6 +136,17 @@ type Tool struct {
 	WorkingDir  string            `json:"workingDir,omitempty"`
 }
 
+func (t Tool) GetToolIDsFromNames(names []string) (result []string, _ error) {
+	for _, toolName := range names {
+		toolID, ok := t.ToolMapping[toolName]
+		if !ok {
+			return nil, NewErrToolNotFound(toolName)
+		}
+		result = append(result, toolID)
+	}
+	return
+}
+
 func (t Tool) String() string {
 	buf := &strings.Builder{}
 	if t.Parameters.Name != "" {
@@ -103,6 +160,12 @@ func (t Tool) String() string {
 	}
 	if len(t.Parameters.Export) != 0 {
 		_, _ = fmt.Fprintf(buf, "Export: %s\n", strings.Join(t.Parameters.Export, ", "))
+	}
+	if len(t.Parameters.ExportContext) != 0 {
+		_, _ = fmt.Fprintf(buf, "Export Context: %s\n", strings.Join(t.Parameters.ExportContext, ", "))
+	}
+	if len(t.Parameters.Context) != 0 {
+		_, _ = fmt.Fprintf(buf, "Context: %s\n", strings.Join(t.Parameters.Context, ", "))
 	}
 	if t.Parameters.MaxTokens != 0 {
 		_, _ = fmt.Fprintf(buf, "Max Tokens: %d\n", t.Parameters.MaxTokens)
@@ -154,6 +217,13 @@ func (t Tool) GetCompletionTools(prg Program) (result []CompletionTool, err erro
 		}
 	}
 
+	for _, subToolName := range t.Parameters.Context {
+		result, err = appendExports(result, prg, t, subToolName, toolNames)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return result, nil
 }
 
@@ -171,6 +241,22 @@ func getTool(prg Program, parent Tool, name string) (Tool, error) {
 		}
 	}
 	return tool, nil
+}
+
+func appendExports(completionTools []CompletionTool, prg Program, parentTool Tool, subToolName string, toolNames map[string]struct{}) ([]CompletionTool, error) {
+	subTool, err := getTool(prg, parentTool, subToolName)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, export := range subTool.Export {
+		completionTools, err = appendTool(completionTools, prg, subTool, export, toolNames)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return completionTools, nil
 }
 
 func appendTool(completionTools []CompletionTool, prg Program, parentTool Tool, subToolName string, toolNames map[string]struct{}) ([]CompletionTool, error) {

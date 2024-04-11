@@ -116,9 +116,34 @@ var (
 	EventTypeCallFinish   = EventType("callFinish")
 )
 
+func (r *Runner) getContext(callCtx engine.Context, monitor Monitor, env []string) (result []engine.InputContext, _ error) {
+	toolIDs, err := callCtx.Program.GetContextToolIDs(callCtx.Tool.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, toolID := range toolIDs {
+		content, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, toolID, "", "")
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, engine.InputContext{
+			ToolID:  toolID,
+			Content: content,
+		})
+	}
+	return result, nil
+}
+
 func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, input string) (string, error) {
 	progress, progressClose := streamProgress(&callCtx, monitor)
 	defer progressClose()
+
+	var err error
+	callCtx.InputContext, err = r.getContext(callCtx, monitor, env)
+	if err != nil {
+		return "", err
+	}
 
 	e := engine.Engine{
 		Model:          r.c,
@@ -221,6 +246,15 @@ func streamProgress(callCtx *engine.Context, monitor Monitor) (chan<- types.Comp
 	}
 }
 
+func (r *Runner) subCall(ctx context.Context, parentContext engine.Context, monitor Monitor, env []string, toolID, input, callID string) (string, error) {
+	callCtx, err := parentContext.SubCall(ctx, toolID, callID)
+	if err != nil {
+		return "", err
+	}
+
+	return r.call(callCtx, monitor, env, input)
+}
+
 func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string, lastReturn *engine.Return) (callResults []engine.CallResult, _ error) {
 	var (
 		resultLock sync.Mutex
@@ -229,12 +263,7 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 	eg, subCtx := errgroup.WithContext(callCtx.Ctx)
 	for id, call := range lastReturn.Calls {
 		eg.Go(func() error {
-			callCtx, err := callCtx.SubCall(subCtx, call.ToolID, id)
-			if err != nil {
-				return err
-			}
-
-			result, err := r.call(callCtx, monitor, env, call.Input)
+			result, err := r.subCall(subCtx, callCtx, monitor, env, call.ToolID, call.Input, id)
 			if err != nil {
 				return err
 			}

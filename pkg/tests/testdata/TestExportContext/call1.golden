@@ -1,0 +1,55 @@
+`{
+  "Model": "gpt-4-turbo-preview",
+  "InternalSystemPrompt": null,
+  "Tools": [
+    {
+      "function": {
+        "toolID": "testdata/TestExportContext/test.gpt:21",
+        "name": "subtool",
+        "parameters": {
+          "properties": {
+            "defaultPromptParameter": {
+              "description": "Prompt to send to the tool or assistant. This may be instructions or question.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "defaultPromptParameter"
+          ],
+          "type": "object"
+        }
+      }
+    },
+    {
+      "function": {
+        "toolID": "testdata/TestExportContext/test.gpt:14",
+        "name": "sampletool",
+        "description": "sample",
+        "parameters": {
+          "properties": {
+            "foo": {
+              "description": "foo description",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      }
+    }
+  ],
+  "Messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "this is from external context\n\nthis is from context\n\nThis is from tool"
+        }
+      ]
+    }
+  ],
+  "MaxTokens": 0,
+  "Temperature": null,
+  "JSONResponse": false,
+  "Grammar": "",
+  "Cache": null
+}`
