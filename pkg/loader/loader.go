@@ -199,7 +199,8 @@ func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool
 	for _, targetToolName := range slices.Concat(tool.Parameters.Tools,
 		tool.Parameters.Export,
 		tool.Parameters.ExportContext,
-		tool.Parameters.Context) {
+		tool.Parameters.Context,
+		tool.Parameters.Credentials) {
 		localTool, ok := localTools[targetToolName]
 		if ok {
 			var linkedTool types.Tool

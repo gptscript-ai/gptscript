@@ -17,9 +17,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/BurntSushi/locker"
 	"github.com/google/shlex"
 	"github.com/gptscript-ai/gptscript/pkg/confirm"
+	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/jaytaylor/html2text"
 )
@@ -148,6 +150,17 @@ var tools = map[string]types.Tool{
 			),
 		},
 		BuiltinFunc: SysStat,
+	},
+	"sys.prompt": {
+		Parameters: types.Parameters{
+			Description: "Prompts the user for input",
+			Arguments: types.ObjectSchema(
+				"message", "The message to display to the user",
+				"fields", "A comma-separated list of fields to prompt for",
+				"sensitive", "(true or false) Whether the input should be hidden",
+			),
+		},
+		BuiltinFunc: SysPrompt,
 	},
 }
 
@@ -632,4 +645,48 @@ func SysDownload(ctx context.Context, env []string, input string) (_ string, err
 	}
 
 	return params.Location, nil
+}
+
+func SysPrompt(ctx context.Context, _ []string, input string) (_ string, err error) {
+	monitor := ctx.Value(runner.MonitorKey{})
+	if monitor == nil {
+		return "", errors.New("no monitor in context")
+	}
+
+	unpause := monitor.(runner.Monitor).Pause()
+	defer unpause()
+
+	var params struct {
+		Message   string `json:"message,omitempty"`
+		Fields    string `json:"fields,omitempty"`
+		Sensitive string `json:"sensitive,omitempty"`
+	}
+	if err := json.Unmarshal([]byte(input), &params); err != nil {
+		return "", err
+	}
+
+	if params.Message != "" {
+		_, _ = fmt.Fprintln(os.Stderr, params.Message)
+	}
+
+	results := map[string]string{}
+	for _, f := range strings.Split(params.Fields, ",") {
+		var value string
+		if params.Sensitive == "true" {
+			err = survey.AskOne(&survey.Password{Message: f}, &value, survey.WithStdio(os.Stdin, os.Stderr, os.Stderr))
+		} else {
+			err = survey.AskOne(&survey.Input{Message: f}, &value, survey.WithStdio(os.Stdin, os.Stderr, os.Stderr))
+		}
+		if err != nil {
+			return "", err
+		}
+		results[f] = value
+	}
+
+	resultsStr, err := json.Marshal(results)
+	if err != nil {
+		return "", err
+	}
+
+	return string(resultsStr), nil
 }

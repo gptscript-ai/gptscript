@@ -54,12 +54,15 @@ type CallResult struct {
 }
 
 type Context struct {
-	ID           string
-	Ctx          context.Context
-	Parent       *Context
-	Program      *types.Program
-	Tool         types.Tool
-	InputContext []InputContext
+	ID                string
+	Ctx               context.Context
+	Parent            *Context
+	Program           *types.Program
+	Tool              types.Tool
+	InputContext      []InputContext
+	CredentialContext string
+	// IsCredential indicates that the current call is for a credential tool
+	IsCredential bool
 }
 
 type InputContext struct {
@@ -103,17 +106,23 @@ func NewContext(ctx context.Context, prg *types.Program) Context {
 	return callCtx
 }
 
-func (c *Context) SubCall(ctx context.Context, toolID, callID string) (Context, error) {
+func (c *Context) SubCall(ctx context.Context, toolID, callID string, isCredentialTool bool) (Context, error) {
 	tool, ok := c.Program.ToolSet[toolID]
 	if !ok {
 		return Context{}, fmt.Errorf("failed to file tool for id [%s]", toolID)
 	}
+
+	if callID == "" {
+		callID = fmt.Sprint(atomic.AddInt32(&execID, 1))
+	}
+
 	return Context{
-		ID:      callID,
-		Ctx:     ctx,
-		Parent:  c,
-		Program: c.Program,
-		Tool:    tool,
+		ID:           callID,
+		Ctx:          ctx,
+		Parent:       c,
+		Program:      c.Program,
+		Tool:         tool,
+		IsCredential: isCredentialTool, // disallow calls to the LLM if this is a credential tool
 	}, nil
 }
 
@@ -146,6 +155,10 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 		return &Return{
 			Result: &s,
 		}, nil
+	}
+
+	if ctx.IsCredential {
+		return nil, fmt.Errorf("credential tools cannot make calls to the LLM")
 	}
 
 	completion := types.CompletionRequest{

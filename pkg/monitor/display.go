@@ -12,6 +12,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
@@ -215,6 +216,16 @@ func (d *display) Event(event runner.Event) {
 		call:        &currentCall,
 		prg:         d.dump.Program,
 		calls:       d.dump.Calls,
+		credential:  event.CallContext.IsCredential,
+	}
+
+	if event.CallContext.Parent != nil {
+		for name, id := range event.CallContext.Parent.Tool.ToolMapping {
+			if id == event.CallContext.Tool.ID {
+				callName.userSpecifiedToolName = name
+				break
+			}
+		}
 	}
 
 	switch event.Type {
@@ -266,6 +277,9 @@ func (d *display) Event(event runner.Event) {
 }
 
 func (d *display) Stop(output string, err error) {
+	d.callLock.Lock()
+	defer d.callLock.Unlock()
+
 	log.Fields("runID", d.dump.ID, "output", output, "err", err).Debugf("Run stopped")
 	d.dump.Output = output
 	d.dump.Err = err
@@ -306,6 +320,13 @@ func (d *display) Dump(out io.Writer) error {
 	return enc.Encode(d.dump)
 }
 
+func (d *display) Pause() func() {
+	d.callLock.Lock()
+	return func() {
+		d.callLock.Unlock()
+	}
+}
+
 func toJSON(obj any) jsonDump {
 	return jsonDump{obj: obj}
 }
@@ -327,10 +348,12 @@ func (j jsonDump) String() string {
 }
 
 type callName struct {
-	prettyIDMap map[string]string
-	call        *call
-	prg         *types.Program
-	calls       []call
+	prettyIDMap           map[string]string
+	call                  *call
+	prg                   *types.Program
+	calls                 []call
+	credential            bool
+	userSpecifiedToolName string
 }
 
 func (c callName) String() string {
@@ -338,6 +361,14 @@ func (c callName) String() string {
 		msg         []string
 		currentCall = c.call
 	)
+
+	if c.credential {
+		// We want to print the credential tool in the same format that the user referenced it, if possible.
+		if c.userSpecifiedToolName != "" {
+			return "credential: " + color.YellowString(c.userSpecifiedToolName)
+		}
+		return "credential: " + color.YellowString(currentCall.ToolID)
+	}
 
 	for {
 		tool := c.prg.ToolSet[currentCall.ToolID]

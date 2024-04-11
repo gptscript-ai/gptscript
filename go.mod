@@ -8,6 +8,8 @@ require (
 	github.com/acorn-io/broadcaster v0.0.0-20240105011354-bfadd4a7b45d
 	github.com/acorn-io/cmd v0.0.0-20240404013709-34f690bde37b
 	github.com/adrg/xdg v0.4.0
+	github.com/docker/cli v26.0.0+incompatible
+	github.com/docker/docker-credential-helpers v0.8.1
 	github.com/fatih/color v1.16.0
 	github.com/getkin/kin-openapi v0.123.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
@@ -63,6 +65,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.6-0.20230925090304-df64c4bbad77 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
@@ -77,5 +80,6 @@ require (
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.17.0 // indirect
+	gotest.tools/v3 v3.5.1 // indirect
 	mvdan.cc/gofumpt v0.6.0 // indirect
 )
