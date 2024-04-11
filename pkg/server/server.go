@@ -87,6 +87,14 @@ var (
 
 type execKey struct{}
 
+func ContextWithNewID(ctx context.Context) context.Context {
+	return context.WithValue(ctx, execKey{}, fmt.Sprint(atomic.AddInt64(&execID, 1)))
+}
+
+func IDFromContext(ctx context.Context) string {
+	return ctx.Value(execKey{}).(string)
+}
+
 func (s *Server) Close() {
 	s.runner.Close()
 }
@@ -290,7 +298,7 @@ func NewSessionFactory(events *broadcaster.Broadcaster[Event]) *SessionFactory {
 }
 
 func (s SessionFactory) Start(ctx context.Context, prg *types.Program, env []string, input string) (runner.Monitor, error) {
-	id, _ := ctx.Value(execKey{}).(string)
+	id := IDFromContext(ctx)
 
 	s.events.C <- Event{
 		Event: runner.Event{
