@@ -18,7 +18,7 @@ name: my-credential-tool
 
 #!/usr/bin/env bash
 
-output=$(gptscript -q --cache=false sys.prompt '{"message":"Please enter your fake credential.","fields":"credential","sensitive":"true"}')
+output=$(gptscript -q --disable-cache sys.prompt '{"message":"Please enter your fake credential.","fields":"credential","sensitive":"true"}')
 credential=$(echo $output | jq -r '.credential')
 echo "{\"env\":{\"MY_ENV_VAR\":\"$credential\"}}"
 ```
@@ -57,10 +57,12 @@ This config file also has another parameter, `credsStore`, which indicates where
 
 - `file` (default): The credentials are stored directly in the config file.
 - `osxkeychain`: The credentials are stored in the macOS Keychain.
+- `wincred`: The credentials are stored in the Windows Credential Manager.
 
-In order to use `osxkeychain` as the credsStore, you must have the `gptscript-credential-osxkeychain` executable
-available in your PATH. There will probably be better packaging for this in the future, but for now, you can build it
-from the [repo](https://github.com/gptscript-ai/gptscript-credential-helpers).
+In order to use `osxkeychain` or `wincred` as the credsStore, you must have the `gptscript-credential-*` executable
+available in your PATH. There will probably be better packaging for this in the future, but for now, you can build them
+from the [repo](https://github.com/gptscript-ai/gptscript-credential-helpers). (For wincred, make sure the executable
+is called `gptscript-credential-wincred.exe`.)
 
 There will likely be support added for other credential stores in the future.
 

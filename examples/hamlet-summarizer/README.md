@@ -36,5 +36,5 @@ pip install -r requirements.txt
 export OPENAI_API_KEY=your-api-key
 
 # Run the example
-gptscript --cache=false hamlet-summarizer.gpt
+gptscript --disable-cache hamlet-summarizer.gpt
 ```
