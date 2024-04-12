@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -340,9 +341,18 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 	}
 
 	for _, credToolName := range callCtx.Tool.Credentials {
-		cred, exists, err := store.Get(credToolName)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get credentials for tool %s: %w", credToolName, err)
+		var (
+			cred   *credentials.Credential
+			exists bool
+			err    error
+		)
+
+		// Only try to look up the cred if the tool is on GitHub.
+		if isGitHubTool(credToolName) {
+			cred, exists, err = store.Get(credToolName)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get credentials for tool %s: %w", credToolName, err)
+			}
 		}
 
 		// If the credential doesn't already exist in the store, run the credential tool in order to get the value,
@@ -375,7 +385,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			}
 
 			// Only store the credential if the tool is on GitHub.
-			if callCtx.Program.ToolSet[credToolID].Source.Repo != nil {
+			if isGitHubTool(credToolName) && callCtx.Program.ToolSet[credToolID].Source.Repo != nil {
 				if err := store.Add(*cred); err != nil {
 					return nil, fmt.Errorf("failed to add credential for tool %s: %w", credToolName, err)
 				}
@@ -390,4 +400,8 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 	}
 
 	return env, nil
+}
+
+func isGitHubTool(toolName string) bool {
+	return strings.HasPrefix(toolName, "github.com")
 }
