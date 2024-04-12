@@ -35,6 +35,10 @@ func (s *Store) Get(toolName string) (*Credential, bool, error) {
 		return nil, false, nil
 	}
 
+	if auth.ServerAddress == "" {
+		auth.ServerAddress = toolNameWithCtx(toolName, s.credCtx) // Not sure why we have to do this, but we do.
+	}
+
 	cred, err := credentialFromDockerAuthConfig(auth)
 	if err != nil {
 		return nil, false, err
