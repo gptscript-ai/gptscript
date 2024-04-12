@@ -9,7 +9,6 @@ import (
 	cmd2 "github.com/acorn-io/cmd"
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
-	"github.com/gptscript-ai/gptscript/pkg/version"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +19,6 @@ type Credential struct {
 
 func (c *Credential) Customize(cmd *cobra.Command) {
 	cmd.Use = "credential"
-	cmd.Version = version.Get().String()
 	cmd.Aliases = []string{"cred", "creds", "credentials"}
 	cmd.Short = "List stored credentials"
 	cmd.Args = cobra.NoArgs
