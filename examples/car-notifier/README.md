@@ -30,5 +30,5 @@ export PGURL=your-postgres-connection-url
 export SENDGRID_API_KEY=your-sendgrid-api-key
 
 # Run the script
-gptscript --cache=false car-notifier.gpt
+gptscript --disable-cache car-notifier.gpt
 ```
