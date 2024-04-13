@@ -25,6 +25,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"golang.org/x/term"
 )
 
@@ -58,9 +59,44 @@ type GPTScript struct {
 
 func New() *cobra.Command {
 	root := &GPTScript{}
-	return cmd.Command(root, &Eval{
+	command := cmd.Command(root, &Eval{
 		gptscript: root,
 	}, &Credential{root: root})
+
+	// Hide all the global flags for the credential subcommand.
+	for _, child := range command.Commands() {
+		if strings.HasPrefix(child.Name(), "credential") {
+			command.PersistentFlags().VisitAll(func(f *pflag.Flag) {
+				newFlag := pflag.Flag{
+					Name:  f.Name,
+					Usage: f.Usage,
+				}
+
+				if f.Name != "credential-context" { // We want to keep credential-context
+					child.Flags().AddFlag(&newFlag)
+					child.Flags().Lookup(newFlag.Name).Hidden = true
+				}
+			})
+
+			for _, grandchild := range child.Commands() {
+				command.PersistentFlags().VisitAll(func(f *pflag.Flag) {
+					newFlag := pflag.Flag{
+						Name:  f.Name,
+						Usage: f.Usage,
+					}
+
+					if f.Name != "credential-context" {
+						grandchild.Flags().AddFlag(&newFlag)
+						grandchild.Flags().Lookup(newFlag.Name).Hidden = true
+					}
+				})
+			}
+
+			break
+		}
+	}
+
+	return command
 }
 
 func (r *GPTScript) NewRunContext(cmd *cobra.Command) context.Context {
