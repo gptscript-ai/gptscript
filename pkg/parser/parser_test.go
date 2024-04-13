@@ -1,0 +1,70 @@
+package parser
+
+import (
+	"strings"
+	"testing"
+
+	"github.com/gptscript-ai/gptscript/pkg/types"
+	"github.com/hexops/autogold/v2"
+	"github.com/stretchr/testify/require"
+)
+
+func TestParse(t *testing.T) {
+	var input = `
+first
+---
+name: second
+---
+
+!third
+
+name: third
+---
+name: fourth
+!forth dont skip
+---
+name: fifth
+
+#!ignore
+---
+!skip
+name: six
+
+----
+name: bad
+ ---
+name: bad
+--
+name: bad
+--- 
+name: bad
+---
+name: seven
+`
+	out, err := Parse(strings.NewReader(input))
+	require.NoError(t, err)
+	autogold.Expect([]types.Tool{
+		{
+			Instructions: "first",
+			Source:       types.ToolSource{LineNo: 1},
+		},
+		{
+			Parameters: types.Parameters{Name: "second"},
+			Source:     types.ToolSource{LineNo: 4},
+		},
+		{
+			Parameters:   types.Parameters{Name: "fourth"},
+			Instructions: "!forth dont skip",
+			Source:       types.ToolSource{LineNo: 11},
+		},
+		{
+			Parameters:   types.Parameters{Name: "fifth"},
+			Instructions: "#!ignore",
+			Source:       types.ToolSource{LineNo: 14},
+		},
+		{
+			Parameters: types.Parameters{Name: "seven"},
+			Source:     types.ToolSource{LineNo: 30},
+		},
+	}).Equal(t, out)
+}

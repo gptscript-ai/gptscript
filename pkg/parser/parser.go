@@ -13,7 +13,9 @@ import (
 )
 
 var (
-	sepRegex = regexp.MustCompile(`^\s*---+\s*$`)
+	sepRegex       = regexp.MustCompile(`^\s*---+\s*$`)
+	strictSepRegex = regexp.MustCompile(`^---\n$`)
+	skipRegex      = regexp.MustCompile(`^![-\w]+\s*$`)
 )
 
 func normalize(key string) string {
@@ -160,6 +162,8 @@ type context struct {
 	tool         types.Tool
 	instructions []string
 	inBody       bool
+	skipNode     bool
+	seenParam    bool
 }
 
 func (c *context) finish(tools *[]types.Tool) {
@@ -168,17 +172,6 @@ func (c *context) finish(tools *[]types.Tool) {
 		*tools = append(*tools, c.tool)
 	}
 	*c = context{}
-}
-
-func commentEmbedded(line string) (string, bool) {
-	for _, i := range []string{"#", "# ", "//", "// "} {
-		prefix := i + "gptscript:"
-		cut, ok := strings.CutPrefix(line, prefix)
-		if ok {
-			return strings.TrimSpace(cut) + "\n", ok
-		}
-	}
-	return line, false
 }
 
 func Parse(input io.Reader) ([]types.Tool, error) {
@@ -197,13 +190,18 @@ func Parse(input io.Reader) ([]types.Tool, error) {
 		}
 
 		line := scan.Text() + "\n"
-		if embeddedLine, ok := commentEmbedded(line); ok {
-			// Strip special comments to allow embedding the preamble in python or other interpreted languages
-			line = embeddedLine
+
+		if context.skipNode {
+			if strictSepRegex.MatchString(line) {
+				context.finish(&tools)
+				continue
+			}
+		} else if sepRegex.MatchString(line) {
+			context.finish(&tools)
+			continue
 		}
 
-		if sepRegex.MatchString(line) {
-			context.finish(&tools)
+		if context.skipNode {
 			continue
 		}
 
@@ -218,6 +216,11 @@ func Parse(input io.Reader) ([]types.Tool, error) {
 				continue
 			}
 
+			if !context.seenParam && skipRegex.MatchString(line) {
+				context.skipNode = true
+				continue
+			}
+
 			// Blank line
 			if strings.TrimSpace(line) == "" {
 				continue
@@ -227,6 +230,7 @@ func Parse(input io.Reader) ([]types.Tool, error) {
 			if isParam, err := isParam(line, &context.tool); err != nil {
 				return nil, NewErrLine("", lineNo, err)
 			} else if isParam {
+				context.seenParam = true
 				continue
 			}
 		}
