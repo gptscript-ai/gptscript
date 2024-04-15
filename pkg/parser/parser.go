@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -83,6 +84,8 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		tool.Parameters.ModelProvider = true
 	case "model", "modelname":
 		tool.Parameters.ModelName = value
+	case "globalmodel", "globalmodelname":
+		tool.Parameters.GlobalModelName = value
 	case "description":
 		tool.Parameters.Description = value
 	case "internalprompt":
@@ -95,6 +98,8 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		tool.Parameters.Export = append(tool.Parameters.Export, csv(strings.ToLower(value))...)
 	case "tool", "tools":
 		tool.Parameters.Tools = append(tool.Parameters.Tools, csv(strings.ToLower(value))...)
+	case "globaltool", "globaltools":
+		tool.Parameters.GlobalTools = append(tool.Parameters.GlobalTools, csv(strings.ToLower(value))...)
 	case "exportcontext":
 		tool.Parameters.ExportContext = append(tool.Parameters.ExportContext, csv(strings.ToLower(value))...)
 	case "context":
@@ -168,13 +173,76 @@ type context struct {
 
 func (c *context) finish(tools *[]types.Tool) {
 	c.tool.Instructions = strings.TrimSpace(strings.Join(c.instructions, ""))
-	if c.tool.Instructions != "" || c.tool.Parameters.Name != "" || len(c.tool.Export) > 0 || len(c.tool.Tools) > 0 {
+	if c.tool.Instructions != "" || c.tool.Parameters.Name != "" ||
+		len(c.tool.Export) > 0 || len(c.tool.Tools) > 0 ||
+		c.tool.GlobalModelName != "" ||
+		len(c.tool.GlobalTools) > 0 {
 		*tools = append(*tools, c.tool)
 	}
 	*c = context{}
 }
 
-func Parse(input io.Reader) ([]types.Tool, error) {
+type Options struct {
+	AssignGlobals bool
+}
+
+func complete(opts ...Options) (result Options) {
+	for _, opt := range opts {
+		result.AssignGlobals = types.FirstSet(result.AssignGlobals, opt.AssignGlobals)
+	}
+	return
+}
+
+func Parse(input io.Reader, opts ...Options) ([]types.Tool, error) {
+	tools, err := parse(input)
+	if err != nil {
+		return nil, err
+	}
+
+	opt := complete(opts...)
+
+	if !opt.AssignGlobals {
+		return tools, nil
+	}
+
+	var (
+		globalModel     string
+		seenGlobalTools = map[string]struct{}{}
+		globalTools     []string
+	)
+
+	for _, tool := range tools {
+		if tool.GlobalModelName != "" {
+			if globalModel != "" {
+				return nil, fmt.Errorf("global model name defined multiple times")
+			}
+			globalModel = tool.GlobalModelName
+		}
+		for _, globalTool := range tool.GlobalTools {
+			if _, ok := seenGlobalTools[globalTool]; ok {
+				continue
+			}
+			seenGlobalTools[globalTool] = struct{}{}
+			globalTools = append(globalTools, globalTool)
+		}
+	}
+
+	for i, tool := range tools {
+		if globalModel != "" && tool.ModelName == "" {
+			tool.ModelName = globalModel
+		}
+		for _, globalTool := range globalTools {
+			if !slices.Contains(tool.Tools, globalTool) {
+				tool.Tools = append(tool.Tools, globalTool)
+			}
+		}
+		tools[i] = tool
+	}
+
+	return tools, nil
+}
+
+func parse(input io.Reader) ([]types.Tool, error) {
 	scan := bufio.NewScanner(input)
 
 	var (

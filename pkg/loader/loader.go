@@ -133,7 +133,9 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 
 	// If we didn't get any tools from trying to parse it as OpenAPI, try to parse it as a GPTScript
 	if len(tools) == 0 {
-		tools, err = parser.Parse(bytes.NewReader(data))
+		tools, err = parser.Parse(bytes.NewReader(data), parser.Options{
+			AssignGlobals: true,
+		})
 		if err != nil {
 			return types.Tool{}, err
 		}

@@ -107,22 +107,24 @@ func (p Program) SetBlocking() Program {
 type BuiltinFunc func(ctx context.Context, env []string, input string) (string, error)
 
 type Parameters struct {
-	Name           string           `json:"name,omitempty"`
-	Description    string           `json:"description,omitempty"`
-	MaxTokens      int              `json:"maxTokens,omitempty"`
-	ModelName      string           `json:"modelName,omitempty"`
-	ModelProvider  bool             `json:"modelProvider,omitempty"`
-	JSONResponse   bool             `json:"jsonResponse,omitempty"`
-	Temperature    *float32         `json:"temperature,omitempty"`
-	Cache          *bool            `json:"cache,omitempty"`
-	InternalPrompt *bool            `json:"internalPrompt"`
-	Arguments      *openapi3.Schema `json:"arguments,omitempty"`
-	Tools          []string         `json:"tools,omitempty"`
-	Context        []string         `json:"context,omitempty"`
-	ExportContext  []string         `json:"exportContext,omitempty"`
-	Export         []string         `json:"export,omitempty"`
-	Credentials    []string         `json:"credentials,omitempty"`
-	Blocking       bool             `json:"-"`
+	Name            string           `json:"name,omitempty"`
+	Description     string           `json:"description,omitempty"`
+	MaxTokens       int              `json:"maxTokens,omitempty"`
+	ModelName       string           `json:"modelName,omitempty"`
+	ModelProvider   bool             `json:"modelProvider,omitempty"`
+	JSONResponse    bool             `json:"jsonResponse,omitempty"`
+	Temperature     *float32         `json:"temperature,omitempty"`
+	Cache           *bool            `json:"cache,omitempty"`
+	InternalPrompt  *bool            `json:"internalPrompt"`
+	Arguments       *openapi3.Schema `json:"arguments,omitempty"`
+	Tools           []string         `json:"tools,omitempty"`
+	GlobalTools     []string         `json:"globalTools,omitempty"`
+	GlobalModelName string           `json:"globalModelName,omitempty"`
+	Context         []string         `json:"context,omitempty"`
+	ExportContext   []string         `json:"exportContext,omitempty"`
+	Export          []string         `json:"export,omitempty"`
+	Credentials     []string         `json:"credentials,omitempty"`
+	Blocking        bool             `json:"-"`
 }
 
 type Tool struct {
@@ -150,6 +152,12 @@ func (t Tool) GetToolIDsFromNames(names []string) (result []string, _ error) {
 
 func (t Tool) String() string {
 	buf := &strings.Builder{}
+	if t.Parameters.GlobalModelName != "" {
+		_, _ = fmt.Fprintf(buf, "Global Model Name: %s\n", t.Parameters.GlobalModelName)
+	}
+	if len(t.Parameters.GlobalTools) != 0 {
+		_, _ = fmt.Fprintf(buf, "Global Tools: %s\n", strings.Join(t.Parameters.GlobalTools, ", "))
+	}
 	if t.Parameters.Name != "" {
 		_, _ = fmt.Fprintf(buf, "Name: %s\n", t.Parameters.Name)
 	}

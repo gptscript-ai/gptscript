@@ -9,7 +9,49 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParse(t *testing.T) {
+func TestParseGlobals(t *testing.T) {
+	var input = `
+global tools: foo, bar
+global model: the model
+---
+name: bar
+tools: bar
+`
+	out, err := Parse(strings.NewReader(input), Options{
+		AssignGlobals: true,
+	})
+	require.NoError(t, err)
+	autogold.Expect([]types.Tool{
+		{
+			Parameters: types.Parameters{
+				ModelName: "the model",
+				Tools: []string{
+					"foo",
+					"bar",
+				},
+				GlobalTools: []string{
+					"foo",
+					"bar",
+				},
+				GlobalModelName: "the model",
+			},
+			Source: types.ToolSource{LineNo: 1},
+		},
+		{
+			Parameters: types.Parameters{
+				Name:      "bar",
+				ModelName: "the model",
+				Tools: []string{
+					"bar",
+					"foo",
+				},
+			},
+			Source: types.ToolSource{LineNo: 5},
+		},
+	}).Equal(t, out)
+}
+
+func TestParseSkip(t *testing.T) {
 	var input = `
 first
 ---
