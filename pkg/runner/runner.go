@@ -61,6 +61,7 @@ type Runner struct {
 	runtimeManager engine.RuntimeManager
 	ports          engine.Ports
 	credCtx        string
+	credMutex      sync.Mutex
 }
 
 func New(client engine.Model, credCtx string, opts ...Options) (*Runner, error) {
@@ -71,6 +72,7 @@ func New(client engine.Model, credCtx string, opts ...Options) (*Runner, error) 
 		factory:        opt.MonitorFactory,
 		runtimeManager: opt.RuntimeManager,
 		credCtx:        credCtx,
+		credMutex:      sync.Mutex{},
 	}
 
 	if opt.StartPort != 0 {
@@ -330,6 +332,10 @@ func recordStateMessage(state *engine.State) error {
 }
 
 func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env []string) ([]string, error) {
+	// Since credential tools (usually) prompt the user, we want to only run one at a time.
+	r.credMutex.Lock()
+	defer r.credMutex.Unlock()
+
 	c, err := config.ReadCLIConfig("")
 	if err != nil {
 		return nil, fmt.Errorf("failed to read CLI config: %w", err)
