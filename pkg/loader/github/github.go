@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -20,19 +21,35 @@ const (
 	githubCommitURL   = "https://api.github.com/repos/%s/%s/commits/%s"
 )
 
+var (
+	githubAuthToken = os.Getenv("GITHUB_AUTH_TOKEN")
+)
+
 func init() {
 	loader.AddVSC(Load)
 }
 
 func getCommit(account, repo, ref string) (string, error) {
 	url := fmt.Sprintf(githubCommitURL, account, repo, ref)
-	resp, err := http.Get(url)
+	client := &http.Client{}
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to create request of %s/%s at %s: %w", account, repo, url, err)
+	}
+
+	if githubAuthToken != "" {
+		req.Header.Add("Authorization", "Bearer "+githubAuthToken)
+	}
+
+	resp, err := client.Do(req)
+
 	if err != nil {
 		return "", err
 	} else if resp.StatusCode != http.StatusOK {
 		c, _ := io.ReadAll(resp.Body)
 		resp.Body.Close()
-		return "", fmt.Errorf("failed to GitHub commit of %s/%s at %s: %s %s",
+		return "", fmt.Errorf("failed to get GitHub commit of %s/%s at %s: %s %s",
 			account, repo, ref, resp.Status, c)
 	}
 	defer resp.Body.Close()
