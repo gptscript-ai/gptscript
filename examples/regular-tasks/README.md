@@ -4,13 +4,13 @@ This example checks if a specific URL is reachable and sends the status code to 
 
 - Create a DigitalOcean PAT token and export it in the DIGITALOCEAN_ACCESS_TOKEN environment variable
 
-- Create a new ssh key on your local machin
+- Create a new SSH key on your local machine
 
 ```
 ssh-keygen -f /tmp/do_gptscript
 ```
 
-- Define a new ssh key in DigitalOcean using the public part of the ssh key created above and call it *gptscript*
+- Define a new SSH key in DigitalOcean using the public part of the SSH key created above and call it `gptscript`
 
 - Get a token from [https://webhooks.app](https://webhooks.app)
 
@@ -28,4 +28,4 @@ gptscript --cache=false ./regular-task.gpt --url https://fakely.app --token 1e10
 
 ![webhooks](./picts/webhooks-2.png)
 
-- Once you'r done do not forget to remove the DigitalOcean VM created in the process
+- Once you're done, do not forget to remove the DigitalOcean VM created in the process

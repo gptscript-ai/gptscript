@@ -11,7 +11,7 @@ Perform the following tasks in order:
 6. Wait for the IP address of the traefik Service to be available and save it in the file ./lb-ip.txt
 7. Create the file ./ingress.yaml and make sure it contains the yaml specification of an Ingress resource which exposes the vote-ui Service on vote.LBIP.nip.io and the result-ui Service on result.LBIP.nip.io, first making sure to replace the LBIP placeholders with the content of the file ./lb-ip.txt
 8. Create the Ingress resource specified in ./ingress.yaml
-9. Open a browser on vote.LBIP.nip.io but make sur to replace the LBIP placeholder with the content of lb-ip.txt in this URL first
+9. Open a browser on vote.LBIP.nip.io but make sure to replace the LBIP placeholder with the content of lb-ip.txt in this URL first
 
 ---
 name: kubectl
