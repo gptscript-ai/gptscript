@@ -92,7 +92,7 @@ const config = {
         additionalLanguages: ["cue", "docker"],
       },
       algolia: {
-        apiKey: "e89df119e1db0b9e0c99ad397b8f4469",
+        apiKey: "c886c827d4057d15ab11efbc59b94a49",
         appId: "CLLI98NP9G",
         indexName: "gptscript",
       },
