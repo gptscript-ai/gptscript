@@ -119,7 +119,7 @@ func NewRunner(t *testing.T) *Runner {
 		t: t,
 	}
 
-	run, err := runner.New(c)
+	run, err := runner.New(c, "default")
 	require.NoError(t, err)
 
 	return &Runner{

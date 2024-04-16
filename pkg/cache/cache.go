@@ -18,17 +18,14 @@ type Client struct {
 }
 
 type Options struct {
-	Cache    *bool  `usage:"Disable caching" default:"true"`
-	CacheDir string `usage:"Directory to store cache (default: $XDG_CACHE_HOME/gptscript)"`
+	DisableCache bool   `usage:"Disable caching of LLM API responses"`
+	CacheDir     string `usage:"Directory to store cache (default: $XDG_CACHE_HOME/gptscript)"`
 }
 
 func Complete(opts ...Options) (result Options) {
 	for _, opt := range opts {
 		result.CacheDir = types.FirstSet(opt.CacheDir, result.CacheDir)
-		result.Cache = types.FirstSet(opt.Cache, result.Cache)
-	}
-	if result.Cache == nil {
-		result.Cache = &[]bool{true}[0]
+		result.DisableCache = types.FirstSet(opt.DisableCache, result.DisableCache)
 	}
 	if result.CacheDir == "" {
 		result.CacheDir = filepath.Join(xdg.CacheHome, version.ProgramName)
@@ -54,7 +51,7 @@ func New(opts ...Options) (*Client, error) {
 	}
 	return &Client{
 		dir:  opt.CacheDir,
-		noop: !*opt.Cache,
+		noop: opt.DisableCache,
 	}, nil
 }
 

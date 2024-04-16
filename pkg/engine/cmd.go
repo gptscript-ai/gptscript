@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"sort"
 	"strings"
@@ -59,6 +60,7 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 
 	output := &bytes.Buffer{}
 	all := &bytes.Buffer{}
+	cmd.Stdin = os.Stdin
 	cmd.Stderr = io.MultiWriter(all, os.Stderr)
 	cmd.Stdout = io.MultiWriter(all, output)
 
@@ -200,6 +202,17 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 			return nil, nil, err
 		}
 		cmdArgs = append(cmdArgs, f.Name())
+	}
+
+	// This is a workaround for Windows, where the command interpreter is constructed with unix style paths
+	// It converts unix style paths to windows style paths
+	if runtime.GOOS == "windows" {
+		parts := strings.Split(args[0], "/")
+		if parts[len(parts)-1] == "gptscript-go-tool" {
+			parts[len(parts)-1] = "gptscript-go-tool.exe"
+		}
+
+		args[0] = filepath.Join(parts...)
 	}
 
 	cmd := exec.CommandContext(ctx, env.Lookup(envvars, args[0]), cmdArgs...)

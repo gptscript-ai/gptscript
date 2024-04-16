@@ -1,9 +1,5 @@
 # OpenAPI Tools
 
-:::note
-This is a new feature and might be buggy.
-:::
-
 GPTScript can treat OpenAPI v3 definition files as though they were tool files.
 Each operation (a path and HTTP method) in the file will become a simple tool that makes an HTTP request.
 GPTScript will automatically and internally generate the necessary code to make the request and parse the response.
@@ -11,9 +7,9 @@ GPTScript will automatically and internally generate the necessary code to make 
 Here is an example that uses the OpenAPI [Petstore Example](https://github.com/OAI/OpenAPI-Specification/blob/main/examples/v3.0/petstore.yaml):
 
 ```yaml
-Tools: https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/petstore.yaml
+Tools: https://petstore.gptscript-demos.ai/openapi
 
-List all the pets. After you get a response, create a new pet named Mark. He is a lizard.
+List all the pets. What are the names of the dogs?
 ```
 
 You can also use a local file path instead of a URL.
@@ -25,6 +21,11 @@ If no HTTPS server exists, it will choose the first HTTP server. Other protocols
 
 GPTScript will also handle path- and operation-level server overrides, following the same logic of choosing the first HTTPS server it finds,
 or the first HTTP server if no HTTPS server exists in the array.
+
+If no servers are defined in the definition, and the definition was downloaded from a URL, GPTScript will use the host
+in the URL as the server value. This is the case with the Petstore example above.
+
+### Server Variables
 
 Additionally, GPTScript can handle variables in the server name. For example, this:
 

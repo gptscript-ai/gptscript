@@ -77,10 +77,17 @@ func stripGo(env []string) (result []string) {
 
 func (r *Runtime) runBuild(ctx context.Context, toolSource, binDir string, env []string) error {
 	log.Infof("Running go build in %s", toolSource)
-	cmd := debugcmd.New(ctx, filepath.Join(binDir, "go"), "build", "-buildvcs=false", "-o", "bin/gptscript-go-tool")
+	cmd := debugcmd.New(ctx, filepath.Join(binDir, "go"), "build", "-buildvcs=false", "-o", artifactName())
 	cmd.Env = stripGo(env)
 	cmd.Dir = toolSource
 	return cmd.Run()
+}
+
+func artifactName() string {
+	if runtime.GOOS == "windows" {
+		return filepath.Join("bin", "gptscript-go-tool.exe")
+	}
+	return filepath.Join("bin", "gptscript-go-tool")
 }
 
 func (r *Runtime) binDir(rel string) string {

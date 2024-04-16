@@ -20,3 +20,7 @@ func (n noopMonitor) Event(Event) {
 }
 
 func (n noopMonitor) Stop(string, error) {}
+
+func (n noopMonitor) Pause() func() {
+	return func() {}
+}

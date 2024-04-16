@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -298,7 +299,7 @@ func NewSessionFactory(events *broadcaster.Broadcaster[Event]) *SessionFactory {
 }
 
 func (s SessionFactory) Start(ctx context.Context, prg *types.Program, env []string, input string) (runner.Monitor, error) {
-	id, _ := ctx.Value(execKey{}).(string)
+	id := IDFromContext(ctx)
 
 	s.events.C <- Event{
 		Event: runner.Event{
@@ -319,14 +320,17 @@ func (s SessionFactory) Start(ctx context.Context, prg *types.Program, env []str
 }
 
 type Session struct {
-	id     string
-	prj    *types.Program
-	env    []string
-	input  string
-	events *broadcaster.Broadcaster[Event]
+	id      string
+	prj     *types.Program
+	env     []string
+	input   string
+	events  *broadcaster.Broadcaster[Event]
+	runLock sync.Mutex
 }
 
 func (s *Session) Event(event runner.Event) {
+	s.runLock.Lock()
+	defer s.runLock.Unlock()
 	s.events.C <- Event{
 		Event: event,
 		RunID: s.id,
@@ -347,5 +351,15 @@ func (s *Session) Stop(output string, err error) {
 	if err != nil {
 		e.Err = err.Error()
 	}
+
+	s.runLock.Lock()
+	defer s.runLock.Unlock()
 	s.events.C <- e
+}
+
+func (s *Session) Pause() func() {
+	s.runLock.Lock()
+	return func() {
+		s.runLock.Unlock()
+	}
 }

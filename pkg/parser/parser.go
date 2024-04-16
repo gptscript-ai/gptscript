@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -13,7 +14,9 @@ import (
 )
 
 var (
-	sepRegex = regexp.MustCompile(`^\s*---+\s*$`)
+	sepRegex       = regexp.MustCompile(`^\s*---+\s*$`)
+	strictSepRegex = regexp.MustCompile(`^---\n$`)
+	skipRegex      = regexp.MustCompile(`^![-\w]+\s*$`)
 )
 
 func normalize(key string) string {
@@ -81,6 +84,8 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		tool.Parameters.ModelProvider = true
 	case "model", "modelname":
 		tool.Parameters.ModelName = value
+	case "globalmodel", "globalmodelname":
+		tool.Parameters.GlobalModelName = value
 	case "description":
 		tool.Parameters.Description = value
 	case "internalprompt":
@@ -93,6 +98,12 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		tool.Parameters.Export = append(tool.Parameters.Export, csv(strings.ToLower(value))...)
 	case "tool", "tools":
 		tool.Parameters.Tools = append(tool.Parameters.Tools, csv(strings.ToLower(value))...)
+	case "globaltool", "globaltools":
+		tool.Parameters.GlobalTools = append(tool.Parameters.GlobalTools, csv(strings.ToLower(value))...)
+	case "exportcontext":
+		tool.Parameters.ExportContext = append(tool.Parameters.ExportContext, csv(strings.ToLower(value))...)
+	case "context":
+		tool.Parameters.Context = append(tool.Parameters.Context, csv(strings.ToLower(value))...)
 	case "args", "arg", "param", "params", "parameters", "parameter":
 		if err := addArg(value, tool); err != nil {
 			return false, err
@@ -118,6 +129,8 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		if err != nil {
 			return false, err
 		}
+	case "credentials", "creds", "credential", "cred":
+		tool.Parameters.Credentials = append(tool.Parameters.Credentials, csv(strings.ToLower(value))...)
 	default:
 		return false, nil
 	}
@@ -154,28 +167,82 @@ type context struct {
 	tool         types.Tool
 	instructions []string
 	inBody       bool
+	skipNode     bool
+	seenParam    bool
 }
 
 func (c *context) finish(tools *[]types.Tool) {
 	c.tool.Instructions = strings.TrimSpace(strings.Join(c.instructions, ""))
-	if c.tool.Instructions != "" || c.tool.Parameters.Name != "" || len(c.tool.Export) > 0 || len(c.tool.Tools) > 0 {
+	if c.tool.Instructions != "" || c.tool.Parameters.Name != "" ||
+		len(c.tool.Export) > 0 || len(c.tool.Tools) > 0 ||
+		c.tool.GlobalModelName != "" ||
+		len(c.tool.GlobalTools) > 0 {
 		*tools = append(*tools, c.tool)
 	}
 	*c = context{}
 }
 
-func commentEmbedded(line string) (string, bool) {
-	for _, i := range []string{"#", "# ", "//", "// "} {
-		prefix := i + "gptscript:"
-		cut, ok := strings.CutPrefix(line, prefix)
-		if ok {
-			return strings.TrimSpace(cut) + "\n", ok
-		}
-	}
-	return line, false
+type Options struct {
+	AssignGlobals bool
 }
 
-func Parse(input io.Reader) ([]types.Tool, error) {
+func complete(opts ...Options) (result Options) {
+	for _, opt := range opts {
+		result.AssignGlobals = types.FirstSet(result.AssignGlobals, opt.AssignGlobals)
+	}
+	return
+}
+
+func Parse(input io.Reader, opts ...Options) ([]types.Tool, error) {
+	tools, err := parse(input)
+	if err != nil {
+		return nil, err
+	}
+
+	opt := complete(opts...)
+
+	if !opt.AssignGlobals {
+		return tools, nil
+	}
+
+	var (
+		globalModel     string
+		seenGlobalTools = map[string]struct{}{}
+		globalTools     []string
+	)
+
+	for _, tool := range tools {
+		if tool.GlobalModelName != "" {
+			if globalModel != "" {
+				return nil, fmt.Errorf("global model name defined multiple times")
+			}
+			globalModel = tool.GlobalModelName
+		}
+		for _, globalTool := range tool.GlobalTools {
+			if _, ok := seenGlobalTools[globalTool]; ok {
+				continue
+			}
+			seenGlobalTools[globalTool] = struct{}{}
+			globalTools = append(globalTools, globalTool)
+		}
+	}
+
+	for i, tool := range tools {
+		if globalModel != "" && tool.ModelName == "" {
+			tool.ModelName = globalModel
+		}
+		for _, globalTool := range globalTools {
+			if !slices.Contains(tool.Tools, globalTool) {
+				tool.Tools = append(tool.Tools, globalTool)
+			}
+		}
+		tools[i] = tool
+	}
+
+	return tools, nil
+}
+
+func parse(input io.Reader) ([]types.Tool, error) {
 	scan := bufio.NewScanner(input)
 
 	var (
@@ -191,13 +258,18 @@ func Parse(input io.Reader) ([]types.Tool, error) {
 		}
 
 		line := scan.Text() + "\n"
-		if embeddedLine, ok := commentEmbedded(line); ok {
-			// Strip special comments to allow embedding the preamble in python or other interpreted languages
-			line = embeddedLine
+
+		if context.skipNode {
+			if strictSepRegex.MatchString(line) {
+				context.finish(&tools)
+				continue
+			}
+		} else if sepRegex.MatchString(line) {
+			context.finish(&tools)
+			continue
 		}
 
-		if sepRegex.MatchString(line) {
-			context.finish(&tools)
+		if context.skipNode {
 			continue
 		}
 
@@ -212,6 +284,11 @@ func Parse(input io.Reader) ([]types.Tool, error) {
 				continue
 			}
 
+			if !context.seenParam && skipRegex.MatchString(line) {
+				context.skipNode = true
+				continue
+			}
+
 			// Blank line
 			if strings.TrimSpace(line) == "" {
 				continue
@@ -221,6 +298,7 @@ func Parse(input io.Reader) ([]types.Tool, error) {
 			if isParam, err := isParam(line, &context.tool); err != nil {
 				return nil, NewErrLine("", lineNo, err)
 			} else if isParam {
+				context.seenParam = true
 				continue
 			}
 		}

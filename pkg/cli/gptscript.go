@@ -25,6 +25,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"golang.org/x/term"
 )
 
@@ -38,28 +39,64 @@ type GPTScript struct {
 	CacheOptions
 	OpenAIOptions
 	DisplayOptions
-	Color         *bool  `usage:"Use color in output (default true)" default:"true"`
-	Confirm       bool   `usage:"Prompt before running potentially dangerous commands"`
-	Debug         bool   `usage:"Enable debug logging"`
-	Quiet         *bool  `usage:"No output logging (set --quiet=false to force on even when there is no TTY)" short:"q"`
-	Output        string `usage:"Save output to a file, or - for stdout" short:"o"`
-	Input         string `usage:"Read input from a file (\"-\" for stdin)" short:"f"`
-	SubTool       string `usage:"Use tool of this name, not the first tool in file" local:"true"`
-	Assemble      bool   `usage:"Assemble tool to a single artifact, saved to --output" hidden:"true" local:"true"`
-	ListModels    bool   `usage:"List the models available and exit" local:"true"`
-	ListTools     bool   `usage:"List built-in tools and exit" local:"true"`
-	Server        bool   `usage:"Start server" local:"true"`
-	ListenAddress string `usage:"Server listen address" default:"127.0.0.1:9090" local:"true"`
-	Chdir         string `usage:"Change current working directory" short:"C"`
-	Daemon        bool   `usage:"Run tool as a daemon" local:"true" hidden:"true"`
-	Ports         string `usage:"The port range to use for ephemeral daemon ports (ex: 11000-12000)" hidden:"true"`
+	Color             *bool  `usage:"Use color in output (default true)" default:"true"`
+	Confirm           bool   `usage:"Prompt before running potentially dangerous commands"`
+	Debug             bool   `usage:"Enable debug logging"`
+	Quiet             *bool  `usage:"No output logging (set --quiet=false to force on even when there is no TTY)" short:"q"`
+	Output            string `usage:"Save output to a file, or - for stdout" short:"o"`
+	Input             string `usage:"Read input from a file (\"-\" for stdin)" short:"f"`
+	SubTool           string `usage:"Use tool of this name, not the first tool in file" local:"true"`
+	Assemble          bool   `usage:"Assemble tool to a single artifact, saved to --output" hidden:"true" local:"true"`
+	ListModels        bool   `usage:"List the models available and exit" local:"true"`
+	ListTools         bool   `usage:"List built-in tools and exit" local:"true"`
+	Server            bool   `usage:"Start server" local:"true"`
+	ListenAddress     string `usage:"Server listen address" default:"127.0.0.1:9090" local:"true"`
+	Chdir             string `usage:"Change current working directory" short:"C"`
+	Daemon            bool   `usage:"Run tool as a daemon" local:"true" hidden:"true"`
+	Ports             string `usage:"The port range to use for ephemeral daemon ports (ex: 11000-12000)" hidden:"true"`
+	CredentialContext string `usage:"Context name in which to store credentials" default:"default"`
 }
 
 func New() *cobra.Command {
 	root := &GPTScript{}
-	return cmd.Command(root, &Eval{
+	command := cmd.Command(root, &Eval{
 		gptscript: root,
-	})
+	}, &Credential{root: root})
+
+	// Hide all the global flags for the credential subcommand.
+	for _, child := range command.Commands() {
+		if strings.HasPrefix(child.Name(), "credential") {
+			command.PersistentFlags().VisitAll(func(f *pflag.Flag) {
+				newFlag := pflag.Flag{
+					Name:  f.Name,
+					Usage: f.Usage,
+				}
+
+				if f.Name != "credential-context" { // We want to keep credential-context
+					child.Flags().AddFlag(&newFlag)
+					child.Flags().Lookup(newFlag.Name).Hidden = true
+				}
+			})
+
+			for _, grandchild := range child.Commands() {
+				command.PersistentFlags().VisitAll(func(f *pflag.Flag) {
+					newFlag := pflag.Flag{
+						Name:  f.Name,
+						Usage: f.Usage,
+					}
+
+					if f.Name != "credential-context" {
+						grandchild.Flags().AddFlag(&newFlag)
+						grandchild.Flags().Lookup(newFlag.Name).Hidden = true
+					}
+				})
+			}
+
+			break
+		}
+	}
+
+	return command
 }
 
 func (r *GPTScript) NewRunContext(cmd *cobra.Command) context.Context {
@@ -72,11 +109,12 @@ func (r *GPTScript) NewRunContext(cmd *cobra.Command) context.Context {
 
 func (r *GPTScript) NewGPTScriptOpts() (gptscript.Options, error) {
 	opts := gptscript.Options{
-		Cache:   cache.Options(r.CacheOptions),
-		OpenAI:  openai.Options(r.OpenAIOptions),
-		Monitor: monitor.Options(r.DisplayOptions),
-		Quiet:   r.Quiet,
-		Env:     os.Environ(),
+		Cache:             cache.Options(r.CacheOptions),
+		OpenAI:            openai.Options(r.OpenAIOptions),
+		Monitor:           monitor.Options(r.DisplayOptions),
+		Quiet:             r.Quiet,
+		Env:               os.Environ(),
+		CredentialContext: r.CredentialContext,
 	}
 
 	if r.Ports != "" {

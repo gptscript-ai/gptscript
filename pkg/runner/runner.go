@@ -6,9 +6,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/gptscript-ai/gptscript/pkg/config"
+	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"golang.org/x/sync/errgroup"
@@ -20,8 +23,11 @@ type MonitorFactory interface {
 
 type Monitor interface {
 	Event(event Event)
+	Pause() func()
 	Stop(output string, err error)
 }
+
+type MonitorKey struct{}
 
 type Options struct {
 	MonitorFactory MonitorFactory        `usage:"-"`
@@ -54,15 +60,17 @@ type Runner struct {
 	factory        MonitorFactory
 	runtimeManager engine.RuntimeManager
 	ports          engine.Ports
+	credCtx        string
 }
 
-func New(client engine.Model, opts ...Options) (*Runner, error) {
+func New(client engine.Model, credCtx string, opts ...Options) (*Runner, error) {
 	opt := complete(opts...)
 
 	runner := &Runner{
 		c:              client,
 		factory:        opt.MonitorFactory,
 		runtimeManager: opt.RuntimeManager,
+		credCtx:        credCtx,
 	}
 
 	if opt.StartPort != 0 {
@@ -116,9 +124,42 @@ var (
 	EventTypeCallFinish   = EventType("callFinish")
 )
 
+func (r *Runner) getContext(callCtx engine.Context, monitor Monitor, env []string) (result []engine.InputContext, _ error) {
+	toolIDs, err := callCtx.Program.GetContextToolIDs(callCtx.Tool.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, toolID := range toolIDs {
+		content, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, toolID, "", "", false)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, engine.InputContext{
+			ToolID:  toolID,
+			Content: content,
+		})
+	}
+	return result, nil
+}
+
 func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, input string) (string, error) {
 	progress, progressClose := streamProgress(&callCtx, monitor)
 	defer progressClose()
+
+	if len(callCtx.Tool.Credentials) > 0 {
+		var err error
+		env, err = r.handleCredentials(callCtx, monitor, env)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	var err error
+	callCtx.InputContext, err = r.getContext(callCtx, monitor, env)
+	if err != nil {
+		return "", err
+	}
 
 	e := engine.Engine{
 		Model:          r.c,
@@ -134,6 +175,11 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 		Type:        EventTypeCallStart,
 		Content:     input,
 	})
+
+	// The sys.prompt tool is a special case where we need to pass the monitor to the builtin function.
+	if callCtx.Tool.BuiltinFunc != nil && callCtx.Tool.ID == "sys.prompt" {
+		callCtx.Ctx = context.WithValue(callCtx.Ctx, MonitorKey{}, monitor)
+	}
 
 	result, err := e.Start(callCtx, input)
 	if err != nil {
@@ -221,6 +267,15 @@ func streamProgress(callCtx *engine.Context, monitor Monitor) (chan<- types.Comp
 	}
 }
 
+func (r *Runner) subCall(ctx context.Context, parentContext engine.Context, monitor Monitor, env []string, toolID, input, callID string, isCredentialTool bool) (string, error) {
+	callCtx, err := parentContext.SubCall(ctx, toolID, callID, isCredentialTool)
+	if err != nil {
+		return "", err
+	}
+
+	return r.call(callCtx, monitor, env, input)
+}
+
 func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string, lastReturn *engine.Return) (callResults []engine.CallResult, _ error) {
 	var (
 		resultLock sync.Mutex
@@ -229,12 +284,7 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 	eg, subCtx := errgroup.WithContext(callCtx.Ctx)
 	for id, call := range lastReturn.Calls {
 		eg.Go(func() error {
-			callCtx, err := callCtx.SubCall(subCtx, call.ToolID, id)
-			if err != nil {
-				return err
-			}
-
-			result, err := r.call(callCtx, monitor, env, call.Input)
+			result, err := r.subCall(subCtx, callCtx, monitor, env, call.ToolID, call.Input, id, false)
 			if err != nil {
 				return err
 			}
@@ -277,4 +327,81 @@ func recordStateMessage(state *engine.State) error {
 
 	filename := filepath.Join(tmpdir, fmt.Sprintf("gptscript-state-%v-%v", hostname, time.Now().UnixMilli()))
 	return os.WriteFile(filename, data, 0444)
+}
+
+func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env []string) ([]string, error) {
+	c, err := config.ReadCLIConfig("")
+	if err != nil {
+		return nil, fmt.Errorf("failed to read CLI config: %w", err)
+	}
+
+	store, err := credentials.NewStore(c, r.credCtx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create credentials store: %w", err)
+	}
+
+	for _, credToolName := range callCtx.Tool.Credentials {
+		var (
+			cred   *credentials.Credential
+			exists bool
+			err    error
+		)
+
+		// Only try to look up the cred if the tool is on GitHub.
+		if isGitHubTool(credToolName) {
+			cred, exists, err = store.Get(credToolName)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get credentials for tool %s: %w", credToolName, err)
+			}
+		}
+
+		// If the credential doesn't already exist in the store, run the credential tool in order to get the value,
+		// and save it in the store.
+		if !exists {
+			credToolID, ok := callCtx.Tool.ToolMapping[credToolName]
+			if !ok {
+				return nil, fmt.Errorf("failed to find ID for tool %s", credToolName)
+			}
+
+			subCtx, err := callCtx.SubCall(callCtx.Ctx, credToolID, "", true) // leaving callID as "" will cause it to be set by the engine
+			if err != nil {
+				return nil, fmt.Errorf("failed to create subcall context for tool %s: %w", credToolName, err)
+			}
+			res, err := r.call(subCtx, monitor, env, "")
+			if err != nil {
+				return nil, fmt.Errorf("failed to run credential tool %s: %w", credToolName, err)
+			}
+
+			var envMap struct {
+				Env map[string]string `json:"env"`
+			}
+			if err := json.Unmarshal([]byte(res), &envMap); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal credential tool %s response: %w", credToolName, err)
+			}
+
+			cred = &credentials.Credential{
+				ToolName: credToolName,
+				Env:      envMap.Env,
+			}
+
+			// Only store the credential if the tool is on GitHub.
+			if isGitHubTool(credToolName) && callCtx.Program.ToolSet[credToolID].Source.Repo != nil {
+				if err := store.Add(*cred); err != nil {
+					return nil, fmt.Errorf("failed to add credential for tool %s: %w", credToolName, err)
+				}
+			} else {
+				log.Warnf("Not saving credential for local tool %s - credentials will only be saved for tools from GitHub.", credToolName)
+			}
+		}
+
+		for k, v := range cred.Env {
+			env = append(env, fmt.Sprintf("%s=%s", k, v))
+		}
+	}
+
+	return env, nil
+}
+
+func isGitHubTool(toolName string) bool {
+	return strings.HasPrefix(toolName, "github.com")
 }
