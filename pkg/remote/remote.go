@@ -12,10 +12,13 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	env2 "github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/openai"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
+
+var log = mvl.Package()
 
 type Client struct {
 	clientsLock sync.Mutex
@@ -102,6 +105,7 @@ func (c *Client) clientFromURL(apiURL string) (*openai.Client, error) {
 	env := "GPTSCRIPT_PROVIDER_" + env2.ToEnvLike(parsed.Hostname()) + "_API_KEY"
 	apiKey := os.Getenv(env)
 	if apiKey == "" {
+		log.Warnf("No API key found for %s", env)
 		apiKey = "<unset>"
 	}
 	return openai.NewClient(openai.Options{
