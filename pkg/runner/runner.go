@@ -384,9 +384,19 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 				Env:      envMap.Env,
 			}
 
-			// Only store the credential if the tool is on GitHub.
+			isEmpty := true
+			for _, v := range cred.Env {
+				if v != "" {
+					isEmpty = false
+					break
+				}
+			}
+
+			// Only store the credential if the tool is on GitHub, and the credential is non-empty.
 			if isGitHubTool(credToolName) && callCtx.Program.ToolSet[credToolID].Source.Repo != nil {
-				if err := store.Add(*cred); err != nil {
+				if isEmpty {
+					log.Warnf("Not saving empty credential for tool %s", credToolName)
+				} else if err := store.Add(*cred); err != nil {
 					return nil, fmt.Errorf("failed to add credential for tool %s: %w", credToolName, err)
 				}
 			} else {
