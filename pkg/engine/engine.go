@@ -137,7 +137,7 @@ func (c *Context) WrappedContext() context.Context {
 	return context.WithValue(c.Ctx, engineContext{}, c)
 }
 
-func (e *Engine) Start(ctx Context, input string, pauseF func() func()) (*Return, error) {
+func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 	tool := ctx.Tool
 
 	if tool.IsCommand() {
@@ -148,7 +148,7 @@ func (e *Engine) Start(ctx Context, input string, pauseF func() func()) (*Return
 		} else if tool.IsOpenAPI() {
 			return e.runOpenAPI(tool, input)
 		}
-		s, err := e.runCommand(ctx.WrappedContext(), tool, input, pauseF)
+		s, err := e.runCommand(ctx.WrappedContext(), tool, input, ctx.IsCredential)
 		if err != nil {
 			return nil, err
 		}

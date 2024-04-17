@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gptscript-ai/gptscript/pkg/config"
+	context2 "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -26,8 +27,6 @@ type Monitor interface {
 	Pause() func()
 	Stop(output string, err error)
 }
-
-type MonitorKey struct{}
 
 type Options struct {
 	MonitorFactory MonitorFactory        `usage:"-"`
@@ -178,13 +177,9 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 		Content:     input,
 	})
 
-	var result *engine.Return
-	if callCtx.IsCredential {
-		result, err = e.Start(callCtx, input, monitor.Pause)
-	} else {
-		result, err = e.Start(callCtx, input, nil)
-	}
+	callCtx.Ctx = context2.AddPauseFuncToCtx(callCtx.Ctx, monitor.Pause)
 
+	result, err := e.Start(callCtx, input)
 	if err != nil {
 		return "", err
 	}
