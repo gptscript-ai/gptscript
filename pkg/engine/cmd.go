@@ -20,7 +20,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
 
-func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) (cmdOut string, cmdErr error) {
+func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string, pauseF func() func()) (cmdOut string, cmdErr error) {
 	id := fmt.Sprint(atomic.AddInt64(&completionID, 1))
 
 	defer func() {
@@ -64,6 +64,10 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 	cmd.Stderr = io.MultiWriter(all, os.Stderr)
 	cmd.Stdout = io.MultiWriter(all, output)
 
+	if pauseF != nil {
+		unpauseF := pauseF()
+		defer unpauseF()
+	}
 	if err := cmd.Run(); err != nil {
 		_, _ = os.Stderr.Write(output.Bytes())
 		log.Errorf("failed to run tool [%s] cmd %v: %v", tool.Parameters.Name, cmd.Args, err)

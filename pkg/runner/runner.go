@@ -178,12 +178,13 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 		Content:     input,
 	})
 
-	// The sys.prompt tool is a special case where we need to pass the monitor to the builtin function.
-	if callCtx.Tool.BuiltinFunc != nil && callCtx.Tool.ID == "sys.prompt" {
-		callCtx.Ctx = context.WithValue(callCtx.Ctx, MonitorKey{}, monitor)
+	var result *engine.Return
+	if callCtx.IsCredential {
+		result, err = e.Start(callCtx, input, monitor.Pause)
+	} else {
+		result, err = e.Start(callCtx, input, nil)
 	}
 
-	result, err := e.Start(callCtx, input)
 	if err != nil {
 		return "", err
 	}
