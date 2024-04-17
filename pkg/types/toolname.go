@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	validToolName = regexp.MustCompile("^[a-zA-Z0-9_-]{1,64}$")
-	invalidChars  = regexp.MustCompile("[^a-zA-Z0-9_-]+")
+	validToolName = regexp.MustCompile("^[a-zA-Z0-9_]{1,64}$")
+	invalidChars  = regexp.MustCompile("[^a-zA-Z0-9_]+")
 )
 
 func ToolNormalizer(tool string) string {
