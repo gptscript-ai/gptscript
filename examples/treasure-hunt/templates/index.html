@@ -1,0 +1,43 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Treasure Hunt</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div id="app" class="container is-fluid">
+        <section class="hero is-primary is-medium is-bold" style="background-image: linear-gradient(to right, #140aa2, #b91b0d);">
+            <div class="hero-body">
+                <h1 class="title">Treasure Hunt</h1>
+                <h2 class="subtitle">How about a real treasure hunt experience? Enter locations for which you want the clues and get hunting!</h2>
+            </div>
+        </section>
+
+        <div class="box">
+            <div class="field">
+                <label class="label">Locations</label>
+                <div class="control">
+                    <input class="input is-focused" type="text" placeholder="Central Park, Hudson Yards, Times Square..." v-model="code">
+                </div>
+            </div>
+            <button class="button is-primary is-medium" style="background-color: #140aa2;" @click="getClues" :disabled="isLoading">
+                <span v-if="isLoading" class="icon is-medium">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </span>
+                <span v-else>Get Clues</span>
+            </button>
+        </div>
+
+        <div class="box markdown-body" v-if="showClues" v-html="renderedMarkdown"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.15.4/js/all.js"></script>
+</body>
+</html>
