@@ -116,28 +116,28 @@ The `--credential-override` argument must be formatted in one of the following t
 
 #### 1. Key-Value Pairs
 
-`tool1:ENV_VAR_1=value1,ENV_VAR_2=value2;tool2:ENV_VAR_1=value3,ENV_VAR_2=value4`
+`toolA:ENV_VAR_1=value1,ENV_VAR_2=value2;toolB:ENV_VAR_1=value3,ENV_VAR_2=value4`
 
-In this example, tool1 and tool2 both provide the variables `ENV_VAR_1` and `ENV_VAR_2`.
+In this example, both `toolA` and `toolB` provide the variables `ENV_VAR_1` and `ENV_VAR_2`.
 This will set the environment variables `ENV_VAR_1` and `ENV_VAR_2` to the specific values provided for each tool.
 
 #### 2. Environment Variables
 
-`tool1:ENV_VAR_1,ENV_VAR_2;tool2:ENV_VAR_3,ENV_VAR_4`
+`toolA:ENV_VAR_1,ENV_VAR_2;toolB:ENV_VAR_3,ENV_VAR_4`
 
-In this example, tool1 provides the variables `ENV_VAR_1` and `ENV_VAR_2`, and tool2 provides the variables `ENV_VAR_3` and `ENV_VAR_4`.
+In this example, `toolA` provides the variables `ENV_VAR_1` and `ENV_VAR_2`, and `toolB` provides the variables `ENV_VAR_3` and `ENV_VAR_4`.
 This will read the values of `ENV_VAR_1` through `ENV_VAR_4` from the current environment and set them for each tool.
 This is a direct mapping of environment variable names. **This is not recommended when overriding credentials for
 multiple tools that use the same environment variable names.**
 
 #### 3. Environment Variable Mapping
 
-`tool1:ENV_VAR_1->TOOL_1_ENV_VAR_1,ENV_VAR_2->TOOL_1_ENV_VAR_2;tool2:ENV_VAR_1->TOOL_2_ENV_VAR_1,ENV_VAR_2->TOOL_2_ENV_VAR_2`
+`toolA:ENV_VAR_1->TOOL_A_ENV_VAR_1,ENV_VAR_2->TOOL_A_ENV_VAR_2;toolB:ENV_VAR_1->TOOL_B_ENV_VAR_1,ENV_VAR_2->TOOL_B_ENV_VAR_2`
 
-In this example, tool1 and tool2 both provide the variables `ENV_VAR_1` and `ENV_VAR_2`.
-This will set the environment variables `ENV_VAR_1` and `ENV_VAR_2` to the values of `TOOL_1_ENV_VAR_1` and
-`TOOL_1_ENV_VAR_2` from the current environment for `tool1`. The same applies for `tool2`, but with the values of
-`TOOL_2_ENV_VAR_1` and `TOOL_2_ENV_VAR_2`. This is a mapping of one environment variable name to another.
+In this example, `toolA` and `toolB` both provide the variables `ENV_VAR_1` and `ENV_VAR_2`.
+This will set the environment variables `ENV_VAR_1` and `ENV_VAR_2` to the values of `TOOL_A_ENV_VAR_1` and
+`TOOL_A_ENV_VAR_2` from the current environment for `toolA`. The same applies for `toolB`, but with the values of
+`TOOL_B_ENV_VAR_1` and `TOOL_B_ENV_VAR_2`. This is a mapping of one environment variable name to another.
 
 ### Real-World Example
 
