@@ -39,22 +39,23 @@ type GPTScript struct {
 	CacheOptions
 	OpenAIOptions
 	DisplayOptions
-	Color             *bool  `usage:"Use color in output (default true)" default:"true"`
-	Confirm           bool   `usage:"Prompt before running potentially dangerous commands"`
-	Debug             bool   `usage:"Enable debug logging"`
-	Quiet             *bool  `usage:"No output logging (set --quiet=false to force on even when there is no TTY)" short:"q"`
-	Output            string `usage:"Save output to a file, or - for stdout" short:"o"`
-	Input             string `usage:"Read input from a file (\"-\" for stdin)" short:"f"`
-	SubTool           string `usage:"Use tool of this name, not the first tool in file" local:"true"`
-	Assemble          bool   `usage:"Assemble tool to a single artifact, saved to --output" hidden:"true" local:"true"`
-	ListModels        bool   `usage:"List the models available and exit" local:"true"`
-	ListTools         bool   `usage:"List built-in tools and exit" local:"true"`
-	Server            bool   `usage:"Start server" local:"true"`
-	ListenAddress     string `usage:"Server listen address" default:"127.0.0.1:9090" local:"true"`
-	Chdir             string `usage:"Change current working directory" short:"C"`
-	Daemon            bool   `usage:"Run tool as a daemon" local:"true" hidden:"true"`
-	Ports             string `usage:"The port range to use for ephemeral daemon ports (ex: 11000-12000)" hidden:"true"`
-	CredentialContext string `usage:"Context name in which to store credentials" default:"default"`
+	Color              *bool  `usage:"Use color in output (default true)" default:"true"`
+	Confirm            bool   `usage:"Prompt before running potentially dangerous commands"`
+	Debug              bool   `usage:"Enable debug logging"`
+	Quiet              *bool  `usage:"No output logging (set --quiet=false to force on even when there is no TTY)" short:"q"`
+	Output             string `usage:"Save output to a file, or - for stdout" short:"o"`
+	Input              string `usage:"Read input from a file (\"-\" for stdin)" short:"f"`
+	SubTool            string `usage:"Use tool of this name, not the first tool in file" local:"true"`
+	Assemble           bool   `usage:"Assemble tool to a single artifact, saved to --output" hidden:"true" local:"true"`
+	ListModels         bool   `usage:"List the models available and exit" local:"true"`
+	ListTools          bool   `usage:"List built-in tools and exit" local:"true"`
+	Server             bool   `usage:"Start server" local:"true"`
+	ListenAddress      string `usage:"Server listen address" default:"127.0.0.1:9090" local:"true"`
+	Chdir              string `usage:"Change current working directory" short:"C"`
+	Daemon             bool   `usage:"Run tool as a daemon" local:"true" hidden:"true"`
+	Ports              string `usage:"The port range to use for ephemeral daemon ports (ex: 11000-12000)" hidden:"true"`
+	CredentialContext  string `usage:"Context name in which to store credentials" default:"default"`
+	CredentialOverride string `usage:"Credentials to override (ex: --credential-override github.com/example/cred-tool:API_TOKEN=1234)"`
 }
 
 func New() *cobra.Command {
@@ -133,6 +134,8 @@ func (r *GPTScript) NewGPTScriptOpts() (gptscript.Options, error) {
 		opts.Runner.StartPort = startNum
 		opts.Runner.EndPort = endNum
 	}
+
+	opts.Runner.CredentialOverride = r.CredentialOverride
 
 	return opts, nil
 }

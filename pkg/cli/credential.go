@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 	"text/tabwriter"
 
 	cmd2 "github.com/acorn-io/cmd"
@@ -15,6 +16,7 @@ import (
 type Credential struct {
 	root        *GPTScript
 	AllContexts bool `usage:"List credentials for all contexts" local:"true"`
+	ShowEnvVars bool `usage:"Show names of environment variables in each credential" local:"true"`
 }
 
 func (c *Credential) Customize(cmd *cobra.Command) {
@@ -57,9 +59,23 @@ func (c *Credential) Run(_ *cobra.Command, _ []string) error {
 
 		w := tabwriter.NewWriter(os.Stdout, 10, 1, 3, ' ', 0)
 		defer w.Flush()
-		_, _ = w.Write([]byte("CONTEXT\tTOOL\n"))
-		for _, cred := range creds {
-			_, _ = fmt.Fprintf(w, "%s\t%s\n", cred.Context, cred.ToolName)
+
+		if c.ShowEnvVars {
+			_, _ = w.Write([]byte("CONTEXT\tTOOL\tENVIRONMENT VARIABLES\n"))
+
+			for _, cred := range creds {
+				envVars := make([]string, 0, len(cred.Env))
+				for envVar := range cred.Env {
+					envVars = append(envVars, envVar)
+				}
+				sort.Strings(envVars)
+				_, _ = fmt.Fprintf(w, "%s\t%s\t%s\n", cred.Context, cred.ToolName, strings.Join(envVars, ", "))
+			}
+		} else {
+			_, _ = w.Write([]byte("CONTEXT\tTOOL\n"))
+			for _, cred := range creds {
+				_, _ = fmt.Fprintf(w, "%s\t%s\n", cred.Context, cred.ToolName)
+			}
 		}
 	} else {
 		// Sort credentials by tool name
@@ -67,8 +83,23 @@ func (c *Credential) Run(_ *cobra.Command, _ []string) error {
 			return creds[i].ToolName < creds[j].ToolName
 		})
 
-		for _, cred := range creds {
-			fmt.Println(cred.ToolName)
+		if c.ShowEnvVars {
+			w := tabwriter.NewWriter(os.Stdout, 10, 1, 3, ' ', 0)
+			defer w.Flush()
+			_, _ = w.Write([]byte("TOOL\tENVIRONMENT VARIABLES\n"))
+
+			for _, cred := range creds {
+				envVars := make([]string, 0, len(cred.Env))
+				for envVar := range cred.Env {
+					envVars = append(envVars, envVar)
+				}
+				sort.Strings(envVars)
+				_, _ = fmt.Fprintf(w, "%s\t%s\n", cred.ToolName, strings.Join(envVars, ", "))
+			}
+		} else {
+			for _, cred := range creds {
+				fmt.Println(cred.ToolName)
+			}
 		}
 	}
 
