@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -14,6 +15,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
+	"github.com/gptscript-ai/gptscript/pkg/chat"
 	"github.com/gptscript-ai/gptscript/pkg/confirm"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/input"
@@ -57,6 +59,10 @@ type GPTScript struct {
 	Ports              string `usage:"The port range to use for ephemeral daemon ports (ex: 11000-12000)" hidden:"true"`
 	CredentialContext  string `usage:"Context name in which to store credentials" default:"default"`
 	CredentialOverride string `usage:"Credentials to override (ex: --credential-override github.com/example/cred-tool:API_TOKEN=1234)"`
+	ChatState          string `usage:"The chat state to continue, or null to start a new chat and return the state"`
+	ForceChat          bool   `usage:"Force an interactive chat session if even the top level tool is not a chat tool"`
+
+	readData []byte
 }
 
 func New() *cobra.Command {
@@ -207,11 +213,17 @@ func (r *GPTScript) PersistentPre(*cobra.Command, []string) error {
 			r.Quiet = new(bool)
 		} else {
 			r.Quiet = &[]bool{true}[0]
+			if r.Color == nil {
+				r.Color = new(bool)
+			}
 		}
 	}
 
 	if r.Debug {
 		mvl.SetDebug()
+		if r.Color == nil {
+			r.Color = new(bool)
+		}
 	} else {
 		mvl.SetSimpleFormat()
 		if *r.Quiet {
@@ -245,9 +257,18 @@ func (r *GPTScript) readProgram(ctx context.Context, args []string) (prg types.P
 	}
 
 	if args[0] == "-" {
-		data, err := io.ReadAll(os.Stdin)
-		if err != nil {
-			return prg, err
+		var (
+			data []byte
+			err  error
+		)
+		if len(r.readData) > 0 {
+			data = r.readData
+		} else {
+			data, err = io.ReadAll(os.Stdin)
+			if err != nil {
+				return prg, err
+			}
+			r.readData = data
 		}
 		return loader.ProgramFromSource(ctx, string(data), r.SubTool)
 	}
@@ -347,6 +368,24 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 	toolInput, err := input.FromCLI(r.Input, args)
 	if err != nil {
 		return err
+	}
+
+	if r.ChatState != "" {
+		resp, err := gptScript.Chat(r.NewRunContext(cmd), r.ChatState, prg, os.Environ(), toolInput)
+		if err != nil {
+			return err
+		}
+		data, err := json.Marshal(resp)
+		if err != nil {
+			return err
+		}
+		return r.PrintOutput(toolInput, string(data))
+	}
+
+	if prg.IsChat() || r.ForceChat {
+		return chat.Start(r.NewRunContext(cmd), nil, gptScript, func() (types.Program, error) {
+			return r.readProgram(ctx, args)
+		}, os.Environ(), toolInput)
 	}
 
 	s, err := gptScript.Run(r.NewRunContext(cmd), prg, os.Environ(), toolInput)

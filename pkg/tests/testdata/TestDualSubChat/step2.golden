@@ -1,0 +1,182 @@
+`{
+  "done": false,
+  "content": "Assistent Response 2 - from chatbot2",
+  "toolID": "testdata/TestDualSubChat/test.gpt:13",
+  "state": {
+    "continuation": {
+      "state": {
+        "completion": {
+          "Model": "gpt-4-turbo-preview",
+          "InternalSystemPrompt": null,
+          "Tools": [
+            {
+              "function": {
+                "toolID": "testdata/TestDualSubChat/test.gpt:6",
+                "name": "chatbot",
+                "parameters": null
+              }
+            },
+            {
+              "function": {
+                "toolID": "testdata/TestDualSubChat/test.gpt:13",
+                "name": "chatbot2",
+                "parameters": null
+              }
+            }
+          ],
+          "Messages": [
+            {
+              "role": "system",
+              "content": [
+                {
+                  "text": "Call chatbots"
+                }
+              ]
+            },
+            {
+              "role": "user",
+              "content": [
+                {
+                  "text": "User 1"
+                }
+              ]
+            },
+            {
+              "role": "assistant",
+              "content": [
+                {
+                  "toolCall": {
+                    "index": 0,
+                    "id": "call_1",
+                    "function": {
+                      "name": "chatbot",
+                      "arguments": "Input to chatbot1"
+                    }
+                  }
+                },
+                {
+                  "toolCall": {
+                    "index": 1,
+                    "id": "call_2",
+                    "function": {
+                      "name": "chatbot2",
+                      "arguments": "Input to chatbot2"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "MaxTokens": 0,
+          "Temperature": null,
+          "JSONResponse": false,
+          "Grammar": "",
+          "Cache": null
+        },
+        "pending": {
+          "call_1": {
+            "index": 0,
+            "id": "call_1",
+            "function": {
+              "name": "chatbot",
+              "arguments": "Input to chatbot1"
+            }
+          },
+          "call_2": {
+            "index": 1,
+            "id": "call_2",
+            "function": {
+              "name": "chatbot2",
+              "arguments": "Input to chatbot2"
+            }
+          }
+        }
+      },
+      "calls": {
+        "call_1": {
+          "toolID": "testdata/TestDualSubChat/test.gpt:6",
+          "input": "Input to chatbot1"
+        },
+        "call_2": {
+          "toolID": "testdata/TestDualSubChat/test.gpt:13",
+          "input": "Input to chatbot2"
+        }
+      }
+    },
+    "subCalls": [
+      {
+        "toolId": "testdata/TestDualSubChat/test.gpt:6",
+        "callId": "call_1",
+        "state": {
+          "result": "Chat done"
+        }
+      },
+      {
+        "toolId": "testdata/TestDualSubChat/test.gpt:13",
+        "callId": "call_2",
+        "state": {
+          "continuation": {
+            "state": {
+              "completion": {
+                "Model": "gpt-4-turbo-preview",
+                "InternalSystemPrompt": false,
+                "Tools": [
+                  {
+                    "function": {
+                      "toolID": "sys.chat.finish",
+                      "name": "chatFinish",
+                      "description": "Concludes the conversation. This can not be used to ask a question.",
+                      "parameters": {
+                        "properties": {
+                          "summary": {
+                            "description": "A summary of the dialog",
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      }
+                    }
+                  }
+                ],
+                "Messages": [
+                  {
+                    "role": "system",
+                    "content": [
+                      {
+                        "text": "This is a chatbot2"
+                      }
+                    ]
+                  },
+                  {
+                    "role": "user",
+                    "content": [
+                      {
+                        "text": "Input to chatbot2"
+                      }
+                    ]
+                  },
+                  {
+                    "role": "assistant",
+                    "content": [
+                      {
+                        "text": "Assistent Response 2 - from chatbot2"
+                      }
+                    ]
+                  }
+                ],
+                "MaxTokens": 0,
+                "Temperature": null,
+                "JSONResponse": false,
+                "Grammar": "",
+                "Cache": null
+              }
+            },
+            "result": "Assistent Response 2 - from chatbot2"
+          },
+          "continuationToolID": "testdata/TestDualSubChat/test.gpt:13"
+        }
+      }
+    ],
+    "subCallID": "call_2"
+  }
+}`

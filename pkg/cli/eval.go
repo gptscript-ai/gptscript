@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gptscript-ai/gptscript/pkg/chat"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/input"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
@@ -15,6 +16,7 @@ import (
 
 type Eval struct {
 	Tools          []string `usage:"Tools available to call"`
+	Chat           bool     `usage:"Enable chat"`
 	MaxTokens      int      `usage:"Maximum number of tokens to output"`
 	Model          string   `usage:"The model to use"`
 	JSON           bool     `usage:"Output JSON"`
@@ -33,6 +35,7 @@ func (e *Eval) Run(cmd *cobra.Command, args []string) error {
 			ModelName:      e.Model,
 			JSONResponse:   e.JSON,
 			InternalPrompt: e.InternalPrompt,
+			Chat:           e.Chat,
 		},
 		Instructions: strings.Join(args, " "),
 	}
@@ -64,6 +67,12 @@ func (e *Eval) Run(cmd *cobra.Command, args []string) error {
 	toolInput, err := input.FromFile(e.gptscript.Input)
 	if err != nil {
 		return err
+	}
+
+	if e.Chat {
+		return chat.Start(e.gptscript.NewRunContext(cmd), nil, runner, func() (types.Program, error) {
+			return prg, nil
+		}, os.Environ(), toolInput)
 	}
 
 	toolOutput, err := runner.Run(e.gptscript.NewRunContext(cmd), prg, os.Environ(), toolInput)

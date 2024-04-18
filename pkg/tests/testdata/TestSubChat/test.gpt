@@ -1,0 +1,9 @@
+tools: chatbot
+
+Call chatbot
+
+---
+name: chatbot
+chat: true
+
+This is a chatbot

@@ -21,7 +21,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
 
-func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string, isCredential bool) (cmdOut string, cmdErr error) {
+func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string, toolCategory ToolCategory) (cmdOut string, cmdErr error) {
 	id := fmt.Sprint(atomic.AddInt64(&completionID, 1))
 
 	defer func() {
@@ -65,7 +65,7 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string, 
 	cmd.Stderr = io.MultiWriter(all, os.Stderr)
 	cmd.Stdout = io.MultiWriter(all, output)
 
-	if isCredential {
+	if toolCategory == CredentialToolCategory {
 		pause := context2.GetPauseFuncFromCtx(ctx)
 		unpause := pause()
 		defer unpause()

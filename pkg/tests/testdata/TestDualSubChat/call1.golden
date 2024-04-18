@@ -1,0 +1,43 @@
+`{
+  "Model": "gpt-4-turbo-preview",
+  "InternalSystemPrompt": null,
+  "Tools": [
+    {
+      "function": {
+        "toolID": "testdata/TestDualSubChat/test.gpt:6",
+        "name": "chatbot",
+        "parameters": null
+      }
+    },
+    {
+      "function": {
+        "toolID": "testdata/TestDualSubChat/test.gpt:13",
+        "name": "chatbot2",
+        "parameters": null
+      }
+    }
+  ],
+  "Messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "Call chatbots"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "User 1"
+        }
+      ]
+    }
+  ],
+  "MaxTokens": 0,
+  "Temperature": null,
+  "JSONResponse": false,
+  "Grammar": "",
+  "Cache": null
+}`

@@ -14,6 +14,7 @@ import (
 const (
 	DaemonPrefix  = "#!sys.daemon"
 	OpenAPIPrefix = "#!sys.openapi"
+	PrintPrefix   = "#!sys.print"
 	CommandPrefix = "#!"
 )
 
@@ -37,6 +38,20 @@ type Program struct {
 	Name        string  `json:"name,omitempty"`
 	EntryToolID string  `json:"entryToolId,omitempty"`
 	ToolSet     ToolSet `json:"toolSet,omitempty"`
+}
+
+func (p Program) IsChat() bool {
+	return p.ToolSet[p.EntryToolID].Chat
+}
+
+func (p Program) ChatName() string {
+	if p.IsChat() {
+		name := p.ToolSet[p.EntryToolID].Name
+		if name != "" {
+			return name
+		}
+	}
+	return p.Name
 }
 
 func (p Program) GetContextToolIDs(toolID string) (result []string, _ error) {
@@ -113,6 +128,7 @@ type Parameters struct {
 	ModelName       string           `json:"modelName,omitempty"`
 	ModelProvider   bool             `json:"modelProvider,omitempty"`
 	JSONResponse    bool             `json:"jsonResponse,omitempty"`
+	Chat            bool             `json:"chat,omitempty"`
 	Temperature     *float32         `json:"temperature,omitempty"`
 	Cache           *bool            `json:"cache,omitempty"`
 	InternalPrompt  *bool            `json:"internalPrompt"`
@@ -215,6 +231,9 @@ func (t Tool) String() string {
 	if len(t.Parameters.Credentials) > 0 {
 		_, _ = fmt.Fprintf(buf, "Credentials: %s\n", strings.Join(t.Parameters.Credentials, ", "))
 	}
+	if t.Chat {
+		_, _ = fmt.Fprintf(buf, "Chat: true")
+	}
 
 	return buf.String()
 }
@@ -278,7 +297,7 @@ func appendTool(completionTools []CompletionTool, prg Program, parentTool Tool, 
 	}
 
 	args := subTool.Parameters.Arguments
-	if args == nil && !subTool.IsCommand() {
+	if args == nil && !subTool.IsCommand() && !subTool.Chat {
 		args = &system.DefaultToolSchema
 	}
 
@@ -344,6 +363,10 @@ func (t Tool) IsDaemon() bool {
 
 func (t Tool) IsOpenAPI() bool {
 	return strings.HasPrefix(t.Instructions, OpenAPIPrefix)
+}
+
+func (t Tool) IsPrint() bool {
+	return strings.HasPrefix(t.Instructions, PrintPrefix)
 }
 
 func (t Tool) IsHTTP() bool {

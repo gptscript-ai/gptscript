@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	validToolName = regexp.MustCompile("^[a-zA-Z0-9_]{1,64}$")
+	validToolName = regexp.MustCompile("^[a-zA-Z0-9]{1,64}$")
 	invalidChars  = regexp.MustCompile("[^a-zA-Z0-9_]+")
 )
 
@@ -25,16 +25,22 @@ func ToolNormalizer(tool string) string {
 		return tool
 	}
 
-	name := invalidChars.ReplaceAllString(tool, "_")
-	for strings.HasSuffix(name, "_") {
-		name = strings.TrimSuffix(name, "_")
+	if len(tool) > 55 {
+		tool = tool[:55]
 	}
 
-	if len(name) > 55 {
-		name = name[:55]
+	tool = invalidChars.ReplaceAllString(tool, "_")
+
+	var result []string
+	for i, part := range strings.Split(tool, "_") {
+		lower := strings.ToLower(part)
+		if i != 0 && len(lower) > 0 {
+			lower = strings.ToTitle(lower[0:1]) + lower[1:]
+		}
+		result = append(result, lower)
 	}
 
-	return name
+	return strings.Join(result, "")
 }
 
 func PickToolName(toolName string, existing map[string]struct{}) string {

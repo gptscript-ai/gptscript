@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
@@ -20,12 +21,14 @@ import (
 type Options struct {
 	DisplayProgress bool   `usage:"-"`
 	DumpState       string `usage:"Dump the internal execution state to a file"`
+	DebugMessages   bool   `usage:"Enable logging of chat completion calls"`
 }
 
 func complete(opts ...Options) (result Options) {
 	for _, opt := range opts {
 		result.DumpState = types.FirstSet(opt.DumpState, result.DumpState)
 		result.DisplayProgress = types.FirstSet(opt.DisplayProgress, result.DisplayProgress)
+		result.DebugMessages = types.FirstSet(opt.DebugMessages, result.DebugMessages)
 	}
 	return
 }
@@ -33,6 +36,7 @@ func complete(opts ...Options) (result Options) {
 type Console struct {
 	dumpState       string
 	displayProgress bool
+	printMessages   bool
 }
 
 var (
@@ -42,7 +46,7 @@ var (
 
 func (c *Console) Start(_ context.Context, prg *types.Program, _ []string, input string) (runner.Monitor, error) {
 	id := atomic.AddInt64(&runID, 1)
-	mon := newDisplay(c.dumpState, c.displayProgress)
+	mon := newDisplay(c.dumpState, c.displayProgress, c.printMessages)
 	mon.dump.ID = fmt.Sprint(id)
 	mon.dump.Program = prg
 	mon.dump.Input = input
@@ -52,11 +56,12 @@ func (c *Console) Start(_ context.Context, prg *types.Program, _ []string, input
 }
 
 type display struct {
-	dump        dump
-	livePrinter *livePrinter
-	dumpState   string
-	callIDMap   map[string]string
-	callLock    sync.Mutex
+	dump          dump
+	printMessages bool
+	livePrinter   *livePrinter
+	dumpState     string
+	callIDMap     map[string]string
+	callLock      sync.Mutex
 }
 
 type livePrinter struct {
@@ -217,7 +222,7 @@ func (d *display) Event(event runner.Event) {
 		call:                  &currentCall,
 		prg:                   d.dump.Program,
 		calls:                 d.dump.Calls,
-		credential:            event.CallContext.IsCredential,
+		toolCategory:          event.CallContext.ToolCategory,
 		userSpecifiedToolName: event.CallContext.ToolName,
 	}
 
@@ -251,7 +256,11 @@ func (d *display) Event(event runner.Event) {
 				"request", toJSON(event.ChatRequest),
 			)
 		}
-		log.Debugf("messages")
+		if d.printMessages {
+			log.Infof("messages")
+		} else {
+			log.Debugf("debug")
+		}
 		currentCall.Messages = append(currentCall.Messages, message{
 			CompletionID: event.ChatCompletionID,
 			Request:      event.ChatRequest,
@@ -290,13 +299,15 @@ func NewConsole(opts ...Options) *Console {
 	return &Console{
 		dumpState:       opt.DumpState,
 		displayProgress: opt.DisplayProgress,
+		printMessages:   opt.DebugMessages,
 	}
 }
 
-func newDisplay(dumpState string, progress bool) *display {
+func newDisplay(dumpState string, progress, printMessages bool) *display {
 	display := &display{
-		dumpState: dumpState,
-		callIDMap: make(map[string]string),
+		dumpState:     dumpState,
+		callIDMap:     make(map[string]string),
+		printMessages: printMessages,
 	}
 	if progress {
 		display.livePrinter = &livePrinter{
@@ -345,7 +356,7 @@ type callName struct {
 	call                  *call
 	prg                   *types.Program
 	calls                 []call
-	credential            bool
+	toolCategory          engine.ToolCategory
 	userSpecifiedToolName string
 }
 
@@ -355,12 +366,12 @@ func (c callName) String() string {
 		currentCall = c.call
 	)
 
-	if c.credential {
+	if c.toolCategory != engine.NoCategory {
 		// We want to print the credential tool in the same format that the user referenced it, if possible.
 		if c.userSpecifiedToolName != "" {
-			return "credential: " + color.YellowString(c.userSpecifiedToolName)
+			return fmt.Sprintf("%s: %s", c.toolCategory, color.YellowString(c.userSpecifiedToolName))
 		}
-		return "credential: " + color.YellowString(currentCall.ToolID)
+		return fmt.Sprintf("%s: %s", c.toolCategory, color.YellowString(currentCall.ToolID))
 	}
 
 	for {

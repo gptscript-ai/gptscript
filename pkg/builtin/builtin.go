@@ -85,6 +85,15 @@ var tools = map[string]types.Tool{
 		},
 		BuiltinFunc: SysAbort,
 	},
+	"sys.chat.finish": {
+		Parameters: types.Parameters{
+			Description: "Concludes the conversation. This can not be used to ask a question.",
+			Arguments: types.ObjectSchema(
+				"summary", "A summary of the dialog",
+			),
+		},
+		BuiltinFunc: SysChatFinish,
+	},
 	"sys.http.post": {
 		Parameters: types.Parameters{
 			Description: "Write contents to a http or https URL using the POST method",
@@ -522,6 +531,26 @@ func SysGetenv(ctx context.Context, env []string, input string) (string, error) 
 	}
 	log.Debugf("looking up env var %s", params.Name)
 	return os.Getenv(params.Name), nil
+}
+
+type ErrChatFinish struct {
+	Message string
+}
+
+func (e *ErrChatFinish) Error() string {
+	return fmt.Sprintf("CHAT FINISH: %s", e.Message)
+}
+
+func SysChatFinish(ctx context.Context, env []string, input string) (string, error) {
+	var params struct {
+		Message string `json:"message,omitempty"`
+	}
+	if err := json.Unmarshal([]byte(input), &params); err != nil {
+		return "", err
+	}
+	return "", &ErrChatFinish{
+		Message: params.Message,
+	}
 }
 
 func SysAbort(ctx context.Context, env []string, input string) (string, error) {

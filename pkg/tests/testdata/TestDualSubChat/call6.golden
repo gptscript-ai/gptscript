@@ -1,0 +1,77 @@
+`{
+  "Model": "gpt-4-turbo-preview",
+  "InternalSystemPrompt": false,
+  "Tools": [
+    {
+      "function": {
+        "toolID": "sys.chat.finish",
+        "name": "chatFinish",
+        "description": "Concludes the conversation. This can not be used to ask a question.",
+        "parameters": {
+          "properties": {
+            "summary": {
+              "description": "A summary of the dialog",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      }
+    }
+  ],
+  "Messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "This is a chatbot2"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "Input to chatbot2"
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "Assistent Response 2 - from chatbot2"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "User 3"
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "Assistant 3"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "User 4"
+        }
+      ]
+    }
+  ],
+  "MaxTokens": 0,
+  "Temperature": null,
+  "JSONResponse": false,
+  "Grammar": "",
+  "Cache": null
+}`

@@ -94,6 +94,12 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 			return false, err
 		}
 		tool.Parameters.InternalPrompt = &v
+	case "chat":
+		v, err := toBool(value)
+		if err != nil {
+			return false, err
+		}
+		tool.Parameters.Chat = v
 	case "export":
 		tool.Parameters.Export = append(tool.Parameters.Export, csv(strings.ToLower(value))...)
 	case "tool", "tools":
@@ -176,7 +182,8 @@ func (c *context) finish(tools *[]types.Tool) {
 	if c.tool.Instructions != "" || c.tool.Parameters.Name != "" ||
 		len(c.tool.Export) > 0 || len(c.tool.Tools) > 0 ||
 		c.tool.GlobalModelName != "" ||
-		len(c.tool.GlobalTools) > 0 {
+		len(c.tool.GlobalTools) > 0 ||
+		c.tool.Chat {
 		*tools = append(*tools, c.tool)
 	}
 	*c = context{}
@@ -188,7 +195,7 @@ type Options struct {
 
 func complete(opts ...Options) (result Options) {
 	for _, opt := range opts {
-		result.AssignGlobals = types.FirstSet(result.AssignGlobals, opt.AssignGlobals)
+		result.AssignGlobals = types.FirstSet(opt.AssignGlobals, result.AssignGlobals)
 	}
 	return
 }
