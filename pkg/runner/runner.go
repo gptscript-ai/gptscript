@@ -108,7 +108,7 @@ func (r *Runner) Run(ctx context.Context, prg types.Program, env []string, input
 
 type Event struct {
 	Time               time.Time              `json:"time,omitempty"`
-	CallContext        *engine.Context        `json:"callContext,omitempty"`
+	CallContext        *engine.BasicContext   `json:"callContext,omitempty"`
 	ToolSubCalls       map[string]engine.Call `json:"toolSubCalls,omitempty"`
 	ToolResults        int                    `json:"toolResults,omitempty"`
 	Type               EventType              `json:"type,omitempty"`
@@ -177,7 +177,7 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 
 	monitor.Event(Event{
 		Time:        time.Now(),
-		CallContext: &callCtx,
+		CallContext: callCtx.ToBasicContext(),
 		Type:        EventTypeCallStart,
 		Content:     input,
 	})
@@ -197,7 +197,7 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 			progressClose()
 			monitor.Event(Event{
 				Time:        time.Now(),
-				CallContext: &callCtx,
+				CallContext: callCtx.ToBasicContext(),
 				Type:        EventTypeCallFinish,
 				Content:     *result.Result,
 			})
@@ -210,7 +210,7 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 
 		monitor.Event(Event{
 			Time:         time.Now(),
-			CallContext:  &callCtx,
+			CallContext:  callCtx.ToBasicContext(),
 			Type:         EventTypeCallSubCalls,
 			ToolSubCalls: result.Calls,
 		})
@@ -222,7 +222,7 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 
 		monitor.Event(Event{
 			Time:        time.Now(),
-			CallContext: &callCtx,
+			CallContext: callCtx.ToBasicContext(),
 			Type:        EventTypeCallContinue,
 			ToolResults: len(callResults),
 		})
@@ -245,7 +245,7 @@ func streamProgress(callCtx *engine.Context, monitor Monitor) (chan<- types.Comp
 			if message := status.PartialResponse; message != nil {
 				monitor.Event(Event{
 					Time:             time.Now(),
-					CallContext:      callCtx,
+					CallContext:      callCtx.ToBasicContext(),
 					Type:             EventTypeCallProgress,
 					ChatCompletionID: status.CompletionID,
 					Content:          message.String(),
@@ -253,7 +253,7 @@ func streamProgress(callCtx *engine.Context, monitor Monitor) (chan<- types.Comp
 			} else {
 				monitor.Event(Event{
 					Time:               time.Now(),
-					CallContext:        callCtx,
+					CallContext:        callCtx.ToBasicContext(),
 					Type:               EventTypeChat,
 					ChatCompletionID:   status.CompletionID,
 					ChatRequest:        status.Request,

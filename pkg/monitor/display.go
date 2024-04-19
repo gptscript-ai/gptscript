@@ -194,7 +194,7 @@ func (d *display) Event(event runner.Event) {
 		currentIndex = len(d.dump.Calls)
 		currentCall = call{
 			ID:       event.CallContext.ID,
-			ParentID: event.CallContext.ParentID(),
+			ParentID: event.CallContext.ParentID,
 			ToolID:   event.CallContext.Tool.ID,
 		}
 		d.dump.Calls = append(d.dump.Calls, currentCall)
@@ -213,20 +213,12 @@ func (d *display) Event(event runner.Event) {
 	}
 
 	callName := callName{
-		prettyIDMap: d.callIDMap,
-		call:        &currentCall,
-		prg:         d.dump.Program,
-		calls:       d.dump.Calls,
-		credential:  event.CallContext.IsCredential,
-	}
-
-	if event.CallContext.Parent != nil {
-		for name, id := range event.CallContext.Parent.Tool.ToolMapping {
-			if id == event.CallContext.Tool.ID {
-				callName.userSpecifiedToolName = name
-				break
-			}
-		}
+		prettyIDMap:           d.callIDMap,
+		call:                  &currentCall,
+		prg:                   d.dump.Program,
+		calls:                 d.dump.Calls,
+		credential:            event.CallContext.IsCredential,
+		userSpecifiedToolName: event.CallContext.ToolName,
 	}
 
 	switch event.Type {

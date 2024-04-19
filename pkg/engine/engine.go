@@ -53,21 +53,31 @@ type CallResult struct {
 	Result string `json:"result,omitempty"`
 }
 
+type commonContext struct {
+	ID           string         `json:"id"`
+	Tool         types.Tool     `json:"tool"`
+	InputContext []InputContext `json:"inputContext"`
+	// IsCredential indicates that the current call is for a credential tool
+	IsCredential bool `json:"isCredential"`
+}
+
 type Context struct {
-	ID                string
+	commonContext
 	Ctx               context.Context
 	Parent            *Context
 	Program           *types.Program
-	Tool              types.Tool
-	InputContext      []InputContext
 	CredentialContext string
-	// IsCredential indicates that the current call is for a credential tool
-	IsCredential bool
 }
 
 type InputContext struct {
 	ToolID  string `json:"toolID,omitempty"`
 	Content string `json:"content,omitempty"`
+}
+
+type BasicContext struct {
+	commonContext `json:",inline"`
+	ToolName      string `json:"toolName,omitempty"`
+	ParentID      string `json:"parentID,omitempty"`
 }
 
 func (c *Context) ParentID() string {
@@ -77,31 +87,42 @@ func (c *Context) ParentID() string {
 	return c.Parent.ID
 }
 
+func (c *Context) ToBasicContext() *BasicContext {
+	var toolName string
+	if c.Parent != nil {
+		for name, id := range c.Parent.Tool.ToolMapping {
+			if id == c.Tool.ID {
+				toolName = name
+				break
+			}
+		}
+	}
+
+	return &BasicContext{
+		commonContext: c.commonContext,
+		ParentID:      c.ParentID(),
+		ToolName:      toolName,
+	}
+}
+
 func (c *Context) UnmarshalJSON([]byte) error {
 	panic("this data struct is circular by design and can not be read from json")
 }
 
 func (c *Context) MarshalJSON() ([]byte, error) {
-	var parentID string
-	if c.Parent != nil {
-		parentID = c.Parent.ID
-	}
-	return json.Marshal(map[string]any{
-		"id":           c.ID,
-		"parentID":     parentID,
-		"tool":         c.Tool,
-		"inputContext": c.InputContext,
-	})
+	return json.Marshal(c.ToBasicContext())
 }
 
 var execID int32
 
 func NewContext(ctx context.Context, prg *types.Program) Context {
 	callCtx := Context{
-		ID:      fmt.Sprint(atomic.AddInt32(&execID, 1)),
+		commonContext: commonContext{
+			ID:   fmt.Sprint(atomic.AddInt32(&execID, 1)),
+			Tool: prg.ToolSet[prg.EntryToolID],
+		},
 		Ctx:     ctx,
 		Program: prg,
-		Tool:    prg.ToolSet[prg.EntryToolID],
 	}
 	return callCtx
 }
@@ -117,12 +138,14 @@ func (c *Context) SubCall(ctx context.Context, toolID, callID string, isCredenti
 	}
 
 	return Context{
-		ID:           callID,
-		Ctx:          ctx,
-		Parent:       c,
-		Program:      c.Program,
-		Tool:         tool,
-		IsCredential: isCredentialTool, // disallow calls to the LLM if this is a credential tool
+		commonContext: commonContext{
+			ID:           callID,
+			Tool:         tool,
+			IsCredential: isCredentialTool,
+		},
+		Ctx:     ctx,
+		Parent:  c,
+		Program: c.Program,
 	}, nil
 }
 
