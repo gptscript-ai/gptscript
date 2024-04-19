@@ -30,10 +30,11 @@ type Monitor interface {
 type MonitorKey struct{}
 
 type Options struct {
-	MonitorFactory MonitorFactory        `usage:"-"`
-	RuntimeManager engine.RuntimeManager `usage:"-"`
-	StartPort      int64                 `usage:"-"`
-	EndPort        int64                 `usage:"-"`
+	MonitorFactory     MonitorFactory        `usage:"-"`
+	RuntimeManager     engine.RuntimeManager `usage:"-"`
+	StartPort          int64                 `usage:"-"`
+	EndPort            int64                 `usage:"-"`
+	CredentialOverride string                `usage:"-"`
 }
 
 func complete(opts ...Options) (result Options) {
@@ -42,6 +43,7 @@ func complete(opts ...Options) (result Options) {
 		result.RuntimeManager = types.FirstSet(opt.RuntimeManager, result.RuntimeManager)
 		result.StartPort = types.FirstSet(opt.StartPort, result.StartPort)
 		result.EndPort = types.FirstSet(opt.EndPort, result.EndPort)
+		result.CredentialOverride = types.FirstSet(opt.CredentialOverride, result.CredentialOverride)
 	}
 	if result.MonitorFactory == nil {
 		result.MonitorFactory = noopFactory{}
@@ -62,6 +64,7 @@ type Runner struct {
 	ports          engine.Ports
 	credCtx        string
 	credMutex      sync.Mutex
+	credOverrides  string
 }
 
 func New(client engine.Model, credCtx string, opts ...Options) (*Runner, error) {
@@ -73,6 +76,7 @@ func New(client engine.Model, credCtx string, opts ...Options) (*Runner, error) 
 		runtimeManager: opt.RuntimeManager,
 		credCtx:        credCtx,
 		credMutex:      sync.Mutex{},
+		credOverrides:  opt.CredentialOverride,
 	}
 
 	if opt.StartPort != 0 {
@@ -336,6 +340,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 	r.credMutex.Lock()
 	defer r.credMutex.Unlock()
 
+	// Set up the credential store.
 	c, err := config.ReadCLIConfig("")
 	if err != nil {
 		return nil, fmt.Errorf("failed to read CLI config: %w", err)
@@ -346,7 +351,24 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 		return nil, fmt.Errorf("failed to create credentials store: %w", err)
 	}
 
+	// Parse the credential overrides from the command line argument, if there are any.
+	var credOverrides map[string]map[string]string
+	if r.credOverrides != "" {
+		credOverrides, err = parseCredentialOverrides(r.credOverrides)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse credential overrides: %w", err)
+		}
+	}
+
 	for _, credToolName := range callCtx.Tool.Credentials {
+		// Check whether the credential was overridden before we attempt to find it in the store or run the tool.
+		if override, exists := credOverrides[credToolName]; exists {
+			for k, v := range override {
+				env = append(env, fmt.Sprintf("%s=%s", k, v))
+			}
+			continue
+		}
+
 		var (
 			cred   *credentials.Credential
 			exists bool
