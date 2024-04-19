@@ -44,6 +44,7 @@ type GPTScript struct {
 	Debug              bool   `usage:"Enable debug logging"`
 	Quiet              *bool  `usage:"No output logging (set --quiet=false to force on even when there is no TTY)" short:"q"`
 	Output             string `usage:"Save output to a file, or - for stdout" short:"o"`
+	EventsStreamTo     string `usage:"Stream events to this location, could be a file descriptor/handle (e.g. fd://2), filename, or named pipe (e.g. \\\\.\\pipe\\my-pipe)" name:"events-stream-to"`
 	Input              string `usage:"Read input from a file (\"-\" for stdin)" short:"f"`
 	SubTool            string `usage:"Use tool of this name, not the first tool in file" local:"true"`
 	Assemble           bool   `usage:"Assemble tool to a single artifact, saved to --output" hidden:"true" local:"true"`
@@ -136,6 +137,15 @@ func (r *GPTScript) NewGPTScriptOpts() (gptscript.Options, error) {
 	}
 
 	opts.Runner.CredentialOverride = r.CredentialOverride
+
+	if r.EventsStreamTo != "" {
+		mf, err := monitor.NewFileFactory(r.EventsStreamTo)
+		if err != nil {
+			return gptscript.Options{}, err
+		}
+
+		opts.Runner.MonitorFactory = mf
+	}
 
 	return opts, nil
 }

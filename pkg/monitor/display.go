@@ -203,7 +203,8 @@ func (d *display) Event(event runner.Event) {
 	log := log.Fields(
 		"id", currentCall.ID,
 		"parentID", currentCall.ParentID,
-		"toolID", currentCall.ToolID)
+		"toolID", currentCall.ToolID,
+	)
 
 	_, ok := d.callIDMap[currentCall.ID]
 	if !ok {
