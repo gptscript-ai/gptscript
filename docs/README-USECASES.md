@@ -98,7 +98,7 @@ Here is an example of a web app that leverages GPTScript to recognize ingredient
 
 ### Image Generation
 
-Here is a GPTScript that takes a story prompt and generates an illustrated children's book: [story-book.gpt](../examples/story-book)
+Here is a GPTScript that takes a story prompt and generates an illustrated children's book: [story-book.gpt](https://github.com/gptscript-ai/story-book)
 
 ## Memory Management
 
