@@ -19,6 +19,6 @@ func SysDaemon() error {
 	cmd := exec.CommandContext(ctx, os.Args[2], os.Args[3:]...)
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
 	return cmd.Run()
 }
