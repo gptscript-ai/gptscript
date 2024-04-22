@@ -15,12 +15,13 @@ import (
 	"sync/atomic"
 
 	"github.com/google/shlex"
+	context2 "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
 
-func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) (cmdOut string, cmdErr error) {
+func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string, isCredential bool) (cmdOut string, cmdErr error) {
 	id := fmt.Sprint(atomic.AddInt64(&completionID, 1))
 
 	defer func() {
@@ -63,6 +64,12 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string) 
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = io.MultiWriter(all, os.Stderr)
 	cmd.Stdout = io.MultiWriter(all, output)
+
+	if isCredential {
+		pause := context2.GetPauseFuncFromCtx(ctx)
+		unpause := pause()
+		defer unpause()
+	}
 
 	if err := cmd.Run(); err != nil {
 		_, _ = os.Stderr.Write(output.Bytes())

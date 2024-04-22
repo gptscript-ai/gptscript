@@ -21,7 +21,6 @@ import (
 	"github.com/BurntSushi/locker"
 	"github.com/google/shlex"
 	"github.com/gptscript-ai/gptscript/pkg/confirm"
-	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/jaytaylor/html2text"
 )
@@ -647,15 +646,7 @@ func SysDownload(ctx context.Context, env []string, input string) (_ string, err
 	return params.Location, nil
 }
 
-func SysPrompt(ctx context.Context, _ []string, input string) (_ string, err error) {
-	monitor := ctx.Value(runner.MonitorKey{})
-	if monitor == nil {
-		return "", errors.New("no monitor in context")
-	}
-
-	unpause := monitor.(runner.Monitor).Pause()
-	defer unpause()
-
+func SysPrompt(_ context.Context, _ []string, input string) (_ string, err error) {
 	var params struct {
 		Message   string `json:"message,omitempty"`
 		Fields    string `json:"fields,omitempty"`

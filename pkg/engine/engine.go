@@ -171,7 +171,7 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 		} else if tool.IsOpenAPI() {
 			return e.runOpenAPI(tool, input)
 		}
-		s, err := e.runCommand(ctx.WrappedContext(), tool, input)
+		s, err := e.runCommand(ctx.WrappedContext(), tool, input, ctx.IsCredential)
 		if err != nil {
 			return nil, err
 		}

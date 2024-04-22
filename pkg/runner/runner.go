@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gptscript-ai/gptscript/pkg/config"
+	context2 "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -26,8 +27,6 @@ type Monitor interface {
 	Pause() func()
 	Stop(output string, err error)
 }
-
-type MonitorKey struct{}
 
 type Options struct {
 	MonitorFactory     MonitorFactory        `usage:"-"`
@@ -182,10 +181,7 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 		Content:     input,
 	})
 
-	// The sys.prompt tool is a special case where we need to pass the monitor to the builtin function.
-	if callCtx.Tool.BuiltinFunc != nil && callCtx.Tool.ID == "sys.prompt" {
-		callCtx.Ctx = context.WithValue(callCtx.Ctx, MonitorKey{}, monitor)
-	}
+	callCtx.Ctx = context2.AddPauseFuncToCtx(callCtx.Ctx, monitor.Pause)
 
 	result, err := e.Start(callCtx, input)
 	if err != nil {
