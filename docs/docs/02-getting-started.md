@@ -51,7 +51,9 @@ $env:OPENAI_API_KEY = 'your-api-key'
 
 ```shell
 gptscript https://get.gptscript.ai/echo.gpt --input 'Hello, World!'
+```
 
+```
 OUTPUT:
 
 Hello, World!
