@@ -6,5 +6,6 @@
 **/__pycache__
 /docs/yarn.lock
 /releases
+/binaries
 /checksums.txt
 /.env*
