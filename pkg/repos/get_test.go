@@ -26,7 +26,7 @@ func TestManager_GetContext(t *testing.T) {
 		Source: types.ToolSource{
 			Repo: &types.Repo{
 				VCS:      "git",
-				Root:     "https://github.com/gptscript-ai/image-generation.git",
+				Root:     "https://github.com/gptscript-ai/dalle-image-generation.git",
 				Revision: "b9d9ed60c25da7c0e01d504a7219d1c6e460fe80",
 			},
 		},

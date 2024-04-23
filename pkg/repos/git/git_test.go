@@ -18,7 +18,7 @@ var (
 
 func TestFetch(t *testing.T) {
 	err := Fetch(context.Background(), testCacheHome,
-		"https://github.com/gptscript-ai/image-generation.git",
+		"https://github.com/gptscript-ai/dalle-image-generation.git",
 		testCommit)
 	require.NoError(t, err)
 }
@@ -28,7 +28,7 @@ func TestCheckout(t *testing.T) {
 	err := os.RemoveAll(commitDir)
 	require.NoError(t, err)
 	err = Checkout(context.Background(), testCacheHome,
-		"https://github.com/gptscript-ai/image-generation.git",
+		"https://github.com/gptscript-ai/dalle-image-generation.git",
 		testCommit, commitDir)
 	require.NoError(t, err)
 }

@@ -57,7 +57,7 @@ You can also refer to OpenAPI definition files as though they were GPTScript too
 GPTScript tools can be packaged and shared on GitHub, and referred to by their GitHub URL. For example:
 
 ```yaml
-tools: github.com/gptscript-ai/image-generation, github.com/gptscript-ai/vision, sys.read
+tools: github.com/gptscript-ai/dalle-image-generation, github.com/gptscript-ai/gpt4-v-vision, sys.read
 
 Generate an image of a city skyline at night and write the resulting image to a file called city_skyline.png.
 
