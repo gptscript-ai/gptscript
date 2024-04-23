@@ -1,4 +1,4 @@
-tools: sys.find, sys.read, sys.write, recipegenerator, github.com/gptscript-ai/vision
+tools: sys.find, sys.read, sys.write, recipegenerator, github.com/gptscript-ai/gpt4-v-vision
 
 Perform the following steps in order:
 
