@@ -211,12 +211,6 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 		cmdArgs = append(cmdArgs, f.Name())
 	}
 
-	// This is a bit hacky, but we want ARGS="x y" to expand to "x" and "y" not "x y" if used as arguments
-	cmdArgs, err = shlex.Split(strings.Join(cmdArgs, " "))
-	if err != nil {
-		return nil, nil, err
-	}
-
 	// This is a workaround for Windows, where the command interpreter is constructed with unix style paths
 	// It converts unix style paths to windows style paths
 	if runtime.GOOS == "windows" {
