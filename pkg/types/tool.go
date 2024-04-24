@@ -3,6 +3,7 @@ package types
 import (
 	"context"
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 
@@ -54,38 +55,61 @@ func (p Program) ChatName() string {
 	return p.Name
 }
 
-func (p Program) GetContextToolIDs(toolID string) (result []string, _ error) {
-	seen := map[string]struct{}{}
+type ToolReference struct {
+	Reference string
+	Arg       string
+	ToolID    string
+}
+
+func (p Program) GetContextToolRefs(toolID string) (result []ToolReference, _ error) {
+	seen := map[struct {
+		toolID string
+		arg    string
+	}]struct{}{}
 	tool := p.ToolSet[toolID]
 
-	subToolIDs, err := tool.GetToolIDsFromNames(tool.Tools)
+	subToolRefs, err := tool.GetToolRefsFromNames(tool.Tools)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, subToolID := range subToolIDs {
-		subTool := p.ToolSet[subToolID]
-		exportContextToolIDs, err := subTool.GetToolIDsFromNames(subTool.ExportContext)
+	for _, subToolRef := range subToolRefs {
+		subTool := p.ToolSet[subToolRef.ToolID]
+		exportContextToolRefs, err := subTool.GetToolRefsFromNames(subTool.ExportContext)
 		if err != nil {
 			return nil, err
 		}
-		for _, exportContextToolID := range exportContextToolIDs {
-			if _, ok := seen[exportContextToolID]; !ok {
-				seen[exportContextToolID] = struct{}{}
-				result = append(result, exportContextToolID)
+		for _, exportContextToolRef := range exportContextToolRefs {
+			key := struct {
+				toolID string
+				arg    string
+			}{
+				toolID: exportContextToolRef.ToolID,
+				arg:    exportContextToolRef.Arg,
+			}
+			if _, ok := seen[key]; !ok {
+				seen[key] = struct{}{}
+				result = append(result, exportContextToolRef)
 			}
 		}
 	}
 
-	contextToolIDs, err := p.ToolSet[toolID].GetToolIDsFromNames(p.ToolSet[toolID].Context)
+	contextToolRefs, err := p.ToolSet[toolID].GetToolRefsFromNames(p.ToolSet[toolID].Context)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, contextToolID := range contextToolIDs {
-		if _, ok := seen[contextToolID]; !ok {
-			seen[contextToolID] = struct{}{}
-			result = append(result, contextToolID)
+	for _, contextToolRef := range contextToolRefs {
+		key := struct {
+			toolID string
+			arg    string
+		}{
+			toolID: contextToolRef.ToolID,
+			arg:    contextToolRef.Arg,
+		}
+		if _, ok := seen[key]; !ok {
+			seen[key] = struct{}{}
+			result = append(result, contextToolRef)
 		}
 	}
 
@@ -155,13 +179,32 @@ type Tool struct {
 	WorkingDir  string            `json:"workingDir,omitempty"`
 }
 
-func (t Tool) GetToolIDsFromNames(names []string) (result []string, _ error) {
+func SplitArg(hasArg string) (prefix, arg string) {
+	var (
+		fields = strings.Fields(hasArg)
+		idx    = slices.Index(fields, "with")
+	)
+
+	if idx == -1 {
+		return strings.TrimSpace(hasArg), ""
+	}
+
+	return strings.Join(fields[:idx], " "),
+		strings.Join(fields[idx+1:], " ")
+}
+
+func (t Tool) GetToolRefsFromNames(names []string) (result []ToolReference, _ error) {
 	for _, toolName := range names {
 		toolID, ok := t.ToolMapping[toolName]
 		if !ok {
 			return nil, NewErrToolNotFound(toolName)
 		}
-		result = append(result, toolID)
+		_, arg := SplitArg(toolName)
+		result = append(result, ToolReference{
+			Arg:       arg,
+			Reference: toolName,
+			ToolID:    toolID,
+		})
 	}
 	return
 }

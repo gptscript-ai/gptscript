@@ -32,6 +32,7 @@ type Engine struct {
 }
 
 type State struct {
+	Input      string                              `json:"input,omitempty"`
 	Completion types.CompletionRequest             `json:"completion,omitempty"`
 	Pending    map[string]types.CompletionToolCall `json:"pending,omitempty"`
 	Results    map[string]CallResult               `json:"results,omitempty"`
@@ -169,8 +170,14 @@ func (c *Context) WrappedContext() context.Context {
 	return context.WithValue(c.Ctx, engineContext{}, c)
 }
 
-func (e *Engine) Start(ctx Context, input string) (*Return, error) {
+func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 	tool := ctx.Tool
+
+	defer func() {
+		if ret != nil && ret.State != nil {
+			ret.State.Input = input
+		}
+	}()
 
 	if tool.IsCommand() {
 		if tool.IsHTTP() {
@@ -321,6 +328,7 @@ func (e *Engine) Continue(ctx Context, state *State, results ...CallResult) (*Re
 	var added bool
 
 	state = &State{
+		Input:      state.Input,
 		Completion: state.Completion,
 		Pending:    state.Pending,
 		Results:    map[string]CallResult{},

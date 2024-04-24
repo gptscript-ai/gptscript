@@ -1,0 +1,12 @@
+context: fromcontext with ${file}
+context: fromcontext from other.gpt with ${file} as first
+context: fromcontext from other.gpt with ${file} as second
+arg: file: something
+
+This is from tool
+---
+name: fromcontext
+args: first: an arg
+
+#!/bin/bash
+echo this is from context -- ${first}

@@ -127,6 +127,7 @@ func TestSubChat(t *testing.T) {
   "state": {
     "continuation": {
       "state": {
+        "input": "Hello",
         "completion": {
           "Model": "gpt-4-turbo-preview",
           "InternalSystemPrompt": null,
@@ -249,6 +250,7 @@ func TestSubChat(t *testing.T) {
   "state": {
     "continuation": {
       "state": {
+        "input": "Hello",
         "completion": {
           "Model": "gpt-4-turbo-preview",
           "InternalSystemPrompt": null,
@@ -399,6 +401,7 @@ func TestChat(t *testing.T) {
   "state": {
     "continuation": {
       "state": {
+        "input": "Hello",
         "completion": {
           "Model": "gpt-4-turbo-preview",
           "InternalSystemPrompt": false,
@@ -452,6 +455,7 @@ func TestChat(t *testing.T) {
   "state": {
     "continuation": {
       "state": {
+        "input": "Hello",
         "completion": {
           "Model": "gpt-4-turbo-preview",
           "InternalSystemPrompt": false,
@@ -527,6 +531,15 @@ func TestExportContext(t *testing.T) {
 func TestContext(t *testing.T) {
 	runner := tester.NewRunner(t)
 	x := runner.RunDefault()
+	assert.Equal(t, "TEST RESULT CALL: 1", x)
+}
+
+func TestContextArg(t *testing.T) {
+	runner := tester.NewRunner(t)
+	x, err := runner.Run("", `{
+"file": "foo.db"
+}`)
+	require.NoError(t, err)
 	assert.Equal(t, "TEST RESULT CALL: 1", x)
 }
 
