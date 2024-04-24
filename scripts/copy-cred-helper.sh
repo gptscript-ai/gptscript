@@ -19,7 +19,10 @@ case "$OS" in
 	"windows")
 		case "$ARCH" in
 			"amd64")
-				cp binaries/gptscript-credential-wincred.exe releases/default_windows_amd64_v1
+				cp binaries/gptscript-credential-wincred-amd64.exe releases/default_windows_amd64_v1/gptscript-credential-wincred.exe
+				;;
+			"arm64")
+				cp binaries/gptscript-credential-wincred-arm64.exe releases/default_windows_arm64/gptscript-credential-wincred.exe
 				;;
 		esac
 		;;

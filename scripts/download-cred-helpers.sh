@@ -13,5 +13,8 @@ cd "$BINARY_DIR"
 wget -O gptscript-credential-osxkeychain "https://github.com/gptscript-ai/gptscript-credential-helpers/releases/download/${GPTSCRIPT_CRED_HELPERS_VERSION}/gptscript-credential-osxkeychain"
 chmod +x gptscript-credential-osxkeychain
 
-wget -O gptscript-credential-wincred.exe "https://github.com/gptscript-ai/gptscript-credential-helpers/releases/download/${GPTSCRIPT_CRED_HELPERS_VERSION}/gptscript-credential-wincred-${GPTSCRIPT_CRED_HELPERS_VERSION}.windows-amd64.exe"
-chmod +x gptscript-credential-wincred.exe
+wget -O gptscript-credential-wincred-amd64.exe "https://github.com/gptscript-ai/gptscript-credential-helpers/releases/download/${GPTSCRIPT_CRED_HELPERS_VERSION}/gptscript-credential-wincred-${GPTSCRIPT_CRED_HELPERS_VERSION}.windows-amd64.exe"
+chmod +x gptscript-credential-wincred-amd64.exe
+
+wget -O gptscript-credential-wincred-arm64.exe "https://github.com/gptscript-ai/gptscript-credential-helpers/releases/download/${GPTSCRIPT_CRED_HELPERS_VERSION}/gptscript-credential-wincred-${GPTSCRIPT_CRED_HELPERS_VERSION}.windows-arm64.exe"
+chmod +x gptscript-credential-wincred-arm64.exe
