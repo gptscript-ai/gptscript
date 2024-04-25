@@ -58,7 +58,7 @@ func Start(ctx context.Context, prevState runner.ChatState, chatter Chatter, prg
 		if startInput != "" {
 			input = startInput
 			startInput = ""
-		} else if !(prevState == nil && prg.ToolSet[prg.EntryToolID].Arguments == nil) {
+		} else if targetTool := prg.ToolSet[prg.EntryToolID]; !(prevState == nil && targetTool.Arguments == nil && targetTool.Instructions != "") {
 			// The above logic will skip prompting if this is the first loop and the chat expects no args
 			input, ok, err = prompter.Readline()
 			if !ok || err != nil {
