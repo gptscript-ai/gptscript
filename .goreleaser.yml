@@ -6,7 +6,6 @@ before:
   hooks:
     # Generate UI assets to embedded in binaries
     - make build-ui
-    - ./scripts/download-cred-helpers.sh
 
 builds:
   - id: default
@@ -34,11 +33,6 @@ archives:
     builds:
       - default
       - mac
-    files:
-      - LICENSE*
-      - README*
-      - src: '{{ if eq .Os "darwin" }}binaries/darwin/*{{ else }}binaries/{{ .Os }}/{{ .Arch }}/*{{ end }}'
-        strip_parent: true
     name_template: 'gptscript-v{{ .Version }}-{{ if eq .Os "darwin" }}macOS-universal{{ else }}{{ .Os }}-{{ .Arch }}{{ .Arm }}{{ end }}'
     format_overrides:
       - goos: windows
