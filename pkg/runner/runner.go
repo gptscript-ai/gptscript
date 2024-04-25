@@ -199,7 +199,7 @@ func (r *Runner) Run(ctx context.Context, prg types.Program, env []string, input
 	callCtx := engine.NewContext(ctx, &prg)
 	state, err := r.call(callCtx, monitor, env, input)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 	if state.Continuation != nil {
 		return "", &ErrContinuation{
