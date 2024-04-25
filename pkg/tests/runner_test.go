@@ -559,3 +559,19 @@ func TestExport(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "TEST RESULT CALL: 3", x)
 }
+
+func TestShlex(t *testing.T) {
+	runner := tester.NewRunner(t)
+
+	runner.RespondWith(tester.Result{
+		Func: types.CompletionFunctionCall{
+			Name: "transient",
+		},
+	})
+	x, err := runner.Run("", `{
+"args":" x y  z  "
+}`)
+	require.NoError(t, err)
+	// The fact the white space is all perfect means that the string didn't get passed as one arg but multiple
+	assert.Equal(t, "x y z\n", x)
+}
