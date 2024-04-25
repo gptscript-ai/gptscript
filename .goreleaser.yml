@@ -6,6 +6,7 @@ before:
   hooks:
     # Generate UI assets to embedded in binaries
     - make build-ui
+    - ./scripts/download-cred-helpers.sh
 
 builds:
   - id: default
@@ -21,12 +22,16 @@ builds:
       - -s
       - -w
       - -X "github.com/gptscript-ai/gptscript/pkg/version.Tag=v{{ .Version }}"
+    hooks:
+      post: ./scripts/copy-cred-helper.sh {{ .Os }} {{ .Arch }}
 
 universal_binaries:
   - id: mac
     ids:
       - default
     replace: true
+    hooks:
+      post: cp binaries/gptscript-credential-osxkeychain releases/mac_darwin_all
 
 archives:
   - id: default
@@ -60,6 +65,7 @@ brews:
   - description: "GPTScript CLI"
     install: |
       bin.install "gptscript"
+      {{ if eq .Os "darwin" }}bin.install "gptscript-credential-osxkeychain"{{ end }}
     homepage: "https://github.com/gptscript-ai/gptscript"
     skip_upload: false
     folder: "Formula"
