@@ -22,22 +22,23 @@ builds:
       - -s
       - -w
       - -X "github.com/gptscript-ai/gptscript/pkg/version.Tag=v{{ .Version }}"
-    hooks:
-      post: ./scripts/copy-cred-helper.sh {{ .Os }} {{ .Arch }}
 
 universal_binaries:
   - id: mac
     ids:
       - default
     replace: true
-    hooks:
-      post: cp binaries/gptscript-credential-osxkeychain releases/mac_darwin_all
 
 archives:
   - id: default
     builds:
       - default
       - mac
+    files:
+      - LICENSE*
+      - README*
+      - src: '{{ if eq .Os "darwin" }}binaries/darwin/*{{ else }}binaries/{{ .Os }}/{{ .Arch }}/*{{ end }}'
+        strip_parent: true
     name_template: 'gptscript-v{{ .Version }}-{{ if eq .Os "darwin" }}macOS-universal{{ else }}{{ .Os }}-{{ .Arch }}{{ .Arm }}{{ end }}'
     format_overrides:
       - goos: windows
