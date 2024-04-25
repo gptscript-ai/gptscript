@@ -22,9 +22,10 @@ type Client struct {
 }
 
 type Result struct {
-	Text string
-	Func types.CompletionFunctionCall
-	Err  error
+	Text    string
+	Func    types.CompletionFunctionCall
+	Content []types.ContentPart
+	Err     error
 }
 
 func (c *Client) Call(_ context.Context, messageRequest types.CompletionRequest, _ chan<- types.CompletionStatus) (*types.CompletionMessage, error) {
@@ -51,6 +52,25 @@ func (c *Client) Call(_ context.Context, messageRequest types.CompletionRequest,
 
 	if result.Err != nil {
 		return nil, result.Err
+	}
+
+	if len(result.Content) > 0 {
+		msg := &types.CompletionMessage{
+			Role: types.CompletionMessageRoleTypeAssistant,
+		}
+		for _, contentPart := range result.Content {
+			if contentPart.ToolCall == nil {
+				msg.Content = append(msg.Content, contentPart)
+			} else {
+				for i, tool := range messageRequest.Tools {
+					if contentPart.ToolCall.Function.Name == tool.Function.Name {
+						contentPart.ToolCall.Index = &i
+						msg.Content = append(msg.Content, contentPart)
+					}
+				}
+			}
+		}
+		return msg, nil
 	}
 
 	for i, tool := range messageRequest.Tools {
@@ -96,16 +116,25 @@ func (r *Runner) RunDefault() string {
 	return result
 }
 
-func (r *Runner) Run(script, input string) (string, error) {
+func (r *Runner) Load(script string) (types.Program, error) {
 	if script == "" {
 		script = "test.gpt"
 	}
-	prg, err := loader.Program(context.Background(), filepath.Join(".", "testdata", r.Client.t.Name(), script), "")
+	return loader.Program(context.Background(), filepath.Join(".", "testdata", r.Client.t.Name(), script), "")
+}
+
+func (r *Runner) Run(script, input string) (string, error) {
+	prg, err := r.Load(script)
 	if err != nil {
 		return "", err
 	}
 
 	return r.Runner.Run(context.Background(), prg, os.Environ(), input)
+}
+
+func (r *Runner) AssertResponded(t *testing.T) {
+	t.Helper()
+	require.Len(t, r.Client.result, 0)
 }
 
 func (r *Runner) RespondWith(result ...Result) {
@@ -119,7 +148,9 @@ func NewRunner(t *testing.T) *Runner {
 		t: t,
 	}
 
-	run, err := runner.New(c, "default")
+	run, err := runner.New(c, "default", runner.Options{
+		Sequential: true,
+	})
 	require.NoError(t, err)
 
 	return &Runner{

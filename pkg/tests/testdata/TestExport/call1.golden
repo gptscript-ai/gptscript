@@ -23,7 +23,7 @@
     {
       "function": {
         "toolID": "testdata/TestExport/parent.gpt:11",
-        "name": "parent_local",
+        "name": "parentLocal",
         "parameters": {
           "properties": {
             "defaultPromptParameter": {

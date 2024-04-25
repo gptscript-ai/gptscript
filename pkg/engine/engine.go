@@ -8,6 +8,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
@@ -37,9 +38,9 @@ type State struct {
 }
 
 type Return struct {
-	State  *State
-	Calls  map[string]Call
-	Result *string
+	State  *State          `json:"state,omitempty"`
+	Calls  map[string]Call `json:"calls,omitempty"`
+	Result *string         `json:"result,omitempty"`
 }
 
 type Call struct {
@@ -51,33 +52,41 @@ type CallResult struct {
 	ToolID string `json:"toolID,omitempty"`
 	CallID string `json:"callID,omitempty"`
 	Result string `json:"result,omitempty"`
+	User   string `json:"user,omitempty"`
 }
 
 type commonContext struct {
 	ID           string         `json:"id"`
 	Tool         types.Tool     `json:"tool"`
 	InputContext []InputContext `json:"inputContext"`
-	// IsCredential indicates that the current call is for a credential tool
-	IsCredential bool `json:"isCredential"`
+	ToolCategory ToolCategory   `json:"toolCategory,omitempty"`
+}
+
+type CallContext struct {
+	commonContext `json:",inline"`
+	ToolName      string `json:"toolName,omitempty"`
+	ParentID      string `json:"parentID,omitempty"`
 }
 
 type Context struct {
 	commonContext
-	Ctx               context.Context
-	Parent            *Context
-	Program           *types.Program
-	CredentialContext string
+	Ctx          context.Context
+	Parent       *Context
+	Program      *types.Program
+	ToolCategory ToolCategory
 }
+
+type ToolCategory string
+
+const (
+	CredentialToolCategory ToolCategory = "credential"
+	ContextToolCategory    ToolCategory = "context"
+	NoCategory             ToolCategory = ""
+)
 
 type InputContext struct {
 	ToolID  string `json:"toolID,omitempty"`
 	Content string `json:"content,omitempty"`
-}
-
-type BasicContext struct {
-	commonContext `json:",inline"`
-	ToolName      string `json:"toolName,omitempty"`
-	ParentID      string `json:"parentID,omitempty"`
 }
 
 func (c *Context) ParentID() string {
@@ -87,7 +96,7 @@ func (c *Context) ParentID() string {
 	return c.Parent.ID
 }
 
-func (c *Context) ToBasicContext() *BasicContext {
+func (c *Context) GetCallContext() *CallContext {
 	var toolName string
 	if c.Parent != nil {
 		for name, id := range c.Parent.Tool.ToolMapping {
@@ -98,7 +107,7 @@ func (c *Context) ToBasicContext() *BasicContext {
 		}
 	}
 
-	return &BasicContext{
+	return &CallContext{
 		commonContext: c.commonContext,
 		ParentID:      c.ParentID(),
 		ToolName:      toolName,
@@ -110,7 +119,7 @@ func (c *Context) UnmarshalJSON([]byte) error {
 }
 
 func (c *Context) MarshalJSON() ([]byte, error) {
-	return json.Marshal(c.ToBasicContext())
+	return json.Marshal(c.GetCallContext())
 }
 
 var execID int32
@@ -127,7 +136,7 @@ func NewContext(ctx context.Context, prg *types.Program) Context {
 	return callCtx
 }
 
-func (c *Context) SubCall(ctx context.Context, toolID, callID string, isCredentialTool bool) (Context, error) {
+func (c *Context) SubCall(ctx context.Context, toolID, callID string, toolCategory ToolCategory) (Context, error) {
 	tool, ok := c.Program.ToolSet[toolID]
 	if !ok {
 		return Context{}, fmt.Errorf("failed to file tool for id [%s]", toolID)
@@ -141,7 +150,7 @@ func (c *Context) SubCall(ctx context.Context, toolID, callID string, isCredenti
 		commonContext: commonContext{
 			ID:           callID,
 			Tool:         tool,
-			IsCredential: isCredentialTool,
+			ToolCategory: toolCategory,
 		},
 		Ctx:     ctx,
 		Parent:  c,
@@ -170,8 +179,10 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 			return e.runDaemon(ctx.Ctx, ctx.Program, tool, input)
 		} else if tool.IsOpenAPI() {
 			return e.runOpenAPI(tool, input)
+		} else if tool.IsPrint() {
+			return e.runPrint(tool)
 		}
-		s, err := e.runCommand(ctx.WrappedContext(), tool, input, ctx.IsCredential)
+		s, err := e.runCommand(ctx.WrappedContext(), tool, input, ctx.ToolCategory)
 		if err != nil {
 			return nil, err
 		}
@@ -180,7 +191,7 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 		}, nil
 	}
 
-	if ctx.IsCredential {
+	if ctx.ToolCategory == CredentialToolCategory {
 		return nil, fmt.Errorf("credential tools cannot make calls to the LLM")
 	}
 
@@ -193,27 +204,21 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 		InternalSystemPrompt: tool.Parameters.InternalPrompt,
 	}
 
+	if tool.Chat && completion.InternalSystemPrompt == nil {
+		completion.InternalSystemPrompt = new(bool)
+	}
+
 	var err error
 	completion.Tools, err = tool.GetCompletionTools(*ctx.Program)
 	if err != nil {
 		return nil, err
 	}
 
-	var instructions []string
+	completion.Messages = addUpdateSystem(ctx, tool, completion.Messages)
 
-	for _, context := range ctx.InputContext {
-		instructions = append(instructions, context.Content)
-	}
-
-	if tool.Instructions != "" {
-		instructions = append(instructions, tool.Instructions)
-	}
-
-	if len(instructions) > 0 {
-		completion.Messages = append(completion.Messages, types.CompletionMessage{
-			Role:    types.CompletionMessageRoleTypeSystem,
-			Content: types.Text(strings.Join(instructions, "\n")),
-		})
+	if _, def := system.IsDefaultPrompt(input); tool.Chat && def {
+		// Ignore "default prompts" from chat
+		input = ""
 	}
 
 	if input != "" {
@@ -226,6 +231,33 @@ func (e *Engine) Start(ctx Context, input string) (*Return, error) {
 	return e.complete(ctx.Ctx, &State{
 		Completion: completion,
 	})
+}
+
+func addUpdateSystem(ctx Context, tool types.Tool, msgs []types.CompletionMessage) []types.CompletionMessage {
+	var instructions []string
+
+	for _, context := range ctx.InputContext {
+		instructions = append(instructions, context.Content)
+	}
+
+	if tool.Instructions != "" {
+		instructions = append(instructions, tool.Instructions)
+	}
+
+	if len(instructions) == 0 {
+		return msgs
+	}
+
+	msg := types.CompletionMessage{
+		Role:    types.CompletionMessageRoleTypeSystem,
+		Content: types.Text(strings.Join(instructions, "\n")),
+	}
+
+	if len(msgs) > 0 && msgs[0].Role == types.CompletionMessageRoleTypeSystem {
+		return append([]types.CompletionMessage{msg}, msgs[1:]...)
+	}
+
+	return append([]types.CompletionMessage{msg}, msgs...)
 }
 
 func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
@@ -285,7 +317,9 @@ func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 	return &ret, nil
 }
 
-func (e *Engine) Continue(ctx context.Context, state *State, results ...CallResult) (*Return, error) {
+func (e *Engine) Continue(ctx Context, state *State, results ...CallResult) (*Return, error) {
+	var added bool
+
 	state = &State{
 		Completion: state.Completion,
 		Pending:    state.Pending,
@@ -293,17 +327,22 @@ func (e *Engine) Continue(ctx context.Context, state *State, results ...CallResu
 	}
 
 	for _, result := range results {
-		state.Results[result.CallID] = result
+		if result.CallID != "" {
+			state.Results[result.CallID] = result
+		}
+		if result.User != "" {
+			added = true
+			state.Completion.Messages = append(state.Completion.Messages, types.CompletionMessage{
+				Role:    types.CompletionMessageRoleTypeUser,
+				Content: types.Text(result.User),
+			})
+		}
 	}
 
 	ret := Return{
 		State: state,
 		Calls: map[string]Call{},
 	}
-
-	var (
-		added bool
-	)
 
 	for id, pending := range state.Pending {
 		if _, ok := state.Results[id]; !ok {
@@ -315,6 +354,7 @@ func (e *Engine) Continue(ctx context.Context, state *State, results ...CallResu
 	}
 
 	if len(ret.Calls) > 0 {
+		// Outstanding tool calls still pending
 		return &ret, nil
 	}
 
@@ -346,5 +386,6 @@ func (e *Engine) Continue(ctx context.Context, state *State, results ...CallResu
 		return nil, fmt.Errorf("invalid continue call, no completion needed")
 	}
 
-	return e.complete(ctx, state)
+	state.Completion.Messages = addUpdateSystem(ctx, ctx.Tool, state.Completion.Messages)
+	return e.complete(ctx.Ctx, state)
 }

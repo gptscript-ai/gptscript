@@ -1,0 +1,17 @@
+tools: chatbot, chatbot2
+
+Call chatbots
+
+---
+tools: sys.chat.finish
+name: chatbot
+chat: true
+
+This is a chatbot
+
+---
+tools: sys.chat.finish
+name: chatbot2
+chat: true
+
+This is a chatbot2

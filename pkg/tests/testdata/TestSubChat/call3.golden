@@ -1,0 +1,36 @@
+`{
+  "Model": "gpt-4-turbo-preview",
+  "InternalSystemPrompt": false,
+  "Tools": null,
+  "Messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "This is a chatbot"
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "Assistant 1"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "User 1"
+        }
+      ]
+    }
+  ],
+  "MaxTokens": 0,
+  "Temperature": null,
+  "JSONResponse": false,
+  "Grammar": "",
+  "Cache": null
+}`

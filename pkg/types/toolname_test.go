@@ -7,5 +7,7 @@ import (
 )
 
 func TestToolNormalizer(t *testing.T) {
-	autogold.Expect("bob_tool").Equal(t, ToolNormalizer("bob-tool"))
+	autogold.Expect("bobTool").Equal(t, ToolNormalizer("bob-tool"))
+	autogold.Expect("bobTool").Equal(t, ToolNormalizer("bob_tool"))
+	autogold.Expect("bobTool").Equal(t, ToolNormalizer("BOB tOOL"))
 }

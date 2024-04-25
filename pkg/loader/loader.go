@@ -9,14 +9,17 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/parser"
+	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"gopkg.in/yaml.v3"
 )
@@ -128,6 +131,17 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 			if err != nil {
 				return types.Tool{}, fmt.Errorf("error parsing OpenAPI definition: %w", err)
 			}
+		}
+	}
+
+	if ext := path.Ext(base.Name); len(tools) == 0 && ext != "" && ext != system.Suffix && utf8.Valid(data) {
+		tools = []types.Tool{
+			{
+				Parameters: types.Parameters{
+					Name: base.Name,
+				},
+				Instructions: types.PrintPrefix + "\n" + string(data),
+			},
 		}
 	}
 

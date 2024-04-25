@@ -3,19 +3,20 @@ package runner
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	context2 "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/types"
-	"golang.org/x/sync/errgroup"
+	"golang.org/x/exp/maps"
 )
 
 type MonitorFactory interface {
@@ -34,6 +35,7 @@ type Options struct {
 	StartPort          int64                 `usage:"-"`
 	EndPort            int64                 `usage:"-"`
 	CredentialOverride string                `usage:"-"`
+	Sequential         bool                  `usage:"-"`
 }
 
 func complete(opts ...Options) (result Options) {
@@ -43,6 +45,7 @@ func complete(opts ...Options) (result Options) {
 		result.StartPort = types.FirstSet(opt.StartPort, result.StartPort)
 		result.EndPort = types.FirstSet(opt.EndPort, result.EndPort)
 		result.CredentialOverride = types.FirstSet(opt.CredentialOverride, result.CredentialOverride)
+		result.Sequential = types.FirstSet(opt.Sequential, result.Sequential)
 	}
 	if result.MonitorFactory == nil {
 		result.MonitorFactory = noopFactory{}
@@ -64,6 +67,7 @@ type Runner struct {
 	credCtx        string
 	credMutex      sync.Mutex
 	credOverrides  string
+	sequential     bool
 }
 
 func New(client engine.Model, credCtx string, opts ...Options) (*Runner, error) {
@@ -76,6 +80,7 @@ func New(client engine.Model, credCtx string, opts ...Options) (*Runner, error) 
 		credCtx:        credCtx,
 		credMutex:      sync.Mutex{},
 		credOverrides:  opt.CredentialOverride,
+		sequential:     opt.Sequential,
 	}
 
 	if opt.StartPort != 0 {
@@ -92,6 +97,96 @@ func (r *Runner) Close() {
 	r.ports.CloseDaemons()
 }
 
+type ErrContinuation struct {
+	State *State
+}
+
+func (e *ErrContinuation) Prompt() string {
+	return *e.State.Continuation.Result
+}
+
+func (e *ErrContinuation) Error() string {
+	return fmt.Sprintf("chat continuation required: %s", e.Prompt())
+}
+
+type ChatResponse struct {
+	Done    bool      `json:"done"`
+	Content string    `json:"content"`
+	ToolID  string    `json:"toolID"`
+	State   ChatState `json:"state"`
+}
+
+type ChatState interface{}
+
+func (r *Runner) Chat(ctx context.Context, prevState ChatState, prg types.Program, env []string, input string) (resp ChatResponse, err error) {
+	var state *State
+
+	if prevState != nil {
+		switch v := prevState.(type) {
+		case *State:
+			state = v
+		case string:
+			if v != "null" {
+				state = &State{}
+				if err := json.Unmarshal([]byte(v), state); err != nil {
+					return resp, fmt.Errorf("failed to unmarshal chat state: %w", err)
+				}
+			}
+		default:
+			return resp, fmt.Errorf("invalid type for state object: %T", prevState)
+		}
+	}
+
+	monitor, err := r.factory.Start(ctx, &prg, env, input)
+	if err != nil {
+		return resp, err
+	}
+	defer func() {
+		monitor.Stop(resp.Content, err)
+	}()
+
+	callCtx := engine.NewContext(ctx, &prg)
+	if state == nil {
+		startResult, err := r.start(callCtx, monitor, env, input)
+		if err != nil {
+			return resp, err
+		}
+		state = &State{
+			Continuation: startResult,
+		}
+	} else {
+		state.ResumeInput = &input
+	}
+
+	state, err = r.resume(callCtx, monitor, env, state)
+	if err != nil {
+		return resp, err
+	}
+
+	if state.Result != nil {
+		return ChatResponse{
+			Done:    true,
+			Content: *state.Result,
+		}, nil
+	}
+
+	content, err := state.ContinuationContent()
+	if err != nil {
+		return resp, err
+	}
+
+	toolID, err := state.ContinuationContentToolID()
+	if err != nil {
+		return resp, err
+	}
+
+	return ChatResponse{
+		Content: content,
+		State:   state,
+		ToolID:  toolID,
+	}, nil
+}
+
 func (r *Runner) Run(ctx context.Context, prg types.Program, env []string, input string) (output string, err error) {
 	monitor, err := r.factory.Start(ctx, &prg, env, input)
 	if err != nil {
@@ -102,12 +197,21 @@ func (r *Runner) Run(ctx context.Context, prg types.Program, env []string, input
 	}()
 
 	callCtx := engine.NewContext(ctx, &prg)
-	return r.call(callCtx, monitor, env, input)
+	state, err := r.call(callCtx, monitor, env, input)
+	if err != nil {
+		return "", nil
+	}
+	if state.Continuation != nil {
+		return "", &ErrContinuation{
+			State: state,
+		}
+	}
+	return *state.Result, nil
 }
 
 type Event struct {
 	Time               time.Time              `json:"time,omitempty"`
-	CallContext        *engine.BasicContext   `json:"callContext,omitempty"`
+	CallContext        *engine.CallContext    `json:"callContext,omitempty"`
 	ToolSubCalls       map[string]engine.Call `json:"toolSubCalls,omitempty"`
 	ToolResults        int                    `json:"toolResults,omitempty"`
 	Type               EventType              `json:"type,omitempty"`
@@ -136,19 +240,32 @@ func (r *Runner) getContext(callCtx engine.Context, monitor Monitor, env []strin
 	}
 
 	for _, toolID := range toolIDs {
-		content, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, toolID, "", "", false)
+		content, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, toolID, "", "", engine.ContextToolCategory)
 		if err != nil {
 			return nil, err
 		}
+		if content.Result == nil {
+			return nil, fmt.Errorf("context tool can not result in a chat continuation")
+		}
 		result = append(result, engine.InputContext{
 			ToolID:  toolID,
-			Content: content,
+			Content: *content.Result,
 		})
 	}
 	return result, nil
 }
 
-func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, input string) (string, error) {
+func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, input string) (*State, error) {
+	result, err := r.start(callCtx, monitor, env, input)
+	if err != nil {
+		return nil, err
+	}
+	return r.resume(callCtx, monitor, env, &State{
+		Continuation: result,
+	})
+}
+
+func (r *Runner) start(callCtx engine.Context, monitor Monitor, env []string, input string) (*engine.Return, error) {
 	progress, progressClose := streamProgress(&callCtx, monitor)
 	defer progressClose()
 
@@ -156,14 +273,14 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 		var err error
 		env, err = r.handleCredentials(callCtx, monitor, env)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 	}
 
 	var err error
 	callCtx.InputContext, err = r.getContext(callCtx, monitor, env)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	e := engine.Engine{
@@ -176,56 +293,167 @@ func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, inp
 
 	monitor.Event(Event{
 		Time:        time.Now(),
-		CallContext: callCtx.ToBasicContext(),
+		CallContext: callCtx.GetCallContext(),
 		Type:        EventTypeCallStart,
 		Content:     input,
 	})
 
 	callCtx.Ctx = context2.AddPauseFuncToCtx(callCtx.Ctx, monitor.Pause)
 
-	result, err := e.Start(callCtx, input)
+	return e.Start(callCtx, input)
+}
+
+type State struct {
+	Continuation       *engine.Return `json:"continuation,omitempty"`
+	ContinuationToolID string         `json:"continuationToolID,omitempty"`
+	Result             *string        `json:"result,omitempty"`
+
+	ResumeInput *string         `json:"resumeInput,omitempty"`
+	SubCalls    []SubCallResult `json:"subCalls,omitempty"`
+	SubCallID   string          `json:"subCallID,omitempty"`
+}
+
+func (s State) WithInput(input *string) *State {
+	s.ResumeInput = input
+	return &s
+}
+
+func (s State) ContinuationContentToolID() (string, error) {
+	if s.Continuation.Result != nil {
+		return s.ContinuationToolID, nil
+	}
+
+	for _, subCall := range s.SubCalls {
+		if s.SubCallID == subCall.CallID {
+			return subCall.State.ContinuationContentToolID()
+		}
+	}
+	return "", fmt.Errorf("illegal state: no result message found in chat response")
+}
+
+func (s State) ContinuationContent() (string, error) {
+	if s.Continuation.Result != nil {
+		return *s.Continuation.Result, nil
+	}
+
+	for _, subCall := range s.SubCalls {
+		if s.SubCallID == subCall.CallID {
+			return subCall.State.ContinuationContent()
+		}
+	}
+	return "", fmt.Errorf("illegal state: no result message found in chat response")
+}
+
+type Needed struct {
+	Content string `json:"content,omitempty"`
+	Input   string `json:"input,omitempty"`
+}
+
+func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, state *State) (*State, error) {
+	progress, progressClose := streamProgress(&callCtx, monitor)
+	defer progressClose()
+
+	if len(callCtx.Tool.Credentials) > 0 {
+		var err error
+		env, err = r.handleCredentials(callCtx, monitor, env)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var err error
+	callCtx.InputContext, err = r.getContext(callCtx, monitor, env)
 	if err != nil {
-		return "", err
+		return nil, err
+	}
+
+	e := engine.Engine{
+		Model:          r.c,
+		RuntimeManager: r.runtimeManager,
+		Progress:       progress,
+		Env:            env,
+		Ports:          &r.ports,
 	}
 
 	for {
-		if result.Result != nil && len(result.Calls) == 0 {
+		if state.Continuation.Result != nil && len(state.Continuation.Calls) == 0 && state.SubCallID == "" && state.ResumeInput == nil {
 			progressClose()
 			monitor.Event(Event{
 				Time:        time.Now(),
-				CallContext: callCtx.ToBasicContext(),
+				CallContext: callCtx.GetCallContext(),
 				Type:        EventTypeCallFinish,
-				Content:     *result.Result,
+				Content:     *state.Continuation.Result,
 			})
-			if err := recordStateMessage(result.State); err != nil {
-				// Log a message if failed to record state message so that it doesn't affect the main process if state can't be recorded
-				log.Infof("Failed to record state message: %v", err)
+			if callCtx.Tool.Chat {
+				return &State{
+					Continuation:       state.Continuation,
+					ContinuationToolID: callCtx.Tool.ID,
+				}, nil
 			}
-			return *result.Result, nil
+			return &State{
+				Result: state.Continuation.Result,
+			}, nil
 		}
 
 		monitor.Event(Event{
 			Time:         time.Now(),
-			CallContext:  callCtx.ToBasicContext(),
+			CallContext:  callCtx.GetCallContext(),
 			Type:         EventTypeCallSubCalls,
-			ToolSubCalls: result.Calls,
+			ToolSubCalls: state.Continuation.Calls,
 		})
 
-		callResults, err := r.subCalls(callCtx, monitor, env, result)
-		if err != nil {
-			return "", err
+		var (
+			callResults []SubCallResult
+			err         error
+		)
+
+		state, callResults, err = r.subCalls(callCtx, monitor, env, state)
+		if errMessage := (*builtin.ErrChatFinish)(nil); errors.As(err, &errMessage) && callCtx.Tool.Chat {
+			return &State{
+				Result: &errMessage.Message,
+			}, nil
+		} else if err != nil {
+			return nil, err
+		}
+
+		var engineResults []engine.CallResult
+		for _, callResult := range callResults {
+			if callResult.State.Continuation == nil {
+				engineResults = append(engineResults, engine.CallResult{
+					ToolID: callResult.ToolID,
+					CallID: callResult.CallID,
+					Result: *callResult.State.Result,
+				})
+			} else {
+				return &State{
+					Continuation: state.Continuation,
+					SubCalls:     callResults,
+					SubCallID:    callResult.CallID,
+				}, nil
+			}
+		}
+
+		if state.ResumeInput != nil {
+			engineResults = append(engineResults, engine.CallResult{
+				User: *state.ResumeInput,
+			})
 		}
 
 		monitor.Event(Event{
 			Time:        time.Now(),
-			CallContext: callCtx.ToBasicContext(),
+			CallContext: callCtx.GetCallContext(),
 			Type:        EventTypeCallContinue,
 			ToolResults: len(callResults),
 		})
 
-		result, err = e.Continue(callCtx.Ctx, result.State, callResults...)
+		nextContinuation, err := e.Continue(callCtx, state.Continuation.State, engineResults...)
 		if err != nil {
-			return "", err
+			return nil, err
+		}
+
+		state = &State{
+			Continuation: nextContinuation,
+			SubCalls:     callResults,
 		}
 	}
 }
@@ -241,7 +469,7 @@ func streamProgress(callCtx *engine.Context, monitor Monitor) (chan<- types.Comp
 			if message := status.PartialResponse; message != nil {
 				monitor.Event(Event{
 					Time:             time.Now(),
-					CallContext:      callCtx.ToBasicContext(),
+					CallContext:      callCtx.GetCallContext(),
 					Type:             EventTypeCallProgress,
 					ChatCompletionID: status.CompletionID,
 					Content:          message.String(),
@@ -249,7 +477,7 @@ func streamProgress(callCtx *engine.Context, monitor Monitor) (chan<- types.Comp
 			} else {
 				monitor.Event(Event{
 					Time:               time.Now(),
-					CallContext:        callCtx.ToBasicContext(),
+					CallContext:        callCtx.GetCallContext(),
 					Type:               EventTypeChat,
 					ChatCompletionID:   status.CompletionID,
 					ChatRequest:        status.Request,
@@ -269,66 +497,104 @@ func streamProgress(callCtx *engine.Context, monitor Monitor) (chan<- types.Comp
 	}
 }
 
-func (r *Runner) subCall(ctx context.Context, parentContext engine.Context, monitor Monitor, env []string, toolID, input, callID string, isCredentialTool bool) (string, error) {
-	callCtx, err := parentContext.SubCall(ctx, toolID, callID, isCredentialTool)
+func (r *Runner) subCall(ctx context.Context, parentContext engine.Context, monitor Monitor, env []string, toolID, input, callID string, toolCategory engine.ToolCategory) (*State, error) {
+	callCtx, err := parentContext.SubCall(ctx, toolID, callID, toolCategory)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	return r.call(callCtx, monitor, env, input)
 }
 
-func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string, lastReturn *engine.Return) (callResults []engine.CallResult, _ error) {
+func (r *Runner) subCallResume(ctx context.Context, parentContext engine.Context, monitor Monitor, env []string, toolID, callID string, state *State) (*State, error) {
+	callCtx, err := parentContext.SubCall(ctx, toolID, callID, engine.NoCategory)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.resume(callCtx, monitor, env, state)
+}
+
+type SubCallResult struct {
+	ToolID string `json:"toolId,omitempty"`
+	CallID string `json:"callId,omitempty"`
+	State  *State `json:"state,omitempty"`
+}
+
+func (r *Runner) newDispatcher(ctx context.Context) dispatcher {
+	if r.sequential {
+		return newSerialDispatcher(ctx)
+	}
+	return newParallelDispatcher(ctx)
+}
+
+func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string, state *State) (_ *State, callResults []SubCallResult, _ error) {
 	var (
 		resultLock sync.Mutex
 	)
 
-	eg, subCtx := errgroup.WithContext(callCtx.Ctx)
-	for id, call := range lastReturn.Calls {
-		eg.Go(func() error {
-			result, err := r.subCall(subCtx, callCtx, monitor, env, call.ToolID, call.Input, id, false)
+	if state.SubCallID != "" {
+		if state.ResumeInput == nil {
+			return nil, nil, fmt.Errorf("invalid state, input must be set for sub call continuation on callID [%s]", state.SubCallID)
+		}
+		var found bool
+		for _, subCall := range state.SubCalls {
+			if subCall.CallID == state.SubCallID {
+				found = true
+				subState := *subCall.State
+				subState.ResumeInput = state.ResumeInput
+				result, err := r.subCallResume(callCtx.Ctx, callCtx, monitor, env, subCall.ToolID, subCall.CallID, subCall.State.WithInput(state.ResumeInput))
+				if err != nil {
+					return nil, nil, err
+				}
+				callResults = append(callResults, SubCallResult{
+					ToolID: subCall.ToolID,
+					CallID: subCall.CallID,
+					State:  result,
+				})
+				// Clear the input, we have already processed it
+				state = state.WithInput(nil)
+			} else {
+				callResults = append(callResults, subCall)
+			}
+		}
+		if !found {
+			return nil, nil, fmt.Errorf("invalid state, failed to find subCall for subCallID [%s]", state.SubCallID)
+		}
+		return state, callResults, nil
+	}
+
+	d := r.newDispatcher(callCtx.Ctx)
+
+	// Sort the id so if sequential the results are predictable
+	ids := maps.Keys(state.Continuation.Calls)
+	sort.Strings(ids)
+
+	for _, id := range ids {
+		call := state.Continuation.Calls[id]
+		d.Run(func(ctx context.Context) error {
+			result, err := r.subCall(ctx, callCtx, monitor, env, call.ToolID, call.Input, id, "")
 			if err != nil {
 				return err
 			}
 
 			resultLock.Lock()
 			defer resultLock.Unlock()
-			callResults = append(callResults, engine.CallResult{
+			callResults = append(callResults, SubCallResult{
 				ToolID: call.ToolID,
 				CallID: id,
-				Result: result,
+				State:  result,
 			})
 
 			return nil
 		})
 	}
 
-	if err := eg.Wait(); err != nil {
-		return nil, err
+	if err := d.Wait(); err != nil {
+		return nil, nil, err
 	}
 
-	return
-}
-
-// recordStateMessage record the final state of the openai request and fetch messages and tools for analysis purpose
-// The name follows `gptscript-state-${hostname}-${unixtimestamp}`
-func recordStateMessage(state *engine.State) error {
-	if state == nil {
-		return nil
-	}
-	tmpdir := os.TempDir()
-	data, err := json.Marshal(state)
-	if err != nil {
-		return err
-	}
-
-	hostname, err := os.Hostname()
-	if err != nil {
-		return err
-	}
-
-	filename := filepath.Join(tmpdir, fmt.Sprintf("gptscript-state-%v-%v", hostname, time.Now().UnixMilli()))
-	return os.WriteFile(filename, data, 0444)
+	return state, callResults, nil
 }
 
 func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env []string) ([]string, error) {
@@ -387,19 +653,24 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 				return nil, fmt.Errorf("failed to find ID for tool %s", credToolName)
 			}
 
-			subCtx, err := callCtx.SubCall(callCtx.Ctx, credToolID, "", true) // leaving callID as "" will cause it to be set by the engine
+			subCtx, err := callCtx.SubCall(callCtx.Ctx, credToolID, "", engine.CredentialToolCategory) // leaving callID as "" will cause it to be set by the engine
 			if err != nil {
 				return nil, fmt.Errorf("failed to create subcall context for tool %s: %w", credToolName, err)
 			}
+
 			res, err := r.call(subCtx, monitor, env, "")
 			if err != nil {
 				return nil, fmt.Errorf("failed to run credential tool %s: %w", credToolName, err)
 			}
 
+			if res.Result == nil {
+				return nil, fmt.Errorf("invalid state: credential tool [%s] can not result in a continuation", credToolName)
+			}
+
 			var envMap struct {
 				Env map[string]string `json:"env"`
 			}
-			if err := json.Unmarshal([]byte(res), &envMap); err != nil {
+			if err := json.Unmarshal([]byte(*res.Result), &envMap); err != nil {
 				return nil, fmt.Errorf("failed to unmarshal credential tool %s response: %w", credToolName, err)
 			}
 

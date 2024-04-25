@@ -2,6 +2,7 @@ package mvl
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"runtime"
 	"strings"
@@ -27,6 +28,15 @@ func (f formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	msg := entry.Message
 	if i, ok := entry.Data["input"].(string); ok && i != "" {
 		msg += fmt.Sprintf(" [input=%s]", i)
+	}
+	if i, ok := entry.Data["output"].(string); ok && i != "" {
+		msg += fmt.Sprintf(" [output=%s]", i)
+	}
+	if i, ok := entry.Data["request"]; ok && i != "" {
+		msg += fmt.Sprintf(" [request=%s]", i)
+	}
+	if i, ok := entry.Data["response"]; ok && i != "" {
+		msg += fmt.Sprintf(" [response=%s]", i)
 	}
 	return []byte(fmt.Sprintf("%s %s\n",
 		entry.Time.Format(time.TimeOnly),
@@ -65,6 +75,10 @@ func New(name string) Logger {
 		log:    logrus.StandardLogger(),
 		fields: fields,
 	}
+}
+
+func SetOutput(out io.Writer) {
+	logrus.SetOutput(out)
 }
 
 type Logger struct {

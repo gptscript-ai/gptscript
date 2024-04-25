@@ -4,13 +4,15 @@
   "Tools": [
     {
       "function": {
-        "name": "test",
+        "toolID": "testdata/TestDualSubChat/test.gpt:6",
+        "name": "chatbot",
         "parameters": null
       }
     },
     {
       "function": {
-        "name": "local",
+        "toolID": "testdata/TestDualSubChat/test.gpt:13",
+        "name": "chatbot2",
         "parameters": null
       }
     }
@@ -20,7 +22,15 @@
       "role": "system",
       "content": [
         {
-          "text": "noop"
+          "text": "Call chatbots"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "User 1"
         }
       ]
     },
@@ -32,7 +42,18 @@
             "index": 0,
             "id": "call_1",
             "function": {
-              "name": "test"
+              "name": "chatbot",
+              "arguments": "Input to chatbot1"
+            }
+          }
+        },
+        {
+          "toolCall": {
+            "index": 1,
+            "id": "call_2",
+            "function": {
+              "name": "chatbot2",
+              "arguments": "Input to chatbot2"
             }
           }
         }
@@ -42,43 +63,31 @@
       "role": "tool",
       "content": [
         {
-          "text": "sub\nsub"
+          "text": "Chat done"
         }
       ],
       "toolCall": {
         "index": 0,
         "id": "call_1",
         "function": {
-          "name": "test"
+          "name": "chatbot",
+          "arguments": "Input to chatbot1"
         }
       }
-    },
-    {
-      "role": "assistant",
-      "content": [
-        {
-          "toolCall": {
-            "index": 1,
-            "id": "call_2",
-            "function": {
-              "name": "local"
-            }
-          }
-        }
-      ]
     },
     {
       "role": "tool",
       "content": [
         {
-          "text": "/testdata/TestCwd\nthe data"
+          "text": "Chat done2"
         }
       ],
       "toolCall": {
         "index": 1,
         "id": "call_2",
         "function": {
-          "name": "local"
+          "name": "chatbot2",
+          "arguments": "Input to chatbot2"
         }
       }
     }

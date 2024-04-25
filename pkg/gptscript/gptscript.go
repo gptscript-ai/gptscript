@@ -94,6 +94,10 @@ func New(opts *Options) (*GPTScript, error) {
 	}, nil
 }
 
+func (g *GPTScript) Chat(ctx context.Context, prevState runner.ChatState, prg types.Program, env []string, input string) (runner.ChatResponse, error) {
+	return g.Runner.Chat(ctx, prevState, prg, env, input)
+}
+
 func (g *GPTScript) Run(ctx context.Context, prg types.Program, envs []string, input string) (string, error) {
 	return g.Runner.Run(ctx, prg, envs, input)
 }
