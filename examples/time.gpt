@@ -5,7 +5,7 @@ Ask time to get you the time in different timezones.
 ---
 name: time
 description: Can tell current time in any timezone,
-args: timezone: The timezone you want time in.
+args: timezone: The timezone you want time in e.g. 'Pacific/Honolulu'
 
 #!/bin/bash
 echo "Your current date and time is "

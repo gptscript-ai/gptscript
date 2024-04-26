@@ -51,7 +51,7 @@ app.post('/generate-logo', async (req, res) => {
     }
 `;
     const tool = new gptscript.Tool({
-        tools: ['github.com/gptscript-ai/image-generation'],
+        tools: ['github.com/gptscript-ai/dalle-image-generation'],
         jsonResponse: true,
         instructions: instructions,
     })
