@@ -6,7 +6,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/tests/tester"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/hexops/autogold/v2"
@@ -516,10 +515,11 @@ func TestChat(t *testing.T) {
 }`).Equal(t, toJSONString(t, resp))
 }
 
-func TestChatRunError(t *testing.T) {
+func TestChatRunNoError(t *testing.T) {
 	r := tester.NewRunner(t)
-	_, err := r.Run("", "")
-	autogold.Expect(`"{\n  \"continuation\": {\n    \"state\": {\n      \"completion\": {\n        \"Model\": \"gpt-4-turbo-preview\",\n        \"InternalSystemPrompt\": false,\n        \"Tools\": null,\n        \"Messages\": [\n          {\n            \"role\": \"system\",\n            \"content\": [\n              {\n                \"text\": \"This is a chatbot\"\n              }\n            ]\n          },\n          {\n            \"role\": \"assistant\",\n            \"content\": [\n              {\n                \"text\": \"TEST RESULT CALL: 1\"\n              }\n            ]\n          }\n        ],\n        \"MaxTokens\": 0,\n        \"Temperature\": null,\n        \"JSONResponse\": false,\n        \"Grammar\": \"\",\n        \"Cache\": null\n      }\n    },\n    \"result\": \"TEST RESULT CALL: 1\"\n  },\n  \"continuationToolID\": \"testdata/TestChatRunError/test.gpt:1\"\n}"`).Equal(t, toJSONString(t, toJSONString(t, err.(*runner.ErrContinuation).State)))
+	s, err := r.Run("", "")
+	require.NoError(t, err)
+	autogold.Expect("TEST RESULT CALL: 1").Equal(t, s)
 }
 
 func TestExportContext(t *testing.T) {
