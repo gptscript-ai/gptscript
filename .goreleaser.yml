@@ -60,7 +60,6 @@ brews:
   - description: "GPTScript CLI"
     install: |
       bin.install "gptscript"
-      {{ if eq .Os "darwin" }}bin.install "gptscript-credential-osxkeychain"{{ end }}
     homepage: "https://github.com/gptscript-ai/gptscript"
     skip_upload: false
     folder: "Formula"
