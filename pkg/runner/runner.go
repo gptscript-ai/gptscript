@@ -97,18 +97,6 @@ func (r *Runner) Close() {
 	r.ports.CloseDaemons()
 }
 
-type ErrContinuation struct {
-	State *State
-}
-
-func (e *ErrContinuation) Prompt() string {
-	return *e.State.Continuation.Result
-}
-
-func (e *ErrContinuation) Error() string {
-	return fmt.Sprintf("chat continuation required: %s", e.Prompt())
-}
-
 type ChatResponse struct {
 	Done    bool      `json:"done"`
 	Content string    `json:"content"`
@@ -188,25 +176,11 @@ func (r *Runner) Chat(ctx context.Context, prevState ChatState, prg types.Progra
 }
 
 func (r *Runner) Run(ctx context.Context, prg types.Program, env []string, input string) (output string, err error) {
-	monitor, err := r.factory.Start(ctx, &prg, env, input)
+	resp, err := r.Chat(ctx, nil, prg, env, input)
 	if err != nil {
 		return "", err
 	}
-	defer func() {
-		monitor.Stop(output, err)
-	}()
-
-	callCtx := engine.NewContext(ctx, &prg)
-	state, err := r.call(callCtx, monitor, env, input)
-	if err != nil {
-		return "", err
-	}
-	if state.Continuation != nil {
-		return "", &ErrContinuation{
-			State: state,
-		}
-	}
-	return *state.Result, nil
+	return resp.Content, nil
 }
 
 type Event struct {
