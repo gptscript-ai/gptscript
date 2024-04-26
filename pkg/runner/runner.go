@@ -419,28 +419,6 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 		}
 	}
 
-	var (
-		err          error
-		contentInput string
-	)
-
-	if state.Continuation != nil && state.Continuation.State != nil {
-		contentInput = state.Continuation.State.Input
-	}
-
-	callCtx.InputContext, err = r.getContext(callCtx, monitor, env, contentInput)
-	if err != nil {
-		return nil, err
-	}
-
-	e := engine.Engine{
-		Model:          r.c,
-		RuntimeManager: r.runtimeManager,
-		Progress:       progress,
-		Env:            env,
-		Ports:          &r.ports,
-	}
-
 	for {
 		if state.Continuation.Result != nil && len(state.Continuation.Calls) == 0 && state.SubCallID == "" && state.ResumeInput == nil {
 			progressClose()
@@ -511,6 +489,27 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 			Type:        EventTypeCallContinue,
 			ToolResults: len(callResults),
 		})
+
+		e := engine.Engine{
+			Model:          r.c,
+			RuntimeManager: r.runtimeManager,
+			Progress:       progress,
+			Env:            env,
+			Ports:          &r.ports,
+		}
+
+		var (
+			contentInput string
+		)
+
+		if state.Continuation != nil && state.Continuation.State != nil {
+			contentInput = state.Continuation.State.Input
+		}
+
+		callCtx.InputContext, err = r.getContext(callCtx, monitor, env, contentInput)
+		if err != nil {
+			return nil, err
+		}
 
 		nextContinuation, err := e.Continue(callCtx, state.Continuation.State, engineResults...)
 		if err != nil {

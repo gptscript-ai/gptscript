@@ -26,6 +26,31 @@ import (
 )
 
 var tools = map[string]types.Tool{
+	"sys.workspace.ls": {
+		Parameters: types.Parameters{
+			Description: "Lists the contents of a directory relative to the current workspace",
+			Arguments: types.ObjectSchema(
+				"dir", "The directory to list"),
+		},
+		BuiltinFunc: SysWorkspaceLs,
+	},
+	"sys.workspace.write": {
+		Parameters: types.Parameters{
+			Description: "Write the contents to a file relative to the current workspace",
+			Arguments: types.ObjectSchema(
+				"filename", "The name of the file to write to",
+				"content", "The content to write"),
+		},
+		BuiltinFunc: SysWorkspaceWrite,
+	},
+	"sys.workspace.read": {
+		Parameters: types.Parameters{
+			Description: "Reads the contents of a file relative to the current workspace",
+			Arguments: types.ObjectSchema(
+				"filename", "The name of the file to read"),
+		},
+		BuiltinFunc: SysWorkspaceRead,
+	},
 	"sys.ls": {
 		Parameters: types.Parameters{
 			Description: "Lists the contents of a directory",
@@ -297,7 +322,29 @@ func SysExec(ctx context.Context, env []string, input string) (string, error) {
 	return string(out), err
 }
 
+func getWorkspaceDir(envs []string) (string, error) {
+	for _, env := range envs {
+		dir, ok := strings.CutPrefix(env, "GPTSCRIPT_WORKSPACE_DIR=")
+		if ok && dir != "" {
+			return dir, nil
+		}
+	}
+	return "", fmt.Errorf("no workspace directory found in env")
+}
+
+func SysWorkspaceLs(_ context.Context, env []string, input string) (string, error) {
+	dir, err := getWorkspaceDir(env)
+	if err != nil {
+		return "", err
+	}
+	return sysLs(dir, input)
+}
+
 func SysLs(_ context.Context, _ []string, input string) (string, error) {
+	return sysLs("", input)
+}
+
+func sysLs(base, input string) (string, error) {
 	var params struct {
 		Dir string `json:"dir,omitempty"`
 	}
@@ -305,11 +352,16 @@ func SysLs(_ context.Context, _ []string, input string) (string, error) {
 		return "", err
 	}
 
-	if params.Dir == "" {
-		params.Dir = "."
+	dir := params.Dir
+	if dir == "" {
+		dir = "."
 	}
 
-	entries, err := os.ReadDir(params.Dir)
+	if base != "" {
+		dir = filepath.Join(base, dir)
+	}
+
+	entries, err := os.ReadDir(dir)
 	if errors.Is(err, fs.ErrNotExist) {
 		return fmt.Sprintf("directory does not exist: %s", params.Dir), nil
 	} else if err != nil {
@@ -328,7 +380,20 @@ func SysLs(_ context.Context, _ []string, input string) (string, error) {
 	return strings.Join(result, "\n"), nil
 }
 
+func SysWorkspaceRead(ctx context.Context, env []string, input string) (string, error) {
+	dir, err := getWorkspaceDir(env)
+	if err != nil {
+		return "", err
+	}
+
+	return sysRead(ctx, dir, env, input)
+}
+
 func SysRead(ctx context.Context, env []string, input string) (string, error) {
+	return sysRead(ctx, "", env, input)
+}
+
+func sysRead(ctx context.Context, base string, env []string, input string) (string, error) {
 	var params struct {
 		Filename string `json:"filename,omitempty"`
 	}
@@ -336,12 +401,17 @@ func SysRead(ctx context.Context, env []string, input string) (string, error) {
 		return "", err
 	}
 
-	// Lock the file to prevent concurrent writes from other tool calls.
-	locker.RLock(params.Filename)
-	defer locker.RUnlock(params.Filename)
+	file := params.Filename
+	if base != "" {
+		file = filepath.Join(base, file)
+	}
 
-	log.Debugf("Reading file %s", params.Filename)
-	data, err := os.ReadFile(params.Filename)
+	// Lock the file to prevent concurrent writes from other tool calls.
+	locker.RLock(file)
+	defer locker.RUnlock(file)
+
+	log.Debugf("Reading file %s", file)
+	data, err := os.ReadFile(file)
 	if errors.Is(err, fs.ErrNotExist) {
 		return fmt.Sprintf("The file %s does not exist", params.Filename), nil
 	} else if err != nil {
@@ -354,7 +424,19 @@ func SysRead(ctx context.Context, env []string, input string) (string, error) {
 	return string(data), nil
 }
 
+func SysWorkspaceWrite(ctx context.Context, env []string, input string) (string, error) {
+	dir, err := getWorkspaceDir(env)
+	if err != nil {
+		return "", err
+	}
+	return sysWrite(ctx, dir, env, input)
+}
+
 func SysWrite(ctx context.Context, env []string, input string) (string, error) {
+	return sysWrite(ctx, "", env, input)
+}
+
+func sysWrite(ctx context.Context, base string, env []string, input string) (string, error) {
 	var params struct {
 		Filename string `json:"filename,omitempty"`
 		Content  string `json:"content,omitempty"`
@@ -363,11 +445,16 @@ func SysWrite(ctx context.Context, env []string, input string) (string, error) {
 		return "", err
 	}
 
-	// Lock the file to prevent concurrent writes from other tool calls.
-	locker.Lock(params.Filename)
-	defer locker.Unlock(params.Filename)
+	file := params.Filename
+	if base != "" {
+		file = filepath.Join(base, file)
+	}
 
-	dir := filepath.Dir(params.Filename)
+	// Lock the file to prevent concurrent writes from other tool calls.
+	locker.Lock(file)
+	defer locker.Unlock(file)
+
+	dir := filepath.Dir(file)
 	if _, err := os.Stat(dir); errors.Is(err, fs.ErrNotExist) {
 		log.Debugf("Creating dir %s", dir)
 		if err := os.MkdirAll(dir, 0755); err != nil {
@@ -375,16 +462,16 @@ func SysWrite(ctx context.Context, env []string, input string) (string, error) {
 		}
 	}
 
-	if _, err := os.Stat(params.Filename); err == nil {
+	if _, err := os.Stat(file); err == nil {
 		if err := confirm.Promptf(ctx, "Overwrite: %s", params.Filename); err != nil {
 			return "", err
 		}
 	}
 
 	data := []byte(params.Content)
-	log.Debugf("Wrote %d bytes to file %s", len(data), params.Filename)
+	log.Debugf("Wrote %d bytes to file %s", len(data), file)
 
-	return "", os.WriteFile(params.Filename, data, 0644)
+	return "", os.WriteFile(file, data, 0644)
 }
 
 func SysAppend(ctx context.Context, env []string, input string) (string, error) {

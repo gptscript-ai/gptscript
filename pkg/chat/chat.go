@@ -35,7 +35,7 @@ func Start(ctx context.Context, prevState runner.ChatState, chatter Chatter, prg
 		prompter Prompter
 	)
 
-	prompter, err := newReadlinePrompter()
+	prompter, err := newReadlinePrompter(prg)
 	if err != nil {
 		return err
 	}

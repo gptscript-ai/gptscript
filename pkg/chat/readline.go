@@ -9,6 +9,7 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/chzyer/readline"
 	"github.com/fatih/color"
+	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 )
 
@@ -18,8 +19,13 @@ type readlinePrompter struct {
 	readliner *readline.Instance
 }
 
-func newReadlinePrompter() (*readlinePrompter, error) {
-	historyFile, err := xdg.CacheFile("gptscript/chat.history")
+func newReadlinePrompter(prg GetProgram) (*readlinePrompter, error) {
+	targetProgram, err := prg()
+	if err != nil {
+		return nil, err
+	}
+
+	historyFile, err := xdg.CacheFile(fmt.Sprintf("gptscript/chat-%s.history", hash.ID(targetProgram.EntryToolID)))
 	if err != nil {
 		historyFile = ""
 	}

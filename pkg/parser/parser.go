@@ -79,7 +79,7 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 	value = strings.TrimSpace(value)
 	switch normalize(key) {
 	case "name":
-		tool.Parameters.Name = strings.ToLower(value)
+		tool.Parameters.Name = value
 	case "modelprovider":
 		tool.Parameters.ModelProvider = true
 	case "model", "modelname":
