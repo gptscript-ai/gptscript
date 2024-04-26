@@ -61,6 +61,7 @@ type GPTScript struct {
 	CredentialOverride string `usage:"Credentials to override (ex: --credential-override github.com/example/cred-tool:API_TOKEN=1234)"`
 	ChatState          string `usage:"The chat state to continue, or null to start a new chat and return the state"`
 	ForceChat          bool   `usage:"Force an interactive chat session if even the top level tool is not a chat tool"`
+	Workspace          string `usage:"Directory to use for the workspace, if specified it will not be deleted on exit"`
 
 	readData []byte
 }
@@ -123,6 +124,7 @@ func (r *GPTScript) NewGPTScriptOpts() (gptscript.Options, error) {
 		Quiet:             r.Quiet,
 		Env:               os.Environ(),
 		CredentialContext: r.CredentialContext,
+		Workspace:         r.Workspace,
 	}
 
 	if r.Ports != "" {

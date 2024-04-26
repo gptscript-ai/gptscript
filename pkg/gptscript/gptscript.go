@@ -2,13 +2,16 @@ package gptscript
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
+	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/llm"
 	"github.com/gptscript-ai/gptscript/pkg/monitor"
+	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/openai"
 	"github.com/gptscript-ai/gptscript/pkg/remote"
 	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes"
@@ -16,9 +19,13 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
+var log = mvl.Package()
+
 type GPTScript struct {
-	Registry *llm.Registry
-	Runner   *runner.Runner
+	Registry               *llm.Registry
+	Runner                 *runner.Runner
+	WorkspacePath          string
+	DeleteWorkspaceOnClose bool
 }
 
 type Options struct {
@@ -26,9 +33,10 @@ type Options struct {
 	OpenAI            openai.Options
 	Monitor           monitor.Options
 	Runner            runner.Options
-	CredentialContext string   `usage:"Context name in which to store credentials" default:"default"`
-	Quiet             *bool    `usage:"No output logging (set --quiet=false to force on even when there is no TTY)" short:"q"`
-	Env               []string `usage:"-"`
+	CredentialContext string
+	Quiet             *bool
+	Workspace         string
+	Env               []string
 }
 
 func complete(opts *Options) (result *Options) {
@@ -89,21 +97,55 @@ func New(opts *Options) (*GPTScript, error) {
 	}
 
 	return &GPTScript{
-		Registry: registry,
-		Runner:   runner,
+		Registry:               registry,
+		Runner:                 runner,
+		WorkspacePath:          opts.Workspace,
+		DeleteWorkspaceOnClose: opts.Workspace == "",
 	}, nil
 }
 
-func (g *GPTScript) Chat(ctx context.Context, prevState runner.ChatState, prg types.Program, env []string, input string) (runner.ChatResponse, error) {
-	return g.Runner.Chat(ctx, prevState, prg, env, input)
+func (g *GPTScript) getEnv(env []string) ([]string, error) {
+	if g.WorkspacePath == "" {
+		var err error
+		g.WorkspacePath, err = os.MkdirTemp("", "gptscript-workspace-*")
+		if err != nil {
+			return nil, err
+		}
+	}
+	if err := os.MkdirAll(g.WorkspacePath, 0700); err != nil {
+		return nil, err
+	}
+	return append([]string{
+		fmt.Sprintf("GPTSCRIPT_WORKSPACE_DIR=%s", g.WorkspacePath),
+		fmt.Sprintf("GPTSCRIPT_WORKSPACE_ID=%s", hash.ID(g.WorkspacePath)),
+	}, env...), nil
+}
+
+func (g *GPTScript) Chat(ctx context.Context, prevState runner.ChatState, prg types.Program, envs []string, input string) (runner.ChatResponse, error) {
+	envs, err := g.getEnv(envs)
+	if err != nil {
+		return runner.ChatResponse{}, err
+	}
+
+	return g.Runner.Chat(ctx, prevState, prg, envs, input)
 }
 
 func (g *GPTScript) Run(ctx context.Context, prg types.Program, envs []string, input string) (string, error) {
+	envs, err := g.getEnv(envs)
+	if err != nil {
+		return "", err
+	}
+
 	return g.Runner.Run(ctx, prg, envs, input)
 }
 
 func (g *GPTScript) Close() {
 	g.Runner.Close()
+	if g.DeleteWorkspaceOnClose && g.WorkspacePath != "" {
+		if err := os.RemoveAll(g.WorkspacePath); err != nil {
+			log.Errorf("failed to delete workspace %s: %s", g.WorkspacePath, err)
+		}
+	}
 }
 
 func (g *GPTScript) GetModel() engine.Model {
