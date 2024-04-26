@@ -5,6 +5,7 @@
   "state": {
     "continuation": {
       "state": {
+        "input": "User 1",
         "completion": {
           "Model": "gpt-4-turbo-preview",
           "InternalSystemPrompt": null,
@@ -117,6 +118,7 @@
         "state": {
           "continuation": {
             "state": {
+              "input": "Input to chatbot2",
               "completion": {
                 "Model": "gpt-4-turbo-preview",
                 "InternalSystemPrompt": false,

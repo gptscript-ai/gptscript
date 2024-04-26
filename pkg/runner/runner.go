@@ -233,14 +233,98 @@ var (
 	EventTypeCallFinish   = EventType("callFinish")
 )
 
-func (r *Runner) getContext(callCtx engine.Context, monitor Monitor, env []string) (result []engine.InputContext, _ error) {
-	toolIDs, err := callCtx.Program.GetContextToolIDs(callCtx.Tool.ID)
+func getContextInput(prg *types.Program, ref types.ToolReference, input string) (string, error) {
+	if ref.Arg == "" {
+		return "", nil
+	}
+
+	targetArgs := prg.ToolSet[ref.ToolID].Arguments
+	targetKeys := map[string]string{}
+
+	if targetArgs == nil {
+		return "", nil
+	}
+
+	for targetKey := range targetArgs.Properties {
+		targetKeys[strings.ToLower(targetKey)] = targetKey
+	}
+
+	inputMap := map[string]interface{}{}
+	outputMap := map[string]interface{}{}
+
+	_ = json.Unmarshal([]byte(input), &inputMap)
+
+	fields := strings.Fields(ref.Arg)
+
+	for i := 0; i < len(fields); i++ {
+		field := fields[i]
+		if field == "and" {
+			continue
+		}
+		if field == "as" {
+			i++
+			continue
+		}
+
+		var (
+			keyName string
+			val     any
+		)
+
+		if strings.HasPrefix(field, "$") {
+			key := strings.TrimPrefix(field, "$")
+			key = strings.TrimPrefix(key, "{")
+			key = strings.TrimSuffix(key, "}")
+			val = inputMap[key]
+		} else {
+			val = field
+		}
+
+		if len(fields) > i+1 && fields[i+1] == "as" {
+			keyName = strings.ToLower(fields[i+2])
+		}
+
+		if len(targetKeys) == 0 {
+			return "", fmt.Errorf("can not assign arg to context because target tool [%s] has no defined args", ref.ToolID)
+		}
+
+		if keyName == "" {
+			if len(targetKeys) != 1 {
+				return "", fmt.Errorf("can not assign arg to context because target tool [%s] has does not have one args. You must use \"as\" syntax to map the arg to a key %v", ref.ToolID, targetKeys)
+			}
+			for k := range targetKeys {
+				keyName = k
+			}
+		}
+
+		if targetKey, ok := targetKeys[strings.ToLower(keyName)]; ok {
+			outputMap[targetKey] = val
+		} else {
+			return "", fmt.Errorf("can not assign arg to context because target tool [%s] has does not args [%s]", ref.ToolID, keyName)
+		}
+	}
+
+	if len(outputMap) == 0 {
+		return "", nil
+	}
+
+	output, err := json.Marshal(outputMap)
+	return string(output), err
+}
+
+func (r *Runner) getContext(callCtx engine.Context, monitor Monitor, env []string, input string) (result []engine.InputContext, _ error) {
+	toolRefs, err := callCtx.Program.GetContextToolRefs(callCtx.Tool.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, toolID := range toolIDs {
-		content, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, toolID, "", "", engine.ContextToolCategory)
+	for _, toolRef := range toolRefs {
+		contextInput, err := getContextInput(callCtx.Program, toolRef, input)
+		if err != nil {
+			return nil, err
+		}
+
+		content, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, toolRef.ToolID, contextInput, "", engine.ContextToolCategory)
 		if err != nil {
 			return nil, err
 		}
@@ -248,7 +332,7 @@ func (r *Runner) getContext(callCtx engine.Context, monitor Monitor, env []strin
 			return nil, fmt.Errorf("context tool can not result in a chat continuation")
 		}
 		result = append(result, engine.InputContext{
-			ToolID:  toolID,
+			ToolID:  toolRef.ToolID,
 			Content: *content.Result,
 		})
 	}
@@ -278,7 +362,7 @@ func (r *Runner) start(callCtx engine.Context, monitor Monitor, env []string, in
 	}
 
 	var err error
-	callCtx.InputContext, err = r.getContext(callCtx, monitor, env)
+	callCtx.InputContext, err = r.getContext(callCtx, monitor, env, input)
 	if err != nil {
 		return nil, err
 	}
@@ -361,8 +445,16 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 		}
 	}
 
-	var err error
-	callCtx.InputContext, err = r.getContext(callCtx, monitor, env)
+	var (
+		err          error
+		contentInput string
+	)
+
+	if state.Continuation != nil && state.Continuation.State != nil {
+		contentInput = state.Continuation.State.Input
+	}
+
+	callCtx.InputContext, err = r.getContext(callCtx, monitor, env, contentInput)
 	if err != nil {
 		return nil, err
 	}

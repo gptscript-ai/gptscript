@@ -99,7 +99,7 @@ func loadProgram(data []byte, into *types.Program, targetToolName string) (types
 		return tool, nil
 	}
 
-	tool, ok := into.ToolSet[tool.LocalTools[targetToolName]]
+	tool, ok := into.ToolSet[tool.LocalTools[strings.ToLower(targetToolName)]]
 	if !ok {
 		return tool, &types.ErrToolNotFound{
 			ToolName: targetToolName,
@@ -217,7 +217,8 @@ func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool
 		tool.Parameters.ExportContext,
 		tool.Parameters.Context,
 		tool.Parameters.Credentials) {
-		localTool, ok := localTools[targetToolName]
+		noArgs, _ := types.SplitArg(targetToolName)
+		localTool, ok := localTools[strings.ToLower(noArgs)]
 		if ok {
 			var linkedTool types.Tool
 			if existing, ok := prg.ToolSet[localTool.ID]; ok {
@@ -244,7 +245,7 @@ func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool
 	}
 
 	for _, localTool := range localTools {
-		tool.LocalTools[localTool.Parameters.Name] = localTool.ID
+		tool.LocalTools[strings.ToLower(localTool.Parameters.Name)] = localTool.ID
 	}
 
 	tool = builtin.SetDefaults(tool)
@@ -326,6 +327,10 @@ func SplitToolRef(targetToolName string) (toolName, subTool string) {
 		fields = strings.Fields(targetToolName)
 		idx    = slices.Index(fields, "from")
 	)
+
+	defer func() {
+		toolName, _ = types.SplitArg(toolName)
+	}()
 
 	if idx == -1 {
 		return strings.TrimSpace(targetToolName), ""

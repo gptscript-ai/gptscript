@@ -97,3 +97,11 @@ func TestHelloWorld(t *testing.T) {
   }
 }`).Equal(t, toString(prg))
 }
+
+func TestParse(t *testing.T) {
+	tool, subTool := SplitToolRef("a from b with x")
+	autogold.Expect([]string{"b", "a"}).Equal(t, []string{tool, subTool})
+
+	tool, subTool = SplitToolRef("a with x")
+	autogold.Expect([]string{"a", ""}).Equal(t, []string{tool, subTool})
+}
