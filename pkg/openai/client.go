@@ -304,7 +304,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	}
 
 	if len(msgs) == 0 {
-		return nil, fmt.Errorf("invalid request, no messages to send to OpenAI")
+		return nil, fmt.Errorf("invalid request, no messages to send to LLM")
 	}
 
 	request := openai.ChatCompletionRequest{

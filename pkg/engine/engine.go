@@ -335,15 +335,14 @@ func (e *Engine) Continue(ctx Context, state *State, results ...CallResult) (*Re
 	}
 
 	for _, result := range results {
-		if result.CallID != "" {
-			state.Results[result.CallID] = result
-		}
-		if result.User != "" {
+		if result.CallID == "" {
 			added = true
 			state.Completion.Messages = append(state.Completion.Messages, types.CompletionMessage{
 				Role:    types.CompletionMessageRoleTypeUser,
 				Content: types.Text(result.User),
 			})
+		} else {
+			state.Results[result.CallID] = result
 		}
 	}
 
