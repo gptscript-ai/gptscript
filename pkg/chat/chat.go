@@ -72,7 +72,7 @@ func Start(ctx context.Context, prevState runner.ChatState, chatter Chatter, prg
 		}
 
 		if resp.Content != "" {
-			_, err := prompter.Printf(color.RedString("< %s\n", resp.Content))
+			_, err := prompter.Printf("%s", color.RedString("< %s\n", resp.Content))
 			if err != nil {
 				return err
 			}
