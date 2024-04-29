@@ -184,13 +184,13 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 			mainTool = tool
 		}
 
-		if existing, ok := localTools[tool.Parameters.Name]; ok {
+		if existing, ok := localTools[strings.ToLower(tool.Parameters.Name)]; ok {
 			return types.Tool{}, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo,
 				fmt.Errorf("duplicate tool name [%s] in %s found at lines %d and %d", tool.Parameters.Name, tool.Source.Location,
 					tool.Source.LineNo, existing.Source.LineNo))
 		}
 
-		localTools[tool.Parameters.Name] = tool
+		localTools[strings.ToLower(tool.Parameters.Name)] = tool
 	}
 
 	return link(ctx, prg, base, mainTool, localTools)
