@@ -1,0 +1,37 @@
+`{
+  "Model": "gpt-4-turbo-preview",
+  "InternalSystemPrompt": null,
+  "Tools": [
+    {
+      "function": {
+        "toolID": "testdata/TestCase2/test.gpt:6",
+        "name": "bob",
+        "description": "I'm Bob, a friendly guy.",
+        "parameters": {
+          "properties": {
+            "question": {
+              "description": "The question to ask Bob.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      }
+    }
+  ],
+  "Messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "Ask Bob how he is doing and let me know exactly what he said."
+        }
+      ]
+    }
+  ],
+  "MaxTokens": 0,
+  "Temperature": null,
+  "JSONResponse": false,
+  "Grammar": "",
+  "Cache": null
+}`

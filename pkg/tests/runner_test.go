@@ -640,6 +640,13 @@ func TestCase(t *testing.T) {
 	assert.Equal(t, "TEST RESULT CALL: 1", x)
 }
 
+func TestCase2(t *testing.T) {
+	runner := tester.NewRunner(t)
+	x, err := runner.Run("", "")
+	require.NoError(t, err)
+	assert.Equal(t, "TEST RESULT CALL: 1", x)
+}
+
 func TestContextArg(t *testing.T) {
 	runner := tester.NewRunner(t)
 	x, err := runner.Run("", `{
