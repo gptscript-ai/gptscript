@@ -1,0 +1,59 @@
+`{
+  "Model": "gpt-4-turbo-preview",
+  "InternalSystemPrompt": null,
+  "Tools": [
+    {
+      "function": {
+        "toolID": "testdata/TestContextSubChat/test.gpt:13",
+        "name": "chatbot",
+        "parameters": null
+      }
+    }
+  ],
+  "Messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "Call chatbot"
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "toolCall": {
+            "index": 0,
+            "id": "call_3",
+            "function": {
+              "name": "chatbot",
+              "arguments": "Input to chatbot1 on resume"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "content": [
+        {
+          "text": "Response from context chatbot after resume"
+        }
+      ],
+      "toolCall": {
+        "index": 0,
+        "id": "call_3",
+        "function": {
+          "name": "chatbot",
+          "arguments": "Input to chatbot1 on resume"
+        }
+      }
+    }
+  ],
+  "MaxTokens": 0,
+  "Temperature": null,
+  "JSONResponse": false,
+  "Grammar": "",
+  "Cache": null
+}`

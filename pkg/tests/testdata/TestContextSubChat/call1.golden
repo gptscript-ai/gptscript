@@ -1,0 +1,28 @@
+`{
+  "Model": "gpt-4-turbo-preview",
+  "InternalSystemPrompt": null,
+  "Tools": [
+    {
+      "function": {
+        "toolID": "testdata/TestContextSubChat/test.gpt:13",
+        "name": "chatbot",
+        "parameters": null
+      }
+    }
+  ],
+  "Messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "Call chatbot"
+        }
+      ]
+    }
+  ],
+  "MaxTokens": 0,
+  "Temperature": null,
+  "JSONResponse": false,
+  "Grammar": "",
+  "Cache": null
+}`

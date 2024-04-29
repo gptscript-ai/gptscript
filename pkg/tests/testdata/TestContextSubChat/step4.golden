@@ -1,0 +1,66 @@
+`{
+  "done": false,
+  "content": "Assistant Response 6 - from main chat tool resume",
+  "toolID": "testdata/TestContextSubChat/test.gpt:1",
+  "state": {
+    "continuation": {
+      "state": {
+        "input": "User 1",
+        "completion": {
+          "Model": "gpt-4-turbo-preview",
+          "InternalSystemPrompt": false,
+          "Tools": null,
+          "Messages": [
+            {
+              "role": "system",
+              "content": [
+                {
+                  "text": "Assistant Response 5 - from context tool resume\nHello"
+                }
+              ]
+            },
+            {
+              "role": "user",
+              "content": [
+                {
+                  "text": "User 1"
+                }
+              ]
+            },
+            {
+              "role": "assistant",
+              "content": [
+                {
+                  "text": "Assistant Response 3 - from main chat tool"
+                }
+              ]
+            },
+            {
+              "role": "user",
+              "content": [
+                {
+                  "text": "User 3"
+                }
+              ]
+            },
+            {
+              "role": "assistant",
+              "content": [
+                {
+                  "text": "Assistant Response 6 - from main chat tool resume"
+                }
+              ]
+            }
+          ],
+          "MaxTokens": 0,
+          "Temperature": null,
+          "JSONResponse": false,
+          "Grammar": "",
+          "Cache": null
+        }
+      },
+      "result": "Assistant Response 6 - from main chat tool resume"
+    },
+    "continuationToolID": "testdata/TestContextSubChat/test.gpt:1"
+  }
+}`

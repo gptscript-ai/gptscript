@@ -1,0 +1,143 @@
+`{
+  "done": false,
+  "content": "Assistant Response 1 - from chatbot1",
+  "toolID": "testdata/TestContextSubChat/test.gpt:13",
+  "state": {
+    "inputContextContinuation": {
+      "continuation": {
+        "state": {
+          "completion": {
+            "Model": "gpt-4-turbo-preview",
+            "InternalSystemPrompt": null,
+            "Tools": [
+              {
+                "function": {
+                  "toolID": "testdata/TestContextSubChat/test.gpt:13",
+                  "name": "chatbot",
+                  "parameters": null
+                }
+              }
+            ],
+            "Messages": [
+              {
+                "role": "system",
+                "content": [
+                  {
+                    "text": "Call chatbot"
+                  }
+                ]
+              },
+              {
+                "role": "assistant",
+                "content": [
+                  {
+                    "toolCall": {
+                      "index": 0,
+                      "id": "call_1",
+                      "function": {
+                        "name": "chatbot",
+                        "arguments": "Input to chatbot1"
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "MaxTokens": 0,
+            "Temperature": null,
+            "JSONResponse": false,
+            "Grammar": "",
+            "Cache": null
+          },
+          "pending": {
+            "call_1": {
+              "index": 0,
+              "id": "call_1",
+              "function": {
+                "name": "chatbot",
+                "arguments": "Input to chatbot1"
+              }
+            }
+          }
+        },
+        "calls": {
+          "call_1": {
+            "toolID": "testdata/TestContextSubChat/test.gpt:13",
+            "input": "Input to chatbot1"
+          }
+        }
+      },
+      "subCalls": [
+        {
+          "toolId": "testdata/TestContextSubChat/test.gpt:13",
+          "callId": "call_1",
+          "state": {
+            "continuation": {
+              "state": {
+                "input": "Input to chatbot1",
+                "completion": {
+                  "Model": "gpt-4-turbo-preview",
+                  "InternalSystemPrompt": false,
+                  "Tools": [
+                    {
+                      "function": {
+                        "toolID": "sys.chat.finish",
+                        "name": "chatFinish",
+                        "description": "Concludes the conversation. This can not be used to ask a question.",
+                        "parameters": {
+                          "properties": {
+                            "summary": {
+                              "description": "A summary of the dialog",
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      }
+                    }
+                  ],
+                  "Messages": [
+                    {
+                      "role": "system",
+                      "content": [
+                        {
+                          "text": "This is a chatbot"
+                        }
+                      ]
+                    },
+                    {
+                      "role": "user",
+                      "content": [
+                        {
+                          "text": "Input to chatbot1"
+                        }
+                      ]
+                    },
+                    {
+                      "role": "assistant",
+                      "content": [
+                        {
+                          "text": "Assistant Response 1 - from chatbot1"
+                        }
+                      ]
+                    }
+                  ],
+                  "MaxTokens": 0,
+                  "Temperature": null,
+                  "JSONResponse": false,
+                  "Grammar": "",
+                  "Cache": null
+                }
+              },
+              "result": "Assistant Response 1 - from chatbot1"
+            },
+            "continuationToolID": "testdata/TestContextSubChat/test.gpt:13"
+          }
+        }
+      ],
+      "subCallID": "call_1"
+    },
+    "inputContextContinuationInput": "User 1",
+    "startContinuation": true
+  }
+}`

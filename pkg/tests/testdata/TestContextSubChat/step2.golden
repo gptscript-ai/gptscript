@@ -1,0 +1,50 @@
+`{
+  "done": false,
+  "content": "Assistant Response 3 - from main chat tool",
+  "toolID": "testdata/TestContextSubChat/test.gpt:1",
+  "state": {
+    "continuation": {
+      "state": {
+        "input": "User 1",
+        "completion": {
+          "Model": "gpt-4-turbo-preview",
+          "InternalSystemPrompt": false,
+          "Tools": null,
+          "Messages": [
+            {
+              "role": "system",
+              "content": [
+                {
+                  "text": "Assistant Response 2 - from context tool\nHello"
+                }
+              ]
+            },
+            {
+              "role": "user",
+              "content": [
+                {
+                  "text": "User 1"
+                }
+              ]
+            },
+            {
+              "role": "assistant",
+              "content": [
+                {
+                  "text": "Assistant Response 3 - from main chat tool"
+                }
+              ]
+            }
+          ],
+          "MaxTokens": 0,
+          "Temperature": null,
+          "JSONResponse": false,
+          "Grammar": "",
+          "Cache": null
+        }
+      },
+      "result": "Assistant Response 3 - from main chat tool"
+    },
+    "continuationToolID": "testdata/TestContextSubChat/test.gpt:1"
+  }
+}`

@@ -633,7 +633,9 @@ func SysChatFinish(ctx context.Context, env []string, input string) (string, err
 		Message string `json:"message,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
-		return "", err
+		return "", &ErrChatFinish{
+			Message: input,
+		}
 	}
 	return "", &ErrChatFinish{
 		Message: params.Message,
