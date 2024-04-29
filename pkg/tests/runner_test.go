@@ -101,6 +101,105 @@ func TestDualSubChat(t *testing.T) {
 	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step4"))
 }
 
+func TestContextSubChat(t *testing.T) {
+	r := tester.NewRunner(t)
+	r.RespondWith(tester.Result{
+		Content: []types.ContentPart{
+			{
+				ToolCall: &types.CompletionToolCall{
+					ID: "call_1",
+					Function: types.CompletionFunctionCall{
+						Name:      "chatbot",
+						Arguments: "Input to chatbot1",
+					},
+				},
+			},
+		},
+	}, tester.Result{
+		Text: "Assistant Response 1 - from chatbot1",
+	})
+
+	prg, err := r.Load("")
+	require.NoError(t, err)
+
+	resp, err := r.Chat(context.Background(), nil, prg, os.Environ(), "User 1")
+	require.NoError(t, err)
+	r.AssertResponded(t)
+	assert.False(t, resp.Done)
+	autogold.Expect("Assistant Response 1 - from chatbot1").Equal(t, resp.Content)
+	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step1"))
+
+	r.RespondWith(tester.Result{
+		Content: []types.ContentPart{
+			{
+				ToolCall: &types.CompletionToolCall{
+					ID: "call_2",
+					Function: types.CompletionFunctionCall{
+						Name:      types.ToolNormalizer("sys.chat.finish"),
+						Arguments: "Response from context chatbot",
+					},
+				},
+			},
+		},
+	}, tester.Result{
+		Text: "Assistant Response 2 - from context tool",
+	}, tester.Result{
+		Text: "Assistant Response 3 - from main chat tool",
+	})
+	resp, err = r.Chat(context.Background(), resp.State, prg, os.Environ(), "User 2")
+	require.NoError(t, err)
+	r.AssertResponded(t)
+	assert.False(t, resp.Done)
+	autogold.Expect("Assistant Response 3 - from main chat tool").Equal(t, resp.Content)
+	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step2"))
+
+	r.RespondWith(tester.Result{
+		Content: []types.ContentPart{
+			{
+				ToolCall: &types.CompletionToolCall{
+					ID: "call_3",
+					Function: types.CompletionFunctionCall{
+						Name:      "chatbot",
+						Arguments: "Input to chatbot1 on resume",
+					},
+				},
+			},
+		},
+	}, tester.Result{
+		Text: "Assistant Response 4 - from chatbot1",
+	})
+	resp, err = r.Chat(context.Background(), resp.State, prg, os.Environ(), "User 3")
+	require.NoError(t, err)
+	r.AssertResponded(t)
+	assert.False(t, resp.Done)
+	autogold.Expect("Assistant Response 3 - from main chat tool").Equal(t, resp.Content)
+	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step3"))
+
+	r.RespondWith(tester.Result{
+		Content: []types.ContentPart{
+			{
+				ToolCall: &types.CompletionToolCall{
+					ID: "call_4",
+					Function: types.CompletionFunctionCall{
+						Name:      types.ToolNormalizer("sys.chat.finish"),
+						Arguments: "Response from context chatbot after resume",
+					},
+				},
+			},
+		},
+	}, tester.Result{
+		Text: "Assistant Response 5 - from context tool resume",
+	}, tester.Result{
+		Text: "Assistant Response 6 - from main chat tool resume",
+	})
+	resp, err = r.Chat(context.Background(), resp.State, prg, os.Environ(), "User 4")
+	require.NoError(t, err)
+	r.AssertResponded(t)
+	assert.False(t, resp.Done)
+	autogold.Expect("Assistant Response 6 - from main chat tool resume").Equal(t, resp.Content)
+	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step4"))
+}
+
 func TestSubChat(t *testing.T) {
 	r := tester.NewRunner(t)
 	r.RespondWith(tester.Result{

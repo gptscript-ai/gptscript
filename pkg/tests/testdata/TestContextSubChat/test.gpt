@@ -1,0 +1,17 @@
+chat: true
+context: subtool
+
+Hello
+
+---
+name: subtool
+tools: chatbot
+
+Call chatbot
+
+---
+name: chatbot
+chat: true
+tools: sys.chat.finish
+
+This is a chatbot

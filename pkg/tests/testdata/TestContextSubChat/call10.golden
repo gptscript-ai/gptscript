@@ -1,0 +1,44 @@
+`{
+  "Model": "gpt-4-turbo-preview",
+  "InternalSystemPrompt": false,
+  "Tools": null,
+  "Messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "Assistant Response 5 - from context tool resume\nHello"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "User 1"
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "Assistant Response 3 - from main chat tool"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "User 3"
+        }
+      ]
+    }
+  ],
+  "MaxTokens": 0,
+  "Temperature": null,
+  "JSONResponse": false,
+  "Grammar": "",
+  "Cache": null
+}`
