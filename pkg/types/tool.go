@@ -251,7 +251,7 @@ func (t Tool) String() string {
 		_, _ = fmt.Fprintln(buf, "Cache: false")
 	}
 	if t.Parameters.Temperature != nil {
-		_, _ = fmt.Fprintf(buf, "Temperature: %f", *t.Parameters.Temperature)
+		_, _ = fmt.Fprintf(buf, "Temperature: %f\n", *t.Parameters.Temperature)
 	}
 	if t.Parameters.Arguments != nil {
 		var keys []string
@@ -275,7 +275,7 @@ func (t Tool) String() string {
 		_, _ = fmt.Fprintf(buf, "Credentials: %s\n", strings.Join(t.Parameters.Credentials, ", "))
 	}
 	if t.Chat {
-		_, _ = fmt.Fprintf(buf, "Chat: true")
+		_, _ = fmt.Fprintf(buf, "Chat: true\n")
 	}
 
 	return buf.String()

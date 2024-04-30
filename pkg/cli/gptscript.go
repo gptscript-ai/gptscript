@@ -68,9 +68,15 @@ type GPTScript struct {
 
 func New() *cobra.Command {
 	root := &GPTScript{}
-	command := cmd.Command(root, &Eval{
-		gptscript: root,
-	}, &Credential{root: root})
+	command := cmd.Command(
+		root,
+		&Eval{
+			gptscript: root,
+		},
+		&Credential{root: root},
+		&Parse{},
+		&Fmt{},
+	)
 
 	// Hide all the global flags for the credential subcommand.
 	for _, child := range command.Commands() {

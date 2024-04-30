@@ -174,42 +174,124 @@ type context struct {
 	instructions []string
 	inBody       bool
 	skipNode     bool
+	skipLines    []string
 	seenParam    bool
 }
 
-func (c *context) finish(tools *[]types.Tool) {
+func (c *context) finish(tools *[]Node) {
 	c.tool.Instructions = strings.TrimSpace(strings.Join(c.instructions, ""))
 	if c.tool.Instructions != "" || c.tool.Parameters.Name != "" ||
 		len(c.tool.Export) > 0 || len(c.tool.Tools) > 0 ||
 		c.tool.GlobalModelName != "" ||
 		len(c.tool.GlobalTools) > 0 ||
 		c.tool.Chat {
-		*tools = append(*tools, c.tool)
+		*tools = append(*tools, Node{
+			ToolNode: &ToolNode{
+				Tool: c.tool,
+			},
+		})
+	}
+	if c.skipNode && len(c.skipLines) > 0 {
+		*tools = append(*tools, Node{
+			TextNode: &TextNode{
+				Text: strings.Join(c.skipLines, ""),
+			},
+		})
 	}
 	*c = context{}
 }
 
 type Options struct {
 	AssignGlobals bool
+	Location      string
 }
 
 func complete(opts ...Options) (result Options) {
 	for _, opt := range opts {
 		result.AssignGlobals = types.FirstSet(opt.AssignGlobals, result.AssignGlobals)
+		result.Location = types.FirstSet(opt.Location, result.Location)
 	}
 	return
 }
 
-func Parse(input io.Reader, opts ...Options) ([]types.Tool, error) {
-	tools, err := parse(input)
+type Document struct {
+	Nodes []Node `json:"nodes,omitempty"`
+}
+
+func writeSep(buf *strings.Builder, lastText bool) {
+	if buf.Len() > 0 {
+		if !lastText {
+			buf.WriteString("\n")
+		}
+		buf.WriteString("---\n")
+	}
+}
+
+func (d Document) String() string {
+	buf := strings.Builder{}
+	lastText := false
+	for _, node := range d.Nodes {
+		if node.TextNode != nil {
+			writeSep(&buf, lastText)
+			buf.WriteString(node.TextNode.Text)
+			lastText = true
+		}
+		if node.ToolNode != nil {
+			writeSep(&buf, lastText)
+			buf.WriteString(node.ToolNode.Tool.String())
+			lastText = false
+		}
+	}
+	return buf.String()
+}
+
+type Node struct {
+	TextNode *TextNode `json:"textNode,omitempty"`
+	ToolNode *ToolNode `json:"toolNode,omitempty"`
+}
+
+type TextNode struct {
+	Text string `json:"text,omitempty"`
+}
+
+type ToolNode struct {
+	Tool types.Tool `json:"tool,omitempty"`
+}
+
+func ParseTools(input io.Reader, opts ...Options) (result []types.Tool, _ error) {
+	doc, err := Parse(input, opts...)
 	if err != nil {
 		return nil, err
+	}
+	for _, node := range doc.Nodes {
+		if node.ToolNode != nil {
+			result = append(result, node.ToolNode.Tool)
+		}
+	}
+
+	return
+}
+
+func Parse(input io.Reader, opts ...Options) (Document, error) {
+	nodes, err := parse(input)
+	if err != nil {
+		return Document{}, err
 	}
 
 	opt := complete(opts...)
 
+	if opt.Location != "" {
+		for _, node := range nodes {
+			if node.ToolNode != nil && node.ToolNode.Tool.Source.Location == "" {
+				node.ToolNode.Tool.Source.Location = opt.Location
+			}
+		}
+	}
+
 	if !opt.AssignGlobals {
-		return tools, nil
+		return Document{
+			Nodes: nodes,
+		}, nil
 	}
 
 	var (
@@ -218,10 +300,14 @@ func Parse(input io.Reader, opts ...Options) ([]types.Tool, error) {
 		globalTools     []string
 	)
 
-	for _, tool := range tools {
+	for _, node := range nodes {
+		if node.ToolNode == nil {
+			continue
+		}
+		tool := node.ToolNode.Tool
 		if tool.GlobalModelName != "" {
 			if globalModel != "" {
-				return nil, fmt.Errorf("global model name defined multiple times")
+				return Document{}, fmt.Errorf("global model name defined multiple times")
 			}
 			globalModel = tool.GlobalModelName
 		}
@@ -234,26 +320,30 @@ func Parse(input io.Reader, opts ...Options) ([]types.Tool, error) {
 		}
 	}
 
-	for i, tool := range tools {
-		if globalModel != "" && tool.ModelName == "" {
-			tool.ModelName = globalModel
+	for _, node := range nodes {
+		if node.ToolNode == nil {
+			continue
+		}
+		if globalModel != "" && node.ToolNode.Tool.ModelName == "" {
+			node.ToolNode.Tool.ModelName = globalModel
 		}
 		for _, globalTool := range globalTools {
-			if !slices.Contains(tool.Tools, globalTool) {
-				tool.Tools = append(tool.Tools, globalTool)
+			if !slices.Contains(node.ToolNode.Tool.Tools, globalTool) {
+				node.ToolNode.Tool.Tools = append(node.ToolNode.Tool.Tools, globalTool)
 			}
 		}
-		tools[i] = tool
 	}
 
-	return tools, nil
+	return Document{
+		Nodes: nodes,
+	}, nil
 }
 
-func parse(input io.Reader) ([]types.Tool, error) {
+func parse(input io.Reader) ([]Node, error) {
 	scan := bufio.NewScanner(input)
 
 	var (
-		tools   []types.Tool
+		tools   []Node
 		context context
 		lineNo  int
 	)
@@ -277,6 +367,7 @@ func parse(input io.Reader) ([]types.Tool, error) {
 		}
 
 		if context.skipNode {
+			context.skipLines = append(context.skipLines, line)
 			continue
 		}
 
@@ -292,6 +383,7 @@ func parse(input io.Reader) ([]types.Tool, error) {
 			}
 
 			if !context.seenParam && skipRegex.MatchString(line) {
+				context.skipLines = append(context.skipLines, line)
 				context.skipNode = true
 				continue
 			}

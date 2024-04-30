@@ -21,23 +21,25 @@ tools: bar
 		AssignGlobals: true,
 	})
 	require.NoError(t, err)
-	autogold.Expect([]types.Tool{
-		{
-			Parameters: types.Parameters{
-				ModelName: "the model",
-				Tools: []string{
-					"foo",
-					"bar",
+	autogold.Expect(Document{Nodes: []Node{
+		{ToolNode: &ToolNode{
+			Tool: types.Tool{
+				Parameters: types.Parameters{
+					ModelName: "the model",
+					Tools: []string{
+						"foo",
+						"bar",
+					},
+					GlobalTools: []string{
+						"foo",
+						"bar",
+					},
+					GlobalModelName: "the model",
 				},
-				GlobalTools: []string{
-					"foo",
-					"bar",
-				},
-				GlobalModelName: "the model",
+				Source: types.ToolSource{LineNo: 1},
 			},
-			Source: types.ToolSource{LineNo: 1},
-		},
-		{
+		}},
+		{ToolNode: &ToolNode{Tool: types.Tool{
 			Parameters: types.Parameters{
 				Name:      "bar",
 				ModelName: "the model",
@@ -47,8 +49,8 @@ tools: bar
 				},
 			},
 			Source: types.ToolSource{LineNo: 5},
-		},
-	}).Equal(t, out)
+		}}},
+	}}).Equal(t, out)
 }
 
 func TestParseSkip(t *testing.T) {
@@ -85,28 +87,47 @@ name: seven
 `
 	out, err := Parse(strings.NewReader(input))
 	require.NoError(t, err)
-	autogold.Expect([]types.Tool{
-		{
-			Instructions: "first",
-			Source:       types.ToolSource{LineNo: 1},
-		},
-		{
+	autogold.Expect(Document{Nodes: []Node{
+		{ToolNode: &ToolNode{
+			Tool: types.Tool{
+				Instructions: "first",
+				Source: types.ToolSource{
+					LineNo: 1,
+				},
+			},
+		}},
+		{ToolNode: &ToolNode{Tool: types.Tool{
 			Parameters: types.Parameters{Name: "second"},
 			Source:     types.ToolSource{LineNo: 4},
-		},
-		{
+		}}},
+		{TextNode: &TextNode{Text: "!third\n\nname: third\n"}},
+		{ToolNode: &ToolNode{Tool: types.Tool{
 			Parameters:   types.Parameters{Name: "fourth"},
 			Instructions: "!forth dont skip",
 			Source:       types.ToolSource{LineNo: 11},
-		},
-		{
+		}}},
+		{ToolNode: &ToolNode{Tool: types.Tool{
 			Parameters:   types.Parameters{Name: "fifth"},
 			Instructions: "#!ignore",
 			Source:       types.ToolSource{LineNo: 14},
-		},
-		{
-			Parameters: types.Parameters{Name: "seven"},
-			Source:     types.ToolSource{LineNo: 30},
-		},
-	}).Equal(t, out)
+		}}},
+		{TextNode: &TextNode{Text: `!skip
+name: six
+
+----
+name: bad
+ ---
+name: bad
+--
+name: bad
+---
+name: bad
+`}},
+		{ToolNode: &ToolNode{Tool: types.Tool{
+			Parameters: types.Parameters{
+				Name: "seven",
+			},
+			Source: types.ToolSource{LineNo: 30},
+		}}},
+	}}).Equal(t, out)
 }
