@@ -49,7 +49,7 @@ For more functionality, like streaming output and the supported options, visit t
 
 ### Node
 
-The [Node SDK](https://github.com/gptscript-ai/node-gptscript) includes a `Tool` data structure corresponding to the documented [tool reference](07-gpt-file-reference#tool-parameters), which can be used to construct and run tools.
+The [Node SDK](https://github.com/gptscript-ai/node-gptscript) includes a `Tool` data structure corresponding to the documented [tool reference](07-gpt-file-reference.md#tool-parameters), which can be used to construct and run tools.
 
 ```javascript
 const gptscript = require('@gptscript-ai/gptscript');
@@ -89,7 +89,7 @@ For more functionality, like streaming output and the supported options, visit t
 
 ### Go
 
-The [Go SDK](https://github.com/gptscript-ai/go-gptscript) includes a `Tool` data structure corresponding to the documented [tool reference](07-gpt-file-reference#tool-parameters), which can be used to construct and run tools.
+The [Go SDK](https://github.com/gptscript-ai/go-gptscript) includes a `Tool` data structure corresponding to the documented [tool reference](07-gpt-file-reference.md#tool-parameters), which can be used to construct and run tools.
 
 ```go
 package main
