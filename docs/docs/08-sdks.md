@@ -8,7 +8,7 @@ Below are some simple examples for each to get started. However, the individual 
 
 ### Python
 
-The [Python SDK](https://github.com/gptscript-ai/py-gptscript) includes a `Tool` data structure corresponding to the documented [tool reference](/gpt-file-reference#tool-parameters), which can be used to construct and run tools.
+The [Python SDK](https://github.com/gptscript-ai/py-gptscript) includes a `Tool` data structure corresponding to the documented [tool reference](07-gpt-file-reference.md#tool-parameters), which can be used to construct and run tools.
 
 ```python
 from gptscript.command import exec
