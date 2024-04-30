@@ -14,7 +14,7 @@ require (
 	github.com/fatih/color v1.16.0
 	github.com/getkin/kin-openapi v0.123.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
-	github.com/gptscript-ai/chat-completion-client v0.0.0-20240404013040-49eb8f6affa1
+	github.com/gptscript-ai/chat-completion-client v0.0.0-20240502162133-7dabc28eab59
 	github.com/hexops/autogold/v2 v2.2.1
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8

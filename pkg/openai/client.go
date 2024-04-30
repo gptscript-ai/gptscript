@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	DefaultModel = openai.GPT4TurboPreview
+	DefaultModel = openai.GPT4Turbo
 )
 
 var (
@@ -47,7 +47,7 @@ type Options struct {
 	APIVersion   string         `usage:"OpenAI API Version (for Azure)" name:"openai-api-version" env:"OPENAI_API_VERSION"`
 	APIType      openai.APIType `usage:"OpenAI API Type (valid: OPEN_AI, AZURE, AZURE_AD)" name:"openai-api-type" env:"OPENAI_API_TYPE"`
 	OrgID        string         `usage:"OpenAI organization ID" name:"openai-org-id" env:"OPENAI_ORG_ID"`
-	DefaultModel string         `usage:"Default LLM model to use" default:"gpt-4-turbo-preview"`
+	DefaultModel string         `usage:"Default LLM model to use" default:"gpt-4-turbo"`
 	ConfigFile   string         `usage:"Path to GPTScript config file" name:"config"`
 	SetSeed      bool           `usage:"-"`
 	CacheKey     string         `usage:"-"`

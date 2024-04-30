@@ -27,7 +27,7 @@ func TestHelloWorld(t *testing.T) {
   "entryToolId": "https://raw.githubusercontent.com/ibuildthecloud/test/bafe5a62174e8a0ea162277dcfe3a2ddb7eea928/example/sub/tool.gpt:1",
   "toolSet": {
     "https://raw.githubusercontent.com/ibuildthecloud/test/bafe5a62174e8a0ea162277dcfe3a2ddb7eea928/example/bob.gpt:1": {
-      "modelName": "gpt-4-turbo-preview",
+      "modelName": "gpt-4-turbo",
       "internalPrompt": null,
       "instructions": "Say hello world",
       "id": "https://raw.githubusercontent.com/ibuildthecloud/test/bafe5a62174e8a0ea162277dcfe3a2ddb7eea928/example/bob.gpt:1",
@@ -41,7 +41,7 @@ func TestHelloWorld(t *testing.T) {
       "workingDir": "https://raw.githubusercontent.com/ibuildthecloud/test/bafe5a62174e8a0ea162277dcfe3a2ddb7eea928/example"
     },
     "https://raw.githubusercontent.com/ibuildthecloud/test/bafe5a62174e8a0ea162277dcfe3a2ddb7eea928/example/sub/tool.gpt:1": {
-      "modelName": "gpt-4-turbo-preview",
+      "modelName": "gpt-4-turbo",
       "internalPrompt": null,
       "tools": [
         "../bob.gpt"
@@ -72,7 +72,7 @@ func TestHelloWorld(t *testing.T) {
   "toolSet": {
     "https://get.gptscript.ai/echo.gpt:1": {
       "description": "Returns back the input of the script",
-      "modelName": "gpt-4-turbo-preview",
+      "modelName": "gpt-4-turbo",
       "internalPrompt": null,
       "arguments": {
         "properties": {

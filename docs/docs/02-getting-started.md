@@ -59,7 +59,7 @@ OUTPUT:
 Hello, World!
 ```
 
-The model used by default is `gpt-4-turbo-preview` and you must have access to that model in your OpenAI account.
+The model used by default is `gpt-4-turbo` and you must have access to that model in your OpenAI account.
 
 If using Azure OpenAI, make sure you configure the model to be one of the supported versions with the `--default-model` argument.
 
