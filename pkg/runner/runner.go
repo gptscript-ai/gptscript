@@ -250,7 +250,7 @@ var (
 	EventTypeRunFinish    EventType = "runFinish"
 )
 
-func getContextInput(prg *types.Program, ref types.ToolReference, input string) (string, error) {
+func getToolRefInput(prg *types.Program, ref types.ToolReference, input string) (string, error) {
 	if ref.Arg == "" {
 		return "", nil
 	}
@@ -355,7 +355,7 @@ func (r *Runner) getContext(callCtx engine.Context, state *State, monitor Monito
 			continue
 		}
 
-		contextInput, err := getContextInput(callCtx.Program, toolRef, input)
+		contextInput, err := getToolRefInput(callCtx.Program, toolRef, input)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -867,7 +867,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 		}
 
 		var (
-			cred   *credentials.Credential
+			c      *credentials.Credential
 			exists bool
 		)
 
@@ -879,25 +879,39 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 		// Only try to look up the cred if the tool is on GitHub or has an alias.
 		// If it is a GitHub tool and has an alias, the alias overrides the tool name, so we use it as the credential name.
 		if isGitHubTool(toolName) && credentialAlias == "" {
-			cred, exists, err = r.credStore.Get(toolName)
+			c, exists, err = r.credStore.Get(toolName)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get credentials for tool %s: %w", toolName, err)
 			}
 		} else if credentialAlias != "" {
-			cred, exists, err = r.credStore.Get(credentialAlias)
+			c, exists, err = r.credStore.Get(credentialAlias)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get credentials for tool %s: %w", credentialAlias, err)
 			}
 		}
 
+		if c == nil {
+			c = &credentials.Credential{}
+		}
+
 		// If the credential doesn't already exist in the store, run the credential tool in order to get the value,
 		// and save it in the store.
-		if !exists {
+		if !exists || c.IsExpired() {
 			credToolRefs, ok := callCtx.Tool.ToolMapping[credToolName]
 			if !ok || len(credToolRefs) != 1 {
 				return nil, fmt.Errorf("failed to find ID for tool %s", credToolName)
 			}
 
+			// If the existing credential is expired, we need to provide it to the cred tool through the environment.
+			if exists && c.IsExpired() {
+				credJson, err := json.Marshal(c)
+				if err != nil {
+					return nil, fmt.Errorf("failed to marshal credential: %w", err)
+				}
+				env = append(env, fmt.Sprintf("%s=%s", credentials.ExistingCredential, string(credJson)))
+			}
+
+			// Get the input for the credential tool, if there is any.
 			var input string
 			if args != nil {
 				inputBytes, err := json.Marshal(args)
@@ -916,21 +930,13 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 				return nil, fmt.Errorf("invalid state: credential tool [%s] can not result in a continuation", credToolName)
 			}
 
-			var envMap struct {
-				Env map[string]string `json:"env"`
-			}
-			if err := json.Unmarshal([]byte(*res.Result), &envMap); err != nil {
+			if err := json.Unmarshal([]byte(*res.Result), &c); err != nil {
 				return nil, fmt.Errorf("failed to unmarshal credential tool %s response: %w", credToolName, err)
 			}
-
-			cred = &credentials.Credential{
-				Type:     credentials.CredentialTypeTool,
-				Env:      envMap.Env,
-				ToolName: credName,
-			}
+			c.ToolName = credName
 
 			isEmpty := true
-			for _, v := range cred.Env {
+			for _, v := range c.Env {
 				if v != "" {
 					isEmpty = false
 					break
@@ -941,7 +947,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			if (isGitHubTool(toolName) && callCtx.Program.ToolSet[credToolRefs[0].ToolID].Source.Repo != nil) || credentialAlias != "" {
 				if isEmpty {
 					log.Warnf("Not saving empty credential for tool %s", toolName)
-				} else if err := r.credStore.Add(*cred); err != nil {
+				} else if err := r.credStore.Add(*c); err != nil {
 					return nil, fmt.Errorf("failed to add credential for tool %s: %w", toolName, err)
 				}
 			} else {
@@ -949,7 +955,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			}
 		}
 
-		for k, v := range cred.Env {
+		for k, v := range c.Env {
 			env = append(env, fmt.Sprintf("%s=%s", k, v))
 		}
 	}
