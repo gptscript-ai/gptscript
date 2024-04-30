@@ -7,7 +7,7 @@
       "state": {
         "input": "User 1",
         "completion": {
-          "Model": "gpt-4-turbo-preview",
+          "Model": "gpt-4-turbo",
           "InternalSystemPrompt": null,
           "Tools": [
             {
@@ -120,7 +120,7 @@
             "state": {
               "input": "Input to chatbot2",
               "completion": {
-                "Model": "gpt-4-turbo-preview",
+                "Model": "gpt-4-turbo",
                 "InternalSystemPrompt": false,
                 "Tools": [
                   {
