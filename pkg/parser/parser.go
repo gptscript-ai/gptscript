@@ -372,11 +372,6 @@ func parse(input io.Reader) ([]Node, error) {
 		}
 
 		if !context.inBody {
-			// If the very first line is #! just skip because this is a unix interpreter declaration
-			if strings.HasPrefix(line, "#!") && lineNo == 1 {
-				continue
-			}
-
 			// This is a comment
 			if strings.HasPrefix(line, "#") && !strings.HasPrefix(line, "#!") {
 				continue

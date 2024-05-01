@@ -131,3 +131,21 @@ name: bad
 		}}},
 	}}).Equal(t, out)
 }
+
+func TestParseFirstLineShebang(t *testing.T) {
+	var input = `#!/usr/bin/env sh
+echo "hello"
+`
+	out, err := Parse(strings.NewReader(input), Options{
+		AssignGlobals: true,
+	})
+	require.NoError(t, err)
+	autogold.Expect(Document{Nodes: []Node{
+		{ToolNode: &ToolNode{
+			Tool: types.Tool{
+				Instructions: "#!/usr/bin/env sh\necho \"hello\"",
+				Source:       types.ToolSource{LineNo: 1},
+			},
+		}},
+	}}).Equal(t, out)
+}
