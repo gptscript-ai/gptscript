@@ -339,6 +339,30 @@ func Parse(input io.Reader, opts ...Options) (Document, error) {
 	}, nil
 }
 
+func isGPTScriptHashBang(line string) bool {
+	if !strings.HasPrefix(line, "#!") {
+		return false
+	}
+
+	parts := strings.Fields(line)
+
+	// Very specific lines we are looking for
+	// 1. #!gptscript
+	// 2. #!/usr/bin/env gptscript
+	// 3. #!/bin/env gptscript
+
+	if parts[0] == "#!gptscript" {
+		return true
+	}
+
+	if len(parts) > 1 && (parts[0] == "#!/usr/bin/env" || parts[0] == "#!/bin/env") &&
+		parts[1] == "gptscript" {
+		return true
+	}
+
+	return false
+}
+
 func parse(input io.Reader) ([]Node, error) {
 	scan := bufio.NewScanner(input)
 
@@ -373,7 +397,7 @@ func parse(input io.Reader) ([]Node, error) {
 
 		if !context.inBody {
 			// If the very first line is #! just skip because this is a unix interpreter declaration
-			if strings.HasPrefix(line, "#!") && lineNo == 1 {
+			if lineNo == 1 && isGPTScriptHashBang(line) {
 				continue
 			}
 

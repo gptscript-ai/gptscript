@@ -9,6 +9,20 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestHashBang(t *testing.T) {
+	autogold.Expect(true).Equal(t, isGPTScriptHashBang("#!/usr/bin/env gptscript"))
+	autogold.Expect(true).Equal(t, isGPTScriptHashBang("#!/bin/env gptscript"))
+	autogold.Expect(true).Equal(t, isGPTScriptHashBang("#!gptscript"))
+
+	autogold.Expect(false).Equal(t, isGPTScriptHashBang("/usr/bin/env gptscript"))
+	autogold.Expect(false).Equal(t, isGPTScriptHashBang("/bin/env gptscript"))
+	autogold.Expect(false).Equal(t, isGPTScriptHashBang("gptscript"))
+
+	autogold.Expect(false).Equal(t, isGPTScriptHashBang("#!/sr/bin/env gptscript"))
+	autogold.Expect(false).Equal(t, isGPTScriptHashBang("#!/bin/env gpscript"))
+	autogold.Expect(false).Equal(t, isGPTScriptHashBang("#!gptscrip"))
+}
+
 func TestParseGlobals(t *testing.T) {
 	var input = `
 global tools: foo, bar
