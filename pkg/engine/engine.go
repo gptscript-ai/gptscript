@@ -321,6 +321,12 @@ func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 		}
 	}
 
+	if len(resp.Content) == 0 {
+		// This can happen if the LLM return no content at all. You can reproduce by just saying, "return an empty response"
+		empty := ""
+		ret.Result = &empty
+	}
+
 	return &ret, nil
 }
 
