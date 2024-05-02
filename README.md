@@ -118,7 +118,7 @@ OUTPUT:
 Hello, World!
 ```
 
-The model used by default is `gpt-4-turbo-preview` and you must have access to that model in your OpenAI account.
+The model used by default is `gpt-4-turbo` and you must have access to that model in your OpenAI account.
 
 If using Azure OpenAI, make sure you configure the model to be one of the supported versions with the `--default-model` argument.
 
@@ -244,7 +244,7 @@ Tool parameters are key-value pairs defined at the beginning of a tool block, be
 | Key            | Description                                                                                                                             |
 |------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
 | `Name`           | The name of the tool.                                                                                                                   |
-| `Model Name`     | The OpenAI model to use, by default it uses "gpt-4-turbo-preview"                                                                         |
+| `Model Name`     | The OpenAI model to use, by default it uses "gpt-4-turbo"                                                                         |
 | `Description`    | The description of the tool. It is important that this properly describes the tool's purpose as the description is used by the LLM.     |
 | `Internal Prompt`| Setting this to `false` will disable the built-in system prompt for this tool.                                                          |
 | `Tools`          | A comma-separated list of tools that are available to be called by this tool.                                                            |

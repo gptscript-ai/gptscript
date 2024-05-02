@@ -123,8 +123,8 @@ github.com/googleapis/gax-go/v2 v2.0.4/go.mod h1:0Wqv26UfaUD9n4G6kQubkQ+KchISgw+
 github.com/googleapis/gax-go/v2 v2.0.5/go.mod h1:DWXyrwAJ9X0FpwwEdw+IPEYBICEFu5mhpdKc/us6bOk=
 github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWmnc=
 github.com/gorilla/websocket v1.5.0/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
-github.com/gptscript-ai/chat-completion-client v0.0.0-20240404013040-49eb8f6affa1 h1:h0ikiEkB6lUgiOKN5ltZ7rzIvA13qjz8qcB/3wWdCws=
-github.com/gptscript-ai/chat-completion-client v0.0.0-20240404013040-49eb8f6affa1/go.mod h1:7P/o6/IWa1KqsntVf68hSnLKuu3+xuqm6lYhch1w4jo=
+github.com/gptscript-ai/chat-completion-client v0.0.0-20240502162133-7dabc28eab59 h1:Nda0GDkrmIDiAFHfaXu0eIp6SsBs0/4Zyo87ff3Qcqo=
+github.com/gptscript-ai/chat-completion-client v0.0.0-20240502162133-7dabc28eab59/go.mod h1:7P/o6/IWa1KqsntVf68hSnLKuu3+xuqm6lYhch1w4jo=
 github.com/hashicorp/errwrap v1.0.0 h1:hLrqtEDnRye3+sgx6z4qVLNuviH3MR5aQ0ykNJa/UYA=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+lD48awMYo=
