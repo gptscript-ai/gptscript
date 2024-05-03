@@ -383,7 +383,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 		if err != nil {
 			return err
 		}
-		data, err := json.Marshal(resp)
+		data, err := json.Marshal(resp.State)
 		if err != nil {
 			return err
 		}
