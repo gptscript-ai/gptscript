@@ -331,6 +331,10 @@ func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 }
 
 func (e *Engine) Continue(ctx Context, state *State, results ...CallResult) (*Return, error) {
+	if state == nil {
+		return nil, fmt.Errorf("invalid continue call, missing state")
+	}
+
 	var added bool
 
 	state = &State{
