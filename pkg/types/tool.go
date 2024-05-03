@@ -267,15 +267,17 @@ func (t Tool) String() string {
 	if t.Parameters.InternalPrompt != nil {
 		_, _ = fmt.Fprintf(buf, "Internal Prompt: %v\n", *t.Parameters.InternalPrompt)
 	}
-	if t.Instructions != "" && t.BuiltinFunc == nil {
-		_, _ = fmt.Fprintln(buf)
-		_, _ = fmt.Fprintln(buf, t.Instructions)
-	}
 	if len(t.Parameters.Credentials) > 0 {
 		_, _ = fmt.Fprintf(buf, "Credentials: %s\n", strings.Join(t.Parameters.Credentials, ", "))
 	}
 	if t.Chat {
 		_, _ = fmt.Fprintf(buf, "Chat: true\n")
+	}
+
+	// Instructions should be printed last
+	if t.Instructions != "" && t.BuiltinFunc == nil {
+		_, _ = fmt.Fprintln(buf)
+		_, _ = fmt.Fprintln(buf, t.Instructions)
 	}
 
 	return buf.String()
