@@ -21,7 +21,7 @@ This Flask application leverages GPTScript to generate clues for a real world tr
     git clone https://github.com/gptscript-ai/gptscript.git
     ```
 
-2. Navigate to the `examples/treasure-hun` directory and install the dependencies:
+2. Navigate to the `examples/treasure-hunt` directory and install the dependencies:
 
     Python:
 
