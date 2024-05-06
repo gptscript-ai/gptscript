@@ -630,7 +630,7 @@ func (e *ErrChatFinish) Error() string {
 
 func SysChatFinish(ctx context.Context, env []string, input string) (string, error) {
 	var params struct {
-		Message string `json:"message,omitempty"`
+		Message string `json:"summary,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
 		return "", &ErrChatFinish{

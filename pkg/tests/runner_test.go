@@ -64,7 +64,7 @@ func TestDualSubChat(t *testing.T) {
 	r.RespondWith(tester.Result{
 		Func: types.CompletionFunctionCall{
 			Name:      types.ToolNormalizer("sys.chat.finish"),
-			Arguments: `{"message":"Chat done"}`,
+			Arguments: `{"summary":"Chat done"}`,
 		},
 	})
 
@@ -89,7 +89,7 @@ func TestDualSubChat(t *testing.T) {
 	r.RespondWith(tester.Result{
 		Func: types.CompletionFunctionCall{
 			Name:      types.ToolNormalizer("sys.chat.finish"),
-			Arguments: `{"message":"Chat done2"}`,
+			Arguments: `{"summary":"Chat done2"}`,
 		},
 	}, tester.Result{
 		Text: "And we're done",
