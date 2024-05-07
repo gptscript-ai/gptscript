@@ -2,8 +2,8 @@ package hash
 
 import (
 	"crypto/sha256"
+	"encoding/gob"
 	"encoding/hex"
-	"encoding/json"
 )
 
 func ID(parts ...string) string {
@@ -19,31 +19,9 @@ func ID(parts ...string) string {
 }
 
 func Digest(obj any) string {
-	data, err := json.Marshal(obj)
-	if err != nil {
+	hash := sha256.New()
+	if err := gob.NewEncoder(hash).Encode(obj); err != nil {
 		panic(err)
 	}
-
-	hash := sha256.Sum256(data)
-	return hex.EncodeToString(hash[:])
-}
-
-func Encode(obj any) string {
-	data, err := json.Marshal(obj)
-	if err != nil {
-		panic(err)
-	}
-
-	asMap := map[string]any{}
-	if err := json.Unmarshal(data, &asMap); err != nil {
-		panic(err)
-	}
-
-	data, err = json.Marshal(asMap)
-	if err != nil {
-		panic(err)
-	}
-
-	hash := sha256.Sum256(data)
-	return hex.EncodeToString(hash[:])
+	return hex.EncodeToString(hash.Sum(nil))
 }

@@ -20,6 +20,10 @@ type CompletionRequest struct {
 	Cache                *bool
 }
 
+func (r *CompletionRequest) GetCache() bool {
+	return r.Cache != nil && !*r.Cache
+}
+
 type CompletionTool struct {
 	Function CompletionFunctionDefinition `json:"function,omitempty"`
 }

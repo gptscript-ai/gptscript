@@ -13,20 +13,24 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
+	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/parser"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"gopkg.in/yaml.v3"
 )
 
+const CacheTimeout = time.Hour
+
 type source struct {
 	// Content The content of the source
-	Content io.ReadCloser
+	Content []byte
 	// Remote indicates that this file was loaded from a remote source (not local disk)
 	Remote bool
 	// Path is the path of this source used to find any relative references to this source
@@ -68,8 +72,15 @@ func loadLocal(base *source, name string) (*source, bool, error) {
 	}
 	log.Debugf("opened %s", path)
 
+	defer content.Close()
+
+	data, err := io.ReadAll(content)
+	if err != nil {
+		return nil, false, err
+	}
+
 	return &source{
-		Content:  content,
+		Content:  data,
 		Remote:   false,
 		Path:     filepath.Dir(path),
 		Name:     filepath.Base(path),
@@ -109,12 +120,8 @@ func loadProgram(data []byte, into *types.Program, targetToolName string) (types
 	return tool, nil
 }
 
-func readTool(ctx context.Context, prg *types.Program, base *source, targetToolName string) (types.Tool, error) {
-	data, err := io.ReadAll(base.Content)
-	if err != nil {
-		return types.Tool{}, err
-	}
-	_ = base.Content.Close()
+func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, targetToolName string) (types.Tool, error) {
+	data := base.Content
 
 	if bytes.HasPrefix(data, assemble.Header) {
 		return loadProgram(data, prg, targetToolName)
@@ -147,6 +154,7 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 
 	// If we didn't get any tools from trying to parse it as OpenAPI, try to parse it as a GPTScript
 	if len(tools) == 0 {
+		var err error
 		tools, err = parser.ParseTools(bytes.NewReader(data), parser.Options{
 			AssignGlobals: true,
 		})
@@ -193,10 +201,10 @@ func readTool(ctx context.Context, prg *types.Program, base *source, targetToolN
 		localTools[strings.ToLower(tool.Parameters.Name)] = tool
 	}
 
-	return link(ctx, prg, base, mainTool, localTools)
+	return link(ctx, cache, prg, base, mainTool, localTools)
 }
 
-func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool, localTools types.ToolSet) (types.Tool, error) {
+func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, tool types.Tool, localTools types.ToolSet) (types.Tool, error) {
 	if existing, ok := prg.ToolSet[tool.ID]; ok {
 		return existing, nil
 	}
@@ -225,7 +233,7 @@ func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool
 				linkedTool = existing
 			} else {
 				var err error
-				linkedTool, err = link(ctx, prg, base, localTool, localTools)
+				linkedTool, err = link(ctx, cache, prg, base, localTool, localTools)
 				if err != nil {
 					return types.Tool{}, fmt.Errorf("failed linking %s at %s: %w", targetToolName, base, err)
 				}
@@ -235,7 +243,7 @@ func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool
 			toolNames[targetToolName] = struct{}{}
 		} else {
 			toolName, subTool := SplitToolRef(targetToolName)
-			resolvedTool, err := resolve(ctx, prg, base, toolName, subTool)
+			resolvedTool, err := resolve(ctx, cache, prg, base, toolName, subTool)
 			if err != nil {
 				return types.Tool{}, fmt.Errorf("failed resolving %s at %s: %w", targetToolName, base, err)
 			}
@@ -254,12 +262,14 @@ func link(ctx context.Context, prg *types.Program, base *source, tool types.Tool
 	return tool, nil
 }
 
-func ProgramFromSource(ctx context.Context, content, subToolName string) (types.Program, error) {
+func ProgramFromSource(ctx context.Context, content, subToolName string, opts ...Options) (types.Program, error) {
+	opt := complete(opts...)
+
 	prg := types.Program{
 		ToolSet: types.ToolSet{},
 	}
-	tool, err := readTool(ctx, &prg, &source{
-		Content:  io.NopCloser(strings.NewReader(content)),
+	tool, err := readTool(ctx, opt.Cache, &prg, &source{
+		Content:  []byte(content),
 		Location: "inline",
 	}, subToolName)
 	if err != nil {
@@ -269,7 +279,21 @@ func ProgramFromSource(ctx context.Context, content, subToolName string) (types.
 	return prg, nil
 }
 
-func Program(ctx context.Context, name, subToolName string) (types.Program, error) {
+type Options struct {
+	Cache *cache.Client
+}
+
+func complete(opts ...Options) (result Options) {
+	for _, opt := range opts {
+		result.Cache = types.FirstSet(opt.Cache, result.Cache)
+	}
+
+	return
+}
+
+func Program(ctx context.Context, name, subToolName string, opts ...Options) (types.Program, error) {
+	opt := complete(opts...)
+
 	if subToolName == "" {
 		name, subToolName = SplitToolRef(name)
 	}
@@ -277,7 +301,7 @@ func Program(ctx context.Context, name, subToolName string) (types.Program, erro
 		Name:    name,
 		ToolSet: types.ToolSet{},
 	}
-	tool, err := resolve(ctx, &prg, &source{}, name, subToolName)
+	tool, err := resolve(ctx, opt.Cache, &prg, &source{}, name, subToolName)
 	if err != nil {
 		return types.Program{}, err
 	}
@@ -285,7 +309,7 @@ func Program(ctx context.Context, name, subToolName string) (types.Program, erro
 	return prg, nil
 }
 
-func resolve(ctx context.Context, prg *types.Program, base *source, name, subTool string) (types.Tool, error) {
+func resolve(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, name, subTool string) (types.Tool, error) {
 	if subTool == "" {
 		t, ok := builtin.Builtin(name)
 		if ok {
@@ -294,15 +318,15 @@ func resolve(ctx context.Context, prg *types.Program, base *source, name, subToo
 		}
 	}
 
-	s, err := input(ctx, base, name)
+	s, err := input(ctx, cache, base, name)
 	if err != nil {
 		return types.Tool{}, err
 	}
 
-	return readTool(ctx, prg, s, subTool)
+	return readTool(ctx, cache, prg, s, subTool)
 }
 
-func input(ctx context.Context, base *source, name string) (*source, error) {
+func input(ctx context.Context, cache *cache.Client, base *source, name string) (*source, error) {
 	if strings.HasPrefix(name, "http://") || strings.HasPrefix(name, "https://") {
 		base.Remote = true
 	}
@@ -314,7 +338,7 @@ func input(ctx context.Context, base *source, name string) (*source, error) {
 		}
 	}
 
-	s, ok, err := loadURL(ctx, base, name)
+	s, ok, err := loadURL(ctx, cache, base, name)
 	if err != nil || ok {
 		return s, err
 	}

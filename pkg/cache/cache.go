@@ -2,12 +2,17 @@ package cache
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/gob"
+	"encoding/hex"
 	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
 
 	"github.com/adrg/xdg"
+	"github.com/getkin/kin-openapi/openapi3"
+	openai "github.com/gptscript-ai/chat-completion-client"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
@@ -20,6 +25,11 @@ type Client struct {
 type Options struct {
 	DisableCache bool   `usage:"Disable caching of LLM API responses"`
 	CacheDir     string `usage:"Directory to store cache (default: $XDG_CACHE_HOME/gptscript)"`
+}
+
+func init() {
+	gob.Register(openai.ChatCompletionRequest{})
+	gob.Register(openapi3.Schema{})
 }
 
 func Complete(opts ...Options) (result Options) {
@@ -59,22 +69,62 @@ func (c *Client) CacheDir() string {
 	return c.dir
 }
 
-func (c *Client) Store(key string, content []byte) error {
-	if c == nil || c.noop {
-		return nil
+func (c *Client) cacheKey(key any) (string, error) {
+	hash := sha256.New()
+	if err := gob.NewEncoder(hash).Encode(key); err != nil {
+		return "", err
 	}
-	return os.WriteFile(filepath.Join(c.dir, key), content, 0644)
+	digest := hash.Sum(nil)
+	return hex.EncodeToString(digest), nil
 }
 
-func (c *Client) Get(key string) ([]byte, bool, error) {
-	if c == nil || c.noop {
-		return nil, false, nil
+func (c *Client) Store(ctx context.Context, key, value any) error {
+	if c == nil {
+		return nil
 	}
-	data, err := os.ReadFile(filepath.Join(c.dir, key))
+
+	if c.noop || IsNoCache(ctx) {
+		keyValue, err := c.cacheKey(key)
+		if err == nil {
+			p := filepath.Join(c.dir, keyValue)
+			if _, err := os.Stat(p); err == nil {
+				_ = os.Remove(p)
+			}
+		}
+		return nil
+	}
+
+	keyValue, err := c.cacheKey(key)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Create(filepath.Join(c.dir, keyValue))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	return gob.NewEncoder(f).Encode(value)
+}
+
+func (c *Client) Get(ctx context.Context, key, out any) (bool, error) {
+	if c == nil || c.noop || IsNoCache(ctx) {
+		return false, nil
+	}
+
+	keyValue, err := c.cacheKey(key)
+	if err != nil {
+		return false, err
+	}
+
+	f, err := os.Open(filepath.Join(c.dir, keyValue))
 	if errors.Is(err, fs.ErrNotExist) {
-		return nil, false, nil
+		return false, nil
 	} else if err != nil {
-		return nil, false, err
+		return false, err
 	}
-	return data, true, nil
+	defer f.Close()
+
+	return gob.NewDecoder(f).Decode(out) == nil, nil
 }

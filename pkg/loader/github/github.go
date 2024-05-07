@@ -1,6 +1,7 @@
 package github
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,7 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/repos/git"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
@@ -29,11 +32,14 @@ func init() {
 	loader.AddVSC(Load)
 }
 
-func getCommit(account, repo, ref string) (string, error) {
-	url := fmt.Sprintf(githubCommitURL, account, repo, ref)
-	client := &http.Client{}
+func getCommitLsRemote(ctx context.Context, account, repo, ref string) (string, error) {
+	url := fmt.Sprintf(githubRepoURL, account, repo)
+	return git.LsRemote(ctx, url, ref)
+}
 
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+func getCommit(ctx context.Context, account, repo, ref string) (string, error) {
+	url := fmt.Sprintf(githubCommitURL, account, repo, ref)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to create request of %s/%s at %s: %w", account, repo, url, err)
 	}
@@ -42,13 +48,15 @@ func getCommit(account, repo, ref string) (string, error) {
 		req.Header.Add("Authorization", "Bearer "+githubAuthToken)
 	}
 
-	resp, err := client.Do(req)
-
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", err
 	} else if resp.StatusCode != http.StatusOK {
 		c, _ := io.ReadAll(resp.Body)
 		resp.Body.Close()
+		if commit, err := getCommitLsRemote(ctx, account, repo, ref); err == nil {
+			return commit, nil
+		}
 		return "", fmt.Errorf("failed to get GitHub commit of %s/%s at %s: %s %s",
 			account, repo, ref, resp.Status, c)
 	}
@@ -68,7 +76,7 @@ func getCommit(account, repo, ref string) (string, error) {
 	return commit.SHA, nil
 }
 
-func Load(urlName string) (string, *types.Repo, bool, error) {
+func Load(ctx context.Context, _ *cache.Client, urlName string) (string, *types.Repo, bool, error) {
 	if !strings.HasPrefix(urlName, GithubPrefix) {
 		return "", nil, false, nil
 	}
@@ -93,7 +101,7 @@ func Load(urlName string) (string, *types.Repo, bool, error) {
 		path += "/tool.gpt"
 	}
 
-	ref, err := getCommit(account, repo, ref)
+	ref, err := getCommit(ctx, account, repo, ref)
 	if err != nil {
 		return "", nil, false, err
 	}

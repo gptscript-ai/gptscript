@@ -49,17 +49,19 @@ func (e *Eval) Run(cmd *cobra.Command, args []string) error {
 		tool.Temperature = &temp32
 	}
 
-	prg, err := loader.ProgramFromSource(cmd.Context(), tool.String(), "")
-	if err != nil {
-		return err
-	}
-
 	opts, err := e.gptscript.NewGPTScriptOpts()
 	if err != nil {
 		return err
 	}
 
 	runner, err := gptscript.New(&opts)
+	if err != nil {
+		return err
+	}
+
+	prg, err := loader.ProgramFromSource(cmd.Context(), tool.String(), "", loader.Options{
+		Cache: runner.Cache,
+	})
 	if err != nil {
 		return err
 	}

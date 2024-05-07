@@ -9,6 +9,9 @@ build-ui:
 	touch static/ui/placeholder static/ui/_nuxt/_placeholder
 	cp -rp ui/.output/public/* static/ui/
 
+build-exe:
+	GOOS=windows go build -o bin/gptscript.exe -tags "${GO_TAGS}" .
+
 build:
 	CGO_ENABLED=0 go build -o bin/gptscript -tags "${GO_TAGS}" -ldflags "-s -w" .
 
