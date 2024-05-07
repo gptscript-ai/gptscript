@@ -1,3 +1,3 @@
 tools: sys.read, sys.write
 
-Edit the go.mod file and add k8s.io/api version v0.29.0 as a dependency in it
+Edit the go.mod file and add k8s.io/api version v0.30.0 as a dependency in it
