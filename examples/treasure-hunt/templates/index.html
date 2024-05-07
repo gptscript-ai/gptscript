@@ -35,6 +35,7 @@
         </div>
 
         <div class="box markdown-body" v-if="showClues" v-html="renderedMarkdown"></div>
+        <div class="gpt-logo"><img src="{{url_for('static', filename='made-with-gptscript.png')}}"/></div>
     </div>
 
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>

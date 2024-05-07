@@ -31,3 +31,16 @@ body {
     border-radius: 0;
     padding: 30px;
 }
+
+.gpt-logo {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gpt-logo img {
+    width: 15%;
+    height: 15%;
+}
