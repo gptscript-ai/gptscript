@@ -110,7 +110,9 @@ func (s *Server) list(rw http.ResponseWriter, req *http.Request) {
 		_ = enc.Encode(builtin.SysProgram())
 		return
 	} else if strings.HasSuffix(path, system.Suffix) {
-		prg, err := loader.Program(req.Context(), path, req.URL.Query().Get("tool"))
+		prg, err := loader.Program(req.Context(), path, req.URL.Query().Get("tool"), loader.Options{
+			Cache: s.runner.Cache,
+		})
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
 			return
@@ -151,7 +153,9 @@ func (s *Server) run(rw http.ResponseWriter, req *http.Request) {
 		path += system.Suffix
 	}
 
-	prg, err := loader.Program(req.Context(), path, req.URL.Query().Get("tool"))
+	prg, err := loader.Program(req.Context(), path, req.URL.Query().Get("tool"), loader.Options{
+		Cache: s.runner.Cache,
+	})
 	if errors.Is(err, fs.ErrNotExist) {
 		http.NotFound(rw, req)
 		return

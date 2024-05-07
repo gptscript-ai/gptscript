@@ -3,15 +3,18 @@ package loader
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	url2 "net/url"
 	"path"
 	"strings"
+	"time"
 
+	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
-type VCSLookup func(string) (string, *types.Repo, bool, error)
+type VCSLookup func(context.Context, *cache.Client, string) (string, *types.Repo, bool, error)
 
 var vcsLookups []VCSLookup
 
@@ -19,12 +22,35 @@ func AddVSC(lookup VCSLookup) {
 	vcsLookups = append(vcsLookups, lookup)
 }
 
-func loadURL(ctx context.Context, base *source, name string) (*source, bool, error) {
+type cacheKey struct {
+	Name string
+	Path string
+	Repo *types.Repo
+}
+
+type cacheValue struct {
+	Source *source
+	Time   time.Time
+}
+
+func loadURL(ctx context.Context, cache *cache.Client, base *source, name string) (*source, bool, error) {
 	var (
-		repo     *types.Repo
-		url      = name
-		relative = strings.HasPrefix(name, ".") || !strings.Contains(name, "/")
+		repo      *types.Repo
+		url       = name
+		relative  = strings.HasPrefix(name, ".") || !strings.Contains(name, "/")
+		cachedKey = cacheKey{
+			Name: name,
+			Path: base.Path,
+			Repo: base.Repo,
+		}
+		cachedValue cacheValue
 	)
+
+	if ok, err := cache.Get(ctx, cachedKey, &cachedValue); err != nil {
+		return nil, false, err
+	} else if ok && time.Since(cachedValue.Time) < CacheTimeout {
+		return cachedValue.Source, true, nil
+	}
 
 	if base.Path != "" && relative {
 		// Don't use path.Join because this is a URL and will break the :// protocol by cleaning it
@@ -41,7 +67,7 @@ func loadURL(ctx context.Context, base *source, name string) (*source, bool, err
 
 	if repo == nil || !relative {
 		for _, vcs := range vcsLookups {
-			newURL, newRepo, ok, err := vcs(name)
+			newURL, newRepo, ok, err := vcs(ctx, cache, name)
 			if err != nil {
 				return nil, false, err
 			} else if ok {
@@ -88,12 +114,26 @@ func loadURL(ctx context.Context, base *source, name string) (*source, bool, err
 
 	log.Debugf("opened %s", url)
 
-	return &source{
-		Content:  resp.Body,
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, false, fmt.Errorf("error loading %s: %v", url, err)
+	}
+
+	result := &source{
+		Content:  data,
 		Remote:   true,
 		Path:     pathString,
 		Name:     name,
 		Location: url,
 		Repo:     repo,
-	}, true, nil
+	}
+
+	if err := cache.Store(ctx, cachedKey, cacheValue{
+		Source: result,
+		Time:   time.Now(),
+	}); err != nil {
+		return nil, false, err
+	}
+
+	return result, true, nil
 }

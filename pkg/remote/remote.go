@@ -137,7 +137,9 @@ func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, err
 		return remoteClient, nil
 	}
 
-	prg, err := loader.Program(ctx, toolName, "")
+	prg, err := loader.Program(ctx, toolName, "", loader.Options{
+		Cache: c.cache,
+	})
 	if err != nil {
 		return nil, err
 	}

@@ -16,6 +16,10 @@ type WrappedCmd struct {
 	Dir string
 }
 
+func (w *WrappedCmd) Stdout() string {
+	return w.r.Stdout()
+}
+
 func (w *WrappedCmd) Run() error {
 	if len(w.Env) > 0 {
 		w.c.Env = w.Env
@@ -49,6 +53,16 @@ type entry struct {
 type recorder struct {
 	lock    sync.Mutex
 	entries []entry
+}
+
+func (r *recorder) Stdout() string {
+	buf := strings.Builder{}
+	for _, e := range r.entries {
+		if !e.err {
+			buf.Write(e.data)
+		}
+	}
+	return buf.String()
 }
 
 func (r *recorder) dump() string {

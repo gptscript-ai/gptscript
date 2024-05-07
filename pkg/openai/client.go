@@ -1,10 +1,7 @@
 package openai
 
 import (
-	"bytes"
-	"compress/gzip"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
@@ -165,11 +162,11 @@ func (c *Client) ListModels(ctx context.Context, providers ...string) (result []
 	return result, nil
 }
 
-func (c *Client) cacheKey(request openai.ChatCompletionRequest) string {
-	return hash.Encode(map[string]any{
+func (c *Client) cacheKey(request openai.ChatCompletionRequest) any {
+	return map[string]any{
 		"base":    c.cacheKeyBase,
 		"request": request,
-	})
+	}
 }
 
 func (c *Client) seed(request openai.ChatCompletionRequest) int {
@@ -192,25 +189,16 @@ func (c *Client) seed(request openai.ChatCompletionRequest) int {
 }
 
 func (c *Client) fromCache(ctx context.Context, messageRequest types.CompletionRequest, request openai.ChatCompletionRequest) (result []openai.ChatCompletionStreamResponse, _ bool, _ error) {
-	if cache.IsNoCache(ctx) {
+	if !messageRequest.GetCache() {
 		return nil, false, nil
 	}
-	if messageRequest.Cache != nil && !*messageRequest.Cache {
-		return nil, false, nil
-	}
-
-	cache, found, err := c.cache.Get(c.cacheKey(request))
+	found, err := c.cache.Get(ctx, c.cacheKey(request), &result)
 	if err != nil {
 		return nil, false, err
 	} else if !found {
 		return nil, false, nil
 	}
-
-	gz, err := gzip.NewReader(bytes.NewReader(cache))
-	if err != nil {
-		return nil, false, err
-	}
-	return result, true, json.NewDecoder(gz).Decode(&result)
+	return result, true, nil
 }
 
 func toToolCall(call types.CompletionToolCall) openai.ToolCall {
@@ -247,6 +235,14 @@ func toMessages(request types.CompletionRequest) (result []openai.ChatCompletion
 			Role:    types.CompletionMessageRoleTypeSystem,
 			Content: types.Text(strings.Join(systemPrompts, "\n")),
 		})
+	}
+
+	// Never send only a system message or a system message not followed by a user message
+	if len(msgs) > 0 && msgs[0].Role == types.CompletionMessageRoleTypeSystem {
+		if len(msgs) == 1 ||
+			(len(msgs) > 1 && msgs[1].Role != types.CompletionMessageRoleTypeUser) {
+			msgs[0].Role = types.CompletionMessageRoleTypeUser
+		}
 	}
 
 	for _, message := range msgs {
@@ -446,24 +442,7 @@ func override(left, right string) string {
 	return left
 }
 
-func (c *Client) store(ctx context.Context, key string, responses []openai.ChatCompletionStreamResponse) error {
-	if cache.IsNoCache(ctx) {
-		return nil
-	}
-	buf := &bytes.Buffer{}
-	gz := gzip.NewWriter(buf)
-	err := json.NewEncoder(gz).Encode(responses)
-	if err != nil {
-		return err
-	}
-	if err := gz.Close(); err != nil {
-		return err
-	}
-	return c.cache.Store(key, buf.Bytes())
-}
-
 func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest, transactionID string, partial chan<- types.CompletionStatus) (responses []openai.ChatCompletionStreamResponse, _ error) {
-	cacheKey := c.cacheKey(request)
 	request.Stream = os.Getenv("GPTSCRIPT_INTERNAL_OPENAI_STREAMING") != "false"
 
 	partial <- types.CompletionStatus{
@@ -513,7 +492,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 	for {
 		response, err := stream.Recv()
 		if err == io.EOF {
-			return responses, c.store(ctx, cacheKey, responses)
+			return responses, c.cache.Store(ctx, c.cacheKey(request), responses)
 		} else if err != nil {
 			return nil, err
 		}

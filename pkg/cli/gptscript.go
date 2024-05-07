@@ -259,7 +259,7 @@ func (r *GPTScript) listModels(ctx context.Context, gptScript *gptscript.GPTScri
 	return nil
 }
 
-func (r *GPTScript) readProgram(ctx context.Context, args []string) (prg types.Program, err error) {
+func (r *GPTScript) readProgram(ctx context.Context, runner *gptscript.GPTScript, args []string) (prg types.Program, err error) {
 	if len(args) == 0 {
 		return
 	}
@@ -278,10 +278,14 @@ func (r *GPTScript) readProgram(ctx context.Context, args []string) (prg types.P
 			}
 			r.readData = data
 		}
-		return loader.ProgramFromSource(ctx, string(data), r.SubTool)
+		return loader.ProgramFromSource(ctx, string(data), r.SubTool, loader.Options{
+			Cache: runner.Cache,
+		})
 	}
 
-	return loader.Program(ctx, args[0], r.SubTool)
+	return loader.Program(ctx, args[0], r.SubTool, loader.Options{
+		Cache: runner.Cache,
+	})
 }
 
 func (r *GPTScript) PrintOutput(toolInput, toolOutput string) (err error) {
@@ -337,7 +341,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 		return r.listModels(ctx, gptScript, args)
 	}
 
-	prg, err := r.readProgram(ctx, args)
+	prg, err := r.readProgram(ctx, gptScript, args)
 	if err != nil {
 		return err
 	}
@@ -392,7 +396,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 
 	if prg.IsChat() || r.ForceChat {
 		return chat.Start(r.NewRunContext(cmd), nil, gptScript, func() (types.Program, error) {
-			return r.readProgram(ctx, args)
+			return r.readProgram(ctx, gptScript, args)
 		}, os.Environ(), toolInput)
 	}
 

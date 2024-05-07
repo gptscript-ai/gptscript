@@ -24,6 +24,7 @@ var log = mvl.Package()
 type GPTScript struct {
 	Registry               *llm.Registry
 	Runner                 *runner.Runner
+	Cache                  *cache.Client
 	WorkspacePath          string
 	DeleteWorkspaceOnClose bool
 }
@@ -99,6 +100,7 @@ func New(opts *Options) (*GPTScript, error) {
 	return &GPTScript{
 		Registry:               registry,
 		Runner:                 runner,
+		Cache:                  cacheClient,
 		WorkspacePath:          opts.Workspace,
 		DeleteWorkspaceOnClose: opts.Workspace == "",
 	}, nil
