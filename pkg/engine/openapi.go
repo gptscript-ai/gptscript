@@ -109,40 +109,49 @@ func (e *Engine) runOpenAPI(tool types.Tool, input string) (*Return, error) {
 	// Handle request body
 	if instructions.BodyContentMIME != "" {
 		res := gjson.Get(input, "requestBodyContent")
-		if res.Exists() {
-			var body bytes.Buffer
-			switch instructions.BodyContentMIME {
-			case "application/json":
-				if err := json.NewEncoder(&body).Encode(res.Value()); err != nil {
-					return nil, fmt.Errorf("failed to encode JSON: %w", err)
-				}
-				req.Header.Set("Content-Type", "application/json")
+		var body bytes.Buffer
+		switch instructions.BodyContentMIME {
+		case "application/json":
+			var reqBody interface{}
 
-			case "text/plain":
-				body.WriteString(res.String())
-				req.Header.Set("Content-Type", "text/plain")
-
-			case "multipart/form-data":
-				multiPartWriter := multipart.NewWriter(&body)
-				req.Header.Set("Content-Type", multiPartWriter.FormDataContentType())
-				if res.IsObject() {
-					for k, v := range res.Map() {
-						if err := multiPartWriter.WriteField(k, v.String()); err != nil {
-							return nil, fmt.Errorf("failed to write multipart field: %w", err)
-						}
-					}
-				} else {
-					return nil, fmt.Errorf("multipart/form-data requires an object as the requestBodyContent")
-				}
-				if err := multiPartWriter.Close(); err != nil {
-					return nil, fmt.Errorf("failed to close multipart writer: %w", err)
-				}
-
-			default:
-				return nil, fmt.Errorf("unsupported MIME type: %s", instructions.BodyContentMIME)
+			reqBody = struct{}{}
+			if res.Exists() {
+				reqBody = res.Value()
 			}
-			req.Body = io.NopCloser(&body)
+			if err := json.NewEncoder(&body).Encode(reqBody); err != nil {
+				return nil, fmt.Errorf("failed to encode JSON: %w", err)
+			}
+			req.Header.Set("Content-Type", "application/json")
+
+		case "text/plain":
+			reqBody := ""
+			if res.Exists() {
+				reqBody = res.String()
+			}
+			body.WriteString(reqBody)
+
+			req.Header.Set("Content-Type", "text/plain")
+
+		case "multipart/form-data":
+			multiPartWriter := multipart.NewWriter(&body)
+			req.Header.Set("Content-Type", multiPartWriter.FormDataContentType())
+			if res.Exists() && res.IsObject() {
+				for k, v := range res.Map() {
+					if err := multiPartWriter.WriteField(k, v.String()); err != nil {
+						return nil, fmt.Errorf("failed to write multipart field: %w", err)
+					}
+				}
+			} else {
+				return nil, fmt.Errorf("multipart/form-data requires an object as the requestBodyContent")
+			}
+			if err := multiPartWriter.Close(); err != nil {
+				return nil, fmt.Errorf("failed to close multipart writer: %w", err)
+			}
+
+		default:
+			return nil, fmt.Errorf("unsupported MIME type: %s", instructions.BodyContentMIME)
 		}
+		req.Body = io.NopCloser(&body)
 	}
 
 	// Make the request
