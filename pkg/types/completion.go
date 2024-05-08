@@ -21,7 +21,10 @@ type CompletionRequest struct {
 }
 
 func (r *CompletionRequest) GetCache() bool {
-	return r.Cache != nil && !*r.Cache
+	if r.Cache == nil {
+		return true
+	}
+	return *r.Cache
 }
 
 type CompletionTool struct {
