@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync/atomic"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	openai "github.com/gptscript-ai/chat-completion-client"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
@@ -323,6 +324,9 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 
 	for _, tool := range messageRequest.Tools {
 		params := tool.Function.Parameters
+		if params == nil {
+			params = &openapi3.Schema{}
+		}
 
 		request.Tools = append(request.Tools, openai.Tool{
 			Type: openai.ToolTypeFunction,
