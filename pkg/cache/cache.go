@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/gob"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"io/fs"
 	"os"
@@ -71,7 +72,7 @@ func (c *Client) CacheDir() string {
 
 func (c *Client) cacheKey(key any) (string, error) {
 	hash := sha256.New()
-	if err := gob.NewEncoder(hash).Encode(key); err != nil {
+	if err := json.NewEncoder(hash).Encode(key); err != nil {
 		return "", err
 	}
 	digest := hash.Sum(nil)

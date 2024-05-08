@@ -447,7 +447,7 @@ func override(left, right string) string {
 }
 
 func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest, transactionID string, partial chan<- types.CompletionStatus) (responses []openai.ChatCompletionStreamResponse, _ error) {
-	request.Stream = os.Getenv("GPTSCRIPT_INTERNAL_OPENAI_STREAMING") != "false"
+	streamResponse := os.Getenv("GPTSCRIPT_INTERNAL_OPENAI_STREAMING") != "false"
 
 	partial <- types.CompletionStatus{
 		CompletionID: transactionID,
@@ -459,7 +459,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 
 	slog.Debug("calling openai", "message", request.Messages)
 
-	if !request.Stream {
+	if !streamResponse {
 		resp, err := c.c.CreateChatCompletion(ctx, request)
 		if err != nil {
 			return nil, err
