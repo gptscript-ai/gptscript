@@ -479,6 +479,10 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 		return nil, fmt.Errorf("invalid state, resume should not have StartContinuation set to true")
 	}
 
+	if state.Continuation == nil {
+		return nil, errors.New("invalid state, resume should have Continuation data")
+	}
+
 	progress, progressClose := streamProgress(&callCtx, monitor)
 	defer progressClose()
 
