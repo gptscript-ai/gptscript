@@ -48,4 +48,4 @@ def get_clues():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=os.environ.get('FLASK_DEBUG', False), host='0.0.0.0')
+    app.run(debug=os.environ.get('FLASK_DEBUG', True), host='0.0.0.0')
