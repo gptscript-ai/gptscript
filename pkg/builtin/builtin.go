@@ -319,7 +319,10 @@ func SysExec(ctx context.Context, env []string, input string) (string, error) {
 	if err != nil {
 		_, _ = os.Stdout.Write(out)
 	}
-	return string(out), err
+	if err != nil {
+		return string(out), fmt.Errorf("OUTPUT: %s, ERROR: %w", out, err)
+	}
+	return string(out), nil
 }
 
 func getWorkspaceDir(envs []string) (string, error) {
@@ -617,6 +620,13 @@ func SysGetenv(ctx context.Context, env []string, input string) (string, error) 
 		return "", err
 	}
 	log.Debugf("looking up env var %s", params.Name)
+	for _, env := range env {
+		k, v, ok := strings.Cut(env, "=")
+		if ok && k == params.Name {
+			log.Debugf("found env var %s in local environment", params.Name)
+			return v, nil
+		}
+	}
 	return os.Getenv(params.Name), nil
 }
 
