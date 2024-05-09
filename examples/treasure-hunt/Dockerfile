@@ -18,7 +18,7 @@ EXPOSE 5000
 
 # Set the environment variable
 ENV FLASK_APP=app.py
-ENV FLASK_DEBUG=True  # Set this to True/False to enable/disable debugging.
+ENV FLASK_DEBUG=False  # Set this to True/False to enable/disable debugging.
 
 # Run app
 CMD ["flask", "run", "--host=0.0.0.0"]
