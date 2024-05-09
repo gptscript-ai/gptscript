@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -56,7 +57,18 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 		tools        []types.Tool
 		operationNum = 1 // Each tool gets an operation number, beginning with 1
 	)
-	for pathString, pathObj := range t.Paths.Map() {
+
+	pathMap := t.Paths.Map()
+
+	keys := make([]string, 0, len(pathMap))
+	for k := range pathMap {
+		keys = append(keys, k)
+	}
+
+	sort.Strings(keys)
+
+	for _, pathString := range keys {
+		pathObj := pathMap[pathString]
 		// Handle path-level server override, if one exists
 		pathServer := defaultServer
 		if pathObj.Servers != nil && len(pathObj.Servers) > 0 {
@@ -66,8 +78,16 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 			}
 		}
 
+		// Generate a tool for each operation in this path.
+		operations := pathObj.Operations()
+		methods := make([]string, 0, len(operations))
+		for method := range operations {
+			methods = append(methods, method)
+		}
+		sort.Strings(methods)
 	operations:
-		for method, operation := range pathObj.Operations() {
+		for _, method := range methods {
+			operation := operations[method]
 			// Handle operation-level server override, if one exists
 			operationServer := pathServer
 			if operation.Servers != nil && len(*operation.Servers) > 0 {
