@@ -23,6 +23,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/monitor"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/openai"
+	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/server"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
@@ -61,6 +62,7 @@ type GPTScript struct {
 	CredentialOverride string `usage:"Credentials to override (ex: --credential-override github.com/example/cred-tool:API_TOKEN=1234)"`
 	ChatState          string `usage:"The chat state to continue, or null to start a new chat and return the state"`
 	ForceChat          bool   `usage:"Force an interactive chat session if even the top level tool is not a chat tool"`
+	ForceSequential    bool   `usage:"Force parallel calls to run sequentially"`
 	Workspace          string `usage:"Directory to use for the workspace, if specified it will not be deleted on exit"`
 
 	readData []byte
@@ -124,9 +126,13 @@ func (r *GPTScript) NewRunContext(cmd *cobra.Command) context.Context {
 
 func (r *GPTScript) NewGPTScriptOpts() (gptscript.Options, error) {
 	opts := gptscript.Options{
-		Cache:             cache.Options(r.CacheOptions),
-		OpenAI:            openai.Options(r.OpenAIOptions),
-		Monitor:           monitor.Options(r.DisplayOptions),
+		Cache:   cache.Options(r.CacheOptions),
+		OpenAI:  openai.Options(r.OpenAIOptions),
+		Monitor: monitor.Options(r.DisplayOptions),
+		Runner: runner.Options{
+			CredentialOverride: r.CredentialOverride,
+			Sequential:         r.ForceSequential,
+		},
 		Quiet:             r.Quiet,
 		Env:               os.Environ(),
 		CredentialContext: r.CredentialContext,
@@ -149,8 +155,6 @@ func (r *GPTScript) NewGPTScriptOpts() (gptscript.Options, error) {
 		opts.Runner.StartPort = startNum
 		opts.Runner.EndPort = endNum
 	}
-
-	opts.Runner.CredentialOverride = r.CredentialOverride
 
 	if r.EventsStreamTo != "" {
 		mf, err := monitor.NewFileFactory(r.EventsStreamTo)
