@@ -114,7 +114,7 @@ var tools = map[string]types.Tool{
 		Parameters: types.Parameters{
 			Description: "Concludes the conversation. This can not be used to ask a question.",
 			Arguments: types.ObjectSchema(
-				"summary", "A summary of the dialog",
+				"return", "The instructed value to return or a summary of the dialog if no value is instructed",
 			),
 		},
 		BuiltinFunc: SysChatFinish,
@@ -640,7 +640,7 @@ func (e *ErrChatFinish) Error() string {
 
 func SysChatFinish(ctx context.Context, env []string, input string) (string, error) {
 	var params struct {
-		Message string `json:"summary,omitempty"`
+		Message string `json:"return,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
 		return "", &ErrChatFinish{
