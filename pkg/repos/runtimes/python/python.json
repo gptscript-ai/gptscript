@@ -24,8 +24,8 @@
     "os": "windows",
     "arch": "amd64",
     "version": "3.10",
-    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.10.13%2B20240107-x86_64-pc-windows-msvc-static-install_only.tar.gz",
-    "digest": "8176713d446ff0a0b4b2bbf8f562398879cd1acbf493bbd6a381e2f5aa96070e"
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240415/cpython-3.10.14+20240415-x86_64-pc-windows-msvc-install_only.tar.gz",
+    "digest": "186b5632fb2fa5b5e6eee4110ce9bbb0349f52bb2163d2a1f5188b1d8eb1b5f3"
   },
   {
     "os": "linux",
@@ -59,8 +59,8 @@
     "os": "windows",
     "arch": "amd64",
     "version": "3.11",
-    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.11.7%2B20240107-x86_64-pc-windows-msvc-static-install_only.tar.gz",
-    "digest": "36a8584ef16277f84a7fea81fca7fb941a8b8fa1defee28100afb39e90385926"
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240415/cpython-3.11.9+20240415-x86_64-pc-windows-msvc-install_only.tar.gz",
+    "digest": "368474c69f476e7de4adaf50b61d9fcf6ec8b4db88cc43c5f71c860b3cd29c69"
   },
   {
     "os": "linux",
@@ -94,8 +94,8 @@
     "os": "windows",
     "arch": "amd64",
     "version": "3.12",
-    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240107/cpython-3.12.1%2B20240107-x86_64-pc-windows-msvc-static-install_only.tar.gz",
-    "digest": "7dde51352511697579d86c968881f431acff9e8b1eb3f42c54de27341fa5b7b2"
+    "url": "https://github.com/indygreg/python-build-standalone/releases/download/20240415/cpython-3.12.3+20240415-x86_64-pc-windows-msvc-install_only.tar.gz",
+    "digest": "f7cfa4ad072feb4578c8afca5ba9a54ad591d665a441dd0d63aa366edbe19279"
   },
   {
     "os": "linux",
