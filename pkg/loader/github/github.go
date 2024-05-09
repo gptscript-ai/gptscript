@@ -97,7 +97,7 @@ func Load(ctx context.Context, _ *cache.Client, urlName string) (string, *types.
 
 	if path == "" || path == "/" {
 		path = "tool.gpt"
-	} else if !strings.HasSuffix(path, system.Suffix) {
+	} else if !strings.HasSuffix(path, system.Suffix) && !strings.Contains(parts[len(parts)-1], ".") {
 		path += "/tool.gpt"
 	}
 
