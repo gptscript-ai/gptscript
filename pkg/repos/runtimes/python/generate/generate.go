@@ -34,11 +34,11 @@ var (
 		{
 			OS:   "windows",
 			Arch: "amd64",
-		}: "x86_64-pc-windows-msvc-static",
+		}: "x86_64-pc-windows-msvc",
 		{
 			OS:   "windows",
 			Arch: "arm64",
-		}: "aarch64-pc-windows-msvc-static",
+		}: "aarch64-pc-windows-msvc",
 		{
 			OS:   "darwin",
 			Arch: "amd64",
