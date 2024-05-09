@@ -1,0 +1,17 @@
+tools: github.com/gptscript-ai/browser, sentiments
+description: get the sentiments expressed in a tweet
+args: url: URL of the tweet to analyze
+
+Perform the actions in the following order:
+
+Get the text of the tweet referenced by $url.
+Then, analyze the sentiments expressed in this tweet.
+
+---
+name: sentiments
+description: Get the sentiment of the writer
+args: content: any string
+
+You are a program designed to assess the sentiments expressed by a writer in a text.
+
+Do not give too many details, just the overall sentiments that is expressed in "${content}"
