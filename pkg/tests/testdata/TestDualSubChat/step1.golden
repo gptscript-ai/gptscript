@@ -123,8 +123,8 @@
                       "description": "Concludes the conversation. This can not be used to ask a question.",
                       "parameters": {
                         "properties": {
-                          "summary": {
-                            "description": "A summary of the dialog",
+                          "return": {
+                            "description": "The instructed value to return or a summary of the dialog if no value is instructed",
                             "type": "string"
                           }
                         },
@@ -189,8 +189,8 @@
                       "description": "Concludes the conversation. This can not be used to ask a question.",
                       "parameters": {
                         "properties": {
-                          "summary": {
-                            "description": "A summary of the dialog",
+                          "return": {
+                            "description": "The instructed value to return or a summary of the dialog if no value is instructed",
                             "type": "string"
                           }
                         },
