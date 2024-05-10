@@ -46,7 +46,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		return nil, fmt.Errorf("failed to find remote model %s", messageRequest.Model)
 	}
 
-	_, modelName := loader.SplitToolRef(messageRequest.Model)
+	_, modelName := types.SplitToolRef(messageRequest.Model)
 	messageRequest.Model = modelName
 	return client.Call(ctx, messageRequest, status)
 }
@@ -71,7 +71,7 @@ func (c *Client) ListModels(ctx context.Context, providers ...string) (result []
 }
 
 func (c *Client) Supports(ctx context.Context, modelName string) (bool, error) {
-	toolName, modelNameSuffix := loader.SplitToolRef(modelName)
+	toolName, modelNameSuffix := types.SplitToolRef(modelName)
 	if modelNameSuffix == "" {
 		return false, nil
 	}
