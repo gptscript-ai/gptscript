@@ -134,6 +134,9 @@ func (r *Runtime) Setup(ctx context.Context, dataRoot, toolSource string, env []
 	}
 
 	newEnv := runtimeEnv.AppendPath(env, venvBinPath)
+	if runtime.GOOS == "windows" && os.Getenv("PYTHONIOENCODING") == "" {
+		newEnv = append(newEnv, "PYTHONIOENCODING=utf-8")
+	}
 	newEnv = append(newEnv, "VIRTUAL_ENV="+venvPath)
 
 	if runtime.GOOS == "windows" {
