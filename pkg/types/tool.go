@@ -36,9 +36,10 @@ func (e *ErrToolNotFound) Error() string {
 type ToolSet map[string]Tool
 
 type Program struct {
-	Name        string  `json:"name,omitempty"`
-	EntryToolID string  `json:"entryToolId,omitempty"`
-	ToolSet     ToolSet `json:"toolSet,omitempty"`
+	Name         string         `json:"name,omitempty"`
+	EntryToolID  string         `json:"entryToolId,omitempty"`
+	ToolSet      ToolSet        `json:"toolSet,omitempty"`
+	OpenAPICache map[string]any `json:"-"`
 }
 
 func (p Program) IsChat() bool {
