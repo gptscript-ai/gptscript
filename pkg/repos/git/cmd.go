@@ -9,6 +9,9 @@ import (
 )
 
 func newGitCommand(ctx context.Context, args ...string) *debugcmd.WrappedCmd {
+	if log.IsDebug() {
+		log.Debugf("running git command: %s", strings.Join(args, " "))
+	}
 	cmd := debugcmd.New(ctx, "git", args...)
 	return cmd
 }

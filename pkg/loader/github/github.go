@@ -8,10 +8,12 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/repos/git"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -26,6 +28,7 @@ const (
 
 var (
 	githubAuthToken = os.Getenv("GITHUB_AUTH_TOKEN")
+	log             = mvl.Package()
 )
 
 func init() {
@@ -37,7 +40,14 @@ func getCommitLsRemote(ctx context.Context, account, repo, ref string) (string, 
 	return git.LsRemote(ctx, url, ref)
 }
 
+// regexp to match a git commit id
+var commitRegexp = regexp.MustCompile("^[a-f0-9]{40}$")
+
 func getCommit(ctx context.Context, account, repo, ref string) (string, error) {
+	if commitRegexp.MatchString(ref) {
+		return ref, nil
+	}
+
 	url := fmt.Sprintf(githubCommitURL, account, repo, ref)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
@@ -68,6 +78,8 @@ func getCommit(ctx context.Context, account, repo, ref string) (string, error) {
 	if err := json.NewDecoder(resp.Body).Decode(&commit); err != nil {
 		return "", fmt.Errorf("failed to decode GitHub commit of %s/%s at %s: %w", account, repo, url, err)
 	}
+
+	log.Debugf("loaded github commit of %s/%s at %s as %q", account, repo, url, commit.SHA)
 
 	if commit.SHA == "" {
 		return "", fmt.Errorf("failed to find commit in response of %s, got empty string", url)

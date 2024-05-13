@@ -7,6 +7,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
@@ -18,6 +19,12 @@ import (
 // The tool's Instructions will be in the format "#!sys.openapi '{JSON Instructions}'",
 // where the JSON Instructions are a JSON-serialized engine.OpenAPIInstructions struct.
 func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
+	if log.IsDebug() {
+		start := time.Now()
+		defer func() {
+			log.Debugf("loaded openapi tools in %v", time.Since(start))
+		}()
+	}
 	// Determine the default server.
 	if len(t.Servers) == 0 {
 		if defaultHost != "" {

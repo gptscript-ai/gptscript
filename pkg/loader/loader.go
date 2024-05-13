@@ -20,10 +20,10 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
+	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/parser"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
-	"gopkg.in/yaml.v3"
 )
 
 const CacheTimeout = time.Hour
@@ -120,6 +120,30 @@ func loadProgram(data []byte, into *types.Program, targetToolName string) (types
 	return tool, nil
 }
 
+func loadOpenAPI(prg *types.Program, data []byte) *openapi3.T {
+	var (
+		openAPICacheKey     = hash.Digest(data)
+		openAPIDocument, ok = prg.OpenAPICache[openAPICacheKey].(*openapi3.T)
+		err                 error
+	)
+
+	if ok {
+		return openAPIDocument
+	}
+
+	if prg.OpenAPICache == nil {
+		prg.OpenAPICache = map[string]any{}
+	}
+
+	openAPIDocument, err = openapi3.NewLoader().LoadFromData(data)
+	if err != nil || openAPIDocument.Paths.Len() == 0 {
+		openAPIDocument = nil
+	}
+
+	prg.OpenAPICache[openAPICacheKey] = openAPIDocument
+	return openAPIDocument
+}
+
 func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, targetToolName string) (types.Tool, error) {
 	data := base.Content
 
@@ -127,17 +151,19 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 		return loadProgram(data, prg, targetToolName)
 	}
 
-	var tools []types.Tool
-	if isOpenAPI(data) {
-		if t, err := openapi3.NewLoader().LoadFromData(data); err == nil {
-			if base.Remote {
-				tools, err = getOpenAPITools(t, base.Location)
-			} else {
-				tools, err = getOpenAPITools(t, "")
-			}
-			if err != nil {
-				return types.Tool{}, fmt.Errorf("error parsing OpenAPI definition: %w", err)
-			}
+	var (
+		tools []types.Tool
+	)
+
+	if openAPIDocument := loadOpenAPI(prg, data); openAPIDocument != nil {
+		var err error
+		if base.Remote {
+			tools, err = getOpenAPITools(openAPIDocument, base.Location)
+		} else {
+			tools, err = getOpenAPITools(openAPIDocument, "")
+		}
+		if err != nil {
+			return types.Tool{}, fmt.Errorf("error parsing OpenAPI definition: %w", err)
 		}
 	}
 
@@ -263,6 +289,12 @@ func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *so
 }
 
 func ProgramFromSource(ctx context.Context, content, subToolName string, opts ...Options) (types.Program, error) {
+	if log.IsDebug() {
+		start := time.Now()
+		defer func() {
+			log.Debugf("loaded program from source took %v", time.Since(start))
+		}()
+	}
 	opt := complete(opts...)
 
 	prg := types.Program{
@@ -292,6 +324,13 @@ func complete(opts ...Options) (result Options) {
 }
 
 func Program(ctx context.Context, name, subToolName string, opts ...Options) (types.Program, error) {
+	if log.IsDebug() {
+		start := time.Now()
+		defer func() {
+			log.Debugf("loaded program %s source took %v", name, time.Since(start))
+		}()
+	}
+
 	opt := complete(opts...)
 
 	if subToolName == "" {
@@ -346,15 +385,20 @@ func input(ctx context.Context, cache *cache.Client, base *source, name string) 
 	return nil, fmt.Errorf("can not load tools path=%s name=%s", base.Path, name)
 }
 
-func isOpenAPI(data []byte) bool {
-	var fragment struct {
-		Paths map[string]any `json:"paths,omitempty"`
+func SplitToolRef(targetToolName string) (toolName, subTool string) {
+	var (
+		fields = strings.Fields(targetToolName)
+		idx    = slices.Index(fields, "from")
+	)
+
+	defer func() {
+		toolName, _ = types.SplitArg(toolName)
+	}()
+
+	if idx == -1 {
+		return strings.TrimSpace(targetToolName), ""
 	}
 
-	if err := json.Unmarshal(data, &fragment); err != nil {
-		if err := yaml.Unmarshal(data, &fragment); err != nil {
-			return false
-		}
-	}
-	return len(fragment.Paths) > 0
+	return strings.Join(fields[idx+1:], " "),
+		strings.Join(fields[:idx], " ")
 }

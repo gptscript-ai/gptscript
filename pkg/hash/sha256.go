@@ -20,8 +20,15 @@ func ID(parts ...string) string {
 
 func Digest(obj any) string {
 	hash := sha256.New()
-	if err := gob.NewEncoder(hash).Encode(obj); err != nil {
-		panic(err)
+	switch v := obj.(type) {
+	case []byte:
+		hash.Write(v)
+	case string:
+		hash.Write([]byte(v))
+	default:
+		if err := gob.NewEncoder(hash).Encode(obj); err != nil {
+			panic(err)
+		}
 	}
 	return hex.EncodeToString(hash.Sum(nil))
 }
