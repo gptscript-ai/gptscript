@@ -242,7 +242,7 @@ func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *so
 			tool.ToolMapping[targetToolName] = linkedTool.ID
 			toolNames[targetToolName] = struct{}{}
 		} else {
-			toolName, subTool := SplitToolRef(targetToolName)
+			toolName, subTool := types.SplitToolRef(targetToolName)
 			resolvedTool, err := resolve(ctx, cache, prg, base, toolName, subTool)
 			if err != nil {
 				return types.Tool{}, fmt.Errorf("failed resolving %s at %s: %w", targetToolName, base, err)
@@ -295,7 +295,7 @@ func Program(ctx context.Context, name, subToolName string, opts ...Options) (ty
 	opt := complete(opts...)
 
 	if subToolName == "" {
-		name, subToolName = SplitToolRef(name)
+		name, subToolName = types.SplitToolRef(name)
 	}
 	prg := types.Program{
 		Name:    name,
@@ -344,24 +344,6 @@ func input(ctx context.Context, cache *cache.Client, base *source, name string) 
 	}
 
 	return nil, fmt.Errorf("can not load tools path=%s name=%s", base.Path, name)
-}
-
-func SplitToolRef(targetToolName string) (toolName, subTool string) {
-	var (
-		fields = strings.Fields(targetToolName)
-		idx    = slices.Index(fields, "from")
-	)
-
-	defer func() {
-		toolName, _ = types.SplitArg(toolName)
-	}()
-
-	if idx == -1 {
-		return strings.TrimSpace(targetToolName), ""
-	}
-
-	return strings.Join(fields[idx+1:], " "),
-		strings.Join(fields[:idx], " ")
 }
 
 func isOpenAPI(data []byte) bool {
