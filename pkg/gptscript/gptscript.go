@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
@@ -110,6 +111,12 @@ func (g *GPTScript) getEnv(env []string) ([]string, error) {
 	if g.WorkspacePath == "" {
 		var err error
 		g.WorkspacePath, err = os.MkdirTemp("", "gptscript-workspace-*")
+		if err != nil {
+			return nil, err
+		}
+	} else if !filepath.IsAbs(g.WorkspacePath) {
+		var err error
+		g.WorkspacePath, err = filepath.Abs(g.WorkspacePath)
 		if err != nil {
 			return nil, err
 		}
