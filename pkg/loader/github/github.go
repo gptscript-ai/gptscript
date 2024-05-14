@@ -41,7 +41,7 @@ func getCommitLsRemote(ctx context.Context, account, repo, ref string) (string, 
 }
 
 // regexp to match a git commit id
-var commitRegexp = regexp.MustCompile("^[a-f0-9]{40}$")
+var commitRegexp = regexp.MustCompile("^[a-z0-9]{40}$")
 
 func getCommit(ctx context.Context, account, repo, ref string) (string, error) {
 	if commitRegexp.MatchString(ref) {

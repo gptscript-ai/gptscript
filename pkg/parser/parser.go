@@ -101,15 +101,15 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		}
 		tool.Parameters.Chat = v
 	case "export":
-		tool.Parameters.Export = append(tool.Parameters.Export, csv(strings.ToLower(value))...)
+		tool.Parameters.Export = append(tool.Parameters.Export, csv(value)...)
 	case "tool", "tools":
-		tool.Parameters.Tools = append(tool.Parameters.Tools, csv(strings.ToLower(value))...)
+		tool.Parameters.Tools = append(tool.Parameters.Tools, csv(value)...)
 	case "globaltool", "globaltools":
-		tool.Parameters.GlobalTools = append(tool.Parameters.GlobalTools, csv(strings.ToLower(value))...)
+		tool.Parameters.GlobalTools = append(tool.Parameters.GlobalTools, csv(value)...)
 	case "exportcontext":
-		tool.Parameters.ExportContext = append(tool.Parameters.ExportContext, csv(strings.ToLower(value))...)
+		tool.Parameters.ExportContext = append(tool.Parameters.ExportContext, csv(value)...)
 	case "context":
-		tool.Parameters.Context = append(tool.Parameters.Context, csv(strings.ToLower(value))...)
+		tool.Parameters.Context = append(tool.Parameters.Context, csv(value)...)
 	case "args", "arg", "param", "params", "parameters", "parameter":
 		if err := addArg(value, tool); err != nil {
 			return false, err
