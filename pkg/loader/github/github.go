@@ -64,11 +64,12 @@ func getCommit(ctx context.Context, account, repo, ref string) (string, error) {
 	} else if resp.StatusCode != http.StatusOK {
 		c, _ := io.ReadAll(resp.Body)
 		resp.Body.Close()
-		if commit, err := getCommitLsRemote(ctx, account, repo, ref); err == nil {
+		commit, fallBackErr := getCommitLsRemote(ctx, account, repo, ref)
+		if fallBackErr == nil {
 			return commit, nil
 		}
-		return "", fmt.Errorf("failed to get GitHub commit of %s/%s at %s: %s %s",
-			account, repo, ref, resp.Status, c)
+		return "", fmt.Errorf("failed to get GitHub commit of %s/%s at %s (fallback error %v): %s %s",
+			account, repo, ref, fallBackErr, resp.Status, c)
 	}
 	defer resp.Body.Close()
 
