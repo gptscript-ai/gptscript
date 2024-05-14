@@ -41,6 +41,8 @@ func Start(ctx context.Context, prevState runner.ChatState, chatter Chatter, prg
 	}
 	defer prompter.Close()
 
+	// We will want the tool name to be displayed in the prompt
+	var prevResp runner.ChatResponse
 	for {
 		var (
 			input string
@@ -53,7 +55,7 @@ func Start(ctx context.Context, prevState runner.ChatState, chatter Chatter, prg
 			return err
 		}
 
-		prompter.SetPrompt(getPrompt(prg, resp))
+		prompter.SetPrompt(getPrompt(prg, prevResp))
 
 		if startInput != "" {
 			input = startInput
@@ -79,5 +81,6 @@ func Start(ctx context.Context, prevState runner.ChatState, chatter Chatter, prg
 		}
 
 		prevState = resp.State
+		prevResp = resp
 	}
 }
