@@ -384,21 +384,3 @@ func input(ctx context.Context, cache *cache.Client, base *source, name string) 
 
 	return nil, fmt.Errorf("can not load tools path=%s name=%s", base.Path, name)
 }
-
-func SplitToolRef(targetToolName string) (toolName, subTool string) {
-	var (
-		fields = strings.Fields(targetToolName)
-		idx    = slices.Index(fields, "from")
-	)
-
-	defer func() {
-		toolName, _ = types.SplitArg(toolName)
-	}()
-
-	if idx == -1 {
-		return strings.TrimSpace(targetToolName), ""
-	}
-
-	return strings.Join(fields[idx+1:], " "),
-		strings.Join(fields[:idx], " ")
-}
