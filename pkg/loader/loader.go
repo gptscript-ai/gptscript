@@ -64,6 +64,13 @@ func openFile(path string) (io.ReadCloser, bool, error) {
 func loadLocal(base *source, name string) (*source, bool, error) {
 	path := filepath.Join(base.Path, name)
 
+	if s, err := os.Stat(path); err == nil && s.IsDir() {
+		toolPath := filepath.Join(base.Path, name, "tool.gpt")
+		if s, err := os.Stat(toolPath); err == nil && !s.IsDir() {
+			path = toolPath
+		}
+	}
+
 	content, ok, err := openFile(path)
 	if err != nil {
 		return nil, false, err
