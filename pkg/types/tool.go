@@ -57,6 +57,7 @@ func (p Program) ChatName() string {
 }
 
 type ToolReference struct {
+	Named     string
 	Reference string
 	Arg       string
 	ToolID    string
@@ -184,9 +185,14 @@ func SplitArg(hasArg string) (prefix, arg string) {
 	var (
 		fields = strings.Fields(hasArg)
 		idx    = slices.Index(fields, "with")
+		asIdx  = slices.Index(fields, "as")
 	)
 
 	if idx == -1 {
+		if asIdx != -1 {
+			return strings.Join(fields[:asIdx], " "),
+				strings.Join(fields[asIdx:], " ")
+		}
 		return strings.TrimSpace(hasArg), ""
 	}
 
@@ -201,7 +207,12 @@ func (t Tool) GetToolRefsFromNames(names []string) (result []ToolReference, _ er
 			return nil, NewErrToolNotFound(toolName)
 		}
 		_, arg := SplitArg(toolName)
+		named, ok := strings.CutPrefix(arg, "as ")
+		if !ok {
+			named = ""
+		}
 		result = append(result, ToolReference{
+			Named:     named,
 			Arg:       arg,
 			Reference: toolName,
 			ToolID:    toolID,
@@ -287,8 +298,13 @@ func (t Tool) String() string {
 func (t Tool) GetCompletionTools(prg Program) (result []CompletionTool, err error) {
 	toolNames := map[string]struct{}{}
 
-	for _, subToolName := range t.Parameters.Tools {
-		result, err = appendTool(result, prg, t, subToolName, toolNames)
+	subToolRefs, err := t.GetToolRefsFromNames(t.Parameters.Tools)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, subToolRef := range subToolRefs {
+		result, err = appendTool(result, prg, t, subToolRef.Reference, toolNames, subToolRef.Named)
 		if err != nil {
 			return nil, err
 		}
@@ -327,7 +343,7 @@ func appendExports(completionTools []CompletionTool, prg Program, parentTool Too
 	}
 
 	for _, export := range subTool.Export {
-		completionTools, err = appendTool(completionTools, prg, subTool, export, toolNames)
+		completionTools, err = appendTool(completionTools, prg, subTool, export, toolNames, "")
 		if err != nil {
 			return nil, err
 		}
@@ -336,7 +352,7 @@ func appendExports(completionTools []CompletionTool, prg Program, parentTool Too
 	return completionTools, nil
 }
 
-func appendTool(completionTools []CompletionTool, prg Program, parentTool Tool, subToolName string, toolNames map[string]struct{}) ([]CompletionTool, error) {
+func appendTool(completionTools []CompletionTool, prg Program, parentTool Tool, subToolName string, toolNames map[string]struct{}, asName string) ([]CompletionTool, error) {
 	subTool, err := getTool(prg, parentTool, subToolName)
 	if err != nil {
 		return nil, err
@@ -356,10 +372,14 @@ func appendTool(completionTools []CompletionTool, prg Program, parentTool Tool, 
 	if subTool.Instructions == "" {
 		log.Debugf("Skipping zero instruction tool %s (%s)", subToolName, subTool.ID)
 	} else {
+		name := subToolName
+		if asName != "" {
+			name = asName
+		}
 		completionTools = append(completionTools, CompletionTool{
 			Function: CompletionFunctionDefinition{
 				ToolID:      subTool.ID,
-				Name:        PickToolName(subToolName, toolNames),
+				Name:        PickToolName(name, toolNames),
 				Description: subTool.Parameters.Description,
 				Parameters:  args,
 			},
@@ -367,7 +387,7 @@ func appendTool(completionTools []CompletionTool, prg Program, parentTool Tool, 
 	}
 
 	for _, export := range subTool.Export {
-		completionTools, err = appendTool(completionTools, prg, subTool, export, toolNames)
+		completionTools, err = appendTool(completionTools, prg, subTool, export, toolNames, "")
 		if err != nil {
 			return nil, err
 		}
