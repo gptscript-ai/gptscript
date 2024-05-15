@@ -196,6 +196,7 @@ type Event struct {
 	ChatCompletionID   string                 `json:"chatCompletionId,omitempty"`
 	ChatRequest        any                    `json:"chatRequest,omitempty"`
 	ChatResponse       any                    `json:"chatResponse,omitempty"`
+	Usage              types.Usage            `json:"usage,omitempty"`
 	ChatResponseCached bool                   `json:"chatResponseCached,omitempty"`
 	Content            string                 `json:"content,omitempty"`
 }
@@ -622,6 +623,7 @@ func streamProgress(callCtx *engine.Context, monitor Monitor) (chan<- types.Comp
 					ChatCompletionID:   status.CompletionID,
 					ChatRequest:        status.Request,
 					ChatResponse:       status.Response,
+					Usage:              status.Usage,
 					ChatResponseCached: status.Cached,
 				})
 			}

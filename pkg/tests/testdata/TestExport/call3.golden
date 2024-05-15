@@ -64,7 +64,8 @@
         {
           "text": "the default"
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "assistant",
@@ -78,7 +79,8 @@
             }
           }
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "tool",
@@ -93,7 +95,8 @@
         "function": {
           "name": "transient"
         }
-      }
+      },
+      "usage": {}
     }
   ],
   "MaxTokens": 0,

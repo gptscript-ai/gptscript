@@ -44,7 +44,8 @@
         {
           "text": "this is from external context\n\nthis is from context\n\nThis is from tool"
         }
-      ]
+      ],
+      "usage": {}
     }
   ],
   "MaxTokens": 0,

@@ -54,12 +54,20 @@ type CompletionMessage struct {
 	// ToolCall should be set for only messages of type "tool" and Content[0].Text should be set as the
 	// result of the call describe by this field
 	ToolCall *CompletionToolCall `json:"toolCall,omitempty"`
+	Usage    Usage               `json:"usage,omitempty"`
+}
+
+type Usage struct {
+	PromptTokens     int `json:"promptTokens,omitempty"`
+	CompletionTokens int `json:"completionTokens,omitempty"`
+	TotalTokens      int `json:"totalTokens,omitempty"`
 }
 
 type CompletionStatus struct {
 	CompletionID    string
 	Request         any
 	Response        any
+	Usage           Usage
 	Cached          bool
 	Chunks          any
 	PartialResponse *CompletionMessage

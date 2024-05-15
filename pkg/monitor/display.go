@@ -62,6 +62,7 @@ type display struct {
 	dumpState     string
 	callIDMap     map[string]string
 	callLock      sync.Mutex
+	usage         types.Usage
 }
 
 type livePrinter struct {
@@ -226,6 +227,10 @@ func (d *display) Event(event runner.Event) {
 		userSpecifiedToolName: event.CallContext.ToolName,
 	}
 
+	d.usage.PromptTokens += event.Usage.PromptTokens
+	d.usage.CompletionTokens += event.Usage.CompletionTokens
+	d.usage.TotalTokens += event.Usage.TotalTokens
+
 	switch event.Type {
 	case runner.EventTypeCallStart:
 		d.livePrinter.progressStart(currentCall)
@@ -283,6 +288,7 @@ func (d *display) Stop(output string, err error) {
 	defer d.callLock.Unlock()
 
 	log.Fields("runID", d.dump.ID, "output", output, "err", err).Debugf("Run stopped")
+	log.Fields("runID", d.dump.ID, "total", d.usage.TotalTokens, "prompt", d.usage.PromptTokens, "completion", d.usage.CompletionTokens).Infof("usage   ")
 	d.dump.Output = output
 	d.dump.Err = err
 	if d.dumpState != "" {

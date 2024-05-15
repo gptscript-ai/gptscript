@@ -24,7 +24,8 @@
         {
           "text": "Call chatbots"
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "user",
@@ -32,7 +33,8 @@
         {
           "text": "User 1"
         }
-      ]
+      ],
+      "usage": {}
     }
   ],
   "MaxTokens": 0,

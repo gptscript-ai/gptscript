@@ -9,7 +9,8 @@
         {
           "text": "Assistant Response 2 - from context tool\nHello"
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "user",
@@ -17,7 +18,8 @@
         {
           "text": "User 1"
         }
-      ]
+      ],
+      "usage": {}
     }
   ],
   "MaxTokens": 0,

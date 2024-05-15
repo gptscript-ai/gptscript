@@ -38,6 +38,15 @@ func (f formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	if i, ok := entry.Data["response"]; ok && i != "" {
 		msg += fmt.Sprintf(" [response=%s]", i)
 	}
+	if i, ok := entry.Data["total"]; ok && i != "" {
+		msg += fmt.Sprintf(" [total=%v]", i)
+	}
+	if i, ok := entry.Data["prompt"]; ok && i != "" {
+		msg += fmt.Sprintf(" [prompt=%v]", i)
+	}
+	if i, ok := entry.Data["completion"]; ok && i != "" {
+		msg += fmt.Sprintf(" [completion=%v]", i)
+	}
 	return []byte(fmt.Sprintf("%s %s\n",
 		entry.Time.Format(time.TimeOnly),
 		msg)), nil

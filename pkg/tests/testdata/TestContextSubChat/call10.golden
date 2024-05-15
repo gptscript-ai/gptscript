@@ -9,7 +9,8 @@
         {
           "text": "Assistant Response 5 - from context tool resume\nHello"
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "user",
@@ -17,7 +18,8 @@
         {
           "text": "User 1"
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "assistant",
@@ -25,7 +27,8 @@
         {
           "text": "Assistant Response 3 - from main chat tool"
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "user",
@@ -33,7 +36,8 @@
         {
           "text": "User 3"
         }
-      ]
+      ],
+      "usage": {}
     }
   ],
   "MaxTokens": 0,

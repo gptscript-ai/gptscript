@@ -24,7 +24,8 @@
         {
           "text": "Call chatbots"
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "user",
@@ -32,7 +33,8 @@
         {
           "text": "User 1"
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "assistant",
@@ -57,7 +59,8 @@
             }
           }
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "tool",
@@ -73,7 +76,8 @@
           "name": "chatbot",
           "arguments": "Input to chatbot1"
         }
-      }
+      },
+      "usage": {}
     },
     {
       "role": "tool",
@@ -89,7 +93,8 @@
           "name": "chatbot2",
           "arguments": "Input to chatbot2"
         }
-      }
+      },
+      "usage": {}
     }
   ],
   "MaxTokens": 0,

@@ -26,7 +26,8 @@
         {
           "text": "This is a chatbot2"
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "user",
@@ -34,7 +35,8 @@
         {
           "text": "Input to chatbot2"
         }
-      ]
+      ],
+      "usage": {}
     }
   ],
   "MaxTokens": 0,

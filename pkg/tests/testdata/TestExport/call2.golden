@@ -9,7 +9,8 @@
         {
           "text": "the transient"
         }
-      ]
+      ],
+      "usage": {}
     }
   ],
   "MaxTokens": 0,
