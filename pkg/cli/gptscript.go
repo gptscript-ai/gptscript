@@ -400,7 +400,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 
 	if prg.IsChat() || r.ForceChat {
 		return chat.Start(r.NewRunContext(cmd), nil, gptScript, func() (types.Program, error) {
-			return prg, nil
+			return r.readProgram(ctx, gptScript, args)
 		}, os.Environ(), toolInput)
 	}
 
