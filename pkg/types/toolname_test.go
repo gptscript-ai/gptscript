@@ -14,6 +14,11 @@ func TestToolNormalizer(t *testing.T) {
 	autogold.Expect("barList").Equal(t, ToolNormalizer("bar_list from ./foo.gpt"))
 	autogold.Expect("write").Equal(t, ToolNormalizer("sys.write"))
 	autogold.Expect("gpt4VVision").Equal(t, ToolNormalizer("github.com/gptscript-ai/gpt4-v-vision"))
+	autogold.Expect("foo").Equal(t, ToolNormalizer("./foo/tool.gpt"))
+	autogold.Expect("tool").Equal(t, ToolNormalizer("./tool.gpt"))
+	autogold.Expect("tool").Equal(t, ToolNormalizer(".a/tool.gpt"))
+	autogold.Expect("ab").Equal(t, ToolNormalizer(".ab/tool.gpt"))
+	autogold.Expect("tool").Equal(t, ToolNormalizer(".../tool.gpt"))
 }
 
 func TestParse(t *testing.T) {
