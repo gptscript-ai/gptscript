@@ -26,7 +26,8 @@
         {
           "text": "Ask Bob how he is doing and let me know exactly what he said."
         }
-      ]
+      ],
+      "usage": {}
     }
   ],
   "MaxTokens": 0,

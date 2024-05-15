@@ -247,7 +247,8 @@ func TestSubChat(t *testing.T) {
                 {
                   "text": "Call chatbot"
                 }
-              ]
+              ],
+              "usage": {}
             },
             {
               "role": "user",
@@ -255,7 +256,8 @@ func TestSubChat(t *testing.T) {
                 {
                   "text": "Hello"
                 }
-              ]
+              ],
+              "usage": {}
             },
             {
               "role": "assistant",
@@ -269,7 +271,8 @@ func TestSubChat(t *testing.T) {
                     }
                   }
                 }
-              ]
+              ],
+              "usage": {}
             }
           ],
           "MaxTokens": 0,
@@ -312,7 +315,8 @@ func TestSubChat(t *testing.T) {
                       {
                         "text": "This is a chatbot"
                       }
-                    ]
+                    ],
+                    "usage": {}
                   },
                   {
                     "role": "assistant",
@@ -320,7 +324,8 @@ func TestSubChat(t *testing.T) {
                       {
                         "text": "Assistant 1"
                       }
-                    ]
+                    ],
+                    "usage": {}
                   }
                 ],
                 "MaxTokens": 0,
@@ -370,7 +375,8 @@ func TestSubChat(t *testing.T) {
                 {
                   "text": "Call chatbot"
                 }
-              ]
+              ],
+              "usage": {}
             },
             {
               "role": "user",
@@ -378,7 +384,8 @@ func TestSubChat(t *testing.T) {
                 {
                   "text": "Hello"
                 }
-              ]
+              ],
+              "usage": {}
             },
             {
               "role": "assistant",
@@ -392,7 +399,8 @@ func TestSubChat(t *testing.T) {
                     }
                   }
                 }
-              ]
+              ],
+              "usage": {}
             }
           ],
           "MaxTokens": 0,
@@ -435,7 +443,8 @@ func TestSubChat(t *testing.T) {
                       {
                         "text": "This is a chatbot"
                       }
-                    ]
+                    ],
+                    "usage": {}
                   },
                   {
                     "role": "assistant",
@@ -443,7 +452,8 @@ func TestSubChat(t *testing.T) {
                       {
                         "text": "Assistant 1"
                       }
-                    ]
+                    ],
+                    "usage": {}
                   },
                   {
                     "role": "user",
@@ -451,7 +461,8 @@ func TestSubChat(t *testing.T) {
                       {
                         "text": "User 1"
                       }
-                    ]
+                    ],
+                    "usage": {}
                   },
                   {
                     "role": "assistant",
@@ -459,7 +470,8 @@ func TestSubChat(t *testing.T) {
                       {
                         "text": "Assistant 2"
                       }
-                    ]
+                    ],
+                    "usage": {}
                   }
                 ],
                 "MaxTokens": 0,
@@ -513,7 +525,8 @@ func TestChat(t *testing.T) {
                 {
                   "text": "This is a chatbot"
                 }
-              ]
+              ],
+              "usage": {}
             },
             {
               "role": "user",
@@ -521,7 +534,8 @@ func TestChat(t *testing.T) {
                 {
                   "text": "Hello"
                 }
-              ]
+              ],
+              "usage": {}
             },
             {
               "role": "assistant",
@@ -529,7 +543,8 @@ func TestChat(t *testing.T) {
                 {
                   "text": "Assistant 1"
                 }
-              ]
+              ],
+              "usage": {}
             }
           ],
           "MaxTokens": 0,
@@ -567,7 +582,8 @@ func TestChat(t *testing.T) {
                 {
                   "text": "This is a chatbot"
                 }
-              ]
+              ],
+              "usage": {}
             },
             {
               "role": "user",
@@ -575,7 +591,8 @@ func TestChat(t *testing.T) {
                 {
                   "text": "Hello"
                 }
-              ]
+              ],
+              "usage": {}
             },
             {
               "role": "assistant",
@@ -583,7 +600,8 @@ func TestChat(t *testing.T) {
                 {
                   "text": "Assistant 1"
                 }
-              ]
+              ],
+              "usage": {}
             },
             {
               "role": "user",
@@ -591,7 +609,8 @@ func TestChat(t *testing.T) {
                 {
                   "text": "User 1"
                 }
-              ]
+              ],
+              "usage": {}
             },
             {
               "role": "assistant",
@@ -599,7 +618,8 @@ func TestChat(t *testing.T) {
                 {
                   "text": "Assistant 2"
                 }
-              ]
+              ],
+              "usage": {}
             }
           ],
           "MaxTokens": 0,

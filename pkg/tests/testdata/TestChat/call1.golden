@@ -9,7 +9,8 @@
         {
           "text": "This is a chatbot"
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "user",
@@ -17,7 +18,8 @@
         {
           "text": "Hello"
         }
-      ]
+      ],
+      "usage": {}
     }
   ],
   "MaxTokens": 0,

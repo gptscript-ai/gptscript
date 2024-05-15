@@ -26,7 +26,8 @@
         {
           "text": "This is a chatbot"
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "user",
@@ -34,7 +35,8 @@
         {
           "text": "Input to chatbot1"
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "assistant",
@@ -42,7 +44,8 @@
         {
           "text": "Assistant Response 1 - from chatbot1"
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "user",
@@ -50,7 +53,8 @@
         {
           "text": "User 2"
         }
-      ]
+      ],
+      "usage": {}
     }
   ],
   "MaxTokens": 0,

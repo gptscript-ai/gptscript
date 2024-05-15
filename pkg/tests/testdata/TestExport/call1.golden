@@ -64,7 +64,8 @@
         {
           "text": "the default"
         }
-      ]
+      ],
+      "usage": {}
     }
   ],
   "MaxTokens": 0,

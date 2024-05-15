@@ -308,6 +308,9 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		Model:     messageRequest.Model,
 		Messages:  msgs,
 		MaxTokens: messageRequest.MaxTokens,
+		StreamOptions: &openai.StreamOptions{
+			IncludeUsage: true,
+		},
 	}
 
 	if messageRequest.Temperature == nil {
@@ -372,10 +375,16 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		}
 	}
 
+	var usage types.Usage
+	if !cacheResponse {
+		usage = result.Usage
+	}
+
 	status <- types.CompletionStatus{
 		CompletionID: id,
 		Chunks:       response,
 		Response:     result,
+		Usage:        usage,
 		Cached:       cacheResponse,
 	}
 
@@ -383,6 +392,10 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 }
 
 func appendMessage(msg types.CompletionMessage, response openai.ChatCompletionStreamResponse) types.CompletionMessage {
+	msg.Usage.CompletionTokens = types.FirstSet(msg.Usage.CompletionTokens, response.Usage.CompletionTokens)
+	msg.Usage.PromptTokens = types.FirstSet(msg.Usage.PromptTokens, response.Usage.PromptTokens)
+	msg.Usage.TotalTokens = types.FirstSet(msg.Usage.TotalTokens, response.Usage.TotalTokens)
+
 	if len(response.Choices) == 0 {
 		return msg
 	}
@@ -470,6 +483,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 				Object:  resp.Object,
 				Created: resp.Created,
 				Model:   resp.Model,
+				Usage:   resp.Usage,
 				Choices: []openai.ChatCompletionStreamChoice{
 					{
 						Index: resp.Choices[0].Index,

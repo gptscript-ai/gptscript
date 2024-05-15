@@ -9,7 +9,8 @@
         {
           "text": "This is a chatbot"
         }
-      ]
+      ],
+      "usage": {}
     }
   ],
   "MaxTokens": 0,

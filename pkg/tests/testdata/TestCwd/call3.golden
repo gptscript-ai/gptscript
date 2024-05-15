@@ -24,7 +24,8 @@
         {
           "text": "noop"
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "assistant",
@@ -38,7 +39,8 @@
             }
           }
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "tool",
@@ -53,7 +55,8 @@
         "function": {
           "name": "test"
         }
-      }
+      },
+      "usage": {}
     },
     {
       "role": "assistant",
@@ -67,7 +70,8 @@
             }
           }
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "tool",
@@ -82,7 +86,8 @@
         "function": {
           "name": "local"
         }
-      }
+      },
+      "usage": {}
     }
   ],
   "MaxTokens": 0,

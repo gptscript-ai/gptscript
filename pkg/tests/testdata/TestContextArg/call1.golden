@@ -9,7 +9,8 @@
         {
           "text": "this is from context -- foo.db\n\nthis is from other context foo.db and then\n\nthis is from other context and then foo.db\n\nThis is from tool"
         }
-      ]
+      ],
+      "usage": {}
     },
     {
       "role": "user",
@@ -17,7 +18,8 @@
         {
           "text": "{\n\"file\": \"foo.db\"\n}"
         }
-      ]
+      ],
+      "usage": {}
     }
   ],
   "MaxTokens": 0,
