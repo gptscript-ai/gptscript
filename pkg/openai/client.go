@@ -308,9 +308,6 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		Model:     messageRequest.Model,
 		Messages:  msgs,
 		MaxTokens: messageRequest.MaxTokens,
-		StreamOptions: &openai.StreamOptions{
-			IncludeUsage: true,
-		},
 	}
 
 	if messageRequest.Temperature == nil {
@@ -350,6 +347,9 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	var cacheResponse bool
 	if c.setSeed {
 		request.Seed = ptr(c.seed(request))
+		request.StreamOptions = &openai.StreamOptions{
+			IncludeUsage: true,
+		}
 	}
 	response, ok, err := c.fromCache(ctx, messageRequest, request)
 	if err != nil {

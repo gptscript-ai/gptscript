@@ -288,7 +288,9 @@ func (d *display) Stop(output string, err error) {
 	defer d.callLock.Unlock()
 
 	log.Fields("runID", d.dump.ID, "output", output, "err", err).Debugf("Run stopped")
-	log.Fields("runID", d.dump.ID, "total", d.usage.TotalTokens, "prompt", d.usage.PromptTokens, "completion", d.usage.CompletionTokens).Infof("usage   ")
+	if d.usage.TotalTokens > 0 {
+		log.Fields("runID", d.dump.ID, "total", d.usage.TotalTokens, "prompt", d.usage.PromptTokens, "completion", d.usage.CompletionTokens).Infof("usage   ")
+	}
 	d.dump.Output = output
 	d.dump.Err = err
 	if d.dumpState != "" {
