@@ -7,7 +7,7 @@
       "continuation": {
         "state": {
           "completion": {
-            "Model": "gpt-4-turbo",
+            "Model": "gpt-4o",
             "InternalSystemPrompt": null,
             "Tools": [
               {
@@ -78,7 +78,7 @@
               "state": {
                 "input": "Input to chatbot1",
                 "completion": {
-                  "Model": "gpt-4-turbo",
+                  "Model": "gpt-4o",
                   "InternalSystemPrompt": false,
                   "Tools": [
                     {
