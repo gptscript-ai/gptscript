@@ -20,6 +20,12 @@ func TestParse(t *testing.T) {
 	tool, subTool := SplitToolRef("a from b with x")
 	autogold.Expect([]string{"b", "a"}).Equal(t, []string{tool, subTool})
 
+	tool, subTool = SplitToolRef("a from b with x as other")
+	autogold.Expect([]string{"b", "a"}).Equal(t, []string{tool, subTool})
+
 	tool, subTool = SplitToolRef("a with x")
+	autogold.Expect([]string{"a", ""}).Equal(t, []string{tool, subTool})
+
+	tool, subTool = SplitToolRef("a with x as other")
 	autogold.Expect([]string{"a", ""}).Equal(t, []string{tool, subTool})
 }

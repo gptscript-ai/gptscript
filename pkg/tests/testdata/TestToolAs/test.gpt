@@ -1,0 +1,8 @@
+tools: infile as local, ./other.gpt as remote
+
+A tool
+
+---
+name: infile
+
+infile tool

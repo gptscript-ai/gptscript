@@ -678,6 +678,13 @@ func TestContextArg(t *testing.T) {
 	assert.Equal(t, "TEST RESULT CALL: 1", x)
 }
 
+func TestToolAs(t *testing.T) {
+	runner := tester.NewRunner(t)
+	x, err := runner.Run("", `{}`)
+	require.NoError(t, err)
+	assert.Equal(t, "TEST RESULT CALL: 1", x)
+}
+
 func TestCwd(t *testing.T) {
 	runner := tester.NewRunner(t)
 
