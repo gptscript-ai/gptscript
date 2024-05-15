@@ -238,12 +238,9 @@ func toMessages(request types.CompletionRequest) (result []openai.ChatCompletion
 		})
 	}
 
-	// Never send only a system message or a system message not followed by a user message
-	if len(msgs) > 0 && msgs[0].Role == types.CompletionMessageRoleTypeSystem {
-		if len(msgs) == 1 ||
-			(len(msgs) > 1 && msgs[1].Role != types.CompletionMessageRoleTypeUser) {
-			msgs[0].Role = types.CompletionMessageRoleTypeUser
-		}
+	// Never send only a system message
+	if len(msgs) == 1 && msgs[0].Role == types.CompletionMessageRoleTypeSystem {
+		msgs[0].Role = types.CompletionMessageRoleTypeUser
 	}
 
 	for _, message := range msgs {
