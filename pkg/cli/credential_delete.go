@@ -14,6 +14,7 @@ type Delete struct {
 
 func (c *Delete) Customize(cmd *cobra.Command) {
 	cmd.Use = "delete <tool name>"
+	cmd.Aliases = []string{"rm", "del"}
 	cmd.SilenceUsage = true
 	cmd.Short = "Delete a stored credential"
 	cmd.Args = cobra.ExactArgs(1)
