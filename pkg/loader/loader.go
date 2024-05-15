@@ -173,7 +173,7 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 				Parameters: types.Parameters{
 					Name: base.Name,
 				},
-				Instructions: types.PrintPrefix + "\n" + string(data),
+				Instructions: types.EchoPrefix + "\n" + string(data),
 			},
 		}
 	}

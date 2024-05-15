@@ -15,7 +15,7 @@ import (
 const (
 	DaemonPrefix  = "#!sys.daemon"
 	OpenAPIPrefix = "#!sys.openapi"
-	PrintPrefix   = "#!sys.print"
+	EchoPrefix    = "#!sys.echo"
 	CommandPrefix = "#!"
 )
 
@@ -411,8 +411,8 @@ func (t Tool) IsOpenAPI() bool {
 	return strings.HasPrefix(t.Instructions, OpenAPIPrefix)
 }
 
-func (t Tool) IsPrint() bool {
-	return strings.HasPrefix(t.Instructions, PrintPrefix)
+func (t Tool) IsEcho() bool {
+	return strings.HasPrefix(t.Instructions, EchoPrefix)
 }
 
 func (t Tool) IsHTTP() bool {

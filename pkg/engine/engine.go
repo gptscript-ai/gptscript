@@ -186,8 +186,8 @@ func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 			return e.runDaemon(ctx.Ctx, ctx.Program, tool, input)
 		} else if tool.IsOpenAPI() {
 			return e.runOpenAPI(tool, input)
-		} else if tool.IsPrint() {
-			return e.runPrint(tool)
+		} else if tool.IsEcho() {
+			return e.runEcho(tool)
 		}
 		s, err := e.runCommand(ctx.WrappedContext(), tool, input, ctx.ToolCategory)
 		if err != nil {
