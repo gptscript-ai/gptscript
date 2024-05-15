@@ -271,7 +271,7 @@ func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *so
 			toolName, subTool := types.SplitToolRef(targetToolName)
 			resolvedTool, err := resolve(ctx, cache, prg, base, toolName, subTool)
 			if err != nil {
-				return types.Tool{}, fmt.Errorf("failed resolving %s at %s: %w", targetToolName, base, err)
+				return types.Tool{}, fmt.Errorf("failed resolving %s from %s: %w", targetToolName, base, err)
 			}
 
 			tool.ToolMapping[targetToolName] = resolvedTool.ID
