@@ -1,5 +1,5 @@
 `{
-  "Model": "gpt-4-turbo",
+  "Model": "gpt-4o",
   "InternalSystemPrompt": false,
   "Tools": null,
   "Messages": [
