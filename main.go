@@ -16,8 +16,11 @@ var log = mvl.Package()
 
 func main() {
 	if len(os.Args) > 2 && os.Args[1] == "sys.daemon" {
+		if os.Getenv("GPTSCRIPT_DEBUG") == "true" {
+			mvl.SetDebug()
+		}
 		if err := daemon.SysDaemon(); err != nil {
-			log.Fatalf("failed running daemon: %v", err)
+			log.Debugf("failed running daemon: %v", err)
 		}
 		os.Exit(0)
 	}
