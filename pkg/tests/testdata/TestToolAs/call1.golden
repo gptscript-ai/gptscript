@@ -4,7 +4,7 @@
   "Tools": [
     {
       "function": {
-        "toolID": "testdata/TestToolAs/test.gpt:6",
+        "toolID": "testdata/TestToolAs/test.gpt:infile",
         "name": "local",
         "parameters": {
           "properties": {
@@ -22,7 +22,7 @@
     },
     {
       "function": {
-        "toolID": "testdata/TestToolAs/other.gpt:1",
+        "toolID": "testdata/TestToolAs/other.gpt:",
         "name": "remote",
         "parameters": {
           "properties": {

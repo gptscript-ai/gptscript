@@ -1,7 +1,7 @@
 `{
   "done": false,
   "content": "Assistant Response 1 - from chatbot1",
-  "toolID": "testdata/TestDualSubChat/test.gpt:6",
+  "toolID": "testdata/TestDualSubChat/test.gpt:chatbot",
   "state": {
     "continuation": {
       "state": {
@@ -12,14 +12,14 @@
           "Tools": [
             {
               "function": {
-                "toolID": "testdata/TestDualSubChat/test.gpt:6",
+                "toolID": "testdata/TestDualSubChat/test.gpt:chatbot",
                 "name": "chatbot",
                 "parameters": null
               }
             },
             {
               "function": {
-                "toolID": "testdata/TestDualSubChat/test.gpt:13",
+                "toolID": "testdata/TestDualSubChat/test.gpt:chatbot2",
                 "name": "chatbot2",
                 "parameters": null
               }
@@ -98,18 +98,18 @@
       },
       "calls": {
         "call_1": {
-          "toolID": "testdata/TestDualSubChat/test.gpt:6",
+          "toolID": "testdata/TestDualSubChat/test.gpt:chatbot",
           "input": "Input to chatbot1"
         },
         "call_2": {
-          "toolID": "testdata/TestDualSubChat/test.gpt:13",
+          "toolID": "testdata/TestDualSubChat/test.gpt:chatbot2",
           "input": "Input to chatbot2"
         }
       }
     },
     "subCalls": [
       {
-        "toolId": "testdata/TestDualSubChat/test.gpt:6",
+        "toolId": "testdata/TestDualSubChat/test.gpt:chatbot",
         "callId": "call_1",
         "state": {
           "continuation": {
@@ -174,11 +174,11 @@
             },
             "result": "Assistant Response 1 - from chatbot1"
           },
-          "continuationToolID": "testdata/TestDualSubChat/test.gpt:6"
+          "continuationToolID": "testdata/TestDualSubChat/test.gpt:chatbot"
         }
       },
       {
-        "toolId": "testdata/TestDualSubChat/test.gpt:13",
+        "toolId": "testdata/TestDualSubChat/test.gpt:chatbot2",
         "callId": "call_2",
         "state": {
           "continuation": {
@@ -243,7 +243,7 @@
             },
             "result": "Assistent Response 2 - from chatbot2"
           },
-          "continuationToolID": "testdata/TestDualSubChat/test.gpt:13"
+          "continuationToolID": "testdata/TestDualSubChat/test.gpt:chatbot2"
         }
       }
     ],

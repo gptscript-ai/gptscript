@@ -4,7 +4,7 @@
   "Tools": [
     {
       "function": {
-        "toolID": "testdata/TestSubChat/test.gpt:6",
+        "toolID": "testdata/TestSubChat/test.gpt:chatbot",
         "name": "chatbot",
         "parameters": null
       }

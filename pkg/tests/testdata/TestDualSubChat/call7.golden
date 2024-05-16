@@ -4,14 +4,14 @@
   "Tools": [
     {
       "function": {
-        "toolID": "testdata/TestDualSubChat/test.gpt:6",
+        "toolID": "testdata/TestDualSubChat/test.gpt:chatbot",
         "name": "chatbot",
         "parameters": null
       }
     },
     {
       "function": {
-        "toolID": "testdata/TestDualSubChat/test.gpt:13",
+        "toolID": "testdata/TestDualSubChat/test.gpt:chatbot2",
         "name": "chatbot2",
         "parameters": null
       }

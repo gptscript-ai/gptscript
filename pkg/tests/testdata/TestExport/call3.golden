@@ -4,7 +4,7 @@
   "Tools": [
     {
       "function": {
-        "toolID": "testdata/TestExport/parent.gpt:5",
+        "toolID": "testdata/TestExport/parent.gpt:frommain",
         "name": "frommain",
         "parameters": {
           "properties": {
@@ -22,7 +22,7 @@
     },
     {
       "function": {
-        "toolID": "testdata/TestExport/parent.gpt:11",
+        "toolID": "testdata/TestExport/parent.gpt:parent-local",
         "name": "parentLocal",
         "parameters": {
           "properties": {
@@ -40,7 +40,7 @@
     },
     {
       "function": {
-        "toolID": "testdata/TestExport/sub/child.gpt:8",
+        "toolID": "testdata/TestExport/sub/child.gpt:transient",
         "name": "transient",
         "parameters": {
           "properties": {

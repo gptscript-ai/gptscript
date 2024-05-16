@@ -211,7 +211,7 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 		tool.Source.Repo = base.Repo
 
 		// Probably a better way to come up with an ID
-		tool.ID = tool.Source.String()
+		tool.ID = tool.Source.Location + ":" + tool.Name
 
 		if i == 0 {
 			mainTool = tool

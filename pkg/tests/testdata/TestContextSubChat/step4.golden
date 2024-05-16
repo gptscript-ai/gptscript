@@ -1,7 +1,7 @@
 `{
   "done": false,
   "content": "Assistant Response 6 - from main chat tool resume",
-  "toolID": "testdata/TestContextSubChat/test.gpt:1",
+  "toolID": "testdata/TestContextSubChat/test.gpt:",
   "state": {
     "continuation": {
       "state": {
@@ -66,6 +66,6 @@
       },
       "result": "Assistant Response 6 - from main chat tool resume"
     },
-    "continuationToolID": "testdata/TestContextSubChat/test.gpt:1"
+    "continuationToolID": "testdata/TestContextSubChat/test.gpt:"
   }
 }`

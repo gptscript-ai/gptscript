@@ -4,7 +4,7 @@
   "Tools": [
     {
       "function": {
-        "toolID": "testdata/TestCase/test.gpt:6",
+        "toolID": "testdata/TestCase/test.gpt:Bob",
         "name": "Bob",
         "description": "I'm Bob, a friendly guy.",
         "parameters": {

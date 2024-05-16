@@ -1,7 +1,7 @@
 `{
   "done": false,
   "content": "Assistant Response 3 - from main chat tool",
-  "toolID": "testdata/TestContextSubChat/test.gpt:1",
+  "toolID": "testdata/TestContextSubChat/test.gpt:",
   "state": {
     "continuation": {
       "state": {
@@ -48,7 +48,7 @@
       },
       "result": "Assistant Response 3 - from main chat tool"
     },
-    "continuationToolID": "testdata/TestContextSubChat/test.gpt:1",
+    "continuationToolID": "testdata/TestContextSubChat/test.gpt:",
     "resumeInput": "User 3",
     "inputContextContinuation": {
       "continuation": {
@@ -59,7 +59,7 @@
             "Tools": [
               {
                 "function": {
-                  "toolID": "testdata/TestContextSubChat/test.gpt:13",
+                  "toolID": "testdata/TestContextSubChat/test.gpt:chatbot",
                   "name": "chatbot",
                   "parameters": null
                 }
@@ -111,14 +111,14 @@
         },
         "calls": {
           "call_3": {
-            "toolID": "testdata/TestContextSubChat/test.gpt:13",
+            "toolID": "testdata/TestContextSubChat/test.gpt:chatbot",
             "input": "Input to chatbot1 on resume"
           }
         }
       },
       "subCalls": [
         {
-          "toolId": "testdata/TestContextSubChat/test.gpt:13",
+          "toolId": "testdata/TestContextSubChat/test.gpt:chatbot",
           "callId": "call_3",
           "state": {
             "continuation": {
@@ -183,7 +183,7 @@
               },
               "result": "Assistant Response 4 - from chatbot1"
             },
-            "continuationToolID": "testdata/TestContextSubChat/test.gpt:13"
+            "continuationToolID": "testdata/TestContextSubChat/test.gpt:chatbot"
           }
         }
       ],

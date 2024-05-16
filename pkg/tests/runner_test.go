@@ -4,10 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"strings"
 	"testing"
 
-	"github.com/gptscript-ai/gptscript/pkg/openai"
 	"github.com/gptscript-ai/gptscript/pkg/tests/tester"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/hexops/autogold/v2"
@@ -220,21 +218,21 @@ func TestSubChat(t *testing.T) {
 	resp, err := r.Chat(context.Background(), nil, prg, os.Environ(), "Hello")
 	require.NoError(t, err)
 
-	autogold.Expect(strings.ReplaceAll(`{
+	autogold.Expect(`{
   "done": false,
   "content": "Assistant 1",
-  "toolID": "testdata/TestSubChat/test.gpt:6",
+  "toolID": "testdata/TestSubChat/test.gpt:chatbot",
   "state": {
     "continuation": {
       "state": {
         "input": "Hello",
         "completion": {
-          "Model": "MODEL",
+          "Model": "gpt-4o",
           "InternalSystemPrompt": null,
           "Tools": [
             {
               "function": {
-                "toolID": "testdata/TestSubChat/test.gpt:6",
+                "toolID": "testdata/TestSubChat/test.gpt:chatbot",
                 "name": "chatbot",
                 "parameters": null
               }
@@ -293,19 +291,19 @@ func TestSubChat(t *testing.T) {
       },
       "calls": {
         "call_1": {
-          "toolID": "testdata/TestSubChat/test.gpt:6"
+          "toolID": "testdata/TestSubChat/test.gpt:chatbot"
         }
       }
     },
     "subCalls": [
       {
-        "toolId": "testdata/TestSubChat/test.gpt:6",
+        "toolId": "testdata/TestSubChat/test.gpt:chatbot",
         "callId": "call_1",
         "state": {
           "continuation": {
             "state": {
               "completion": {
-                "Model": "MODEL",
+                "Model": "gpt-4o",
                 "InternalSystemPrompt": false,
                 "Tools": null,
                 "Messages": [
@@ -337,32 +335,32 @@ func TestSubChat(t *testing.T) {
             },
             "result": "Assistant 1"
           },
-          "continuationToolID": "testdata/TestSubChat/test.gpt:6"
+          "continuationToolID": "testdata/TestSubChat/test.gpt:chatbot"
         }
       }
     ],
     "subCallID": "call_1"
   }
-}`, "MODEL", openai.DefaultModel)).Equal(t, toJSONString(t, resp))
+}`).Equal(t, toJSONString(t, resp))
 
 	resp, err = r.Chat(context.Background(), resp.State, prg, os.Environ(), "User 1")
 	require.NoError(t, err)
 
-	autogold.Expect(strings.ReplaceAll(`{
+	autogold.Expect(`{
   "done": false,
   "content": "Assistant 2",
-  "toolID": "testdata/TestSubChat/test.gpt:6",
+  "toolID": "testdata/TestSubChat/test.gpt:chatbot",
   "state": {
     "continuation": {
       "state": {
         "input": "Hello",
         "completion": {
-          "Model": "MODEL",
+          "Model": "gpt-4o",
           "InternalSystemPrompt": null,
           "Tools": [
             {
               "function": {
-                "toolID": "testdata/TestSubChat/test.gpt:6",
+                "toolID": "testdata/TestSubChat/test.gpt:chatbot",
                 "name": "chatbot",
                 "parameters": null
               }
@@ -421,19 +419,19 @@ func TestSubChat(t *testing.T) {
       },
       "calls": {
         "call_1": {
-          "toolID": "testdata/TestSubChat/test.gpt:6"
+          "toolID": "testdata/TestSubChat/test.gpt:chatbot"
         }
       }
     },
     "subCalls": [
       {
-        "toolId": "testdata/TestSubChat/test.gpt:6",
+        "toolId": "testdata/TestSubChat/test.gpt:chatbot",
         "callId": "call_1",
         "state": {
           "continuation": {
             "state": {
               "completion": {
-                "Model": "MODEL",
+                "Model": "gpt-4o",
                 "InternalSystemPrompt": false,
                 "Tools": null,
                 "Messages": [
@@ -483,13 +481,13 @@ func TestSubChat(t *testing.T) {
             },
             "result": "Assistant 2"
           },
-          "continuationToolID": "testdata/TestSubChat/test.gpt:6"
+          "continuationToolID": "testdata/TestSubChat/test.gpt:chatbot"
         }
       }
     ],
     "subCallID": "call_1"
   }
-}`, "MODEL", openai.DefaultModel)).Equal(t, toJSONString(t, resp))
+}`).Equal(t, toJSONString(t, resp))
 }
 
 func TestChat(t *testing.T) {
@@ -506,16 +504,16 @@ func TestChat(t *testing.T) {
 	resp, err := r.Chat(context.Background(), nil, prg, os.Environ(), "Hello")
 	require.NoError(t, err)
 
-	autogold.Expect(strings.ReplaceAll(`{
+	autogold.Expect(`{
   "done": false,
   "content": "Assistant 1",
-  "toolID": "testdata/TestChat/test.gpt:1",
+  "toolID": "testdata/TestChat/test.gpt:",
   "state": {
     "continuation": {
       "state": {
         "input": "Hello",
         "completion": {
-          "Model": "MODEL",
+          "Model": "gpt-4o",
           "InternalSystemPrompt": false,
           "Tools": null,
           "Messages": [
@@ -556,23 +554,23 @@ func TestChat(t *testing.T) {
       },
       "result": "Assistant 1"
     },
-    "continuationToolID": "testdata/TestChat/test.gpt:1"
+    "continuationToolID": "testdata/TestChat/test.gpt:"
   }
-}`, "MODEL", openai.DefaultModel)).Equal(t, toJSONString(t, resp))
+}`).Equal(t, toJSONString(t, resp))
 
 	resp, err = r.Chat(context.Background(), resp.State, prg, os.Environ(), "User 1")
 	require.NoError(t, err)
 
-	autogold.Expect(strings.ReplaceAll(`{
+	autogold.Expect(`{
   "done": false,
   "content": "Assistant 2",
-  "toolID": "testdata/TestChat/test.gpt:1",
+  "toolID": "testdata/TestChat/test.gpt:",
   "state": {
     "continuation": {
       "state": {
         "input": "Hello",
         "completion": {
-          "Model": "MODEL",
+          "Model": "gpt-4o",
           "InternalSystemPrompt": false,
           "Tools": null,
           "Messages": [
@@ -631,9 +629,9 @@ func TestChat(t *testing.T) {
       },
       "result": "Assistant 2"
     },
-    "continuationToolID": "testdata/TestChat/test.gpt:1"
+    "continuationToolID": "testdata/TestChat/test.gpt:"
   }
-}`, "MODEL", openai.DefaultModel)).Equal(t, toJSONString(t, resp))
+}`).Equal(t, toJSONString(t, resp))
 }
 
 func TestChatRunNoError(t *testing.T) {
