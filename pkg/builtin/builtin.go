@@ -717,7 +717,10 @@ func SysDownload(ctx context.Context, env []string, input string) (_ string, err
 	}
 
 	checkExists := true
-	tmpDir := ""
+	tmpDir, err := getWorkspaceDir(env)
+	if err != nil {
+		return "", err
+	}
 
 	if params.Location != "" {
 		if s, err := os.Stat(params.Location); err == nil && s.IsDir() {
