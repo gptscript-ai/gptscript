@@ -6,6 +6,7 @@ This is from tool
 ---
 name: fromcontext
 export: sampletool
+export context: fromexportcontext
 
 #!/bin/bash
 echo this is from context
@@ -19,7 +20,6 @@ Dummy body
 
 ---
 name: subtool
-export context: fromexportcontext
 
 Dummy body
 

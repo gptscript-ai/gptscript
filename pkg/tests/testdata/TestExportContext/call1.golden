@@ -4,7 +4,7 @@
   "Tools": [
     {
       "function": {
-        "toolID": "testdata/TestExportContext/test.gpt:21",
+        "toolID": "testdata/TestExportContext/test.gpt:22",
         "name": "subtool",
         "parameters": {
           "properties": {
@@ -22,7 +22,7 @@
     },
     {
       "function": {
-        "toolID": "testdata/TestExportContext/test.gpt:14",
+        "toolID": "testdata/TestExportContext/test.gpt:15",
         "name": "sampletool",
         "description": "sample",
         "parameters": {

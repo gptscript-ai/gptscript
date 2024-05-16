@@ -63,59 +63,8 @@ type ToolReference struct {
 	ToolID    string
 }
 
-func (p Program) GetContextToolRefs(toolID string) (result []ToolReference, _ error) {
-	seen := map[struct {
-		toolID string
-		arg    string
-	}]struct{}{}
-	tool := p.ToolSet[toolID]
-
-	subToolRefs, err := tool.GetToolRefsFromNames(tool.Tools)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, subToolRef := range subToolRefs {
-		subTool := p.ToolSet[subToolRef.ToolID]
-		exportContextToolRefs, err := subTool.GetToolRefsFromNames(subTool.ExportContext)
-		if err != nil {
-			return nil, err
-		}
-		for _, exportContextToolRef := range exportContextToolRefs {
-			key := struct {
-				toolID string
-				arg    string
-			}{
-				toolID: exportContextToolRef.ToolID,
-				arg:    exportContextToolRef.Arg,
-			}
-			if _, ok := seen[key]; !ok {
-				seen[key] = struct{}{}
-				result = append(result, exportContextToolRef)
-			}
-		}
-	}
-
-	contextToolRefs, err := p.ToolSet[toolID].GetToolRefsFromNames(p.ToolSet[toolID].Context)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, contextToolRef := range contextToolRefs {
-		key := struct {
-			toolID string
-			arg    string
-		}{
-			toolID: contextToolRef.ToolID,
-			arg:    contextToolRef.Arg,
-		}
-		if _, ok := seen[key]; !ok {
-			seen[key] = struct{}{}
-			result = append(result, contextToolRef)
-		}
-	}
-
-	return
+func (p Program) GetContextToolRefs(toolID string) ([]ToolReference, error) {
+	return p.ToolSet[toolID].GetContextTools(p)
 }
 
 func (p Program) GetCompletionTools() (result []CompletionTool, err error) {
@@ -295,105 +244,139 @@ func (t Tool) String() string {
 	return buf.String()
 }
 
-func (t Tool) GetCompletionTools(prg Program) (result []CompletionTool, err error) {
-	toolNames := map[string]struct{}{}
+func (t Tool) GetExportedContext(prg Program) ([]ToolReference, error) {
+	result := &toolRefSet{}
 
-	subToolRefs, err := t.GetToolRefsFromNames(t.Parameters.Tools)
+	exportRefs, err := t.GetToolRefsFromNames(t.ExportContext)
 	if err != nil {
 		return nil, err
+	}
+
+	for _, exportRef := range exportRefs {
+		result.Add(exportRef)
+
+		tool := prg.ToolSet[exportRef.ToolID]
+		result.AddAll(tool.GetExportedContext(prg))
+	}
+
+	return result.List()
+}
+
+func (t Tool) GetExportedTools(prg Program) ([]ToolReference, error) {
+	result := &toolRefSet{}
+
+	exportRefs, err := t.GetToolRefsFromNames(t.Export)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, exportRef := range exportRefs {
+		result.Add(exportRef)
+		result.AddAll(prg.ToolSet[exportRef.ToolID].GetExportedTools(prg))
+	}
+
+	return result.List()
+}
+
+func (t Tool) GetContextTools(prg Program) ([]ToolReference, error) {
+	result := &toolRefSet{}
+
+	contextRefs, err := t.GetToolRefsFromNames(t.Context)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, contextRef := range contextRefs {
+		result.AddAll(prg.ToolSet[contextRef.ToolID].GetExportedContext(prg))
+		result.Add(contextRef)
+	}
+
+	return result.List()
+}
+
+func (t Tool) GetCompletionTools(prg Program) (result []CompletionTool, err error) {
+	refs, err := t.getCompletionToolRefs(prg)
+	if err != nil {
+		return nil, err
+	}
+	return toolRefsToCompletionTools(refs, prg), nil
+}
+
+func (t Tool) addReferencedTools(prg Program, result *toolRefSet) error {
+	subToolRefs, err := t.GetToolRefsFromNames(t.Parameters.Tools)
+	if err != nil {
+		return err
 	}
 
 	for _, subToolRef := range subToolRefs {
-		result, err = appendTool(result, prg, t, subToolRef.Reference, toolNames, subToolRef.Named)
-		if err != nil {
-			return nil, err
-		}
+		// Add the tool
+		result.Add(subToolRef)
+
+		// Get all tools exports
+		result.AddAll(prg.ToolSet[subToolRef.ToolID].GetExportedTools(prg))
 	}
 
-	for _, subToolName := range t.Parameters.Context {
-		result, err = appendExports(result, prg, t, subToolName, toolNames)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return result, nil
+	return nil
 }
 
-func getTool(prg Program, parent Tool, name string) (Tool, error) {
-	toolID, ok := parent.ToolMapping[name]
-	if !ok {
-		return Tool{}, &ErrToolNotFound{
-			ToolName: name,
-		}
-	}
-	tool, ok := prg.ToolSet[toolID]
-	if !ok {
-		return Tool{}, &ErrToolNotFound{
-			ToolName: name,
-		}
-	}
-	return tool, nil
-}
-
-func appendExports(completionTools []CompletionTool, prg Program, parentTool Tool, subToolName string, toolNames map[string]struct{}) ([]CompletionTool, error) {
-	subTool, err := getTool(prg, parentTool, subToolName)
+func (t Tool) addContextExportedTools(prg Program, result *toolRefSet) error {
+	contextTools, err := t.GetContextTools(prg)
 	if err != nil {
+		return err
+	}
+
+	for _, contextTool := range contextTools {
+		result.AddAll(prg.ToolSet[contextTool.ToolID].GetExportedTools(prg))
+	}
+
+	return nil
+}
+
+func (t Tool) getCompletionToolRefs(prg Program) ([]ToolReference, error) {
+	result := toolRefSet{}
+
+	if err := t.addReferencedTools(prg, &result); err != nil {
 		return nil, err
 	}
 
-	for _, export := range subTool.Export {
-		completionTools, err = appendTool(completionTools, prg, subTool, export, toolNames, "")
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return completionTools, nil
-}
-
-func appendTool(completionTools []CompletionTool, prg Program, parentTool Tool, subToolName string, toolNames map[string]struct{}, asName string) ([]CompletionTool, error) {
-	subTool, err := getTool(prg, parentTool, subToolName)
-	if err != nil {
+	if err := t.addContextExportedTools(prg, &result); err != nil {
 		return nil, err
 	}
 
-	args := subTool.Parameters.Arguments
-	if args == nil && !subTool.IsCommand() && !subTool.Chat {
-		args = &system.DefaultToolSchema
-	}
+	return result.List()
+}
 
-	for _, existingTool := range completionTools {
-		if existingTool.Function.ToolID == subTool.ID {
-			return completionTools, nil
+func toolRefsToCompletionTools(completionTools []ToolReference, prg Program) (result []CompletionTool) {
+	toolNames := map[string]struct{}{}
+
+	for _, subToolRef := range completionTools {
+		subTool := prg.ToolSet[subToolRef.ToolID]
+
+		subToolName := subToolRef.Reference
+		if subToolRef.Named != "" {
+			subToolName = subToolRef.Named
+		}
+
+		args := subTool.Parameters.Arguments
+		if args == nil && !subTool.IsCommand() && !subTool.Chat {
+			args = &system.DefaultToolSchema
+		}
+
+		if subTool.Instructions == "" {
+			log.Debugf("Skipping zero instruction tool %s (%s)", subToolName, subTool.ID)
+		} else {
+			result = append(result, CompletionTool{
+				Function: CompletionFunctionDefinition{
+					ToolID:      subTool.ID,
+					Name:        PickToolName(subToolName, toolNames),
+					Description: subTool.Parameters.Description,
+					Parameters:  args,
+				},
+			})
 		}
 	}
 
-	if subTool.Instructions == "" {
-		log.Debugf("Skipping zero instruction tool %s (%s)", subToolName, subTool.ID)
-	} else {
-		name := subToolName
-		if asName != "" {
-			name = asName
-		}
-		completionTools = append(completionTools, CompletionTool{
-			Function: CompletionFunctionDefinition{
-				ToolID:      subTool.ID,
-				Name:        PickToolName(name, toolNames),
-				Description: subTool.Parameters.Description,
-				Parameters:  args,
-			},
-		})
-	}
-
-	for _, export := range subTool.Export {
-		completionTools, err = appendTool(completionTools, prg, subTool, export, toolNames, "")
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return completionTools, nil
+	return
 }
 
 type Repo struct {
