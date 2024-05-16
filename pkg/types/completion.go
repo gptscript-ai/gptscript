@@ -50,7 +50,7 @@ type CompletionMessageRoleType string
 
 type CompletionMessage struct {
 	Role    CompletionMessageRoleType `json:"role,omitempty"`
-	Content []ContentPart             `json:"content,omitempty" column:"name=Message,jsonpath=.spec.content"`
+	Content []ContentPart             `json:"content,omitempty"`
 	// ToolCall should be set for only messages of type "tool" and Content[0].Text should be set as the
 	// result of the call describe by this field
 	ToolCall *CompletionToolCall `json:"toolCall,omitempty"`

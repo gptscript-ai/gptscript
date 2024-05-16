@@ -212,7 +212,7 @@ func toToolCall(call types.CompletionToolCall) openai.ToolCall {
 	}
 }
 
-func toMessages(request types.CompletionRequest) (result []openai.ChatCompletionMessage, err error) {
+func toMessages(request types.CompletionRequest, compat bool) (result []openai.ChatCompletionMessage, err error) {
 	var (
 		systemPrompts []string
 		msgs          []types.CompletionMessage
@@ -237,9 +237,23 @@ func toMessages(request types.CompletionRequest) (result []openai.ChatCompletion
 		})
 	}
 
-	// Never send only a system message
-	if len(msgs) == 1 && msgs[0].Role == types.CompletionMessageRoleTypeSystem {
-		msgs[0].Role = types.CompletionMessageRoleTypeUser
+	if compat {
+		// This is terrible hack to deal with APIs that strictly want: (system, user | user) (assistant, user)* assistant?
+		// Two scenarios where this breaks with GPTScript is just sending system, or sending system, assistant
+
+		// Don't send just a system message
+		if len(msgs) == 1 && msgs[0].Role == types.CompletionMessageRoleTypeSystem {
+			msgs[0].Role = types.CompletionMessageRoleTypeUser
+		}
+
+		// Don't send system, assistant.  If so, insert a user message that just has "."
+		if len(msgs) > 1 && msgs[0].Role == types.CompletionMessageRoleTypeSystem &&
+			msgs[1].Role == types.CompletionMessageRoleTypeAssistant {
+			msgs = slices.Insert(msgs, 1, types.CompletionMessage{
+				Role:    types.CompletionMessageRoleTypeUser,
+				Content: types.Text("."),
+			})
+		}
 	}
 
 	for _, message := range msgs {
@@ -288,7 +302,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	if messageRequest.Model == "" {
 		messageRequest.Model = c.defaultModel
 	}
-	msgs, err := toMessages(messageRequest)
+	msgs, err := toMessages(messageRequest, !c.setSeed)
 	if err != nil {
 		return nil, err
 	}
@@ -366,6 +380,10 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 			content.ToolCall.ID = "call_" + hash.ID(content.ToolCall.Function.Name, content.ToolCall.Function.Arguments)[:8]
 			result.Content[i] = content
 		}
+	}
+
+	if result.Role == "" {
+		result.Role = types.CompletionMessageRoleTypeAssistant
 	}
 
 	var usage types.Usage
