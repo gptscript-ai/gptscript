@@ -138,6 +138,11 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 	cmd.Stdin = r
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
+	cmd.Cancel = func() error {
+		_ = r.Close()
+		return w.Close()
+	}
+
 	log.Infof("launched [%s][%s] port [%d] %v", tool.Parameters.Name, tool.ID, port, cmd.Args)
 	if err := cmd.Start(); err != nil {
 		stop()
@@ -152,6 +157,7 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 	killedCtx, cancel := context.WithCancelCause(ctx)
 	defer cancel(nil)
 
+	e.Ports.daemonWG.Add(1)
 	go func() {
 		err := cmd.Wait()
 		if err != nil {
@@ -166,15 +172,8 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 		defer e.Ports.daemonLock.Unlock()
 
 		delete(e.Ports.daemonPorts, tool.ID)
-	}()
-
-	e.Ports.daemonWG.Add(1)
-	context.AfterFunc(ctx, func() {
-		if err := cmd.Process.Kill(); err != nil {
-			log.Debugf("daemon failed to kill tool [%s] process: %v", tool.Parameters.Name, err)
-		}
 		e.Ports.daemonWG.Done()
-	})
+	}()
 
 	for i := 0; i < 120; i++ {
 		resp, err := http.Get(url)
