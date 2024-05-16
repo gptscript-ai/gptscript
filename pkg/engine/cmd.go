@@ -12,17 +12,17 @@ import (
 	"runtime"
 	"sort"
 	"strings"
-	"sync/atomic"
 
 	"github.com/google/shlex"
 	context2 "github.com/gptscript-ai/gptscript/pkg/context"
+	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
 
 func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string, toolCategory ToolCategory) (cmdOut string, cmdErr error) {
-	id := fmt.Sprint(atomic.AddInt64(&completionID, 1))
+	id := counter.Next()
 
 	defer func() {
 		e.Progress <- types.CompletionStatus{

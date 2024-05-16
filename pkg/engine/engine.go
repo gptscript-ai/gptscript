@@ -6,14 +6,12 @@ import (
 	"fmt"
 	"strings"
 	"sync"
-	"sync/atomic"
 
+	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
-
-var completionID int64
 
 type Model interface {
 	Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error)
@@ -123,12 +121,10 @@ func (c *Context) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c.GetCallContext())
 }
 
-var execID int32
-
 func NewContext(ctx context.Context, prg *types.Program) Context {
 	callCtx := Context{
 		commonContext: commonContext{
-			ID:   fmt.Sprint(atomic.AddInt32(&execID, 1)),
+			ID:   counter.Next(),
 			Tool: prg.ToolSet[prg.EntryToolID],
 		},
 		Ctx:     ctx,
@@ -144,7 +140,7 @@ func (c *Context) SubCall(ctx context.Context, toolID, callID string, toolCatego
 	}
 
 	if callID == "" {
-		callID = fmt.Sprint(atomic.AddInt32(&execID, 1))
+		callID = counter.Next()
 	}
 
 	return Context{

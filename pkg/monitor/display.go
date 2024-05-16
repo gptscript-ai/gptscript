@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -40,12 +41,11 @@ type Console struct {
 }
 
 var (
-	runID           int64
 	prettyIDCounter int64
 )
 
 func (c *Console) Start(_ context.Context, prg *types.Program, _ []string, input string) (runner.Monitor, error) {
-	id := atomic.AddInt64(&runID, 1)
+	id := counter.Next()
 	mon := newDisplay(c.dumpState, c.displayProgress, c.printMessages)
 	mon.dump.ID = fmt.Sprint(id)
 	mon.dump.Program = prg

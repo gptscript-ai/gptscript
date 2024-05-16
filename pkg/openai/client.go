@@ -9,11 +9,11 @@ import (
 	"slices"
 	"sort"
 	"strings"
-	"sync/atomic"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	openai "github.com/gptscript-ai/chat-completion-client"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
+	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -24,10 +24,9 @@ const (
 )
 
 var (
-	key          = os.Getenv("OPENAI_API_KEY")
-	url          = os.Getenv("OPENAI_URL")
-	azureModel   = os.Getenv("OPENAI_AZURE_DEPLOYMENT")
-	completionID int64
+	key        = os.Getenv("OPENAI_API_KEY")
+	url        = os.Getenv("OPENAI_URL")
+	azureModel = os.Getenv("OPENAI_AZURE_DEPLOYMENT")
 )
 
 type Client struct {
@@ -332,7 +331,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		})
 	}
 
-	id := fmt.Sprint(atomic.AddInt64(&completionID, 1))
+	id := counter.Next()
 	status <- types.CompletionStatus{
 		CompletionID: id,
 		Request:      request,
