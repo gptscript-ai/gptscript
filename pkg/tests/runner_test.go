@@ -669,6 +669,15 @@ func TestCase2(t *testing.T) {
 	assert.Equal(t, "TEST RESULT CALL: 1", x)
 }
 
+func TestGlobalErr(t *testing.T) {
+	runner := tester.NewRunner(t)
+	_, err := runner.Run("", "")
+	autogold.Expect("line testdata/TestGlobalErr/test.gpt:4: only the first tool in a file can have global model name").Equal(t, err.Error())
+
+	_, err = runner.Run("test2.gpt", "")
+	autogold.Expect("line testdata/TestGlobalErr/test2.gpt:4: only the first tool in a file can have global tools").Equal(t, err.Error())
+}
+
 func TestContextArg(t *testing.T) {
 	runner := tester.NewRunner(t)
 	x, err := runner.Run("", `{

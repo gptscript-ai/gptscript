@@ -221,6 +221,14 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 			return types.Tool{}, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have no name"))
 		}
 
+		if i != 0 && tool.Parameters.GlobalModelName != "" {
+			return types.Tool{}, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have global model name"))
+		}
+
+		if i != 0 && len(tool.Parameters.GlobalTools) > 0 {
+			return types.Tool{}, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have global tools"))
+		}
+
 		if targetToolName != "" && strings.EqualFold(tool.Parameters.Name, targetToolName) {
 			mainTool = tool
 		}
