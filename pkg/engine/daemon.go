@@ -161,7 +161,7 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 	go func() {
 		err := cmd.Wait()
 		if err != nil {
-			log.Errorf("daemon exited tool [%s] %v: %v", tool.Parameters.Name, cmd.Args, err)
+			log.Debugf("daemon exited tool [%s] %v: %v", tool.Parameters.Name, cmd.Args, err)
 		}
 		_ = r.Close()
 		_ = w.Close()
