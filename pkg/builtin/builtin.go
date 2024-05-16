@@ -162,7 +162,7 @@ var tools = map[string]types.Tool{
 			Description: "Downloads a URL, saving the contents to disk at a given location",
 			Arguments: types.ObjectSchema(
 				"url", "The URL to download, either http or https.",
-				"location", "(optional) The on disk location to store the file. If no location is specified a temp location will be used. If the target file already exists it will fail unless override is set to true.",
+				"location", "(optional) The on disk location to store the file. If no location is specified, the workspace will be used. If the target file already exists, it will fail unless override is set to true.",
 				"override", "If true and a file at the location exists, the file will be overwritten, otherwise fail. Default is false"),
 		},
 		BuiltinFunc: SysDownload,
@@ -717,7 +717,10 @@ func SysDownload(ctx context.Context, env []string, input string) (_ string, err
 	}
 
 	checkExists := true
-	tmpDir := ""
+	tmpDir, err := getWorkspaceDir(env)
+	if err != nil {
+		return "", err
+	}
 
 	if params.Location != "" {
 		if s, err := os.Stat(params.Location); err == nil && s.IsDir() {
