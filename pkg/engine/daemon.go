@@ -143,7 +143,7 @@ func (e *Engine) startDaemon(_ context.Context, tool types.Tool) (string, error)
 		return w.Close()
 	}
 
-	log.Infof("launched [%s][%s] port [%d] %v", tool.Parameters.Name, tool.ID, port, cmd.Args)
+	log.Debugf("launched [%s][%s] port [%d] %v", tool.Parameters.Name, tool.ID, port, cmd.Args)
 	if err := cmd.Start(); err != nil {
 		stop()
 		return url, err
