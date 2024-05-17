@@ -367,6 +367,13 @@ func (r *Runner) start(callCtx engine.Context, state *State, monitor Monitor, en
 	progress, progressClose := streamProgress(&callCtx, monitor)
 	defer progressClose()
 
+	monitor.Event(Event{
+		Time:        time.Now(),
+		CallContext: callCtx.GetCallContext(),
+		Type:        EventTypeCallStart,
+		Content:     input,
+	})
+
 	if len(callCtx.Tool.Credentials) > 0 {
 		var err error
 		env, err = r.handleCredentials(callCtx, monitor, env)
@@ -395,13 +402,6 @@ func (r *Runner) start(callCtx engine.Context, state *State, monitor Monitor, en
 		Env:            env,
 		Ports:          &r.ports,
 	}
-
-	monitor.Event(Event{
-		Time:        time.Now(),
-		CallContext: callCtx.GetCallContext(),
-		Type:        EventTypeCallStart,
-		Content:     input,
-	})
 
 	callCtx.Ctx = context2.AddPauseFuncToCtx(callCtx.Ctx, monitor.Pause)
 
@@ -719,7 +719,7 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 	for _, id := range ids {
 		call := state.Continuation.Calls[id]
 		d.Run(func(ctx context.Context) error {
-			result, err := r.subCall(ctx, callCtx, monitor, env, call.ToolID, call.Input, id, "")
+			result, err := r.subCall(ctx, callCtx, monitor, env, call.ToolID, call.Input, id, toolCategory)
 			if err != nil {
 				return err
 			}

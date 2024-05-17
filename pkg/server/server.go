@@ -18,6 +18,7 @@ import (
 	"github.com/acorn-io/broadcaster"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
+	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
@@ -89,7 +90,7 @@ var (
 type execKey struct{}
 
 func ContextWithNewID(ctx context.Context) context.Context {
-	return context.WithValue(ctx, execKey{}, fmt.Sprint(atomic.AddInt64(&execID, 1)))
+	return context.WithValue(ctx, execKey{}, counter.Next())
 }
 
 func IDFromContext(ctx context.Context) string {

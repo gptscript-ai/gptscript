@@ -69,10 +69,9 @@ type CallContext struct {
 
 type Context struct {
 	commonContext
-	Ctx          context.Context
-	Parent       *Context
-	Program      *types.Program
-	ToolCategory ToolCategory
+	Ctx     context.Context
+	Parent  *Context
+	Program *types.Program
 }
 
 type ToolCategory string
