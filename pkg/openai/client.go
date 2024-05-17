@@ -414,8 +414,8 @@ func appendMessage(msg types.CompletionMessage, response openai.ChatCompletionSt
 	delta := response.Choices[0].Delta
 	msg.Role = types.CompletionMessageRoleType(override(string(msg.Role), delta.Role))
 
-	for _, tool := range delta.ToolCalls {
-		idx := 0
+	for i, tool := range delta.ToolCalls {
+		idx := i
 		if tool.Index != nil {
 			idx = *tool.Index
 		}
@@ -484,6 +484,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 	slog.Debug("calling openai", "message", request.Messages)
 
 	if !streamResponse {
+		request.StreamOptions = nil
 		resp, err := c.c.CreateChatCompletion(ctx, request)
 		if err != nil {
 			return nil, err

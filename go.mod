@@ -16,6 +16,7 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/gptscript-ai/chat-completion-client v0.0.0-20240515050533-bdef9f2226a9
 	github.com/hexops/autogold/v2 v2.2.1
+	github.com/hexops/valast v1.4.4
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/olahol/melody v1.1.4
@@ -48,7 +49,6 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hexops/autogold v1.3.1 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
-	github.com/hexops/valast v1.4.4 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/invopop/yaml v0.2.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
