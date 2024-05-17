@@ -26,6 +26,12 @@ import (
 )
 
 var tools = map[string]types.Tool{
+	"sys.time.now": {
+		Parameters: types.Parameters{
+			Description: "Returns the current date and time in RFC3339 format",
+		},
+		BuiltinFunc: SysTimeNow,
+	},
 	"sys.ls": {
 		Parameters: types.Parameters{
 			Description: "Lists the contents of a directory",
@@ -744,4 +750,8 @@ func SysPrompt(_ context.Context, _ []string, input string) (_ string, err error
 	}
 
 	return string(resultsStr), nil
+}
+
+func SysTimeNow(ctx context.Context, env []string, input string) (string, error) {
+	return time.Now().Format(time.RFC3339), nil
 }
