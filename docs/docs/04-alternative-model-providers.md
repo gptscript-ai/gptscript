@@ -31,9 +31,11 @@ Each provider shim has different requirements for authentication. Please check t
 ## Available Model Providers
 
 The following shims are currently available:
-* [github.com/gptscript-ai/azure-provider](https://github.com/gptscript-ai/azure-provider)
+* [github.com/gptscript-ai/azure-openai-provider](https://github.com/gptscript-ai/azure-openai-provider)
+* [github.com/gptscript-ai/azure-other-provider](https://github.com/gptscript-ai/azure-other-provider)
 * [github.com/gptscript-ai/anthropic-provider](https://github.com/gptscript-ai/anthropic-provider)
 * [github.com/gptscript-ai/google-provider](https://github.com/gptscript-ai/google-provider)
+* [github.com/gptscript-ai/gemini-vertexai-provider](https://github.com/gptscript-ai/gemini-vertexai-provider)
 
 ## Listing available models
 
