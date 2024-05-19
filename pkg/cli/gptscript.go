@@ -45,6 +45,7 @@ type GPTScript struct {
 	Color              *bool  `usage:"Use color in output (default true)" default:"true"`
 	Confirm            bool   `usage:"Prompt before running potentially dangerous commands"`
 	Debug              bool   `usage:"Enable debug logging"`
+	NoTrunc            bool   `usage:"Do not truncate long log messages"`
 	Quiet              *bool  `usage:"No output logging (set --quiet=false to force on even when there is no TTY)" short:"q"`
 	Output             string `usage:"Save output to a file, or - for stdout" short:"o"`
 	EventsStreamTo     string `usage:"Stream events to this location, could be a file descriptor/handle (e.g. fd://2), filename, or named pipe (e.g. \\\\.\\pipe\\my-pipe)" name:"events-stream-to"`
@@ -237,7 +238,7 @@ func (r *GPTScript) PersistentPre(*cobra.Command, []string) error {
 			r.Color = new(bool)
 		}
 	} else {
-		mvl.SetSimpleFormat()
+		mvl.SetSimpleFormat(!r.NoTrunc)
 		if *r.Quiet {
 			mvl.SetError()
 		}

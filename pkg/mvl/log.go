@@ -1,6 +1,7 @@
 package mvl
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -17,11 +18,14 @@ import (
 // So this is simple place to make a better decision later about logging frameworks. I only care about
 // the interface, not the implementation. Smarter people do that well.
 
-func SetSimpleFormat() {
-	logrus.SetFormatter(&formatter{})
+func SetSimpleFormat(trunc bool) {
+	logrus.SetFormatter(&formatter{
+		trunc: trunc,
+	})
 }
 
 type formatter struct {
+	trunc bool
 }
 
 func (f formatter) Format(entry *logrus.Entry) ([]byte, error) {
@@ -30,6 +34,20 @@ func (f formatter) Format(entry *logrus.Entry) ([]byte, error) {
 		msg += fmt.Sprintf(" [input=%s]", i)
 	}
 	if i, ok := entry.Data["output"].(string); ok && i != "" {
+		if f.trunc {
+			i = strings.TrimSpace(i)
+			addDot := false
+			if len(i) > 100 {
+				addDot = true
+				i = i[:100]
+			}
+			d, _ := json.Marshal(i)
+			i = string(d)
+			i = strings.TrimSpace(i[1 : len(i)-2])
+			if addDot {
+				i += "..."
+			}
+		}
 		msg += fmt.Sprintf(" [output=%s]", i)
 	}
 	if i, ok := entry.Data["request"]; ok && i != "" {
