@@ -77,6 +77,7 @@ type Context struct {
 type ToolCategory string
 
 const (
+	ProviderToolCategory   ToolCategory = "provider"
 	CredentialToolCategory ToolCategory = "credential"
 	ContextToolCategory    ToolCategory = "context"
 	NoCategory             ToolCategory = ""
@@ -120,11 +121,20 @@ func (c *Context) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c.GetCallContext())
 }
 
+type toolCategoryKey struct{}
+
+func WithToolCategory(ctx context.Context, toolCategory ToolCategory) context.Context {
+	return context.WithValue(ctx, toolCategoryKey{}, toolCategory)
+}
+
 func NewContext(ctx context.Context, prg *types.Program) Context {
+	category, _ := ctx.Value(toolCategoryKey{}).(ToolCategory)
+
 	callCtx := Context{
 		commonContext: commonContext{
-			ID:   counter.Next(),
-			Tool: prg.ToolSet[prg.EntryToolID],
+			ID:           counter.Next(),
+			Tool:         prg.ToolSet[prg.EntryToolID],
+			ToolCategory: category,
 		},
 		Ctx:     ctx,
 		Program: prg,

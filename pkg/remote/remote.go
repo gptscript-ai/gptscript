@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/gptscript-ai/gptscript/pkg/cache"
+	"github.com/gptscript-ai/gptscript/pkg/engine"
 	env2 "github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
@@ -144,7 +145,7 @@ func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, err
 		return nil, err
 	}
 
-	url, err := c.runner.Run(ctx, prg.SetBlocking(), c.envs, "")
+	url, err := c.runner.Run(engine.WithToolCategory(ctx, engine.ProviderToolCategory), prg.SetBlocking(), c.envs, "")
 	if err != nil {
 		return nil, err
 	}
