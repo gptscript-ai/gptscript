@@ -317,9 +317,6 @@ func SysExec(ctx context.Context, env []string, input string) (string, error) {
 	cmd.Dir = params.Directory
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		_, _ = os.Stdout.Write(out)
-	}
-	if err != nil {
 		return string(out), fmt.Errorf("OUTPUT: %s, ERROR: %w", out, err)
 	}
 	return string(out), nil
