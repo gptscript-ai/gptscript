@@ -26,31 +26,6 @@ import (
 )
 
 var tools = map[string]types.Tool{
-	"sys.workspace.ls": {
-		Parameters: types.Parameters{
-			Description: "Lists the contents of a directory relative to the current workspace",
-			Arguments: types.ObjectSchema(
-				"dir", "The directory to list"),
-		},
-		BuiltinFunc: SysWorkspaceLs,
-	},
-	"sys.workspace.write": {
-		Parameters: types.Parameters{
-			Description: "Write the contents to a file relative to the current workspace",
-			Arguments: types.ObjectSchema(
-				"filename", "The name of the file to write to",
-				"content", "The content to write"),
-		},
-		BuiltinFunc: SysWorkspaceWrite,
-	},
-	"sys.workspace.read": {
-		Parameters: types.Parameters{
-			Description: "Reads the contents of a file relative to the current workspace",
-			Arguments: types.ObjectSchema(
-				"filename", "The name of the file to read"),
-		},
-		BuiltinFunc: SysWorkspaceRead,
-	},
 	"sys.ls": {
 		Parameters: types.Parameters{
 			Description: "Lists the contents of a directory",
@@ -332,14 +307,6 @@ func getWorkspaceDir(envs []string) (string, error) {
 	return "", fmt.Errorf("no workspace directory found in env")
 }
 
-func SysWorkspaceLs(_ context.Context, env []string, input string) (string, error) {
-	dir, err := getWorkspaceDir(env)
-	if err != nil {
-		return "", err
-	}
-	return sysLs(dir, input)
-}
-
 func SysLs(_ context.Context, _ []string, input string) (string, error) {
 	return sysLs("", input)
 }
@@ -380,20 +347,7 @@ func sysLs(base, input string) (string, error) {
 	return strings.Join(result, "\n"), nil
 }
 
-func SysWorkspaceRead(ctx context.Context, env []string, input string) (string, error) {
-	dir, err := getWorkspaceDir(env)
-	if err != nil {
-		return "", err
-	}
-
-	return sysRead(ctx, dir, env, input)
-}
-
-func SysRead(ctx context.Context, env []string, input string) (string, error) {
-	return sysRead(ctx, "", env, input)
-}
-
-func sysRead(ctx context.Context, base string, env []string, input string) (string, error) {
+func SysRead(_ context.Context, _ []string, input string) (string, error) {
 	var params struct {
 		Filename string `json:"filename,omitempty"`
 	}
@@ -402,9 +356,6 @@ func sysRead(ctx context.Context, base string, env []string, input string) (stri
 	}
 
 	file := params.Filename
-	if base != "" {
-		file = filepath.Join(base, file)
-	}
 
 	// Lock the file to prevent concurrent writes from other tool calls.
 	locker.RLock(file)
@@ -424,19 +375,7 @@ func sysRead(ctx context.Context, base string, env []string, input string) (stri
 	return string(data), nil
 }
 
-func SysWorkspaceWrite(ctx context.Context, env []string, input string) (string, error) {
-	dir, err := getWorkspaceDir(env)
-	if err != nil {
-		return "", err
-	}
-	return sysWrite(ctx, dir, env, input)
-}
-
-func SysWrite(ctx context.Context, env []string, input string) (string, error) {
-	return sysWrite(ctx, "", env, input)
-}
-
-func sysWrite(ctx context.Context, base string, env []string, input string) (string, error) {
+func SysWrite(ctx context.Context, _ []string, input string) (string, error) {
 	var params struct {
 		Filename string `json:"filename,omitempty"`
 		Content  string `json:"content,omitempty"`
@@ -446,9 +385,6 @@ func sysWrite(ctx context.Context, base string, env []string, input string) (str
 	}
 
 	file := params.Filename
-	if base != "" {
-		file = filepath.Join(base, file)
-	}
 
 	// Lock the file to prevent concurrent writes from other tool calls.
 	locker.Lock(file)
