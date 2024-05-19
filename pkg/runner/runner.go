@@ -527,7 +527,7 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 			err         error
 		)
 
-		state, callResults, err = r.subCalls(callCtx, monitor, env, state, engine.NoCategory)
+		state, callResults, err = r.subCalls(callCtx, monitor, env, state, callCtx.ToolCategory)
 		if errMessage := (*builtin.ErrChatFinish)(nil); errors.As(err, &errMessage) && callCtx.Tool.Chat {
 			return &State{
 				Result: &errMessage.Message,

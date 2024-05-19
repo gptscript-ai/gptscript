@@ -98,7 +98,7 @@ func (in CompletionMessage) String() string {
 		}
 		buf.WriteString(content.Text)
 		if content.ToolCall != nil {
-			buf.WriteString(fmt.Sprintf("tool call %s -> %s", color.GreenString(content.ToolCall.Function.Name), content.ToolCall.Function.Arguments))
+			buf.WriteString(fmt.Sprintf("<tool call> %s -> %s", color.GreenString(content.ToolCall.Function.Name), content.ToolCall.Function.Arguments))
 		}
 	}
 	return buf.String()
