@@ -43,7 +43,7 @@ func (f formatter) Format(entry *logrus.Entry) ([]byte, error) {
 			}
 			d, _ := json.Marshal(i)
 			i = string(d)
-			i = strings.TrimSpace(i[1 : len(i)-2])
+			i = strings.TrimSpace(i[1 : len(i)-1])
 			if addDot {
 				i += "..."
 			}

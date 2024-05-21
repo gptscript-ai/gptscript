@@ -13,10 +13,10 @@ import (
 	"github.com/acorn-io/cmd"
 	"github.com/fatih/color"
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
+	"github.com/gptscript-ai/gptscript/pkg/auth"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/chat"
-	"github.com/gptscript-ai/gptscript/pkg/confirm"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/input"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
@@ -117,14 +117,6 @@ func New() *cobra.Command {
 	return command
 }
 
-func (r *GPTScript) NewRunContext(cmd *cobra.Command) context.Context {
-	ctx := cmd.Context()
-	if r.Confirm {
-		ctx = confirm.WithConfirm(ctx, confirm.TextPrompt{})
-	}
-	return ctx
-}
-
 func (r *GPTScript) NewGPTScriptOpts() (gptscript.Options, error) {
 	opts := gptscript.Options{
 		Cache:   cache.Options(r.CacheOptions),
@@ -138,6 +130,10 @@ func (r *GPTScript) NewGPTScriptOpts() (gptscript.Options, error) {
 		Env:               os.Environ(),
 		CredentialContext: r.CredentialContext,
 		Workspace:         r.Workspace,
+	}
+
+	if r.Confirm {
+		opts.Runner.Authorizer = auth.Authorize
 	}
 
 	if r.Ports != "" {
@@ -388,7 +384,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 	}
 
 	if r.ChatState != "" {
-		resp, err := gptScript.Chat(r.NewRunContext(cmd), r.ChatState, prg, os.Environ(), toolInput)
+		resp, err := gptScript.Chat(cmd.Context(), r.ChatState, prg, os.Environ(), toolInput)
 		if err != nil {
 			return err
 		}
@@ -400,12 +396,12 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 	}
 
 	if prg.IsChat() || r.ForceChat {
-		return chat.Start(r.NewRunContext(cmd), nil, gptScript, func() (types.Program, error) {
+		return chat.Start(cmd.Context(), nil, gptScript, func() (types.Program, error) {
 			return r.readProgram(ctx, gptScript, args)
 		}, os.Environ(), toolInput)
 	}
 
-	s, err := gptScript.Run(r.NewRunContext(cmd), prg, os.Environ(), toolInput)
+	s, err := gptScript.Run(cmd.Context(), prg, os.Environ(), toolInput)
 	if err != nil {
 		return err
 	}
