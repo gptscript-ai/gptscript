@@ -3,12 +3,10 @@ package loader
 import (
 	"context"
 	"encoding/json"
+	"os"
 	"testing"
 
-	"os"
-
 	"github.com/gptscript-ai/gptscript/pkg/types"
-
 	"github.com/hexops/autogold/v2"
 	"github.com/stretchr/testify/require"
 )
@@ -24,20 +22,17 @@ func toString(obj any) string {
 func TestIsOpenAPI(t *testing.T) {
 	datav2, err := os.ReadFile("testdata/openapi_v2.yaml")
 	require.NoError(t, err)
-	v, ok := isOpenAPI(datav2)
-	require.True(t, ok)
+	v := isOpenAPI(datav2)
 	require.Equal(t, 2, v, "(yaml) expected openapi v2")
 
 	datav2, err = os.ReadFile("testdata/openapi_v2.json")
 	require.NoError(t, err)
-	v, ok = isOpenAPI(datav2)
-	require.True(t, ok)
+	v = isOpenAPI(datav2)
 	require.Equal(t, 2, v, "(json) expected openapi v2")
 
 	datav3, err := os.ReadFile("testdata/openapi_v3.yaml")
 	require.NoError(t, err)
-	v, ok = isOpenAPI(datav3)
-	require.True(t, ok)
+	v = isOpenAPI(datav3)
 	require.Equal(t, 3, v, "(json) expected openapi v3")
 }
 
