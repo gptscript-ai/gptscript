@@ -20,10 +20,16 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/BurntSushi/locker"
 	"github.com/google/shlex"
-	"github.com/gptscript-ai/gptscript/pkg/confirm"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/jaytaylor/html2text"
 )
+
+var SafeTools = map[string]struct{}{
+	"sys.echo":        {},
+	"sys.time.now":    {},
+	"sys.prompt":      {},
+	"sys.chat.finish": {},
+}
 
 var tools = map[string]types.Tool{
 	"sys.time.now": {
@@ -278,10 +284,6 @@ func SysExec(ctx context.Context, env []string, input string) (string, error) {
 
 	log.Debugf("Running %s in %s", params.Command, params.Directory)
 
-	if err := confirm.Promptf(ctx, "Run command: %s", params.Command); err != nil {
-		return "", err
-	}
-
 	var cmd *exec.Cmd
 
 	if runtime.GOOS == "windows" {
@@ -404,12 +406,6 @@ func SysWrite(ctx context.Context, _ []string, input string) (string, error) {
 		}
 	}
 
-	if _, err := os.Stat(file); err == nil {
-		if err := confirm.Promptf(ctx, "Overwrite: %s", params.Filename); err != nil {
-			return "", err
-		}
-	}
-
 	data := []byte(params.Content)
 	log.Debugf("Wrote %d bytes to file %s", len(data), file)
 
@@ -428,12 +424,6 @@ func SysAppend(ctx context.Context, env []string, input string) (string, error) 
 	// Lock the file to prevent concurrent writes from other tool calls.
 	locker.Lock(params.Filename)
 	defer locker.Unlock(params.Filename)
-
-	if _, err := os.Stat(params.Filename); err == nil {
-		if err := confirm.Promptf(ctx, "Write to existing file: %s.", params.Filename); err != nil {
-			return "", err
-		}
-	}
 
 	f, err := os.OpenFile(params.Filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
@@ -606,10 +596,6 @@ func SysRemove(ctx context.Context, env []string, input string) (string, error) 
 		Location string `json:"location,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
-		return "", err
-	}
-
-	if err := confirm.Promptf(ctx, "Remove: %s", params.Location); err != nil {
 		return "", err
 	}
 

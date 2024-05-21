@@ -435,7 +435,9 @@ func appendMessage(msg types.CompletionMessage, response openai.ChatCompletionSt
 			tc.ToolCall.Index = tool.Index
 		}
 		tc.ToolCall.ID = override(tc.ToolCall.ID, tool.ID)
-		tc.ToolCall.Function.Name += tool.Function.Name
+		if tc.ToolCall.Function.Name != tool.Function.Name {
+			tc.ToolCall.Function.Name += tool.Function.Name
+		}
 		tc.ToolCall.Function.Arguments += tool.Function.Arguments
 
 		msg.Content[idx] = tc

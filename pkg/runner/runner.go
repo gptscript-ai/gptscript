@@ -36,6 +36,20 @@ type Options struct {
 	EndPort            int64                 `usage:"-"`
 	CredentialOverride string                `usage:"-"`
 	Sequential         bool                  `usage:"-"`
+	Authorizer         AuthorizerFunc        `usage:"-"`
+}
+
+type AuthorizerResponse struct {
+	Accept  bool
+	Message string
+}
+
+type AuthorizerFunc func(ctx engine.Context, input string) (AuthorizerResponse, error)
+
+func DefaultAuthorizer(_ engine.Context, _ string) (AuthorizerResponse, error) {
+	return AuthorizerResponse{
+		Accept: true,
+	}, nil
 }
 
 func complete(opts ...Options) (result Options) {
@@ -46,6 +60,9 @@ func complete(opts ...Options) (result Options) {
 		result.EndPort = types.FirstSet(opt.EndPort, result.EndPort)
 		result.CredentialOverride = types.FirstSet(opt.CredentialOverride, result.CredentialOverride)
 		result.Sequential = types.FirstSet(opt.Sequential, result.Sequential)
+		if opt.Authorizer != nil {
+			result.Authorizer = opt.Authorizer
+		}
 	}
 	if result.MonitorFactory == nil {
 		result.MonitorFactory = noopFactory{}
@@ -56,11 +73,15 @@ func complete(opts ...Options) (result Options) {
 	if result.StartPort == 0 {
 		result.StartPort = result.EndPort
 	}
+	if result.Authorizer == nil {
+		result.Authorizer = DefaultAuthorizer
+	}
 	return
 }
 
 type Runner struct {
 	c              engine.Model
+	auth           AuthorizerFunc
 	factory        MonitorFactory
 	runtimeManager engine.RuntimeManager
 	ports          engine.Ports
@@ -81,6 +102,7 @@ func New(client engine.Model, credCtx string, opts ...Options) (*Runner, error) 
 		credMutex:      sync.Mutex{},
 		credOverrides:  opt.CredentialOverride,
 		sequential:     opt.Sequential,
+		auth:           opt.Authorizer,
 	}
 
 	if opt.StartPort != 0 {
@@ -404,6 +426,20 @@ func (r *Runner) start(callCtx engine.Context, state *State, monitor Monitor, en
 	}
 
 	callCtx.Ctx = context2.AddPauseFuncToCtx(callCtx.Ctx, monitor.Pause)
+
+	authResp, err := r.auth(callCtx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	if !authResp.Accept {
+		msg := fmt.Sprintf("[AUTHORIZATION ERROR]: %s", authResp.Message)
+		return &State{
+			Continuation: &engine.Return{
+				Result: &msg,
+			},
+		}, nil
+	}
 
 	ret, err := e.Start(callCtx, input)
 	if err != nil {
