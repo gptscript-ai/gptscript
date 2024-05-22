@@ -69,9 +69,20 @@ type CallContext struct {
 
 type Context struct {
 	commonContext
-	Ctx     context.Context
-	Parent  *Context
-	Program *types.Program
+	Ctx        context.Context
+	Parent     *Context
+	LastReturn *Return
+	Program    *types.Program
+}
+
+type ChatHistory struct {
+	History []ChatHistoryCall `json:"history,omitempty"`
+}
+
+type ChatHistoryCall struct {
+	ID         string                  `json:"id,omitempty"`
+	Tool       types.Tool              `json:"tool,omitempty"`
+	Completion types.CompletionRequest `json:"completion,omitempty"`
 }
 
 type ToolCategory string
@@ -194,7 +205,7 @@ func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 		} else if tool.IsEcho() {
 			return e.runEcho(tool)
 		}
-		s, err := e.runCommand(ctx.WrappedContext(), tool, input, ctx.ToolCategory)
+		s, err := e.runCommand(ctx, tool, input, ctx.ToolCategory)
 		if err != nil {
 			return nil, err
 		}
@@ -230,6 +241,10 @@ func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 
 	if _, def := system.IsDefaultPrompt(input); tool.Chat && def {
 		// Ignore "default prompts" from chat
+		input = ""
+	}
+
+	if tool.Chat && input == "{}" {
 		input = ""
 	}
 

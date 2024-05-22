@@ -7,10 +7,9 @@
       "state": {
         "input": "User 1",
         "completion": {
-          "Model": "gpt-4o",
-          "InternalSystemPrompt": false,
-          "Tools": null,
-          "Messages": [
+          "model": "gpt-4o",
+          "internalSystemPrompt": false,
+          "messages": [
             {
               "role": "system",
               "content": [
@@ -38,12 +37,7 @@
               ],
               "usage": {}
             }
-          ],
-          "MaxTokens": 0,
-          "Temperature": null,
-          "JSONResponse": false,
-          "Grammar": "",
-          "Cache": null
+          ]
         }
       },
       "result": "Assistant Response 3 - from main chat tool"
@@ -54,9 +48,8 @@
       "continuation": {
         "state": {
           "completion": {
-            "Model": "gpt-4o",
-            "InternalSystemPrompt": null,
-            "Tools": [
+            "model": "gpt-4o",
+            "tools": [
               {
                 "function": {
                   "toolID": "testdata/TestContextSubChat/test.gpt:chatbot",
@@ -65,7 +58,7 @@
                 }
               }
             ],
-            "Messages": [
+            "messages": [
               {
                 "role": "system",
                 "content": [
@@ -91,12 +84,7 @@
                 ],
                 "usage": {}
               }
-            ],
-            "MaxTokens": 0,
-            "Temperature": null,
-            "JSONResponse": false,
-            "Grammar": "",
-            "Cache": null
+            ]
           },
           "pending": {
             "call_3": {
@@ -125,9 +113,9 @@
               "state": {
                 "input": "Input to chatbot1 on resume",
                 "completion": {
-                  "Model": "gpt-4o",
-                  "InternalSystemPrompt": false,
-                  "Tools": [
+                  "model": "gpt-4o",
+                  "internalSystemPrompt": false,
+                  "tools": [
                     {
                       "function": {
                         "toolID": "sys.chat.finish",
@@ -145,7 +133,7 @@
                       }
                     }
                   ],
-                  "Messages": [
+                  "messages": [
                     {
                       "role": "system",
                       "content": [
@@ -173,12 +161,7 @@
                       ],
                       "usage": {}
                     }
-                  ],
-                  "MaxTokens": 0,
-                  "Temperature": null,
-                  "JSONResponse": false,
-                  "Grammar": "",
-                  "Cache": null
+                  ]
                 }
               },
               "result": "Assistant Response 4 - from chatbot1"

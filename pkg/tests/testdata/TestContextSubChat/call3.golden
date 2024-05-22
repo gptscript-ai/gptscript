@@ -1,7 +1,7 @@
 `{
-  "Model": "gpt-4o",
-  "InternalSystemPrompt": false,
-  "Tools": [
+  "model": "gpt-4o",
+  "internalSystemPrompt": false,
+  "tools": [
     {
       "function": {
         "toolID": "sys.chat.finish",
@@ -19,7 +19,7 @@
       }
     }
   ],
-  "Messages": [
+  "messages": [
     {
       "role": "system",
       "content": [
@@ -56,10 +56,5 @@
       ],
       "usage": {}
     }
-  ],
-  "MaxTokens": 0,
-  "Temperature": null,
-  "JSONResponse": false,
-  "Grammar": "",
-  "Cache": null
+  ]
 }`

@@ -7,10 +7,9 @@
       "state": {
         "input": "User 1",
         "completion": {
-          "Model": "gpt-4o",
-          "InternalSystemPrompt": false,
-          "Tools": null,
-          "Messages": [
+          "model": "gpt-4o",
+          "internalSystemPrompt": false,
+          "messages": [
             {
               "role": "system",
               "content": [
@@ -56,12 +55,7 @@
               ],
               "usage": {}
             }
-          ],
-          "MaxTokens": 0,
-          "Temperature": null,
-          "JSONResponse": false,
-          "Grammar": "",
-          "Cache": null
+          ]
         }
       },
       "result": "Assistant Response 6 - from main chat tool resume"

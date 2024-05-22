@@ -9,15 +9,14 @@ import (
 )
 
 type CompletionRequest struct {
-	Model                string
-	InternalSystemPrompt *bool
-	Tools                []CompletionTool
-	Messages             []CompletionMessage
-	MaxTokens            int
-	Temperature          *float32
-	JSONResponse         bool
-	Grammar              string
-	Cache                *bool
+	Model                string              `json:"model,omitempty"`
+	InternalSystemPrompt *bool               `json:"internalSystemPrompt,omitempty"`
+	Tools                []CompletionTool    `json:"tools,omitempty"`
+	Messages             []CompletionMessage `json:"messages,omitempty"`
+	MaxTokens            int                 `json:"maxTokens,omitempty"`
+	Temperature          *float32            `json:"temperature,omitempty"`
+	JSONResponse         bool                `json:"jsonResponse,omitempty"`
+	Cache                *bool               `json:"cache,omitempty"`
 }
 
 func (r *CompletionRequest) GetCache() bool {
@@ -57,6 +56,20 @@ type CompletionMessage struct {
 	Usage    Usage               `json:"usage,omitempty"`
 }
 
+func (c CompletionMessage) ChatText() string {
+	var buf strings.Builder
+	for _, part := range c.Content {
+		if part.Text == "" {
+			continue
+		}
+		if buf.Len() > 0 {
+			buf.WriteString(" ")
+		}
+		buf.WriteString(part.Text)
+	}
+	return buf.String()
+}
+
 type Usage struct {
 	PromptTokens     int `json:"promptTokens,omitempty"`
 	CompletionTokens int `json:"completionTokens,omitempty"`
@@ -73,8 +86,8 @@ type CompletionStatus struct {
 	PartialResponse *CompletionMessage
 }
 
-func (in CompletionMessage) IsToolCall() bool {
-	for _, content := range in.Content {
+func (c CompletionMessage) IsToolCall() bool {
+	for _, content := range c.Content {
 		if content.ToolCall != nil {
 			return true
 		}
@@ -90,9 +103,9 @@ func Text(text string) []ContentPart {
 	}
 }
 
-func (in CompletionMessage) String() string {
+func (c CompletionMessage) String() string {
 	buf := strings.Builder{}
-	for i, content := range in.Content {
+	for i, content := range c.Content {
 		if i > 0 {
 			buf.WriteString("\n")
 		}
