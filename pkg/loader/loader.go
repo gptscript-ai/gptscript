@@ -12,10 +12,13 @@ import (
 	"path"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
 
+	"github.com/getkin/kin-openapi/openapi2"
+	"github.com/getkin/kin-openapi/openapi2conv"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
@@ -24,6 +27,8 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/parser"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
+	"gopkg.in/yaml.v3"
+	kyaml "sigs.k8s.io/yaml"
 )
 
 const CacheTimeout = time.Hour
@@ -142,9 +147,34 @@ func loadOpenAPI(prg *types.Program, data []byte) *openapi3.T {
 		prg.OpenAPICache = map[string]any{}
 	}
 
-	openAPIDocument, err = openapi3.NewLoader().LoadFromData(data)
-	if err != nil || openAPIDocument.Paths.Len() == 0 {
-		openAPIDocument = nil
+	switch isOpenAPI(data) {
+	case 2:
+		// Convert OpenAPI v2 to v3
+		jsondata := data
+		if !json.Valid(data) {
+			jsondata, err = kyaml.YAMLToJSON(data)
+			if err != nil {
+				return nil
+			}
+		}
+
+		doc := &openapi2.T{}
+		if err := doc.UnmarshalJSON(jsondata); err != nil {
+			return nil
+		}
+
+		openAPIDocument, err = openapi2conv.ToV3(doc)
+		if err != nil {
+			return nil
+		}
+	case 3:
+		// Use OpenAPI v3 as is
+		openAPIDocument, err = openapi3.NewLoader().LoadFromData(data)
+		if err != nil {
+			return nil
+		}
+	default:
+		return nil
 	}
 
 	prg.OpenAPICache[openAPICacheKey] = openAPIDocument
@@ -398,4 +428,43 @@ func input(ctx context.Context, cache *cache.Client, base *source, name string) 
 	}
 
 	return nil, fmt.Errorf("can not load tools path=%s name=%s", base.Path, name)
+}
+
+// isOpenAPI checks if the data is an OpenAPI definition and returns the version if it is.
+func isOpenAPI(data []byte) int {
+	var fragment struct {
+		Paths   map[string]any `json:"paths,omitempty"`
+		Swagger string         `json:"swagger,omitempty"`
+		OpenAPI string         `json:"openapi,omitempty"`
+	}
+
+	if err := json.Unmarshal(data, &fragment); err != nil {
+		if err := yaml.Unmarshal(data, &fragment); err != nil {
+			return 0
+		}
+	}
+	if len(fragment.Paths) == 0 {
+		return 0
+	}
+
+	if v, _, _ := strings.Cut(fragment.OpenAPI, "."); v != "" {
+		ver, err := strconv.Atoi(v)
+		if err != nil {
+			log.Debugf("invalid OpenAPI version: openapi=%q", fragment.OpenAPI)
+			return 0
+		}
+		return ver
+	}
+
+	if v, _, _ := strings.Cut(fragment.Swagger, "."); v != "" {
+		ver, err := strconv.Atoi(v)
+		if err != nil {
+			log.Debugf("invalid Swagger version: swagger=%q", fragment.Swagger)
+			return 0
+		}
+		return ver
+	}
+
+	log.Debugf("no OpenAPI version found in input data: openapi=%q, swagger=%q", fragment.OpenAPI, fragment.Swagger)
+	return 0
 }
