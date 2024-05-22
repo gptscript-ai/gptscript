@@ -711,6 +711,10 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 		resultLock sync.Mutex
 	)
 
+	if state.Continuation != nil {
+		callCtx.LastReturn = state.Continuation
+	}
+
 	if state.InputContextContinuation != nil {
 		return state, nil, nil
 	}

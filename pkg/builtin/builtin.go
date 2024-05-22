@@ -20,15 +20,17 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/BurntSushi/locker"
 	"github.com/google/shlex"
+	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/jaytaylor/html2text"
 )
 
 var SafeTools = map[string]struct{}{
-	"sys.echo":        {},
-	"sys.time.now":    {},
-	"sys.prompt":      {},
-	"sys.chat.finish": {},
+	"sys.echo":         {},
+	"sys.time.now":     {},
+	"sys.prompt":       {},
+	"sys.chat.finish":  {},
+	"sys.chat.history": {},
 }
 
 var tools = map[string]types.Tool{
@@ -181,6 +183,13 @@ var tools = map[string]types.Tool{
 			),
 		},
 		BuiltinFunc: SysPrompt,
+	},
+	"sys.chat.history": {
+		Parameters: types.Parameters{
+			Description: "Retrieves the previous chat dialog",
+			Arguments:   types.ObjectSchema(),
+		},
+		BuiltinFunc: SysChatHistory,
 	},
 }
 
@@ -565,6 +574,33 @@ type ErrChatFinish struct {
 
 func (e *ErrChatFinish) Error() string {
 	return fmt.Sprintf("CHAT FINISH: %s", e.Message)
+}
+
+func SysChatHistory(ctx context.Context, _ []string, _ string) (string, error) {
+	engineContext, _ := engine.FromContext(ctx)
+
+	data, err := json.Marshal(engine.ChatHistory{
+		History: writeHistory(engineContext),
+	})
+
+	return string(data), err
+}
+
+func writeHistory(ctx *engine.Context) (result []engine.ChatHistoryCall) {
+	if ctx == nil {
+		return nil
+	}
+	if ctx.Parent != nil {
+		result = append(result, writeHistory(ctx.Parent)...)
+	}
+	if ctx.LastReturn != nil && ctx.LastReturn.State != nil {
+		result = append(result, engine.ChatHistoryCall{
+			ID:         ctx.ID,
+			Tool:       ctx.Tool,
+			Completion: ctx.LastReturn.State.Completion,
+		})
+	}
+	return
 }
 
 func SysChatFinish(ctx context.Context, env []string, input string) (string, error) {

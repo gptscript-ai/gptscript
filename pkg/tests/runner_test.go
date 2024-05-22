@@ -227,9 +227,8 @@ func TestSubChat(t *testing.T) {
       "state": {
         "input": "Hello",
         "completion": {
-          "Model": "gpt-4o",
-          "InternalSystemPrompt": null,
-          "Tools": [
+          "model": "gpt-4o",
+          "tools": [
             {
               "function": {
                 "toolID": "testdata/TestSubChat/test.gpt:chatbot",
@@ -238,7 +237,7 @@ func TestSubChat(t *testing.T) {
               }
             }
           ],
-          "Messages": [
+          "messages": [
             {
               "role": "system",
               "content": [
@@ -272,12 +271,7 @@ func TestSubChat(t *testing.T) {
               ],
               "usage": {}
             }
-          ],
-          "MaxTokens": 0,
-          "Temperature": null,
-          "JSONResponse": false,
-          "Grammar": "",
-          "Cache": null
+          ]
         },
         "pending": {
           "call_1": {
@@ -303,10 +297,9 @@ func TestSubChat(t *testing.T) {
           "continuation": {
             "state": {
               "completion": {
-                "Model": "gpt-4o",
-                "InternalSystemPrompt": false,
-                "Tools": null,
-                "Messages": [
+                "model": "gpt-4o",
+                "internalSystemPrompt": false,
+                "messages": [
                   {
                     "role": "system",
                     "content": [
@@ -325,12 +318,7 @@ func TestSubChat(t *testing.T) {
                     ],
                     "usage": {}
                   }
-                ],
-                "MaxTokens": 0,
-                "Temperature": null,
-                "JSONResponse": false,
-                "Grammar": "",
-                "Cache": null
+                ]
               }
             },
             "result": "Assistant 1"
@@ -355,9 +343,8 @@ func TestSubChat(t *testing.T) {
       "state": {
         "input": "Hello",
         "completion": {
-          "Model": "gpt-4o",
-          "InternalSystemPrompt": null,
-          "Tools": [
+          "model": "gpt-4o",
+          "tools": [
             {
               "function": {
                 "toolID": "testdata/TestSubChat/test.gpt:chatbot",
@@ -366,7 +353,7 @@ func TestSubChat(t *testing.T) {
               }
             }
           ],
-          "Messages": [
+          "messages": [
             {
               "role": "system",
               "content": [
@@ -400,12 +387,7 @@ func TestSubChat(t *testing.T) {
               ],
               "usage": {}
             }
-          ],
-          "MaxTokens": 0,
-          "Temperature": null,
-          "JSONResponse": false,
-          "Grammar": "",
-          "Cache": null
+          ]
         },
         "pending": {
           "call_1": {
@@ -431,10 +413,9 @@ func TestSubChat(t *testing.T) {
           "continuation": {
             "state": {
               "completion": {
-                "Model": "gpt-4o",
-                "InternalSystemPrompt": false,
-                "Tools": null,
-                "Messages": [
+                "model": "gpt-4o",
+                "internalSystemPrompt": false,
+                "messages": [
                   {
                     "role": "system",
                     "content": [
@@ -471,12 +452,7 @@ func TestSubChat(t *testing.T) {
                     ],
                     "usage": {}
                   }
-                ],
-                "MaxTokens": 0,
-                "Temperature": null,
-                "JSONResponse": false,
-                "Grammar": "",
-                "Cache": null
+                ]
               }
             },
             "result": "Assistant 2"
@@ -513,10 +489,9 @@ func TestChat(t *testing.T) {
       "state": {
         "input": "Hello",
         "completion": {
-          "Model": "gpt-4o",
-          "InternalSystemPrompt": false,
-          "Tools": null,
-          "Messages": [
+          "model": "gpt-4o",
+          "internalSystemPrompt": false,
+          "messages": [
             {
               "role": "system",
               "content": [
@@ -544,12 +519,7 @@ func TestChat(t *testing.T) {
               ],
               "usage": {}
             }
-          ],
-          "MaxTokens": 0,
-          "Temperature": null,
-          "JSONResponse": false,
-          "Grammar": "",
-          "Cache": null
+          ]
         }
       },
       "result": "Assistant 1"
@@ -570,10 +540,9 @@ func TestChat(t *testing.T) {
       "state": {
         "input": "Hello",
         "completion": {
-          "Model": "gpt-4o",
-          "InternalSystemPrompt": false,
-          "Tools": null,
-          "Messages": [
+          "model": "gpt-4o",
+          "internalSystemPrompt": false,
+          "messages": [
             {
               "role": "system",
               "content": [
@@ -619,12 +588,7 @@ func TestChat(t *testing.T) {
               ],
               "usage": {}
             }
-          ],
-          "MaxTokens": 0,
-          "Temperature": null,
-          "JSONResponse": false,
-          "Grammar": "",
-          "Cache": null
+          ]
         }
       },
       "result": "Assistant 2"

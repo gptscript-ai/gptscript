@@ -21,7 +21,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
 
-func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string, toolCategory ToolCategory) (cmdOut string, cmdErr error) {
+func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCategory ToolCategory) (cmdOut string, cmdErr error) {
 	id := counter.Next()
 
 	defer func() {
@@ -42,10 +42,18 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string, 
 				"input":   input,
 			},
 		}
-		return tool.BuiltinFunc(ctx, e.Env, input)
+		return tool.BuiltinFunc(ctx.WrappedContext(), e.Env, input)
 	}
 
-	cmd, stop, err := e.newCommand(ctx, nil, tool, input)
+	var instructions []string
+	for _, inputContext := range ctx.InputContext {
+		instructions = append(instructions, inputContext.Content)
+	}
+	var extraEnv = []string{
+		strings.TrimSpace(fmt.Sprintf("GPTSCRIPT_CONTEXT=%s", strings.Join(instructions, "\n"))),
+	}
+
+	cmd, stop, err := e.newCommand(ctx.Ctx, extraEnv, tool, input)
 	if err != nil {
 		return "", err
 	}
@@ -66,7 +74,7 @@ func (e *Engine) runCommand(ctx context.Context, tool types.Tool, input string, 
 	cmd.Stdout = io.MultiWriter(all, output)
 
 	if toolCategory == CredentialToolCategory {
-		pause := context2.GetPauseFuncFromCtx(ctx)
+		pause := context2.GetPauseFuncFromCtx(ctx.Ctx)
 		unpause := pause()
 		defer unpause()
 	}

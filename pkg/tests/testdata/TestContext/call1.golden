@@ -1,8 +1,6 @@
 `{
-  "Model": "gpt-4o",
-  "InternalSystemPrompt": null,
-  "Tools": null,
-  "Messages": [
+  "model": "gpt-4o",
+  "messages": [
     {
       "role": "system",
       "content": [
@@ -12,10 +10,5 @@
       ],
       "usage": {}
     }
-  ],
-  "MaxTokens": 0,
-  "Temperature": null,
-  "JSONResponse": false,
-  "Grammar": "",
-  "Cache": null
+  ]
 }`

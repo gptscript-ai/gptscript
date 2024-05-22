@@ -1,7 +1,6 @@
 `{
-  "Model": "gpt-4o",
-  "InternalSystemPrompt": null,
-  "Tools": [
+  "model": "gpt-4o",
+  "tools": [
     {
       "function": {
         "toolID": "testdata/TestCwd/subtool/test.gpt:",
@@ -17,7 +16,7 @@
       }
     }
   ],
-  "Messages": [
+  "messages": [
     {
       "role": "system",
       "content": [
@@ -27,10 +26,5 @@
       ],
       "usage": {}
     }
-  ],
-  "MaxTokens": 0,
-  "Temperature": null,
-  "JSONResponse": false,
-  "Grammar": "",
-  "Cache": null
+  ]
 }`
