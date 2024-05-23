@@ -10,7 +10,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/getkin/kin-openapi/openapi3"
 	openai "github.com/gptscript-ai/chat-completion-client"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
@@ -330,11 +329,11 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	}
 
 	for _, tool := range messageRequest.Tools {
-		params := tool.Function.Parameters
-		if params == nil {
-			params = &openapi3.Schema{
-				Type:       "object",
-				Properties: openapi3.Schemas{},
+		var params any = tool.Function.Parameters
+		if tool.Function.Parameters == nil || len(tool.Function.Parameters.Properties) == 0 {
+			params = map[string]any{
+				"type":       "object",
+				"properties": map[string]any{},
 			}
 		}
 
