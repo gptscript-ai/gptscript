@@ -332,7 +332,10 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	for _, tool := range messageRequest.Tools {
 		params := tool.Function.Parameters
 		if params == nil {
-			params = &openapi3.Schema{}
+			params = &openapi3.Schema{
+				Type:       "object",
+				Properties: openapi3.Schemas{},
+			}
 		}
 
 		request.Tools = append(request.Tools, openai.Tool{
