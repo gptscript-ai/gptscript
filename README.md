@@ -257,7 +257,7 @@ Tool parameters are key-value pairs defined at the beginning of a tool block, be
 #### Tool Body
 
 The tool body contains the instructions for the tool which can be a natural language prompt or
-a command to execute. Commands must start with `#!` followed by the interpreter (e.g. `#!/bin/bash`, `#!python3`)
+a command to execute. Commands [must start with](https://en.wikipedia.org/wiki/Shebang_(Unix)) `#!` followed by the interpreter (e.g. `#!/bin/bash`, `#!python3`)
 a text that will be placed in a file and passed to the interpreter. Arguments can be references in the instructions
 using the format `${arg1}`.
 
