@@ -217,7 +217,7 @@ func toMessages(request types.CompletionRequest, compat bool) (result []openai.C
 		msgs          []types.CompletionMessage
 	)
 
-	if request.InternalSystemPrompt == nil || *request.InternalSystemPrompt {
+	if !compat && (request.InternalSystemPrompt == nil || *request.InternalSystemPrompt) {
 		systemPrompts = append(systemPrompts, system.InternalSystemPrompt)
 	}
 
@@ -234,25 +234,6 @@ func toMessages(request types.CompletionRequest, compat bool) (result []openai.C
 			Role:    types.CompletionMessageRoleTypeSystem,
 			Content: types.Text(strings.Join(systemPrompts, "\n")),
 		})
-	}
-
-	if compat {
-		// This is terrible hack to deal with APIs that strictly want: (system, user | user) (assistant, user)* assistant?
-		// Two scenarios where this breaks with GPTScript is just sending system, or sending system, assistant
-
-		// Don't send just a system message
-		if len(msgs) == 1 && msgs[0].Role == types.CompletionMessageRoleTypeSystem {
-			msgs[0].Role = types.CompletionMessageRoleTypeUser
-		}
-
-		// Don't send system, assistant.  If so, insert a user message that just has "."
-		if len(msgs) > 1 && msgs[0].Role == types.CompletionMessageRoleTypeSystem &&
-			msgs[1].Role == types.CompletionMessageRoleTypeAssistant {
-			msgs = slices.Insert(msgs, 1, types.CompletionMessage{
-				Role:    types.CompletionMessageRoleTypeUser,
-				Content: types.Text("."),
-			})
-		}
 	}
 
 	for _, message := range msgs {
