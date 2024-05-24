@@ -73,12 +73,13 @@ func New() *cobra.Command {
 	root := &GPTScript{}
 	command := cmd.Command(
 		root,
-		&Eval{
-			gptscript: root,
-		},
+		&Eval{gptscript: root},
 		&Credential{root: root},
 		&Parse{},
 		&Fmt{},
+		&SDKServer{
+			GPTScript: root,
+		},
 	)
 
 	// Hide all the global flags for the credential subcommand.
@@ -290,7 +291,7 @@ func (r *GPTScript) readProgram(ctx context.Context, runner *gptscript.GPTScript
 }
 
 func (r *GPTScript) PrintOutput(toolInput, toolOutput string) (err error) {
-	if r.Output != "" {
+	if r.Output != "" && r.Output != "-" {
 		err = os.WriteFile(r.Output, []byte(toolOutput), 0644)
 		if err != nil {
 			return err
@@ -328,7 +329,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 		if err != nil {
 			return err
 		}
-		defer s.Close()
+		defer s.Close(true)
 		return s.Start(ctx)
 	}
 
@@ -336,7 +337,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 	if err != nil {
 		return err
 	}
-	defer gptScript.Close()
+	defer gptScript.Close(true)
 
 	if r.ListModels {
 		return r.listModels(ctx, gptScript, args)

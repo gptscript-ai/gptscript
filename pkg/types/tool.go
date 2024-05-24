@@ -69,8 +69,10 @@ func (p Program) GetContextToolRefs(toolID string) ([]ToolReference, error) {
 
 func (p Program) GetCompletionTools() (result []CompletionTool, err error) {
 	return Tool{
-		Parameters: Parameters{
-			Tools: []string{"main"},
+		ToolDef: ToolDef{
+			Parameters: Parameters{
+				Tools: []string{"main"},
+			},
 		},
 		ToolMapping: map[string][]ToolReference{
 			"main": {
@@ -125,14 +127,18 @@ type Parameters struct {
 	Blocking        bool             `json:"-"`
 }
 
-type Tool struct {
+type ToolDef struct {
 	Parameters   `json:",inline"`
-	Instructions string `json:"instructions,omitempty"`
+	Instructions string      `json:"instructions,omitempty"`
+	BuiltinFunc  BuiltinFunc `json:"-"`
+}
+
+type Tool struct {
+	ToolDef `json:",inline"`
 
 	ID          string                     `json:"id,omitempty"`
 	ToolMapping map[string][]ToolReference `json:"toolMapping,omitempty"`
 	LocalTools  map[string]string          `json:"localTools,omitempty"`
-	BuiltinFunc BuiltinFunc                `json:"-"`
 	Source      ToolSource                 `json:"source,omitempty"`
 	WorkingDir  string                     `json:"workingDir,omitempty"`
 }
@@ -215,7 +221,7 @@ func (t Tool) GetToolRefsFromNames(names []string) (result []ToolReference, _ er
 	return
 }
 
-func (t Tool) String() string {
+func (t ToolDef) String() string {
 	buf := &strings.Builder{}
 	if t.Parameters.GlobalModelName != "" {
 		_, _ = fmt.Fprintf(buf, "Global Model Name: %s\n", t.Parameters.GlobalModelName)
@@ -276,7 +282,7 @@ func (t Tool) String() string {
 	if len(t.Parameters.Credentials) > 0 {
 		_, _ = fmt.Fprintf(buf, "Credentials: %s\n", strings.Join(t.Parameters.Credentials, ", "))
 	}
-	if t.Chat {
+	if t.Parameters.Chat {
 		_, _ = fmt.Fprintf(buf, "Chat: true\n")
 	}
 

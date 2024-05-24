@@ -24,7 +24,7 @@ func TestHashBang(t *testing.T) {
 }
 
 func TestParseGlobals(t *testing.T) {
-	var input = `
+	input := `
 global tools: foo, bar
 global model: the model
 ---
@@ -36,39 +36,49 @@ tools: bar
 	})
 	require.NoError(t, err)
 	autogold.Expect(Document{Nodes: []Node{
-		{ToolNode: &ToolNode{
-			Tool: types.Tool{
-				Parameters: types.Parameters{
-					ModelName: "the model",
-					Tools: []string{
-						"foo",
-						"bar",
+		{
+			ToolNode: &ToolNode{
+				Tool: types.Tool{
+					ToolDef: types.ToolDef{
+						Parameters: types.Parameters{
+							ModelName: "the model",
+							Tools: []string{
+								"foo",
+								"bar",
+							},
+							GlobalTools: []string{
+								"foo",
+								"bar",
+							},
+							GlobalModelName: "the model",
+						},
 					},
-					GlobalTools: []string{
-						"foo",
-						"bar",
-					},
-					GlobalModelName: "the model",
-				},
-				Source: types.ToolSource{LineNo: 1},
-			},
-		}},
-		{ToolNode: &ToolNode{Tool: types.Tool{
-			Parameters: types.Parameters{
-				Name:      "bar",
-				ModelName: "the model",
-				Tools: []string{
-					"bar",
-					"foo",
+					Source: types.ToolSource{LineNo: 1},
 				},
 			},
-			Source: types.ToolSource{LineNo: 5},
-		}}},
+		},
+		{
+			ToolNode: &ToolNode{
+				Tool: types.Tool{
+					ToolDef: types.ToolDef{
+						Parameters: types.Parameters{
+							Name:      "bar",
+							ModelName: "the model",
+							Tools: []string{
+								"bar",
+								"foo",
+							},
+						},
+					},
+					Source: types.ToolSource{LineNo: 5},
+				},
+			},
+		},
 	}}).Equal(t, out)
 }
 
 func TestParseSkip(t *testing.T) {
-	var input = `
+	input := `
 first
 ---
 name: second
@@ -102,30 +112,58 @@ name: seven
 	out, err := Parse(strings.NewReader(input))
 	require.NoError(t, err)
 	autogold.Expect(Document{Nodes: []Node{
-		{ToolNode: &ToolNode{
-			Tool: types.Tool{
-				Instructions: "first",
-				Source: types.ToolSource{
-					LineNo: 1,
+		{
+			ToolNode: &ToolNode{
+				Tool: types.Tool{
+					ToolDef: types.ToolDef{
+						Instructions: "first",
+					},
+					Source: types.ToolSource{
+						LineNo: 1,
+					},
 				},
 			},
-		}},
-		{ToolNode: &ToolNode{Tool: types.Tool{
-			Parameters: types.Parameters{Name: "second"},
-			Source:     types.ToolSource{LineNo: 4},
-		}}},
-		{TextNode: &TextNode{Text: "!third\n\nname: third\n"}},
-		{ToolNode: &ToolNode{Tool: types.Tool{
-			Parameters:   types.Parameters{Name: "fourth"},
-			Instructions: "!forth dont skip",
-			Source:       types.ToolSource{LineNo: 11},
-		}}},
-		{ToolNode: &ToolNode{Tool: types.Tool{
-			Parameters:   types.Parameters{Name: "fifth"},
-			Instructions: "#!ignore",
-			Source:       types.ToolSource{LineNo: 14},
-		}}},
-		{TextNode: &TextNode{Text: `!skip
+		},
+		{
+			ToolNode: &ToolNode{
+				Tool: types.Tool{
+					ToolDef: types.ToolDef{
+						Parameters: types.Parameters{Name: "second"},
+					},
+					Source: types.ToolSource{LineNo: 4},
+				},
+			},
+		},
+		{
+			TextNode: &TextNode{
+				Text: "!third\n\nname: third\n",
+			},
+		},
+		{
+			ToolNode: &ToolNode{
+				Tool: types.Tool{
+					ToolDef: types.ToolDef{
+						Parameters:   types.Parameters{Name: "fourth"},
+						Instructions: "!forth dont skip",
+					},
+					Source: types.ToolSource{LineNo: 11},
+				},
+			},
+		},
+		{
+			ToolNode: &ToolNode{
+				Tool: types.Tool{
+					ToolDef: types.ToolDef{
+						Parameters:   types.Parameters{Name: "fifth"},
+						Instructions: "#!ignore",
+					},
+					Source: types.ToolSource{LineNo: 14},
+				},
+			},
+		},
+		{
+			TextNode: &TextNode{
+				Text: `!skip
 name: six
 
 ----
@@ -136,12 +174,20 @@ name: bad
 name: bad
 ---
 name: bad
-`}},
-		{ToolNode: &ToolNode{Tool: types.Tool{
-			Parameters: types.Parameters{
-				Name: "seven",
+`,
 			},
-			Source: types.ToolSource{LineNo: 30},
-		}}},
+		},
+		{
+			ToolNode: &ToolNode{
+				Tool: types.Tool{
+					ToolDef: types.ToolDef{
+						Parameters: types.Parameters{
+							Name: "seven",
+						},
+					},
+					Source: types.ToolSource{LineNo: 30},
+				},
+			},
+		},
 	}}).Equal(t, out)
 }

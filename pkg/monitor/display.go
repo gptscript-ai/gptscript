@@ -51,7 +51,7 @@ func (c *Console) Start(_ context.Context, prg *types.Program, _ []string, input
 	mon.dump.Program = prg
 	mon.dump.Input = input
 
-	log.Fields("runID", mon.dump.ID, "input", input, "program", prg, "type", "runStart").Debugf("Run started")
+	log.Fields("runID", mon.dump.ID, "input", input, "program", prg, "type", runner.EventTypeRunStart).Debugf("Run started")
 	return mon, nil
 }
 
@@ -288,7 +288,7 @@ func (d *display) Stop(output string, err error) {
 	d.callLock.Lock()
 	defer d.callLock.Unlock()
 
-	log.Fields("runID", d.dump.ID, "output", output, "err", err, "type", "runFinish").Debugf("Run stopped")
+	log.Fields("runID", d.dump.ID, "output", output, "err", err, "type", runner.EventTypeRunFinish).Debugf("Run stopped")
 	if d.usage.TotalTokens > 0 {
 		log.Fields("runID", d.dump.ID, "total", d.usage.TotalTokens, "prompt", d.usage.PromptTokens, "completion", d.usage.CompletionTokens).Infof("usage   ")
 	}

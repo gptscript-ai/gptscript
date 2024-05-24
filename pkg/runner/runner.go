@@ -46,7 +46,7 @@ type AuthorizerResponse struct {
 
 type AuthorizerFunc func(ctx engine.Context, input string) (AuthorizerResponse, error)
 
-func DefaultAuthorizer(_ engine.Context, _ string) (AuthorizerResponse, error) {
+func DefaultAuthorizer(engine.Context, string) (AuthorizerResponse, error) {
 	return AuthorizerResponse{
 		Accept: true,
 	}, nil
@@ -84,7 +84,6 @@ type Runner struct {
 	auth           AuthorizerFunc
 	factory        MonitorFactory
 	runtimeManager engine.RuntimeManager
-	ports          engine.Ports
 	credCtx        string
 	credMutex      sync.Mutex
 	credOverrides  string
@@ -109,14 +108,10 @@ func New(client engine.Model, credCtx string, opts ...Options) (*Runner, error) 
 		if opt.EndPort < opt.StartPort {
 			return nil, fmt.Errorf("invalid port range: %d-%d", opt.StartPort, opt.EndPort)
 		}
-		runner.ports.SetPorts(opt.StartPort, opt.EndPort)
+		engine.SetPorts(opt.StartPort, opt.EndPort)
 	}
 
 	return runner, nil
-}
-
-func (r *Runner) Close() {
-	r.ports.CloseDaemons()
 }
 
 type ChatResponse struct {
@@ -226,12 +221,14 @@ type Event struct {
 type EventType string
 
 var (
-	EventTypeCallStart    = EventType("callStart")
-	EventTypeCallContinue = EventType("callContinue")
-	EventTypeCallSubCalls = EventType("callSubCalls")
-	EventTypeCallProgress = EventType("callProgress")
-	EventTypeChat         = EventType("callChat")
-	EventTypeCallFinish   = EventType("callFinish")
+	EventTypeRunStart     EventType = "runStart"
+	EventTypeCallStart    EventType = "callStart"
+	EventTypeCallContinue EventType = "callContinue"
+	EventTypeCallSubCalls EventType = "callSubCalls"
+	EventTypeCallProgress EventType = "callProgress"
+	EventTypeChat         EventType = "callChat"
+	EventTypeCallFinish   EventType = "callFinish"
+	EventTypeRunFinish    EventType = "runFinish"
 )
 
 func getContextInput(prg *types.Program, ref types.ToolReference, input string) (string, error) {
@@ -422,7 +419,6 @@ func (r *Runner) start(callCtx engine.Context, state *State, monitor Monitor, en
 		RuntimeManager: r.runtimeManager,
 		Progress:       progress,
 		Env:            env,
-		Ports:          &r.ports,
 	}
 
 	callCtx.Ctx = context2.AddPauseFuncToCtx(callCtx.Ctx, monitor.Pause)
@@ -601,7 +597,6 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 			RuntimeManager: r.runtimeManager,
 			Progress:       progress,
 			Env:            env,
-			Ports:          &r.ports,
 		}
 
 		var (

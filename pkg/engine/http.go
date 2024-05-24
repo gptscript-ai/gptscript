@@ -43,7 +43,7 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 		if !ok {
 			return nil, fmt.Errorf("failed to find tool [%s] for [%s]", referencedToolName, parsed.Hostname())
 		}
-		toolURL, err = e.startDaemon(ctx, referencedTool)
+		toolURL, err = e.startDaemon(referencedTool)
 		if err != nil {
 			return nil, err
 		}

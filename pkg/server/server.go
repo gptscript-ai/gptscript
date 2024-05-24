@@ -89,16 +89,16 @@ var (
 
 type execKey struct{}
 
-func ContextWithNewID(ctx context.Context) context.Context {
+func ContextWithNewRunID(ctx context.Context) context.Context {
 	return context.WithValue(ctx, execKey{}, counter.Next())
 }
 
-func IDFromContext(ctx context.Context) string {
+func RunIDFromContext(ctx context.Context) string {
 	return ctx.Value(execKey{}).(string)
 }
 
-func (s *Server) Close() {
-	s.runner.Close()
+func (s *Server) Close(closeDaemons bool) {
+	s.runner.Close(closeDaemons)
 }
 
 func (s *Server) list(rw http.ResponseWriter, req *http.Request) {
@@ -304,12 +304,12 @@ func NewSessionFactory(events *broadcaster.Broadcaster[Event]) *SessionFactory {
 }
 
 func (s SessionFactory) Start(ctx context.Context, prg *types.Program, env []string, input string) (runner.Monitor, error) {
-	id := IDFromContext(ctx)
+	id := RunIDFromContext(ctx)
 
 	s.events.C <- Event{
 		Event: runner.Event{
 			Time: time.Now(),
-			Type: "runStart",
+			Type: runner.EventTypeRunStart,
 		},
 		RunID:   id,
 		Program: prg,
@@ -347,7 +347,7 @@ func (s *Session) Stop(output string, err error) {
 	e := Event{
 		Event: runner.Event{
 			Time: time.Now(),
-			Type: "runFinish",
+			Type: runner.EventTypeRunFinish,
 		},
 		RunID:  s.id,
 		Input:  s.input,

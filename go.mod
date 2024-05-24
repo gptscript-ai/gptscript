@@ -14,13 +14,14 @@ require (
 	github.com/fatih/color v1.16.0
 	github.com/getkin/kin-openapi v0.123.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
+	github.com/google/uuid v1.6.0
 	github.com/gptscript-ai/chat-completion-client v0.0.0-20240515050533-bdef9f2226a9
 	github.com/hexops/autogold/v2 v2.2.1
 	github.com/hexops/valast v1.4.4
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/olahol/melody v1.1.4
-	github.com/rs/cors v1.10.1
+	github.com/rs/cors v1.11.0
 	github.com/samber/lo v1.38.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.0

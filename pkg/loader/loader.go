@@ -101,9 +101,7 @@ func loadLocal(base *source, name string) (*source, bool, error) {
 }
 
 func loadProgram(data []byte, into *types.Program, targetToolName string) (types.Tool, error) {
-	var (
-		ext types.Program
-	)
+	var ext types.Program
 
 	if err := json.Unmarshal(data[len(assemble.Header):], &ext); err != nil {
 		return types.Tool{}, err
@@ -192,9 +190,7 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 		return []types.Tool{tool}, nil
 	}
 
-	var (
-		tools []types.Tool
-	)
+	var tools []types.Tool
 
 	if openAPIDocument := loadOpenAPI(prg, data); openAPIDocument != nil {
 		var err error
@@ -211,10 +207,12 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 	if ext := path.Ext(base.Name); len(tools) == 0 && ext != "" && ext != system.Suffix && utf8.Valid(data) {
 		tools = []types.Tool{
 			{
-				Parameters: types.Parameters{
-					Name: base.Name,
+				ToolDef: types.ToolDef{
+					Parameters: types.Parameters{
+						Name: base.Name,
+					},
+					Instructions: types.EchoPrefix + "\n" + string(data),
 				},
-				Instructions: types.EchoPrefix + "\n" + string(data),
 			},
 		}
 	}

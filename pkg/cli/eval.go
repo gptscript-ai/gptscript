@@ -28,16 +28,18 @@ type Eval struct {
 
 func (e *Eval) Run(cmd *cobra.Command, args []string) error {
 	tool := types.Tool{
-		Parameters: types.Parameters{
-			Description:    "inline script",
-			Tools:          e.Tools,
-			MaxTokens:      e.MaxTokens,
-			ModelName:      e.Model,
-			JSONResponse:   e.JSON,
-			InternalPrompt: e.InternalPrompt,
-			Chat:           e.Chat,
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description:    "inline script",
+				Tools:          e.Tools,
+				MaxTokens:      e.MaxTokens,
+				ModelName:      e.Model,
+				JSONResponse:   e.JSON,
+				InternalPrompt: e.InternalPrompt,
+				Chat:           e.Chat,
+			},
+			Instructions: strings.Join(args, " "),
 		},
-		Instructions: strings.Join(args, " "),
 	}
 
 	if e.Temperature != "" {
