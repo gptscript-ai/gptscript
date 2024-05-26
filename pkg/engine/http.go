@@ -35,11 +35,11 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 
 	if strings.HasSuffix(parsed.Hostname(), DaemonURLSuffix) {
 		referencedToolName := strings.TrimSuffix(parsed.Hostname(), DaemonURLSuffix)
-		referencedToolID, ok := tool.ToolMapping[referencedToolName]
-		if !ok {
+		referencedToolRefs, ok := tool.ToolMapping[referencedToolName]
+		if !ok || len(referencedToolRefs) != 1 {
 			return nil, fmt.Errorf("invalid reference [%s] to tool [%s] from [%s], missing \"tools: %s\" parameter", toolURL, referencedToolName, tool.Source, referencedToolName)
 		}
-		referencedTool, ok := prg.ToolSet[referencedToolID]
+		referencedTool, ok := prg.ToolSet[referencedToolRefs[0].ToolID]
 		if !ok {
 			return nil, fmt.Errorf("failed to find tool [%s] for [%s]", referencedToolName, parsed.Hostname())
 		}

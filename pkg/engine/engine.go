@@ -109,10 +109,13 @@ func (c *Context) ParentID() string {
 func (c *Context) GetCallContext() *CallContext {
 	var toolName string
 	if c.Parent != nil {
-		for name, id := range c.Parent.Tool.ToolMapping {
-			if id == c.Tool.ID {
-				toolName = name
-				break
+	outer:
+		for name, refs := range c.Parent.Tool.ToolMapping {
+			for _, ref := range refs {
+				if ref.ToolID == c.Tool.ID {
+					toolName = name
+					break outer
+				}
 			}
 		}
 	}

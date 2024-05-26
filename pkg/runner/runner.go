@@ -834,12 +834,12 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 		// If the credential doesn't already exist in the store, run the credential tool in order to get the value,
 		// and save it in the store.
 		if !exists {
-			credToolID, ok := callCtx.Tool.ToolMapping[credToolName]
-			if !ok {
+			credToolRefs, ok := callCtx.Tool.ToolMapping[credToolName]
+			if !ok || len(credToolRefs) != 1 {
 				return nil, fmt.Errorf("failed to find ID for tool %s", credToolName)
 			}
 
-			subCtx, err := callCtx.SubCall(callCtx.Ctx, credToolID, "", engine.CredentialToolCategory) // leaving callID as "" will cause it to be set by the engine
+			subCtx, err := callCtx.SubCall(callCtx.Ctx, credToolRefs[0].ToolID, "", engine.CredentialToolCategory) // leaving callID as "" will cause it to be set by the engine
 			if err != nil {
 				return nil, fmt.Errorf("failed to create subcall context for tool %s: %w", credToolName, err)
 			}
@@ -874,7 +874,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			}
 
 			// Only store the credential if the tool is on GitHub, and the credential is non-empty.
-			if isGitHubTool(credToolName) && callCtx.Program.ToolSet[credToolID].Source.Repo != nil {
+			if isGitHubTool(credToolName) && callCtx.Program.ToolSet[credToolRefs[0].ToolID].Source.Repo != nil {
 				if isEmpty {
 					log.Warnf("Not saving empty credential for tool %s", credToolName)
 				} else if err := store.Add(*cred); err != nil {

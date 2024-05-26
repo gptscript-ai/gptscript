@@ -181,11 +181,15 @@ func loadOpenAPI(prg *types.Program, data []byte) *openapi3.T {
 	return openAPIDocument
 }
 
-func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, targetToolName string) (types.Tool, error) {
+func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, targetToolName string) ([]types.Tool, error) {
 	data := base.Content
 
 	if bytes.HasPrefix(data, assemble.Header) {
-		return loadProgram(data, prg, targetToolName)
+		tool, err := loadProgram(data, prg, targetToolName)
+		if err != nil {
+			return nil, err
+		}
+		return []types.Tool{tool}, nil
 	}
 
 	var (
@@ -200,7 +204,7 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 			tools, err = getOpenAPITools(openAPIDocument, "")
 		}
 		if err != nil {
-			return types.Tool{}, fmt.Errorf("error parsing OpenAPI definition: %w", err)
+			return nil, fmt.Errorf("error parsing OpenAPI definition: %w", err)
 		}
 	}
 
@@ -222,17 +226,17 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 			AssignGlobals: true,
 		})
 		if err != nil {
-			return types.Tool{}, err
+			return nil, err
 		}
 	}
 
 	if len(tools) == 0 {
-		return types.Tool{}, fmt.Errorf("no tools found in %s", base)
+		return nil, fmt.Errorf("no tools found in %s", base)
 	}
 
 	var (
-		localTools = types.ToolSet{}
-		mainTool   types.Tool
+		localTools  = types.ToolSet{}
+		targetTools []types.Tool
 	)
 
 	for i, tool := range tools {
@@ -243,28 +247,38 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 		// Probably a better way to come up with an ID
 		tool.ID = tool.Source.Location + ":" + tool.Name
 
-		if i == 0 {
-			mainTool = tool
+		if i == 0 && targetToolName == "" {
+			targetTools = append(targetTools, tool)
 		}
 
 		if i != 0 && tool.Parameters.Name == "" {
-			return types.Tool{}, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have no name"))
+			return nil, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have no name"))
 		}
 
 		if i != 0 && tool.Parameters.GlobalModelName != "" {
-			return types.Tool{}, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have global model name"))
+			return nil, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have global model name"))
 		}
 
 		if i != 0 && len(tool.Parameters.GlobalTools) > 0 {
-			return types.Tool{}, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have global tools"))
+			return nil, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have global tools"))
 		}
 
-		if targetToolName != "" && strings.EqualFold(tool.Parameters.Name, targetToolName) {
-			mainTool = tool
+		if targetToolName != "" && tool.Parameters.Name != "" {
+			if strings.EqualFold(tool.Parameters.Name, targetToolName) {
+				targetTools = append(targetTools, tool)
+			} else if strings.Contains(targetToolName, "*") {
+				match, err := filepath.Match(strings.ToLower(targetToolName), strings.ToLower(tool.Parameters.Name))
+				if err != nil {
+					return nil, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, err)
+				}
+				if match {
+					targetTools = append(targetTools, tool)
+				}
+			}
 		}
 
 		if existing, ok := localTools[strings.ToLower(tool.Parameters.Name)]; ok {
-			return types.Tool{}, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo,
+			return nil, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo,
 				fmt.Errorf("duplicate tool name [%s] in %s found at lines %d and %d", tool.Parameters.Name, tool.Source.Location,
 					tool.Source.LineNo, existing.Source.LineNo))
 		}
@@ -272,7 +286,18 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 		localTools[strings.ToLower(tool.Parameters.Name)] = tool
 	}
 
-	return link(ctx, cache, prg, base, mainTool, localTools)
+	return linkAll(ctx, cache, prg, base, targetTools, localTools)
+}
+
+func linkAll(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, tools []types.Tool, localTools types.ToolSet) (result []types.Tool, _ error) {
+	for _, tool := range tools {
+		tool, err := link(ctx, cache, prg, base, tool, localTools)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, tool)
+	}
+	return
 }
 
 func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, tool types.Tool, localTools types.ToolSet) (types.Tool, error) {
@@ -280,7 +305,7 @@ func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *so
 		return existing, nil
 	}
 
-	tool.ToolMapping = map[string]string{}
+	tool.ToolMapping = map[string][]types.ToolReference{}
 	tool.LocalTools = map[string]string{}
 	toolNames := map[string]struct{}{}
 
@@ -310,16 +335,17 @@ func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *so
 				}
 			}
 
-			tool.ToolMapping[targetToolName] = linkedTool.ID
+			tool.AddToolMapping(targetToolName, linkedTool)
 			toolNames[targetToolName] = struct{}{}
 		} else {
 			toolName, subTool := types.SplitToolRef(targetToolName)
-			resolvedTool, err := resolve(ctx, cache, prg, base, toolName, subTool)
+			resolvedTools, err := resolve(ctx, cache, prg, base, toolName, subTool)
 			if err != nil {
 				return types.Tool{}, fmt.Errorf("failed resolving %s from %s: %w", targetToolName, base, err)
 			}
-
-			tool.ToolMapping[targetToolName] = resolvedTool.ID
+			for _, resolvedTool := range resolvedTools {
+				tool.AddToolMapping(targetToolName, resolvedTool)
+			}
 		}
 	}
 
@@ -345,14 +371,14 @@ func ProgramFromSource(ctx context.Context, content, subToolName string, opts ..
 	prg := types.Program{
 		ToolSet: types.ToolSet{},
 	}
-	tool, err := readTool(ctx, opt.Cache, &prg, &source{
+	tools, err := readTool(ctx, opt.Cache, &prg, &source{
 		Content:  []byte(content),
 		Location: "inline",
 	}, subToolName)
 	if err != nil {
 		return types.Program{}, err
 	}
-	prg.EntryToolID = tool.ID
+	prg.EntryToolID = tools[0].ID
 	return prg, nil
 }
 
@@ -385,26 +411,26 @@ func Program(ctx context.Context, name, subToolName string, opts ...Options) (ty
 		Name:    name,
 		ToolSet: types.ToolSet{},
 	}
-	tool, err := resolve(ctx, opt.Cache, &prg, &source{}, name, subToolName)
+	tools, err := resolve(ctx, opt.Cache, &prg, &source{}, name, subToolName)
 	if err != nil {
 		return types.Program{}, err
 	}
-	prg.EntryToolID = tool.ID
+	prg.EntryToolID = tools[0].ID
 	return prg, nil
 }
 
-func resolve(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, name, subTool string) (types.Tool, error) {
+func resolve(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, name, subTool string) ([]types.Tool, error) {
 	if subTool == "" {
 		t, ok := builtin.Builtin(name)
 		if ok {
 			prg.ToolSet[t.ID] = t
-			return t, nil
+			return []types.Tool{t}, nil
 		}
 	}
 
 	s, err := input(ctx, cache, base, name)
 	if err != nil {
-		return types.Tool{}, err
+		return nil, err
 	}
 
 	return readTool(ctx, cache, prg, s, subTool)

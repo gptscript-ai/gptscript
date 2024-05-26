@@ -20,6 +20,91 @@ func toJSONString(t *testing.T, v interface{}) string {
 	return string(x)
 }
 
+func TestAsterick(t *testing.T) {
+	r := tester.NewRunner(t)
+	p, err := r.Load("")
+	require.NoError(t, err)
+	autogold.Expect(`{
+  "name": "testdata/TestAsterick/test.gpt",
+  "entryToolId": "testdata/TestAsterick/test.gpt:",
+  "toolSet": {
+    "testdata/TestAsterick/other.gpt:a": {
+      "name": "a",
+      "modelName": "gpt-4o",
+      "internalPrompt": null,
+      "instructions": "a",
+      "id": "testdata/TestAsterick/other.gpt:a",
+      "localTools": {
+        "a": "testdata/TestAsterick/other.gpt:a",
+        "afoo": "testdata/TestAsterick/other.gpt:afoo",
+        "foo": "testdata/TestAsterick/other.gpt:foo",
+        "fooa": "testdata/TestAsterick/other.gpt:fooa",
+        "fooafoo": "testdata/TestAsterick/other.gpt:fooafoo"
+      },
+      "source": {
+        "location": "testdata/TestAsterick/other.gpt",
+        "lineNo": 10
+      },
+      "workingDir": "testdata/TestAsterick"
+    },
+    "testdata/TestAsterick/other.gpt:afoo": {
+      "name": "afoo",
+      "modelName": "gpt-4o",
+      "internalPrompt": null,
+      "instructions": "afoo",
+      "id": "testdata/TestAsterick/other.gpt:afoo",
+      "localTools": {
+        "a": "testdata/TestAsterick/other.gpt:a",
+        "afoo": "testdata/TestAsterick/other.gpt:afoo",
+        "foo": "testdata/TestAsterick/other.gpt:foo",
+        "fooa": "testdata/TestAsterick/other.gpt:fooa",
+        "fooafoo": "testdata/TestAsterick/other.gpt:fooafoo"
+      },
+      "source": {
+        "location": "testdata/TestAsterick/other.gpt",
+        "lineNo": 4
+      },
+      "workingDir": "testdata/TestAsterick"
+    },
+    "testdata/TestAsterick/test.gpt:": {
+      "modelName": "gpt-4o",
+      "internalPrompt": null,
+      "tools": [
+        "a* from ./other.gpt"
+      ],
+      "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+      "id": "testdata/TestAsterick/test.gpt:",
+      "toolMapping": {
+        "a* from ./other.gpt": [
+          {
+            "reference": "afoo from ./other.gpt",
+            "toolID": "testdata/TestAsterick/other.gpt:afoo"
+          },
+          {
+            "reference": "a from ./other.gpt",
+            "toolID": "testdata/TestAsterick/other.gpt:a"
+          }
+        ]
+      },
+      "localTools": {
+        "": "testdata/TestAsterick/test.gpt:"
+      },
+      "source": {
+        "location": "testdata/TestAsterick/test.gpt",
+        "lineNo": 1
+      },
+      "workingDir": "testdata/TestAsterick"
+    }
+  }
+}`).Equal(t, toJSONString(t, p))
+
+	r.RespondWith(tester.Result{
+		Text: "hi",
+	})
+	_, err = r.Run("", "")
+	require.NoError(t, err)
+}
+
 func TestDualSubChat(t *testing.T) {
 	r := tester.NewRunner(t)
 	r.RespondWith(tester.Result{
