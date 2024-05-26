@@ -22,7 +22,7 @@ import (
 //go:embed python.json
 var releasesData []byte
 
-const uvVersion = "uv==0.1.42"
+const uvVersion = "uv==0.2.3"
 
 type Release struct {
 	OS      string `json:"os,omitempty"`
