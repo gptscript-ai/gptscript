@@ -86,8 +86,8 @@ func PickToolName(toolName string, existing map[string]struct{}) string {
 		toolName = "external"
 	}
 
+	testName := ToolNormalizer(toolName)
 	for {
-		testName := ToolNormalizer(toolName)
 		if _, ok := existing[testName]; !ok {
 			existing[testName] = struct{}{}
 			return testName

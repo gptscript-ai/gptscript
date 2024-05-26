@@ -1,0 +1,14 @@
+name: foo
+foo
+---
+name: afoo
+afoo
+---
+name: fooa
+fooa
+---
+name: a
+a
+---
+name: fooafoo
+fooafoo

@@ -57,10 +57,10 @@ func (p Program) ChatName() string {
 }
 
 type ToolReference struct {
-	Named     string
-	Reference string
-	Arg       string
-	ToolID    string
+	Named     string `json:"named,omitempty"`
+	Reference string `json:"reference,omitempty"`
+	Arg       string `json:"arg,omitempty"`
+	ToolID    string `json:"toolID,omitempty"`
 }
 
 func (p Program) GetContextToolRefs(toolID string) ([]ToolReference, error) {
@@ -72,15 +72,22 @@ func (p Program) GetCompletionTools() (result []CompletionTool, err error) {
 		Parameters: Parameters{
 			Tools: []string{"main"},
 		},
-		ToolMapping: map[string]string{
-			"main": p.EntryToolID,
+		ToolMapping: map[string][]ToolReference{
+			"main": {
+				{
+					Reference: "main",
+					ToolID:    p.EntryToolID,
+				},
+			},
 		},
 	}.GetCompletionTools(p)
 }
 
 func (p Program) TopLevelTools() (result []Tool) {
 	for _, tool := range p.ToolSet[p.EntryToolID].LocalTools {
-		result = append(result, p.ToolSet[tool])
+		if target, ok := p.ToolSet[tool]; ok {
+			result = append(result, target)
+		}
 	}
 	return
 }
@@ -122,12 +129,46 @@ type Tool struct {
 	Parameters   `json:",inline"`
 	Instructions string `json:"instructions,omitempty"`
 
-	ID          string            `json:"id,omitempty"`
-	ToolMapping map[string]string `json:"toolMapping,omitempty"`
-	LocalTools  map[string]string `json:"localTools,omitempty"`
-	BuiltinFunc BuiltinFunc       `json:"-"`
-	Source      ToolSource        `json:"source,omitempty"`
-	WorkingDir  string            `json:"workingDir,omitempty"`
+	ID          string                     `json:"id,omitempty"`
+	ToolMapping map[string][]ToolReference `json:"toolMapping,omitempty"`
+	LocalTools  map[string]string          `json:"localTools,omitempty"`
+	BuiltinFunc BuiltinFunc                `json:"-"`
+	Source      ToolSource                 `json:"source,omitempty"`
+	WorkingDir  string                     `json:"workingDir,omitempty"`
+}
+
+func IsMatch(subTool string) bool {
+	return strings.ContainsAny(subTool, "*?[")
+}
+
+func (t *Tool) AddToolMapping(name string, tool Tool) {
+	if t.ToolMapping == nil {
+		t.ToolMapping = map[string][]ToolReference{}
+	}
+
+	ref := name
+	_, subTool := SplitToolRef(name)
+	if IsMatch(subTool) && tool.Name != "" {
+		ref = strings.Replace(ref, subTool, tool.Name, 1)
+	}
+
+	if existing, ok := t.ToolMapping[name]; ok {
+		var found bool
+		for _, toolRef := range existing {
+			if toolRef.ToolID == tool.ID && toolRef.Reference == ref {
+				found = true
+				break
+			}
+		}
+		if found {
+			return
+		}
+	}
+
+	t.ToolMapping[name] = append(t.ToolMapping[name], ToolReference{
+		Reference: ref,
+		ToolID:    tool.ID,
+	})
 }
 
 func SplitArg(hasArg string) (prefix, arg string) {
@@ -151,21 +192,25 @@ func SplitArg(hasArg string) (prefix, arg string) {
 
 func (t Tool) GetToolRefsFromNames(names []string) (result []ToolReference, _ error) {
 	for _, toolName := range names {
-		toolID, ok := t.ToolMapping[toolName]
-		if !ok {
+		toolRefs, ok := t.ToolMapping[toolName]
+		if !ok || len(toolRefs) == 0 {
 			return nil, NewErrToolNotFound(toolName)
 		}
 		_, arg := SplitArg(toolName)
 		named, ok := strings.CutPrefix(arg, "as ")
 		if !ok {
 			named = ""
+		} else if len(toolRefs) > 1 {
+			return nil, fmt.Errorf("can not combine 'as' syntax with wildcard: %s", toolName)
 		}
-		result = append(result, ToolReference{
-			Named:     named,
-			Arg:       arg,
-			Reference: toolName,
-			ToolID:    toolID,
-		})
+		for _, toolRef := range toolRefs {
+			result = append(result, ToolReference{
+				Named:     named,
+				Arg:       arg,
+				Reference: toolRef.Reference,
+				ToolID:    toolRef.ToolID,
+			})
+		}
 	}
 	return
 }
