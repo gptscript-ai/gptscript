@@ -35,161 +35,197 @@ var SafeTools = map[string]struct{}{
 
 var tools = map[string]types.Tool{
 	"sys.time.now": {
-		Parameters: types.Parameters{
-			Description: "Returns the current date and time in RFC3339 format",
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Returns the current date and time in RFC3339 format",
+			},
+			BuiltinFunc: SysTimeNow,
 		},
-		BuiltinFunc: SysTimeNow,
 	},
 	"sys.ls": {
-		Parameters: types.Parameters{
-			Description: "Lists the contents of a directory",
-			Arguments: types.ObjectSchema(
-				"dir", "The directory to list"),
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Lists the contents of a directory",
+				Arguments: types.ObjectSchema(
+					"dir", "The directory to list"),
+			},
+			BuiltinFunc: SysLs,
 		},
-		BuiltinFunc: SysLs,
 	},
 	"sys.read": {
-		Parameters: types.Parameters{
-			Description: "Reads the contents of a file",
-			Arguments: types.ObjectSchema(
-				"filename", "The name of the file to read"),
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Reads the contents of a file",
+				Arguments: types.ObjectSchema(
+					"filename", "The name of the file to read"),
+			},
+			BuiltinFunc: SysRead,
 		},
-		BuiltinFunc: SysRead,
 	},
 	"sys.write": {
-		Parameters: types.Parameters{
-			Description: "Write the contents to a file",
-			Arguments: types.ObjectSchema(
-				"filename", "The name of the file to write to",
-				"content", "The content to write"),
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Write the contents to a file",
+				Arguments: types.ObjectSchema(
+					"filename", "The name of the file to write to",
+					"content", "The content to write"),
+			},
+			BuiltinFunc: SysWrite,
 		},
-		BuiltinFunc: SysWrite,
 	},
 	"sys.append": {
-		Parameters: types.Parameters{
-			Description: "Appends the contents to a file",
-			Arguments: types.ObjectSchema(
-				"filename", "The name of the file to append to",
-				"content", "The content to append"),
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Appends the contents to a file",
+				Arguments: types.ObjectSchema(
+					"filename", "The name of the file to append to",
+					"content", "The content to append"),
+			},
+			BuiltinFunc: SysAppend,
 		},
-		BuiltinFunc: SysAppend,
 	},
 	"sys.http.get": {
-		Parameters: types.Parameters{
-			Description: "Download the contents of a http or https URL",
-			Arguments: types.ObjectSchema(
-				"url", "The URL to download"),
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Download the contents of a http or https URL",
+				Arguments: types.ObjectSchema(
+					"url", "The URL to download"),
+			},
+			BuiltinFunc: SysHTTPGet,
 		},
-		BuiltinFunc: SysHTTPGet,
 	},
 	"sys.http.html2text": {
-		Parameters: types.Parameters{
-			Description: "Download the contents of a http or https URL returning the content as rendered text converted from HTML",
-			Arguments: types.ObjectSchema(
-				"url", "The URL to download"),
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Download the contents of a http or https URL returning the content as rendered text converted from HTML",
+				Arguments: types.ObjectSchema(
+					"url", "The URL to download"),
+			},
+			BuiltinFunc: SysHTTPHtml2Text,
 		},
-		BuiltinFunc: SysHTTPHtml2Text,
 	},
 	"sys.abort": {
-		Parameters: types.Parameters{
-			Description: "Aborts execution",
-			Arguments: types.ObjectSchema(
-				"message", "The description of the error or unexpected result that caused abort to be called",
-			),
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Aborts execution",
+				Arguments: types.ObjectSchema(
+					"message", "The description of the error or unexpected result that caused abort to be called",
+				),
+			},
+			BuiltinFunc: SysAbort,
 		},
-		BuiltinFunc: SysAbort,
 	},
 	"sys.chat.finish": {
-		Parameters: types.Parameters{
-			Description: "Concludes the conversation. This can not be used to ask a question.",
-			Arguments: types.ObjectSchema(
-				"return", "The instructed value to return or a summary of the dialog if no value is instructed",
-			),
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Concludes the conversation. This can not be used to ask a question.",
+				Arguments: types.ObjectSchema(
+					"return", "The instructed value to return or a summary of the dialog if no value is instructed",
+				),
+			},
+			BuiltinFunc: SysChatFinish,
 		},
-		BuiltinFunc: SysChatFinish,
 	},
 	"sys.http.post": {
-		Parameters: types.Parameters{
-			Description: "Write contents to a http or https URL using the POST method",
-			Arguments: types.ObjectSchema(
-				"url", "The URL to POST to",
-				"content", "The content to POST",
-				"contentType", "The \"content type\" of the content such as application/json or text/plain"),
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Write contents to a http or https URL using the POST method",
+				Arguments: types.ObjectSchema(
+					"url", "The URL to POST to",
+					"content", "The content to POST",
+					"contentType", "The \"content type\" of the content such as application/json or text/plain"),
+			},
+			BuiltinFunc: SysHTTPPost,
 		},
-		BuiltinFunc: SysHTTPPost,
 	},
 	"sys.find": {
-		Parameters: types.Parameters{
-			Description: "Traverse a directory looking for files that match a pattern in the style of the unix find command",
-			Arguments: types.ObjectSchema(
-				"pattern", "The file pattern to look for. The pattern is a traditional unix glob format with * matching any character and ? matching a single character",
-				"directory", "The directory to search in. The current directory \".\" will be used as the default if no argument is passed",
-			),
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Traverse a directory looking for files that match a pattern in the style of the unix find command",
+				Arguments: types.ObjectSchema(
+					"pattern", "The file pattern to look for. The pattern is a traditional unix glob format with * matching any character and ? matching a single character",
+					"directory", "The directory to search in. The current directory \".\" will be used as the default if no argument is passed",
+				),
+			},
+			BuiltinFunc: SysFind,
 		},
-		BuiltinFunc: SysFind,
 	},
 	"sys.exec": {
-		Parameters: types.Parameters{
-			Description: "Execute a command and get the output of the command",
-			Arguments: types.ObjectSchema(
-				"command", "The command to run including all applicable arguments",
-				"directory", "The directory to use as the current working directory of the command. The current directory \".\" will be used if no argument is passed",
-			),
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Execute a command and get the output of the command",
+				Arguments: types.ObjectSchema(
+					"command", "The command to run including all applicable arguments",
+					"directory", "The directory to use as the current working directory of the command. The current directory \".\" will be used if no argument is passed",
+				),
+			},
+			BuiltinFunc: SysExec,
 		},
-		BuiltinFunc: SysExec,
 	},
 	"sys.getenv": {
-		Parameters: types.Parameters{
-			Description: "Gets the value of an OS environment variable",
-			Arguments: types.ObjectSchema(
-				"name", "The environment variable name to lookup"),
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Gets the value of an OS environment variable",
+				Arguments: types.ObjectSchema(
+					"name", "The environment variable name to lookup"),
+			},
+			BuiltinFunc: SysGetenv,
 		},
-		BuiltinFunc: SysGetenv,
 	},
 	"sys.download": {
-		Parameters: types.Parameters{
-			Description: "Downloads a URL, saving the contents to disk at a given location",
-			Arguments: types.ObjectSchema(
-				"url", "The URL to download, either http or https.",
-				"location", "(optional) The on disk location to store the file. If no location is specified a temp location will be used. If the target file already exists it will fail unless override is set to true.",
-				"override", "If true and a file at the location exists, the file will be overwritten, otherwise fail. Default is false"),
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Downloads a URL, saving the contents to disk at a given location",
+				Arguments: types.ObjectSchema(
+					"url", "The URL to download, either http or https.",
+					"location", "(optional) The on disk location to store the file. If no location is specified a temp location will be used. If the target file already exists it will fail unless override is set to true.",
+					"override", "If true and a file at the location exists, the file will be overwritten, otherwise fail. Default is false"),
+			},
+			BuiltinFunc: SysDownload,
 		},
-		BuiltinFunc: SysDownload,
 	},
 	"sys.remove": {
-		Parameters: types.Parameters{
-			Description: "Removes the specified files",
-			Arguments: types.ObjectSchema(
-				"location", "The file to remove"),
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Removes the specified files",
+				Arguments: types.ObjectSchema(
+					"location", "The file to remove"),
+			},
+			BuiltinFunc: SysRemove,
 		},
-		BuiltinFunc: SysRemove,
 	},
 	"sys.stat": {
-		Parameters: types.Parameters{
-			Description: "Gets size, modfied time, and mode of the specified file",
-			Arguments: types.ObjectSchema(
-				"filepath", "The complete path and filename of the file",
-			),
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Gets size, modfied time, and mode of the specified file",
+				Arguments: types.ObjectSchema(
+					"filepath", "The complete path and filename of the file",
+				),
+			},
+			BuiltinFunc: SysStat,
 		},
-		BuiltinFunc: SysStat,
 	},
 	"sys.prompt": {
-		Parameters: types.Parameters{
-			Description: "Prompts the user for input",
-			Arguments: types.ObjectSchema(
-				"message", "The message to display to the user",
-				"fields", "A comma-separated list of fields to prompt for",
-				"sensitive", "(true or false) Whether the input should be hidden",
-			),
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Prompts the user for input",
+				Arguments: types.ObjectSchema(
+					"message", "The message to display to the user",
+					"fields", "A comma-separated list of fields to prompt for",
+					"sensitive", "(true or false) Whether the input should be hidden",
+				),
+			},
+			BuiltinFunc: SysPrompt,
 		},
-		BuiltinFunc: SysPrompt,
 	},
 	"sys.chat.history": {
-		Parameters: types.Parameters{
-			Description: "Retrieves the previous chat dialog",
-			Arguments:   types.ObjectSchema(),
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Retrieves the previous chat dialog",
+				Arguments:   types.ObjectSchema(),
+			},
+			BuiltinFunc: SysChatHistory,
 		},
-		BuiltinFunc: SysChatHistory,
 	},
 }
 

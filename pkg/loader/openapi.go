@@ -131,13 +131,15 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 				bodyMIME         string
 			)
 			tool := types.Tool{
-				Parameters: types.Parameters{
-					Name:        operation.OperationID,
-					Description: toolDesc,
-					Arguments: &openapi3.Schema{
-						Type:       "object",
-						Properties: openapi3.Schemas{},
-						Required:   []string{},
+				ToolDef: types.ToolDef{
+					Parameters: types.Parameters{
+						Name:        operation.OperationID,
+						Description: toolDesc,
+						Arguments: &openapi3.Schema{
+							Type:       "object",
+							Properties: openapi3.Schemas{},
+							Required:   []string{},
+						},
 					},
 				},
 				Source: types.ToolSource{
@@ -279,9 +281,11 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 
 	// The first tool we generate is a special tool that just exports all the others.
 	exportTool := types.Tool{
-		Parameters: types.Parameters{
-			Description: fmt.Sprintf("This is a tool set for the %s OpenAPI spec", t.Info.Title),
-			Export:      toolNames,
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: fmt.Sprintf("This is a tool set for the %s OpenAPI spec", t.Info.Title),
+				Export:      toolNames,
+			},
 		},
 		Source: types.ToolSource{
 			LineNo: 0,

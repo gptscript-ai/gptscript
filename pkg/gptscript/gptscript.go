@@ -65,10 +65,10 @@ func New(opts *Options) (*GPTScript, error) {
 		return nil, err
 	}
 
-	oAIClient, err := openai.NewClient(append([]openai.Options{opts.OpenAI}, openai.Options{
+	oAIClient, err := openai.NewClient(opts.OpenAI, openai.Options{
 		Cache:   cacheClient,
 		SetSeed: true,
-	})...)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -78,9 +78,7 @@ func New(opts *Options) (*GPTScript, error) {
 	}
 
 	if opts.Runner.MonitorFactory == nil {
-		opts.Runner.MonitorFactory = monitor.NewConsole(append([]monitor.Options{opts.Monitor}, monitor.Options{
-			DisplayProgress: !*opts.Quiet,
-		})...)
+		opts.Runner.MonitorFactory = monitor.NewConsole(opts.Monitor, monitor.Options{DebugMessages: *opts.Quiet})
 	}
 
 	if opts.Runner.RuntimeManager == nil {
@@ -148,12 +146,15 @@ func (g *GPTScript) Run(ctx context.Context, prg types.Program, envs []string, i
 	return g.Runner.Run(ctx, prg, envs, input)
 }
 
-func (g *GPTScript) Close() {
-	g.Runner.Close()
+func (g *GPTScript) Close(closeDaemons bool) {
 	if g.DeleteWorkspaceOnClose && g.WorkspacePath != "" {
 		if err := os.RemoveAll(g.WorkspacePath); err != nil {
 			log.Errorf("failed to delete workspace %s: %s", g.WorkspacePath, err)
 		}
+	}
+
+	if closeDaemons {
+		engine.CloseDaemons()
 	}
 }
 

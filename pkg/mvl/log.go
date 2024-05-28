@@ -91,6 +91,19 @@ func Package() Logger {
 	return New(p)
 }
 
+func NewWithFields(fields logrus.Fields) Logger {
+	return Logger{
+		log:    logrus.StandardLogger(),
+		fields: fields,
+	}
+}
+
+func NewWithID(id string) Logger {
+	return NewWithFields(logrus.Fields{
+		"id": id,
+	})
+}
+
 func New(name string) Logger {
 	var fields logrus.Fields
 	if name != "" {
@@ -98,10 +111,7 @@ func New(name string) Logger {
 			"logger": name,
 		}
 	}
-	return Logger{
-		log:    logrus.StandardLogger(),
-		fields: fields,
-	}
+	return NewWithFields(fields)
 }
 
 func SetOutput(out io.Writer) {

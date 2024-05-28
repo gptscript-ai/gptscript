@@ -66,7 +66,7 @@ func (s fileFactory) Start(_ context.Context, prg *types.Program, env []string, 
 	fd.event(Event{
 		Event: runner.Event{
 			Time: time.Now(),
-			Type: "runStart",
+			Type: runner.EventTypeRunStart,
 		},
 		Program: prg,
 	})
@@ -107,7 +107,7 @@ func (f *fd) Stop(output string, err error) {
 	e := Event{
 		Event: runner.Event{
 			Time: time.Now(),
-			Type: "runFinish",
+			Type: runner.EventTypeRunFinish,
 		},
 		Input:  f.input,
 		Output: output,
