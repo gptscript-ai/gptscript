@@ -64,6 +64,7 @@ type CallContext struct {
 	commonContext `json:",inline"`
 	ToolName      string `json:"toolName,omitempty"`
 	ParentID      string `json:"parentID,omitempty"`
+	DisplayText   string `json:"displayText,omitempty"`
 }
 
 type Context struct {
@@ -72,6 +73,8 @@ type Context struct {
 	Parent     *Context
 	LastReturn *Return
 	Program    *types.Program
+	// Input is saved only so that we can render display text, don't use otherwise
+	Input string
 }
 
 type ChatHistory struct {
@@ -123,6 +126,7 @@ func (c *Context) GetCallContext() *CallContext {
 		commonContext: c.commonContext,
 		ParentID:      c.ParentID(),
 		ToolName:      toolName,
+		DisplayText:   types.ToDisplayText(c.Tool, c.Input),
 	}
 }
 
@@ -140,7 +144,7 @@ func WithToolCategory(ctx context.Context, toolCategory ToolCategory) context.Co
 	return context.WithValue(ctx, toolCategoryKey{}, toolCategory)
 }
 
-func NewContext(ctx context.Context, prg *types.Program) Context {
+func NewContext(ctx context.Context, prg *types.Program, input string) Context {
 	category, _ := ctx.Value(toolCategoryKey{}).(ToolCategory)
 
 	callCtx := Context{
@@ -151,11 +155,12 @@ func NewContext(ctx context.Context, prg *types.Program) Context {
 		},
 		Ctx:     ctx,
 		Program: prg,
+		Input:   input,
 	}
 	return callCtx
 }
 
-func (c *Context) SubCall(ctx context.Context, toolID, callID string, toolCategory ToolCategory) (Context, error) {
+func (c *Context) SubCall(ctx context.Context, input, toolID, callID string, toolCategory ToolCategory) (Context, error) {
 	tool, ok := c.Program.ToolSet[toolID]
 	if !ok {
 		return Context{}, fmt.Errorf("failed to file tool for id [%s]", toolID)
@@ -174,6 +179,7 @@ func (c *Context) SubCall(ctx context.Context, toolID, callID string, toolCatego
 		Ctx:     ctx,
 		Parent:  c,
 		Program: c.Program,
+		Input:   input,
 	}, nil
 }
 

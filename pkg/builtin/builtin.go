@@ -20,18 +20,18 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/BurntSushi/locker"
-	"github.com/google/shlex"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/jaytaylor/html2text"
 )
 
 var SafeTools = map[string]struct{}{
-	"sys.echo":         {},
-	"sys.time.now":     {},
-	"sys.prompt":       {},
+	"sys.abort":        {},
 	"sys.chat.finish":  {},
 	"sys.chat.history": {},
+	"sys.echo":         {},
+	"sys.prompt":       {},
+	"sys.time.now":     {},
 }
 
 var tools = map[string]types.Tool{
@@ -333,11 +333,7 @@ func SysExec(ctx context.Context, env []string, input string) (string, error) {
 	var cmd *exec.Cmd
 
 	if runtime.GOOS == "windows" {
-		args, err := shlex.Split(params.Command)
-		if err != nil {
-			return "", fmt.Errorf("parsing command: %w", err)
-		}
-		cmd = exec.Command(args[0], args[1:]...)
+		cmd = exec.Command("cmd.exe", "/c", params.Command)
 	} else {
 		cmd = exec.Command("/bin/sh", "-c", params.Command)
 	}
@@ -346,7 +342,7 @@ func SysExec(ctx context.Context, env []string, input string) (string, error) {
 	cmd.Dir = params.Directory
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return string(out), fmt.Errorf("OUTPUT: %s, ERROR: %w", out, err)
+		return fmt.Sprintf("ERROR: %s\nOUTPUT: %s", err, out), nil
 	}
 	return string(out), nil
 }
@@ -362,10 +358,6 @@ func getWorkspaceDir(envs []string) (string, error) {
 }
 
 func SysLs(_ context.Context, _ []string, input string) (string, error) {
-	return sysLs("", input)
-}
-
-func sysLs(base, input string) (string, error) {
 	var params struct {
 		Dir string `json:"dir,omitempty"`
 	}
@@ -376,10 +368,6 @@ func sysLs(base, input string) (string, error) {
 	dir := params.Dir
 	if dir == "" {
 		dir = "."
-	}
-
-	if base != "" {
-		dir = filepath.Join(base, dir)
 	}
 
 	entries, err := os.ReadDir(dir)
@@ -772,7 +760,7 @@ func SysDownload(ctx context.Context, env []string, input string) (_ string, err
 		return "", fmt.Errorf("failed copying data from [%s] to [%s]: %w", params.URL, params.Location, err)
 	}
 
-	return params.Location, nil
+	return fmt.Sprintf("Downloaded %s to %s", params.URL, params.Location), nil
 }
 
 func sysPromptHTTP(ctx context.Context, url, message string, fields []string, sensitive bool) (_ string, err error) {

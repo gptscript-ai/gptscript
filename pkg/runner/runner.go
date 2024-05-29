@@ -150,7 +150,7 @@ func (r *Runner) Chat(ctx context.Context, prevState ChatState, prg types.Progra
 		monitor.Stop(resp.Content, err)
 	}()
 
-	callCtx := engine.NewContext(ctx, &prg)
+	callCtx := engine.NewContext(ctx, &prg, input)
 	if state == nil || state.StartContinuation {
 		if state != nil {
 			state = state.WithResumeInput(&input)
@@ -423,18 +423,21 @@ func (r *Runner) start(callCtx engine.Context, state *State, monitor Monitor, en
 
 	callCtx.Ctx = context2.AddPauseFuncToCtx(callCtx.Ctx, monitor.Pause)
 
-	authResp, err := r.auth(callCtx, input)
-	if err != nil {
-		return nil, err
-	}
+	_, safe := builtin.SafeTools[callCtx.Tool.ID]
+	if callCtx.Tool.IsCommand() && !safe {
+		authResp, err := r.auth(callCtx, input)
+		if err != nil {
+			return nil, err
+		}
 
-	if !authResp.Accept {
-		msg := fmt.Sprintf("[AUTHORIZATION ERROR]: %s", authResp.Message)
-		return &State{
-			Continuation: &engine.Return{
-				Result: &msg,
-			},
-		}, nil
+		if !authResp.Accept {
+			msg := fmt.Sprintf("[AUTHORIZATION ERROR]: %s", authResp.Message)
+			return &State{
+				Continuation: &engine.Return{
+					Result: &msg,
+				},
+			}, nil
+		}
 	}
 
 	ret, err := e.Start(callCtx, input)
@@ -671,7 +674,7 @@ func streamProgress(callCtx *engine.Context, monitor Monitor) (chan<- types.Comp
 }
 
 func (r *Runner) subCall(ctx context.Context, parentContext engine.Context, monitor Monitor, env []string, toolID, input, callID string, toolCategory engine.ToolCategory) (*State, error) {
-	callCtx, err := parentContext.SubCall(ctx, toolID, callID, toolCategory)
+	callCtx, err := parentContext.SubCall(ctx, input, toolID, callID, toolCategory)
 	if err != nil {
 		return nil, err
 	}
@@ -680,7 +683,7 @@ func (r *Runner) subCall(ctx context.Context, parentContext engine.Context, moni
 }
 
 func (r *Runner) subCallResume(ctx context.Context, parentContext engine.Context, monitor Monitor, env []string, toolID, callID string, state *State, toolCategory engine.ToolCategory) (*State, error) {
-	callCtx, err := parentContext.SubCall(ctx, toolID, callID, toolCategory)
+	callCtx, err := parentContext.SubCall(ctx, "", toolID, callID, toolCategory)
 	if err != nil {
 		return nil, err
 	}
@@ -834,7 +837,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 				return nil, fmt.Errorf("failed to find ID for tool %s", credToolName)
 			}
 
-			subCtx, err := callCtx.SubCall(callCtx.Ctx, credToolRefs[0].ToolID, "", engine.CredentialToolCategory) // leaving callID as "" will cause it to be set by the engine
+			subCtx, err := callCtx.SubCall(callCtx.Ctx, "", credToolRefs[0].ToolID, "", engine.CredentialToolCategory) // leaving callID as "" will cause it to be set by the engine
 			if err != nil {
 				return nil, fmt.Errorf("failed to create subcall context for tool %s: %w", credToolName, err)
 			}
