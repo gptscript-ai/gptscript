@@ -3,6 +3,7 @@ package types
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"slices"
 	"sort"
 	"strings"
@@ -451,6 +452,20 @@ type ToolSource struct {
 
 func (t ToolSource) String() string {
 	return fmt.Sprintf("%s:%d", t.Location, t.LineNo)
+}
+
+func (t Tool) GetInterpreter() string {
+	if !strings.HasPrefix(t.Instructions, CommandPrefix) {
+		return ""
+	}
+	fields := strings.Fields(strings.TrimPrefix(t.Instructions, CommandPrefix))
+	for _, field := range fields {
+		name := filepath.Base(field)
+		if name != "env" {
+			return name
+		}
+	}
+	return fields[0]
 }
 
 func (t Tool) IsCommand() bool {

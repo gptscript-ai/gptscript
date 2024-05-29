@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/hexops/autogold/v2"
 	"github.com/stretchr/testify/require"
 )
@@ -20,4 +21,11 @@ func TestSysGetenv(t *testing.T) {
 	}, `{"name":"MAGIC2"}`)
 	require.NoError(t, err)
 	autogold.Expect("").Equal(t, v)
+}
+
+func TestDisplayCoverage(t *testing.T) {
+	for _, tool := range ListTools() {
+		_, err := types.ToSysDisplayString(tool.ID, nil)
+		require.NoError(t, err)
+	}
 }
