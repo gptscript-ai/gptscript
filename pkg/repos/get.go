@@ -56,7 +56,7 @@ func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, e
 	locker.Lock(tool.ID)
 	defer locker.Unlock(tool.ID)
 
-	target := filepath.Join(m.storageDir, tool.Source.Repo.Revision, runtime.ID())
+	target := filepath.Join(m.storageDir, tool.Source.Repo.Revision, tool.Source.Repo.Path, tool.Source.Repo.Name, runtime.ID())
 	targetFinal := filepath.Join(target, tool.Source.Repo.Path)
 	doneFile := targetFinal + ".done"
 	envData, err := os.ReadFile(doneFile)
