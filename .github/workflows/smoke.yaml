@@ -1,0 +1,179 @@
+name: test
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - docs/**
+  workflow_dispatch:
+
+jobs:
+  check-label:
+    runs-on: ubuntu-22.04
+    outputs:
+      run_smoke_tests: ${{ steps.check.outputs.run_smoke_tests }}
+    steps:
+      - name: Check if PR author is a member of the organization or has the run-smoke label
+        id: check
+        run: |
+          case "${{ github.event_name }}" in
+            push)
+              # Run smoke tests for push to base repo
+              echo "run_smoke_tests=true" >> $GITHUB_OUTPUT
+              exit 0
+              ;;
+            workflow_dispatch)
+              # Run smoke tests for manual runs against base branch
+              echo "run_smoke_tests=true" >> $GITHUB_OUTPUT
+              exit 0
+              ;;
+            pull_request_target)
+              ORG="gptscript-ai"
+              AUTHOR="${{ github.event.pull_request.user.login }}"
+
+              # Check for org membership
+              MEMBERSHIP_RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                "https://api.github.com/orgs/$ORG/members/$AUTHOR")
+
+              if [ "$MEMBERSHIP_RESPONSE_CODE" -eq 204 ]; then
+                echo "run_smoke_tests=true" >> $GITHUB_OUTPUT
+                exit 0
+              fi
+
+              # Check for "run-smoke" label
+              LABELS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                "https://api.github.com/repos/${{ github.repository_owner }}/${{ github.event.repository.name }}/issues/${{ github.event.pull_request.number }}/labels" | jq -r '.[].name')
+              if echo "$LABELS" | grep -q "run-smoke"; then
+                # Run smoke tests for PR with the "run-smoke" label
+                echo "run_smoke_tests=true" >> $GITHUB_OUTPUT
+                exit 0
+              fi
+
+              ;;
+          esac
+
+          echo "run_smoke_tests=false" >> $GITHUB_OUTPUT
+
+  smoke-gpt-4o-2024-05-13:
+    needs: check-label
+    if: ${{ needs.check-label.outputs.run_smoke_tests == 'true' }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout base repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Checkout PR code if running for a PR
+        if: ${{ github.event_name == 'pull_request_target' }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/setup-go@v5
+        with:
+          cache: false
+          go-version: "1.21"
+      - env:
+          OPENAI_API_KEY: ${{ secrets.SMOKE_OPENAI_API_KEY }}
+          GPTSCRIPT_DEFAULT_MODEL: gpt-4o-2024-05-13
+        name: Run smoke test for gpt-4o-2024-05-13
+        run: |
+          echo "Running smoke test for model gpt-4o-2024-05-13"
+          export PATH="$(pwd)/bin:${PATH}"
+          make smoke
+
+  smoke-gpt-4-turbo-2024-04-09:
+    needs: check-label
+    if: ${{ needs.check-label.outputs.run_smoke_tests == 'true' }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout base repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Checkout PR code if running for a PR
+        if: ${{ github.event_name == 'pull_request_target' }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/setup-go@v5
+        with:
+          cache: false
+          go-version: "1.21"
+      - env:
+          OPENAI_API_KEY: ${{ secrets.SMOKE_OPENAI_API_KEY }}
+          GPTSCRIPT_DEFAULT_MODEL: gpt-4-turbo-2024-04-09
+        name: Run smoke test for gpt-4-turbo-2024-04-09
+        run: |
+          echo "Running smoke test for model gpt-4-turbo-2024-04-09"
+          export PATH="$(pwd)/bin:${PATH}"
+          make smoke
+
+  smoke-claude-3-opus-20240229:
+    needs: check-label
+    if: ${{ needs.check-label.outputs.run_smoke_tests == 'true' }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout base repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Checkout PR code if running for a PR
+        if: ${{ github.event_name == 'pull_request_target' }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/setup-go@v5
+        with:
+          cache: false
+          go-version: "1.21"
+      - env:
+          OPENAI_API_KEY: ${{ secrets.SMOKE_OPENAI_API_KEY }}
+          GPTSCRIPT_DEFAULT_MODEL: claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta
+          ANTHROPIC_API_KEY: ${{ secrets.SMOKE_ANTHROPIC_API_KEY }}
+        name: Run smoke test for claude-3-opus-20240229
+        run: |
+          echo "Running smoke test for model claude-3-opus-20240229"
+          export PATH="$(pwd)/bin:${PATH}"
+          make smoke
+
+  smoke-mistral-large-2402:
+    needs: check-label
+    if: ${{ needs.check-label.outputs.run_smoke_tests == 'true' }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout base repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Checkout PR code if running for a PR
+        if: ${{ github.event_name == 'pull_request_target' }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/setup-go@v5
+        with:
+          cache: false
+          go-version: "1.21"
+      - env:
+          OPENAI_API_KEY: ${{ secrets.SMOKE_OPENAI_API_KEY }}
+          GPTSCRIPT_DEFAULT_MODEL: mistral-large-2402 from https://api.mistral.ai/v1
+          GPTSCRIPT_PROVIDER_API_MISTRAL_AI_API_KEY: ${{ secrets.SMOKE_GPTSCRIPT_PROVIDER_API_MISTRAL_AI_API_KEY }}
+        name: Run smoke test for mistral-large-2402
+        run: |
+          echo "Running smoke test for model mistral-large-2402"
+          export PATH="$(pwd)/bin:${PATH}"
+          make smoke
+
