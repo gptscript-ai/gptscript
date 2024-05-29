@@ -8,9 +8,17 @@ import (
 	"github.com/docker/cli/cli/config/types"
 )
 
+type CredentialType string
+
+const (
+	CredentialTypeTool          CredentialType = "tool"
+	CredentialTypeModelProvider CredentialType = "modelprovider"
+)
+
 type Credential struct {
 	Context  string            `json:"context"`
 	ToolName string            `json:"toolName"`
+	Type     CredentialType    `json:"type"`
 	Env      map[string]string `json:"env"`
 }
 
@@ -21,7 +29,7 @@ func (c Credential) toDockerAuthConfig() (types.AuthConfig, error) {
 	}
 
 	return types.AuthConfig{
-		Username:      "gptscript", // Username is required, but not used
+		Username:      string(c.Type),
 		Password:      string(env),
 		ServerAddress: toolNameWithCtx(c.ToolName, c.Context),
 	}, nil
@@ -33,7 +41,20 @@ func credentialFromDockerAuthConfig(authCfg types.AuthConfig) (Credential, error
 		return Credential{}, err
 	}
 
-	tool, ctx, err := toolNameAndCtxFromAddress(strings.TrimPrefix(authCfg.ServerAddress, "https://"))
+	// We used to hardcode the username as "gptscript" before CredentialType was introduced, so
+	// check for that here.
+	credType := authCfg.Username
+	if credType == "gptscript" {
+		credType = string(CredentialTypeTool)
+	}
+
+	// If it's a tool credential or sys.openai, remove the http[s] prefix.
+	address := authCfg.ServerAddress
+	if credType == string(CredentialTypeTool) || strings.HasPrefix(address, "https://sys.openai///") {
+		address = strings.TrimPrefix(strings.TrimPrefix(address, "https://"), "http://")
+	}
+
+	tool, ctx, err := toolNameAndCtxFromAddress(address)
 	if err != nil {
 		return Credential{}, err
 	}
@@ -41,6 +62,7 @@ func credentialFromDockerAuthConfig(authCfg types.AuthConfig) (Credential, error
 	return Credential{
 		Context:  ctx,
 		ToolName: tool,
+		Type:     CredentialType(credType),
 		Env:      env,
 	}, nil
 }

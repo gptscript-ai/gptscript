@@ -861,6 +861,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 
 			cred = &credentials.Credential{
 				ToolName: credToolName,
+				Type:     credentials.CredentialTypeTool,
 				Env:      envMap.Env,
 			}
 

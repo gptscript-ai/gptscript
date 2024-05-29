@@ -15,7 +15,7 @@ require (
 	github.com/getkin/kin-openapi v0.123.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/google/uuid v1.6.0
-	github.com/gptscript-ai/chat-completion-client v0.0.0-20240515050533-bdef9f2226a9
+	github.com/gptscript-ai/chat-completion-client v0.0.0-20240531200700-af8e7ecf0379
 	github.com/gptscript-ai/tui v0.0.0-20240604233332-4a5ff43cdc58
 	github.com/hexops/autogold/v2 v2.2.1
 	github.com/hexops/valast v1.4.4
