@@ -1,6 +1,7 @@
 package builtin
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -774,7 +775,37 @@ func SysDownload(ctx context.Context, env []string, input string) (_ string, err
 	return params.Location, nil
 }
 
-func SysPrompt(_ context.Context, _ []string, input string) (_ string, err error) {
+func sysPromptHTTP(ctx context.Context, url, message string, fields []string, sensitive bool) (_ string, err error) {
+	data, err := json.Marshal(map[string]any{
+		"message":   message,
+		"fields":    fields,
+		"sensitive": sensitive,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(data))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("invalid status code [%d], expected 200", resp.StatusCode)
+	}
+
+	data, err = io.ReadAll(resp.Body)
+	return string(data), err
+}
+
+func SysPrompt(ctx context.Context, envs []string, input string) (_ string, err error) {
 	var params struct {
 		Message   string `json:"message,omitempty"`
 		Fields    string `json:"fields,omitempty"`
@@ -782,6 +813,12 @@ func SysPrompt(_ context.Context, _ []string, input string) (_ string, err error
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
 		return "", err
+	}
+
+	for _, env := range envs {
+		if url, ok := strings.CutPrefix(env, "GPTSCRIPT_PROMPT_URL="); ok {
+			return sysPromptHTTP(ctx, url, params.Message, strings.Split(params.Fields, ","), params.Sensitive == "true")
+		}
 	}
 
 	if params.Message != "" {
