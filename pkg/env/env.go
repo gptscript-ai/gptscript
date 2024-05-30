@@ -12,6 +12,14 @@ func execEquals(bin, check string) bool {
 		bin == check+".exe"
 }
 
+func VarOrDefault(key, defaultValue string) string {
+	if val := os.Getenv(key); val != "" {
+		return val
+	}
+
+	return defaultValue
+}
+
 func ToEnvLike(v string) string {
 	v = strings.ReplaceAll(v, ".", "_")
 	v = strings.ReplaceAll(v, "-", "_")
