@@ -79,7 +79,7 @@ func (e *Eval) Run(cmd *cobra.Command, args []string) error {
 		}, os.Environ(), toolInput)
 	}
 
-	toolOutput, err := runner.Run(cmd.Context(), prg, os.Environ(), toolInput)
+	toolOutput, err := runner.Run(cmd.Context(), prg, opts.Env, toolInput)
 	if err != nil {
 		return err
 	}

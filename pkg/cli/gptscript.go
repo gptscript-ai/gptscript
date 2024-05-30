@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -17,6 +18,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/chat"
+	"github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/input"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
@@ -65,6 +67,7 @@ type GPTScript struct {
 	ForceChat          bool   `usage:"Force an interactive chat session if even the top level tool is not a chat tool"`
 	ForceSequential    bool   `usage:"Force parallel calls to run sequentially"`
 	Workspace          string `usage:"Directory to use for the workspace, if specified it will not be deleted on exit"`
+	UI                 bool   `usage:"Launch the UI" hidden:"true" local:"true" name:"ui"`
 
 	readData []byte
 }
@@ -319,6 +322,39 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 		return err
 	}
 
+	// If the user is trying to launch the chat-builder UI, then set up the tool and options here.
+	if r.UI {
+		args = append([]string{env.VarOrDefault("GPTSCRIPT_CHAT_UI_TOOL", "github.com/gptscript-ai/ui@v2")}, args...)
+
+		// If args has more than one element, then the user has provided a file.
+		if len(args) > 1 {
+			if args[1] == "-" {
+				return fmt.Errorf("chat UI only supports files, cannot read from stdin")
+			}
+
+			absPathToScript, err := filepath.Abs(args[1])
+			if err != nil {
+				return fmt.Errorf("cannot determine absolute path to script %s: %v", args[1], err)
+			}
+
+			gptOpt.Env = append(gptOpt.Env, "SCRIPTS_PATH="+filepath.Dir(absPathToScript))
+
+			args = append([]string{args[0]}, "--file="+filepath.Base(args[1]))
+			if len(args) > 2 {
+				args = append(args, args[2:]...)
+			}
+		} else {
+			cwd, err := os.Getwd()
+			if err != nil {
+				return fmt.Errorf("could not determine current working directory: %w", err)
+			}
+			gptOpt.Env = append(gptOpt.Env, "SCRIPTS_PATH="+cwd)
+		}
+
+		// The UI must run in daemon mode.
+		r.Daemon = true
+	}
+
 	ctx := cmd.Context()
 
 	if r.Server {
@@ -385,7 +421,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 	}
 
 	if r.ChatState != "" {
-		resp, err := gptScript.Chat(cmd.Context(), r.ChatState, prg, os.Environ(), toolInput)
+		resp, err := gptScript.Chat(cmd.Context(), r.ChatState, prg, gptOpt.Env, toolInput)
 		if err != nil {
 			return err
 		}
@@ -399,10 +435,10 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 	if prg.IsChat() || r.ForceChat {
 		return chat.Start(cmd.Context(), nil, gptScript, func() (types.Program, error) {
 			return r.readProgram(ctx, gptScript, args)
-		}, os.Environ(), toolInput)
+		}, gptOpt.Env, toolInput)
 	}
 
-	s, err := gptScript.Run(cmd.Context(), prg, os.Environ(), toolInput)
+	s, err := gptScript.Run(cmd.Context(), prg, gptOpt.Env, toolInput)
 	if err != nil {
 		return err
 	}
