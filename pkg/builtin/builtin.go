@@ -256,21 +256,12 @@ func ListTools() (result []types.Tool) {
 }
 
 func Builtin(name string) (types.Tool, bool) {
-	name, dontFail := strings.CutSuffix(name, "?")
+	// Legacy syntax not used anymore
+	name = strings.TrimSuffix(name, "?")
 	t, ok := tools[name]
 	t.Parameters.Name = name
 	t.ID = name
 	t.Instructions = "#!" + name
-	if ok && dontFail {
-		orig := t.BuiltinFunc
-		t.BuiltinFunc = func(ctx context.Context, env []string, input string) (string, error) {
-			s, err := orig(ctx, env, input)
-			if err != nil {
-				return fmt.Sprintf("ERROR: %s", err.Error()), nil
-			}
-			return s, err
-		}
-	}
 	return SetDefaults(t), ok
 }
 
@@ -281,7 +272,7 @@ func SysFind(ctx context.Context, env []string, input string) (string, error) {
 		Directory string `json:"directory,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
-		return "", err
+		return invalidArgument(input, err), nil
 	}
 
 	if params.Directory == "" {
@@ -305,7 +296,7 @@ func SysFind(ctx context.Context, env []string, input string) (string, error) {
 		return nil
 	})
 	if err != nil {
-		return "", nil
+		return fmt.Sprintf("Failed to traverse directory %s: %v", params.Directory, err.Error()), nil
 	}
 	if len(result) == 0 {
 		return "No files found", nil
@@ -321,7 +312,7 @@ func SysExec(ctx context.Context, env []string, input string) (string, error) {
 		Directory string `json:"directory,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
-		return "", err
+		return invalidArgument(input, err), nil
 	}
 
 	if params.Directory == "" {
@@ -342,7 +333,7 @@ func SysExec(ctx context.Context, env []string, input string) (string, error) {
 	cmd.Dir = params.Directory
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Sprintf("ERROR: %s\nOUTPUT: %s", err, out), nil
+		return fmt.Sprintf("ERROR: %s\nOUTPUT:\n%s", err, out), nil
 	}
 	return string(out), nil
 }
@@ -362,7 +353,7 @@ func SysLs(_ context.Context, _ []string, input string) (string, error) {
 		Dir string `json:"dir,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
-		return "", err
+		return invalidArgument(input, err), nil
 	}
 
 	dir := params.Dir
@@ -374,7 +365,7 @@ func SysLs(_ context.Context, _ []string, input string) (string, error) {
 	if errors.Is(err, fs.ErrNotExist) {
 		return fmt.Sprintf("directory does not exist: %s", params.Dir), nil
 	} else if err != nil {
-		return "", err
+		return fmt.Sprintf("Failed to read directory %s: %v", params.Dir, err.Error()), nil
 	}
 
 	var result []string
@@ -386,6 +377,10 @@ func SysLs(_ context.Context, _ []string, input string) (string, error) {
 		}
 	}
 
+	if len(result) == 0 {
+		return "Empty directory", nil
+	}
+
 	return strings.Join(result, "\n"), nil
 }
 
@@ -394,7 +389,7 @@ func SysRead(_ context.Context, _ []string, input string) (string, error) {
 		Filename string `json:"filename,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
-		return "", err
+		return invalidArgument(input, err), nil
 	}
 
 	file := params.Filename
@@ -408,7 +403,7 @@ func SysRead(_ context.Context, _ []string, input string) (string, error) {
 	if errors.Is(err, fs.ErrNotExist) {
 		return fmt.Sprintf("The file %s does not exist", params.Filename), nil
 	} else if err != nil {
-		return "", err
+		return fmt.Sprintf("Failed to read file %s: %v", params.Filename, err.Error()), nil
 	}
 
 	if len(data) == 0 {
@@ -423,7 +418,7 @@ func SysWrite(ctx context.Context, _ []string, input string) (string, error) {
 		Content  string `json:"content,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
-		return "", err
+		return invalidArgument(input, err), nil
 	}
 
 	file := params.Filename
@@ -436,14 +431,17 @@ func SysWrite(ctx context.Context, _ []string, input string) (string, error) {
 	if _, err := os.Stat(dir); errors.Is(err, fs.ErrNotExist) {
 		log.Debugf("Creating dir %s", dir)
 		if err := os.MkdirAll(dir, 0755); err != nil {
-			return "", fmt.Errorf("creating dir %s: %w", dir, err)
+			return fmt.Sprintf("Failed to create directory %s: %v", dir, err.Error()), nil
 		}
 	}
 
 	data := []byte(params.Content)
 	log.Debugf("Wrote %d bytes to file %s", len(data), file)
 
-	return "", os.WriteFile(file, data, 0644)
+	if err := os.WriteFile(file, data, 0644); err != nil {
+		return fmt.Sprintf("Failed to write file %s: %v", file, err.Error()), nil
+	}
+	return fmt.Sprintf("Wrote (%d) bytes to file %s", len(data), file), nil
 }
 
 func SysAppend(ctx context.Context, env []string, input string) (string, error) {
@@ -452,7 +450,7 @@ func SysAppend(ctx context.Context, env []string, input string) (string, error) 
 		Content  string `json:"content,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
-		return "", err
+		return invalidArgument(input, err), nil
 	}
 
 	// Lock the file to prevent concurrent writes from other tool calls.
@@ -461,19 +459,18 @@ func SysAppend(ctx context.Context, env []string, input string) (string, error) 
 
 	f, err := os.OpenFile(params.Filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
-		return "", err
+		return fmt.Sprintf("Failed to open file %s: %v", params.Filename, err.Error()), nil
 	}
 
 	// Attempt to append to the file and close it immediately.
 	// Write is guaranteed to return an error when n != len([]byte(params.Content))
 	n, err := f.Write([]byte(params.Content))
 	if err := errors.Join(err, f.Close()); err != nil {
-		return "", err
+		return fmt.Sprintf("Failed to write file %s: %v", params.Filename, err.Error()), nil
 	}
 
 	log.Debugf("Appended %d bytes to file %s", n, params.Filename)
-
-	return "", nil
+	return fmt.Sprintf("Appended (%d) bytes to file %s", n, params.Filename), nil
 }
 
 func urlExt(u string) string {
@@ -484,13 +481,13 @@ func urlExt(u string) string {
 	return filepath.Ext(url.Path)
 }
 
-func fixQueries(u string) (string, error) {
+func fixQueries(u string) string {
 	url, err := url.Parse(u)
 	if err != nil {
-		return "", err
+		return u
 	}
 	url.RawQuery = url.Query().Encode()
-	return url.String(), nil
+	return url.String()
 }
 
 func SysHTTPGet(ctx context.Context, env []string, input string) (_ string, err error) {
@@ -498,29 +495,30 @@ func SysHTTPGet(ctx context.Context, env []string, input string) (_ string, err 
 		URL string `json:"url,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
-		return "", err
+		return invalidArgument(input, err), nil
 	}
 
-	params.URL, err = fixQueries(params.URL)
-	if err != nil {
-		return "", err
-	}
+	params.URL = fixQueries(params.URL)
 
 	c := http.Client{Timeout: 10 * time.Second}
 
 	log.Debugf("http get %s", params.URL)
 	resp, err := c.Get(params.URL)
 	if err != nil {
-		return "", err
+		return fmt.Sprintf("Failed to fetch URL %s: %v", params.URL, err), nil
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("failed to download %s: %s", params.URL, resp.Status)
+		return fmt.Sprintf("failed to download %s: %s", params.URL, resp.Status), nil
 	}
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return fmt.Sprintf("Failed to download URL %s: %v", params.URL, err), nil
+	}
+
+	if len(strings.TrimSpace(string(data))) == 0 {
+		return fmt.Sprintf("URL %s has no contents", params.URL), nil
 	}
 
 	return string(data), nil
@@ -543,13 +541,10 @@ func SysHTTPPost(ctx context.Context, env []string, input string) (_ string, err
 		ContentType string `json:"contentType,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
-		return "", err
+		return invalidArgument(input, err), nil
 	}
 
-	params.URL, err = fixQueries(params.URL)
-	if err != nil {
-		return "", err
-	}
+	params.URL = fixQueries(params.URL)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, params.URL, strings.NewReader(params.Content))
 	if err != nil {
@@ -563,13 +558,13 @@ func SysHTTPPost(ctx context.Context, env []string, input string) (_ string, err
 
 	resp, err := c.Do(req)
 	if err != nil {
-		return "", err
+		return fmt.Sprintf("Failed to post URL %s: %v", params.URL, err), nil
 	}
 	defer resp.Body.Close()
 
 	_, _ = io.ReadAll(resp.Body)
 	if resp.StatusCode > 399 {
-		return "", fmt.Errorf("failed to post %s: %s", params.URL, resp.Status)
+		return fmt.Sprintf("Failed to post URL %s: %s", params.URL, resp.Status), nil
 	}
 
 	return fmt.Sprintf("Wrote %d to %s", len([]byte(params.Content)), params.URL), nil
@@ -580,8 +575,9 @@ func SysGetenv(ctx context.Context, env []string, input string) (string, error) 
 		Name string `json:"name,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
-		return "", err
+		return invalidArgument(input, err), nil
 	}
+
 	log.Debugf("looking up env var %s", params.Name)
 	for _, env := range env {
 		k, v, ok := strings.Cut(env, "=")
@@ -590,7 +586,12 @@ func SysGetenv(ctx context.Context, env []string, input string) (string, error) 
 			return v, nil
 		}
 	}
-	return os.Getenv(params.Name), nil
+
+	value := os.Getenv(params.Name)
+	if value == "" {
+		return fmt.Sprintf("%s is not set or has no value", params.Name), nil
+	}
+	return value, nil
 }
 
 type ErrChatFinish struct {
@@ -601,14 +602,21 @@ func (e *ErrChatFinish) Error() string {
 	return fmt.Sprintf("CHAT FINISH: %s", e.Message)
 }
 
+func invalidArgument(input string, err error) string {
+	return fmt.Sprintf("Failed to parse arguments %s: %v", input, err)
+}
+
 func SysChatHistory(ctx context.Context, _ []string, _ string) (string, error) {
 	engineContext, _ := engine.FromContext(ctx)
 
 	data, err := json.Marshal(engine.ChatHistory{
 		History: writeHistory(engineContext),
 	})
+	if err != nil {
+		return invalidArgument("", err), nil
+	}
 
-	return string(data), err
+	return string(data), nil
 }
 
 func writeHistory(ctx *engine.Context) (result []engine.ChatHistoryCall) {
@@ -647,7 +655,7 @@ func SysAbort(ctx context.Context, env []string, input string) (string, error) {
 		Message string `json:"message,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
-		return "", err
+		return "", fmt.Errorf("ABORT: %s", input)
 	}
 	return "", fmt.Errorf("ABORT: %s", params.Message)
 }
@@ -657,14 +665,18 @@ func SysRemove(ctx context.Context, env []string, input string) (string, error) 
 		Location string `json:"location,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
-		return "", err
+		return invalidArgument(input, err), nil
 	}
 
 	// Lock the file to prevent concurrent writes from other tool calls.
 	locker.Lock(params.Location)
 	defer locker.Unlock(params.Location)
 
-	return fmt.Sprintf("Removed file: %s", params.Location), os.Remove(params.Location)
+	if err := os.Remove(params.Location); err != nil {
+		return fmt.Sprintf("Failed to removed %s: %v", params.Location, err), nil
+	}
+
+	return fmt.Sprintf("Removed file: %s", params.Location), nil
 }
 
 func SysStat(ctx context.Context, env []string, input string) (string, error) {
@@ -672,12 +684,12 @@ func SysStat(ctx context.Context, env []string, input string) (string, error) {
 		Filepath string `json:"filepath,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
-		return "", err
+		return invalidArgument(input, err), nil
 	}
 
 	stat, err := os.Stat(params.Filepath)
 	if err != nil {
-		return "", err
+		return fmt.Sprintf("failed to stat %s: %s", params.Filepath, err), nil
 	}
 
 	title := "File"
@@ -694,13 +706,10 @@ func SysDownload(ctx context.Context, env []string, input string) (_ string, err
 		Override string `json:"override,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
-		return "", err
+		return invalidArgument(input, err), nil
 	}
 
-	params.URL, err = fixQueries(params.URL)
-	if err != nil {
-		return "", err
-	}
+	params.URL = fixQueries(params.URL)
 
 	checkExists := true
 	tmpDir, err := getWorkspaceDir(env)
@@ -718,10 +727,10 @@ func SysDownload(ctx context.Context, env []string, input string) (_ string, err
 	if params.Location == "" {
 		f, err := os.CreateTemp(tmpDir, "gpt-download*"+urlExt(params.URL))
 		if err != nil {
-			return "", err
+			return fmt.Sprintf("Failed to create temporary file: %s", err), nil
 		}
 		if err := f.Close(); err != nil {
-			return "", err
+			return fmt.Sprintf("Failed to close temporary file %s: %v", f.Name(), err), nil
 		}
 		checkExists = false
 		params.Location = f.Name()
@@ -729,16 +738,16 @@ func SysDownload(ctx context.Context, env []string, input string) (_ string, err
 
 	if checkExists && params.Override != "true" {
 		if _, err := os.Stat(params.Location); err == nil {
-			return "", fmt.Errorf("file %s already exists and can not be overwritten", params.Location)
-		} else if err != nil && !errors.Is(err, fs.ErrNotExist) {
-			return "", err
+			return fmt.Sprintf("file %s already exists and can not be overwritten", params.Location), nil
+		} else if !errors.Is(err, fs.ErrNotExist) {
+			return fmt.Sprintf("failed to stat file %s: %v", params.Location, err), nil
 		}
 	}
 
 	log.Infof("download [%s] to [%s]", params.URL, params.Location)
 	resp, err := http.Get(params.URL)
 	if err != nil {
-		return "", err
+		return fmt.Sprintf("failed to download %s: %v", params.URL, err), nil
 	}
 	defer func() {
 		_, _ = io.ReadAll(resp.Body)
@@ -746,18 +755,18 @@ func SysDownload(ctx context.Context, env []string, input string) (_ string, err
 	}()
 
 	if resp.StatusCode > 299 {
-		return "", fmt.Errorf("invalid status code [%d] downloading [%s]: %s", resp.StatusCode, params.URL, resp.Status)
+		return fmt.Sprintf("invalid status code [%d] downloading [%s]: %s", resp.StatusCode, params.URL, resp.Status), nil
 	}
 
 	_ = os.Remove(params.Location)
 	f, err := os.Create(params.Location)
 	if err != nil {
-		return "", fmt.Errorf("failed to create [%s]: %w", params.Location, err)
+		return fmt.Sprintf("failed to create [%s]: %v", params.Location, err), nil
 	}
 	defer f.Close()
 
 	if _, err := io.Copy(f, resp.Body); err != nil {
-		return "", fmt.Errorf("failed copying data from [%s] to [%s]: %w", params.URL, params.Location, err)
+		return fmt.Sprintf("failed copying data from [%s] to [%s]: %v", params.URL, params.Location, err), nil
 	}
 
 	return fmt.Sprintf("Downloaded %s to %s", params.URL, params.Location), nil
