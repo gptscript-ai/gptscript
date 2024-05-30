@@ -20,7 +20,7 @@ func TestSysGetenv(t *testing.T) {
 		"MAGIC=VALUE",
 	}, `{"name":"MAGIC2"}`)
 	require.NoError(t, err)
-	autogold.Expect("").Equal(t, v)
+	autogold.Expect("MAGIC2 is not set or has no value").Equal(t, v)
 }
 
 func TestDisplayCoverage(t *testing.T) {
