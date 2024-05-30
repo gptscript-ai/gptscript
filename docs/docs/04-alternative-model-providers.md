@@ -4,7 +4,7 @@
 
 GPTScript can be used against alternative models that expose an OpenAI compatible API or have a provider shim available.
 
-To use a model with an OpenAI compatible API:
+### Using a model with an OpenAI compatible API
 
 ```gptscript
 model: mistral-large-latest from https://api.mistral.ai/v1
@@ -12,8 +12,11 @@ model: mistral-large-latest from https://api.mistral.ai/v1
 Say hello world
 ```
 
-To use a model that requires a provider shim:
+#### Note
+Mistral's La Plateforme has an OpenAI compatible API, but the model does not behave identically to gpt-4. For that reason, we also have a provider for it that might get better results in some cases.
 
+
+### Using a model that requires a provider
 ```gptscript
 model: claude-3-haiku-20240307 from github.com/gptscript-ai/claude3-anthropic-provider
 
@@ -40,6 +43,7 @@ The following shims are currently available:
 * [github.com/gptscript-ai/claude3-bedrock-provider](https://github.com/gptscript-ai/claude3-bedrock-provider)
 * [github.com/gptscript-ai/gemini-aistudio-provider](https://github.com/gptscript-ai/gemini-aistudio-provider)
 * [github.com/gptscript-ai/gemini-vertexai-provider](https://github.com/gptscript-ai/gemini-vertexai-provider)
+* [github.com/gptscript-ai/mistral-laplateforme-provider](https://github.com/gptscript-ai/mistral-laplateforme-provider)
 
 ## Listing available models
 
