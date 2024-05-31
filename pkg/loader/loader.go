@@ -49,6 +49,11 @@ type source struct {
 	Repo *types.Repo
 }
 
+func (s source) WithRemote(remote bool) *source {
+	s.Remote = remote
+	return &s
+}
+
 func (s *source) String() string {
 	if s.Path == "" && s.Name == "" {
 		return ""
@@ -436,7 +441,8 @@ func resolve(ctx context.Context, cache *cache.Client, prg *types.Program, base 
 
 func input(ctx context.Context, cache *cache.Client, base *source, name string) (*source, error) {
 	if strings.HasPrefix(name, "http://") || strings.HasPrefix(name, "https://") {
-		base.Remote = true
+		// copy and modify
+		base = base.WithRemote(true)
 	}
 
 	if !base.Remote {
