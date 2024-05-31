@@ -3,7 +3,11 @@ package loader
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -17,6 +21,34 @@ func toString(obj any) string {
 		panic(err)
 	}
 	return string(s)
+}
+
+func TestLocalRemote(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	}))
+	defer s.Close()
+	dir, err := os.MkdirTemp("", "gptscript-test")
+	require.NoError(t, err)
+
+	err = os.WriteFile(filepath.Join(dir, "chatbot.gpt"), []byte(fmt.Sprintf(`
+Chat: true
+Name: chatbot
+Context: context.gpt
+Tools: http://%s/swagger.json
+
+THis is a tool, say hi
+`, s.Listener.Addr().String())), 0644)
+	require.NoError(t, err)
+
+	err = os.WriteFile(filepath.Join(dir, "context.gpt"), []byte(`
+#!sys.echo
+
+Stuff
+`), 0644)
+	require.NoError(t, err)
+
+	_, err = Program(context.Background(), filepath.Join(dir, "chatbot.gpt"), "")
+	require.NoError(t, err)
 }
 
 func TestIsOpenAPI(t *testing.T) {
