@@ -69,8 +69,8 @@ type GPTScript struct {
 	ForceChat          bool   `usage:"Force an interactive chat session if even the top level tool is not a chat tool"`
 	ForceSequential    bool   `usage:"Force parallel calls to run sequentially"`
 	Workspace          string `usage:"Directory to use for the workspace, if specified it will not be deleted on exit"`
-	UI                 bool   `usage:"Launch the UI" hidden:"true" local:"true" name:"ui"`
-	TUI                bool   `usage:"Launch the TUI" hidden:"true" local:"true" name:"tui"`
+	UI                 bool   `usage:"Launch the UI" local:"true" name:"ui"`
+	TUI                bool   `usage:"Launch the TUI" local:"true" name:"tui"`
 
 	readData []byte
 }
