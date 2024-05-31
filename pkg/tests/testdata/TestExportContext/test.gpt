@@ -8,8 +8,8 @@ name: fromcontext
 export: sampletool
 export context: fromexportcontext
 
-#!/bin/bash
-echo this is from context
+#!sys.echo
+this is from context
 
 ---
 name: sampletool
@@ -26,5 +26,5 @@ Dummy body
 ---
 name: fromexportcontext
 
-#!/bin/bash
-echo this is from external context
+#!sys.echo
+this is from external context

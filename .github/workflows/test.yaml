@@ -1,4 +1,5 @@
 name: test
+
 on:
   push:
     branches:
@@ -13,7 +14,10 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-latest]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,7 +27,11 @@ jobs:
           cache: false
           go-version: "1.21"
       - name: Build UI
-        run: make build-ui
+        run: |
+          if [ ${{ matrix.os }} != 'windows-latest' ]; then
+            make build-ui
+          fi
+        shell: bash
       - name: Validate
         run: make validate
       - name: Build

@@ -2,6 +2,8 @@ package golang
 
 import (
 	"context"
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -31,5 +33,8 @@ func TestRuntime(t *testing.T) {
 	v, _, _ = strings.Cut(v, string(filepath.ListSeparator))
 	assert.Equal(t, "PATH", p)
 	_, err = os.Stat(filepath.Join(v, "gofmt"))
+	if errors.Is(err, fs.ErrNotExist) {
+		_, err = os.Stat(filepath.Join(v, "gofmt.exe"))
+	}
 	assert.NoError(t, err)
 }
