@@ -27,8 +27,10 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/openai"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/server"
+	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
+	"github.com/gptscript-ai/tui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"golang.org/x/term"
@@ -68,6 +70,7 @@ type GPTScript struct {
 	ForceSequential    bool   `usage:"Force parallel calls to run sequentially"`
 	Workspace          string `usage:"Directory to use for the workspace, if specified it will not be deleted on exit"`
 	UI                 bool   `usage:"Launch the UI" hidden:"true" local:"true" name:"ui"`
+	TUI                bool   `usage:"Launch the TUI" hidden:"true" local:"true" name:"tui"`
 
 	readData []byte
 }
@@ -216,6 +219,8 @@ func (r *GPTScript) PersistentPre(*cobra.Command, []string) error {
 			return err
 		}
 	}
+
+	_ = os.Setenv("GPTSCRIPT_BIN", system.Bin())
 
 	if r.DefaultModel != "" {
 		builtin.SetDefaultModel(r.DefaultModel)
@@ -433,6 +438,11 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 	}
 
 	if prg.IsChat() || r.ForceChat {
+		if r.TUI {
+			return tui.Run(cmd.Context(), args[0], r.Workspace, strings.Join(args[1:], " "), tui.RunOptions{
+				TrustedRepoPrefixes: []string{"github.com/gptscript-ai/context"},
+			})
+		}
 		return chat.Start(cmd.Context(), nil, gptScript, func() (types.Program, error) {
 			return r.readProgram(ctx, gptScript, args)
 		}, gptOpt.Env, toolInput)

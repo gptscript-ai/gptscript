@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
@@ -143,8 +144,8 @@ func (e *Engine) startDaemon(tool types.Tool) (string, error) {
 	}
 
 	// Loop back to gptscript to help with process supervision
-	cmd.Args = append([]string{os.Args[0], "sys.daemon", cmd.Path}, cmd.Args[1:]...)
-	cmd.Path = self()
+	cmd.Args = append([]string{system.Bin(), "sys.daemon", cmd.Path}, cmd.Args[1:]...)
+	cmd.Path = system.Bin()
 
 	cmd.Stdin = r
 	cmd.Stderr = os.Stderr
