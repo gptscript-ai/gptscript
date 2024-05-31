@@ -41,7 +41,7 @@
       "role": "system",
       "content": [
         {
-          "text": "this is from external context\n\nthis is from context\n\nThis is from tool"
+          "text": "this is from external context\nthis is from context\nThis is from tool"
         }
       ],
       "usage": {}

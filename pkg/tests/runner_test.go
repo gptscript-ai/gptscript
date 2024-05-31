@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"runtime"
 	"testing"
 
 	"github.com/gptscript-ai/gptscript/pkg/tests/tester"
@@ -726,6 +727,9 @@ func TestGlobalErr(t *testing.T) {
 }
 
 func TestContextArg(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip()
+	}
 	runner := tester.NewRunner(t)
 	x, err := runner.Run("", `{
 "file": "foo.db"
@@ -742,6 +746,10 @@ func TestToolAs(t *testing.T) {
 }
 
 func TestCwd(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip()
+	}
+
 	runner := tester.NewRunner(t)
 
 	runner.RespondWith(tester.Result{

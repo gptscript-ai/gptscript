@@ -4,5 +4,5 @@ This is from tool
 ---
 name: fromcontext
 
-#!/bin/bash
-echo this is from context
+#!sys.echo
+this is from context

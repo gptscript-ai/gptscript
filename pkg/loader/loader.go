@@ -72,22 +72,23 @@ func openFile(path string) (io.ReadCloser, bool, error) {
 }
 
 func loadLocal(base *source, name string) (*source, bool, error) {
-	path := filepath.Join(base.Path, name)
+	// We want to keep all strings in / format, and only convert to platform specific when reading
+	filePath := path.Join(base.Path, name)
 
-	if s, err := os.Stat(path); err == nil && s.IsDir() {
-		toolPath := filepath.Join(base.Path, name, "tool.gpt")
-		if s, err := os.Stat(toolPath); err == nil && !s.IsDir() {
-			path = toolPath
+	if s, err := os.Stat(filepath.Clean(filePath)); err == nil && s.IsDir() {
+		toolPath := path.Join(filePath, "tool.gpt")
+		if s, err := os.Stat(filepath.Clean(toolPath)); err == nil && !s.IsDir() {
+			filePath = toolPath
 		}
 	}
 
-	content, ok, err := openFile(path)
+	content, ok, err := openFile(filepath.Clean(filePath))
 	if err != nil {
 		return nil, false, err
 	} else if !ok {
 		return nil, false, nil
 	}
-	log.Debugf("opened %s", path)
+	log.Debugf("opened %s", filePath)
 
 	defer content.Close()
 
@@ -99,9 +100,9 @@ func loadLocal(base *source, name string) (*source, bool, error) {
 	return &source{
 		Content:  data,
 		Remote:   false,
-		Path:     filepath.Dir(path),
-		Name:     filepath.Base(path),
-		Location: path,
+		Path:     path.Dir(filePath),
+		Name:     path.Base(filePath),
+		Location: filePath,
 	}, true, nil
 }
 
@@ -398,6 +399,9 @@ func complete(opts ...Options) (result Options) {
 }
 
 func Program(ctx context.Context, name, subToolName string, opts ...Options) (types.Program, error) {
+	// We want all paths to have / not \
+	name = strings.ReplaceAll(name, "\\", "/")
+
 	if log.IsDebug() {
 		start := time.Now()
 		defer func() {

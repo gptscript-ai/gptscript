@@ -5,7 +5,7 @@
       "role": "system",
       "content": [
         {
-          "text": "this is from context\n\nThis is from tool"
+          "text": "this is from context\nThis is from tool"
         }
       ],
       "usage": {}
