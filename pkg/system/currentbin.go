@@ -1,6 +1,6 @@
 //go:build !linux
 
-package engine
+package system
 
 import (
 	"os"
@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 )
 
+// currentBin returns the executable of yourself to allow forking a new version of yourself
 // Copied from github.com/moby/moby/pkg/reexec d25b0bd7ea6ce17ca085c54d5965eeeb66417e52
-
-func self() string {
+func currentBin() string {
 	name := os.Args[0]
 	if filepath.Base(name) == name {
 		if lp, err := exec.LookPath(name); err == nil {
