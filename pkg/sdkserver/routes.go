@@ -26,11 +26,13 @@ import (
 const toolRunTimeout = 15 * time.Minute
 
 type server struct {
-	client *gptscript.GPTScript
-	events *broadcaster.Broadcaster[gserver.Event]
+	address string
+	client  *gptscript.GPTScript
+	events  *broadcaster.Broadcaster[event]
 
 	lock             sync.RWMutex
 	waitingToConfirm map[string]chan runner.AuthorizerResponse
+	waitingToPrompt  map[string]chan map[string]string
 }
 
 func (s *server) addRoutes(mux *http.ServeMux) {
@@ -52,6 +54,8 @@ func (s *server) addRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /fmt", s.fmtDocument)
 
 	mux.HandleFunc("POST /confirm/{id}", s.confirm)
+	mux.HandleFunc("POST /prompt/{id}", s.prompt)
+	mux.HandleFunc("POST /prompt-response/{id}", s.promptResponse)
 }
 
 // health just provides an endpoint for checking whether the server is running and accessible.
@@ -148,13 +152,18 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(gserver.ContextWithNewRunID(r.Context()), toolRunTimeout)
+	ctx := gserver.ContextWithNewRunID(r.Context())
+	runID := gserver.RunIDFromContext(ctx)
+	ctx, cancel := context.WithTimeout(ctx, toolRunTimeout)
 	defer cancel()
 
 	// Ensure chat state is not empty.
 	if reqObject.ChatState == "" {
 		reqObject.ChatState = "null"
 	}
+
+	// Append a prompt URL for this run.
+	reqObject.Env = append(reqObject.Env, fmt.Sprintf("%s=http://%s/prompt/%s", types.PromptURLEnvVar, s.address, runID))
 
 	logger.Debugf("executing tool: %+v", reqObject)
 	var (
@@ -170,12 +179,12 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 
 	opts := &gptscript.Options{
 		Cache:             reqObject.Options,
-		Env:               reqObject.Env,
+		Env:               append(os.Environ(), reqObject.Env...),
 		Workspace:         reqObject.Workspace,
 		CredentialContext: reqObject.CredentialContext,
 		Runner: runner.Options{
 			// Set the monitor factory so that we can get events from the server.
-			MonitorFactory: gserver.NewSessionFactory(s.events),
+			MonitorFactory: NewSessionFactory(s.events),
 		},
 	}
 

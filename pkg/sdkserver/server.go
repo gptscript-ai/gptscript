@@ -16,7 +16,6 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
-	gserver "github.com/gptscript-ai/gptscript/pkg/server"
 	"github.com/rs/cors"
 )
 
@@ -42,8 +41,8 @@ func Start(ctx context.Context, opts Options) error {
 		mvl.SetDebug()
 	}
 
-	events := broadcaster.New[gserver.Event]()
-	opts.Options.Runner.MonitorFactory = gserver.NewSessionFactory(events)
+	events := broadcaster.New[event]()
+	opts.Options.Runner.MonitorFactory = NewSessionFactory(events)
 	go events.Start(ctx)
 
 	g, err := gptscript.New(&opts.Options)
@@ -52,9 +51,11 @@ func Start(ctx context.Context, opts Options) error {
 	}
 
 	s := &server{
+		address:          opts.ListenAddress,
 		client:           g,
 		events:           events,
 		waitingToConfirm: make(map[string]chan runner.AuthorizerResponse),
+		waitingToPrompt:  make(map[string]chan map[string]string),
 	}
 	defer s.Close()
 

@@ -39,14 +39,16 @@ func (s *server) authorize(ctx engine.Context, input string) (runner.AuthorizerR
 		s.lock.Unlock()
 	}(ctx.ID)
 
-	s.events.C <- gserver.Event{
-		Event: runner.Event{
-			Time:        time.Now(),
-			CallContext: ctx.GetCallContext(),
-			Type:        CallConfirm,
+	s.events.C <- event{
+		Event: gserver.Event{
+			Event: runner.Event{
+				Time:        time.Now(),
+				CallContext: ctx.GetCallContext(),
+				Type:        CallConfirm,
+			},
+			Input: input,
+			RunID: runID,
 		},
-		Input: input,
-		RunID: runID,
 	}
 
 	// Wait for the confirmation to come through.
