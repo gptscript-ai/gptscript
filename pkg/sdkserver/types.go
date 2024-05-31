@@ -22,6 +22,7 @@ const (
 	Error    runState = "error"
 
 	CallConfirm runner.EventType = "callConfirm"
+	Prompt      runner.EventType = "prompt"
 )
 
 type toolOrFileRequest struct {
@@ -89,20 +90,26 @@ func newRun(id string) *runInfo {
 
 type runEvent struct {
 	runInfo `json:",inline"`
-
-	Type runner.EventType `json:"type"`
+	Type    runner.EventType `json:"type"`
 }
 
-func (r *runInfo) process(event gserver.Event) map[string]any {
-	switch event.Type {
+func (r *runInfo) process(e event) map[string]any {
+	switch e.Type {
+	case Prompt:
+		return map[string]any{"prompt": prompt{
+			Prompt: e.Prompt,
+			ID:     e.RunID,
+			Type:   e.Type,
+			Time:   e.Time,
+		}}
 	case runner.EventTypeRunStart:
-		r.Start = event.Time
-		r.Program = *event.Program
+		r.Start = e.Time
+		r.Program = *e.Program
 		r.State = Running
 	case runner.EventTypeRunFinish:
-		r.End = event.Time
-		r.Output = event.Output
-		r.Error = event.Err
+		r.End = e.Time
+		r.Output = e.Output
+		r.Error = e.Err
 		if r.Error != "" {
 			r.State = Error
 		} else {
@@ -110,42 +117,42 @@ func (r *runInfo) process(event gserver.Event) map[string]any {
 		}
 	}
 
-	if event.CallContext == nil || event.CallContext.ID == "" {
+	if e.CallContext == nil || e.CallContext.ID == "" {
 		return map[string]any{"run": runEvent{
 			runInfo: *r,
-			Type:    event.Type,
+			Type:    e.Type,
 		}}
 	}
 
-	call := r.Calls[event.CallContext.ID]
-	call.CallContext = *event.CallContext
-	call.Type = event.Type
+	call := r.Calls[e.CallContext.ID]
+	call.CallContext = *e.CallContext
+	call.Type = e.Type
 
-	switch event.Type {
+	switch e.Type {
 	case runner.EventTypeCallStart:
-		call.Start = event.Time
-		call.Input = event.Content
+		call.Start = e.Time
+		call.Input = e.Content
 
 	case runner.EventTypeCallSubCalls:
-		call.setSubCalls(event.ToolSubCalls)
+		call.setSubCalls(e.ToolSubCalls)
 
 	case runner.EventTypeCallProgress:
-		call.setOutput(event.Content)
+		call.setOutput(e.Content)
 
 	case runner.EventTypeCallFinish:
-		call.End = event.Time
-		call.setOutput(event.Content)
+		call.End = e.Time
+		call.setOutput(e.Content)
 
 	case runner.EventTypeChat:
-		if event.ChatRequest != nil {
-			call.LLMRequest = event.ChatRequest
+		if e.ChatRequest != nil {
+			call.LLMRequest = e.ChatRequest
 		}
-		if event.ChatResponse != nil {
-			call.LLMResponse = event.ChatResponse
+		if e.ChatResponse != nil {
+			call.LLMResponse = e.ChatResponse
 		}
 	}
 
-	r.Calls[event.CallContext.ID] = call
+	r.Calls[e.CallContext.ID] = call
 	return map[string]any{"call": call}
 }
 
@@ -191,4 +198,16 @@ func (c *call) setOutput(o string) {
 type output struct {
 	Content  string                 `json:"content"`
 	SubCalls map[string]engine.Call `json:"subCalls"`
+}
+
+type event struct {
+	gserver.Event `json:",inline"`
+	types.Prompt  `json:",inline"`
+}
+
+type prompt struct {
+	types.Prompt `json:",inline"`
+	ID           string           `json:"id,omitempty"`
+	Type         runner.EventType `json:"type,omitempty"`
+	Time         time.Time        `json:"time,omitempty"`
 }

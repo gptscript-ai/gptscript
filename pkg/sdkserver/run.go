@@ -51,7 +51,7 @@ func (s *server) execAndStream(ctx context.Context, programLoader loaderFunc, lo
 
 // processEventStreamOutput will stream the events of the tool to the response as server sent events.
 // If an error occurs, then an event with the error will also be sent.
-func processEventStreamOutput(ctx context.Context, logger mvl.Logger, w http.ResponseWriter, id string, events <-chan gserver.Event, output <-chan runner.ChatResponse, errChan chan error) {
+func processEventStreamOutput(ctx context.Context, logger mvl.Logger, w http.ResponseWriter, id string, events <-chan event, output <-chan runner.ChatResponse, errChan chan error) {
 	run := newRun(id)
 	setStreamingHeaders(w)
 
@@ -82,7 +82,7 @@ func processEventStreamOutput(ctx context.Context, logger mvl.Logger, w http.Res
 }
 
 // streamEvents will stream the events of the tool to the response as server sent events.
-func streamEvents(ctx context.Context, logger mvl.Logger, w http.ResponseWriter, run *runInfo, events <-chan gserver.Event) {
+func streamEvents(ctx context.Context, logger mvl.Logger, w http.ResponseWriter, run *runInfo, events <-chan event) {
 	logger.Debugf("receiving events")
 	for {
 		select {

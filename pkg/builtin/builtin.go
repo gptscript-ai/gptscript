@@ -265,7 +265,7 @@ func Builtin(name string) (types.Tool, bool) {
 	return SetDefaults(t), ok
 }
 
-func SysFind(ctx context.Context, env []string, input string) (string, error) {
+func SysFind(_ context.Context, _ []string, input string) (string, error) {
 	var result []string
 	var params struct {
 		Pattern   string `json:"pattern,omitempty"`
@@ -306,7 +306,7 @@ func SysFind(ctx context.Context, env []string, input string) (string, error) {
 	return strings.Join(result, "\n"), nil
 }
 
-func SysExec(ctx context.Context, env []string, input string) (string, error) {
+func SysExec(_ context.Context, env []string, input string) (string, error) {
 	var params struct {
 		Command   string `json:"command,omitempty"`
 		Directory string `json:"directory,omitempty"`
@@ -412,7 +412,7 @@ func SysRead(_ context.Context, _ []string, input string) (string, error) {
 	return string(data), nil
 }
 
-func SysWrite(ctx context.Context, _ []string, input string) (string, error) {
+func SysWrite(_ context.Context, _ []string, input string) (string, error) {
 	var params struct {
 		Filename string `json:"filename,omitempty"`
 		Content  string `json:"content,omitempty"`
@@ -444,7 +444,7 @@ func SysWrite(ctx context.Context, _ []string, input string) (string, error) {
 	return fmt.Sprintf("Wrote (%d) bytes to file %s", len(data), file), nil
 }
 
-func SysAppend(ctx context.Context, env []string, input string) (string, error) {
+func SysAppend(_ context.Context, _ []string, input string) (string, error) {
 	var params struct {
 		Filename string `json:"filename,omitempty"`
 		Content  string `json:"content,omitempty"`
@@ -490,7 +490,7 @@ func fixQueries(u string) string {
 	return url.String()
 }
 
-func SysHTTPGet(ctx context.Context, env []string, input string) (_ string, err error) {
+func SysHTTPGet(_ context.Context, _ []string, input string) (_ string, err error) {
 	var params struct {
 		URL string `json:"url,omitempty"`
 	}
@@ -534,7 +534,7 @@ func SysHTTPHtml2Text(ctx context.Context, env []string, input string) (string, 
 	})
 }
 
-func SysHTTPPost(ctx context.Context, env []string, input string) (_ string, err error) {
+func SysHTTPPost(ctx context.Context, _ []string, input string) (_ string, err error) {
 	var params struct {
 		URL         string `json:"url,omitempty"`
 		Content     string `json:"content,omitempty"`
@@ -570,7 +570,7 @@ func SysHTTPPost(ctx context.Context, env []string, input string) (_ string, err
 	return fmt.Sprintf("Wrote %d to %s", len([]byte(params.Content)), params.URL), nil
 }
 
-func SysGetenv(ctx context.Context, env []string, input string) (string, error) {
+func SysGetenv(_ context.Context, env []string, input string) (string, error) {
 	var params struct {
 		Name string `json:"name,omitempty"`
 	}
@@ -636,7 +636,7 @@ func writeHistory(ctx *engine.Context) (result []engine.ChatHistoryCall) {
 	return
 }
 
-func SysChatFinish(ctx context.Context, env []string, input string) (string, error) {
+func SysChatFinish(_ context.Context, _ []string, input string) (string, error) {
 	var params struct {
 		Message string `json:"return,omitempty"`
 	}
@@ -650,7 +650,7 @@ func SysChatFinish(ctx context.Context, env []string, input string) (string, err
 	}
 }
 
-func SysAbort(ctx context.Context, env []string, input string) (string, error) {
+func SysAbort(_ context.Context, _ []string, input string) (string, error) {
 	var params struct {
 		Message string `json:"message,omitempty"`
 	}
@@ -660,7 +660,7 @@ func SysAbort(ctx context.Context, env []string, input string) (string, error) {
 	return "", fmt.Errorf("ABORT: %s", params.Message)
 }
 
-func SysRemove(ctx context.Context, env []string, input string) (string, error) {
+func SysRemove(_ context.Context, _ []string, input string) (string, error) {
 	var params struct {
 		Location string `json:"location,omitempty"`
 	}
@@ -679,7 +679,7 @@ func SysRemove(ctx context.Context, env []string, input string) (string, error) 
 	return fmt.Sprintf("Removed file: %s", params.Location), nil
 }
 
-func SysStat(ctx context.Context, env []string, input string) (string, error) {
+func SysStat(_ context.Context, _ []string, input string) (string, error) {
 	var params struct {
 		Filepath string `json:"filepath,omitempty"`
 	}
@@ -699,7 +699,7 @@ func SysStat(ctx context.Context, env []string, input string) (string, error) {
 	return fmt.Sprintf("%s %s mode: %s, size: %d bytes, modtime: %s", title, params.Filepath, stat.Mode().String(), stat.Size(), stat.ModTime().String()), nil
 }
 
-func SysDownload(ctx context.Context, env []string, input string) (_ string, err error) {
+func SysDownload(_ context.Context, env []string, input string) (_ string, err error) {
 	var params struct {
 		URL      string `json:"url,omitempty"`
 		Location string `json:"location,omitempty"`
@@ -772,12 +772,8 @@ func SysDownload(ctx context.Context, env []string, input string) (_ string, err
 	return fmt.Sprintf("Downloaded %s to %s", params.URL, params.Location), nil
 }
 
-func sysPromptHTTP(ctx context.Context, url, message string, fields []string, sensitive bool) (_ string, err error) {
-	data, err := json.Marshal(map[string]any{
-		"message":   message,
-		"fields":    fields,
-		"sensitive": sensitive,
-	})
+func sysPromptHTTP(ctx context.Context, url string, prompt types.Prompt) (_ string, err error) {
+	data, err := json.Marshal(prompt)
 	if err != nil {
 		return "", err
 	}
@@ -792,7 +788,7 @@ func sysPromptHTTP(ctx context.Context, url, message string, fields []string, se
 	if err != nil {
 		return "", err
 	}
-	resp.Body.Close()
+	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
 		return "", fmt.Errorf("invalid status code [%d], expected 200", resp.StatusCode)
@@ -813,8 +809,13 @@ func SysPrompt(ctx context.Context, envs []string, input string) (_ string, err 
 	}
 
 	for _, env := range envs {
-		if url, ok := strings.CutPrefix(env, "GPTSCRIPT_PROMPT_URL="); ok {
-			return sysPromptHTTP(ctx, url, params.Message, strings.Split(params.Fields, ","), params.Sensitive == "true")
+		if url, ok := strings.CutPrefix(env, types.PromptURLEnvVar+"="); ok {
+			httpPrompt := types.Prompt{
+				Message:   params.Message,
+				Fields:    strings.Split(params.Fields, ","),
+				Sensitive: params.Sensitive == "true",
+			}
+			return sysPromptHTTP(ctx, url, httpPrompt)
 		}
 	}
 
@@ -844,6 +845,6 @@ func SysPrompt(ctx context.Context, envs []string, input string) (_ string, err 
 	return string(resultsStr), nil
 }
 
-func SysTimeNow(ctx context.Context, env []string, input string) (string, error) {
+func SysTimeNow(context.Context, []string, string) (string, error) {
 	return time.Now().Format(time.RFC3339), nil
 }
