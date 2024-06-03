@@ -15,6 +15,7 @@ import (
 	"github.com/BurntSushi/locker"
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
+	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/loader/github"
 	"github.com/gptscript-ai/gptscript/pkg/repos/git"
 	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes/golang"
@@ -51,6 +52,7 @@ type Manager struct {
 	credHelperDirs   credentials.CredentialHelperDirs
 	runtimes         []Runtime
 	credHelperConfig *credHelperConfig
+	supportLocal     bool
 }
 
 type credHelperConfig struct {
@@ -58,6 +60,10 @@ type credHelperConfig struct {
 	initialized bool
 	cliCfg      *config.CLIConfig
 	env         []string
+}
+
+func (m *Manager) SetSupportLocal() {
+	m.supportLocal = true
 }
 
 func New(cacheDir string, runtimes ...Runtime) *Manager {
@@ -200,8 +206,14 @@ func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, e
 	_ = os.RemoveAll(doneFile)
 	_ = os.RemoveAll(target)
 
-	if err := git.Checkout(ctx, m.gitDir, tool.Source.Repo.Root, tool.Source.Repo.Revision, target); err != nil {
-		return "", nil, err
+	if tool.Source.Repo.VCS == "git" {
+		if err := git.Checkout(ctx, m.gitDir, tool.Source.Repo.Root, tool.Source.Repo.Revision, target); err != nil {
+			return "", nil, err
+		}
+	} else {
+		if err := os.MkdirAll(target, 0755); err != nil {
+			return "", nil, err
+		}
 	}
 
 	newEnv, err := runtime.Setup(ctx, m.runtimeDir, targetFinal, env)
@@ -227,12 +239,25 @@ func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, e
 }
 
 func (m *Manager) GetContext(ctx context.Context, tool types.Tool, cmd, env []string) (string, []string, error) {
-	if tool.Source.Repo == nil {
-		return tool.WorkingDir, env, nil
-	}
+	var isLocal bool
+	if !m.supportLocal {
+		if tool.Source.Repo == nil {
+			return tool.WorkingDir, env, nil
+		}
 
-	if tool.Source.Repo.VCS != "git" {
-		return "", nil, fmt.Errorf("only git is supported, found VCS %s for %s", tool.Source.Repo.VCS, tool.ID)
+		if tool.Source.Repo.VCS != "git" {
+			return "", nil, fmt.Errorf("only git is supported, found VCS %s for %s", tool.Source.Repo.VCS, tool.ID)
+		}
+	} else if tool.Source.Repo == nil {
+		isLocal = true
+		id := hash.Digest(tool)[:12]
+		tool.Source.Repo = &types.Repo{
+			VCS:      "<local>",
+			Root:     id,
+			Path:     "/",
+			Name:     id,
+			Revision: id,
+		}
 	}
 
 	for _, runtime := range m.runtimes {
@@ -240,6 +265,10 @@ func (m *Manager) GetContext(ctx context.Context, tool types.Tool, cmd, env []st
 			log.Debugf("Runtime %s supports %v", runtime.ID(), cmd)
 			return m.setup(ctx, runtime, tool, env)
 		}
+	}
+
+	if isLocal {
+		return tool.WorkingDir, env, nil
 	}
 
 	return m.setup(ctx, &noopRuntime{}, tool, env)
