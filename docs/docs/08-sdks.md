@@ -1,3 +1,0 @@
-# SDKs
-
-Currently, there are three SDKs being maintained: [Python](https://github.com/gptscript-ai/py-gptscript), [Node](https://github.com/gptscript-ai/node-gptscript), and [Go](https://github.com/gptscript-ai/go-gptscript). They are currently under development and are being iterated on relatively rapidly. The READMEs in each repository contain the most up-to-date documentation for the functionality of each.

@@ -1,4 +1,4 @@
-# Alternative Model Providers
+# Support Models and Platforms
 
 ## Usage
 
