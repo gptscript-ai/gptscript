@@ -748,9 +748,6 @@ func TestGlobalErr(t *testing.T) {
 }
 
 func TestContextArg(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip()
-	}
 	runner := tester.NewRunner(t)
 	x, err := runner.Run("", `{
 "file": "foo.db"
