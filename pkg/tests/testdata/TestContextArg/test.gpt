@@ -9,4 +9,4 @@ name: fromcontext
 args: first: an arg
 
 #!/bin/bash
-echo this is from context -- ${first}
+echo this is from context -- ${FIRST}
