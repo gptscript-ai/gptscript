@@ -80,6 +80,9 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 	}
 
 	if err := cmd.Run(); err != nil {
+		if toolCategory == NoCategory {
+			return fmt.Sprintf("ERROR: got (%v) while running tool, OUTPUT: %s", err, all), nil
+		}
 		_, _ = os.Stderr.Write(output.Bytes())
 		log.Errorf("failed to run tool [%s] cmd %v: %v", tool.Parameters.Name, cmd.Args, err)
 		return "", fmt.Errorf("ERROR: %s: %w", all, err)
