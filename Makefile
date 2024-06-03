@@ -14,6 +14,7 @@ tidy:
 test:
 	go test -v ./...
 
+smoke: build
 smoke:
 	go test -v -tags='smoke' ./pkg/tests/smoke/...
 
