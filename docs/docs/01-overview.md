@@ -2,39 +2,41 @@
 title: Overview
 slug: /
 ---
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 [![Discord](https://img.shields.io/discord/1204558420984864829?label=Discord)](https://discord.gg/9sSf4UyAMC)
 
-GPTScript is a new scripting language to automate your interaction with a Large Language Model (LLM), namely OpenAI. The ultimate goal is to create a natural language programming experience. The syntax of GPTScript is largely natural language, making it very easy to learn and use. Natural language prompts can be mixed with traditional scripts such as bash and python or even external HTTP service calls. With GPTScript you can do just about anything, like [plan a vacation](https://github.com/gptscript-ai/gptscript/blob/main/examples/travel-agent.gpt), [edit a file](https://github.com/gptscript-ai/gptscript/blob/main/examples/add-go-mod-dep.gpt), [run some SQL](https://github.com/gptscript-ai/gptscript/blob/main/examples/sqlite-download.gpt), or [build a mongodb/flask app](https://github.com/gptscript-ai/gptscript/blob/main/examples/hacker-news-headlines.gpt).
+![Demo](/img/demo.gif)
 
-:::note
-We are currently exploring options for interacting with local models using GPTScript.
-:::
+GPTScript is a framework that allows Large Language Models (LLMs) to operate and interact with various systems. These systems can range from local executables to complex applications with OpenAPI schemas, SDK libraries, or any RAG-based solutions. GPTScript is designed to easily integrate any system, whether local or remote, with your LLM using just a few lines of prompts.
 
-```yaml
-# example.gpt
+Here are some sample use cases of GPTScript:
+1. Chat with a local CLI - [Try it!](examples/cli)
+2. Chat with an OpenAPI compliant endpoint - [Try it!](examples/api)
+3. Chat with local files and directories - [Try it!](examples/local-files)
+4. Run an automated workflow - [Try it!](examples/workflow)
 
-Tools: sys.download, sys.exec, sys.remove
+### Getting Started
 
-Download https://www.sqlitetutorial.net/wp-content/uploads/2018/03/chinook.zip to a
-random file. Then expand the archive to a temporary location as there is a sqlite
-database in it.
-
-First inspect the schema of the database to understand the table structure.
-
-Form and run a SQL query to find the artist with the most number of albums and output
-the result of that.
-
-When done remove the database file and the downloaded content.
-```
-```shell
-$ gptscript ./example.gpt
-```
-```
-OUTPUT:
-
-The artist with the most number of albums in the database is Iron Maiden, with a total
-of 21 albums.
-```
-
-For more examples check out the [examples](https://github.com/gptscript-ai/gptscript/blob/main/examples) directory.
+<Tabs>
+    <TabItem value="MacOS and Linux">
+    ```shell
+    brew install gptscript-ai/tap/gptscript 
+    gptscript github.com/gptscript-ai/llm-basics-demo
+    ```
+    A few notes:
+    - You'll need an [OpenAI API key](https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key)
+    - The above script is a simple chat-based assistant. You can ask it questions and it will answer to the best of its ability.
+    </TabItem>
+    <TabItem value="Windows">
+    ```shell
+    winget install gptscript-ai.gptscript
+    gptscript github.com/gptscript-ai/llm-basics-demo
+    ```
+    A few notes:
+    - You'll need an [OpenAI API key](https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key)
+    - After installing gptscript you may need to restart your terminal for the changes to take effect
+    - The above script is a simple chat-based assistant. You can ask it questions and it will answer to the best of its ability.
+    </TabItem>
+</Tabs>
