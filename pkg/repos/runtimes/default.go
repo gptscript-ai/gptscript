@@ -3,12 +3,14 @@ package runtimes
 import (
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/repos"
+	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes/busybox"
 	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes/golang"
 	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes/node"
 	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes/python"
 )
 
 var Runtimes = []repos.Runtime{
+	&busybox.Runtime{},
 	&python.Runtime{
 		Version: "3.12",
 		Default: true,

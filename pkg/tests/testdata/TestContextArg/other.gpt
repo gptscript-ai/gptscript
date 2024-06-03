@@ -2,5 +2,5 @@ name: fromcontext
 args: first: an arg
 args: second: an arg
 
-#!/bin/bash
-echo this is from other context ${first} and then ${second}
+#!/usr/bin/env bash
+echo this is from other context ${FIRST} and then ${SECOND}

@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"runtime"
 	"sort"
@@ -267,6 +268,10 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 		args[i] = os.Expand(arg, func(s string) string {
 			return envMap[s]
 		})
+	}
+
+	if runtime.GOOS == "windows" && (args[0] == "/bin/bash" || args[0] == "/bin/sh") {
+		args[0] = path.Base(args[0])
 	}
 
 	if runtime.GOOS == "windows" && (args[0] == "/usr/bin/env" || args[0] == "/bin/env") {

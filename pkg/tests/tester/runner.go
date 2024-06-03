@@ -8,8 +8,11 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/adrg/xdg"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/repos"
+	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/hexops/autogold/v2"
@@ -171,8 +174,15 @@ func NewRunner(t *testing.T) *Runner {
 		t: t,
 	}
 
+	cacheDir, err := xdg.CacheFile("gptscript-test-cache/runtime")
+	require.NoError(t, err)
+
+	rm := runtimes.Default(cacheDir)
+	rm.(*repos.Manager).SetSupportLocal()
+
 	run, err := runner.New(c, credentials.NoopStore{}, runner.Options{
-		Sequential: true,
+		Sequential:     true,
+		RuntimeManager: rm,
 	})
 	require.NoError(t, err)
 
