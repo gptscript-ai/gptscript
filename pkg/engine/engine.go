@@ -1,9 +1,12 @@
 package engine
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
+	"os"
 	"strings"
 	"sync"
 
@@ -201,6 +204,36 @@ func (c *Context) WrappedContext() context.Context {
 	return context.WithValue(c.Ctx, engineContext{}, c)
 }
 
+func putHistory(messages []types.CompletionMessage) []types.CompletionMessage {
+	prevHistoryFile := strings.TrimSpace(os.Getenv("GPTSCRIPT_PREVIOUS_HISTORY_FILE"))
+
+	if prevHistoryFile == "" {
+		return messages
+	}
+	fp, err := os.Open(prevHistoryFile)
+	if err != nil {
+		slog.Error("Open Error", err)
+		return messages
+	}
+	defer fp.Close()
+
+	scanner := bufio.NewScanner(fp)
+
+	prevMessages := []types.CompletionMessage{}
+	for scanner.Scan() {
+		var message types.CompletionMessage
+		line := scanner.Text()
+		err := json.Unmarshal([]byte(line), &message)
+		if err != nil {
+			slog.Error("Unmarshal Error", err)
+			return messages
+		}
+		prevMessages = append(prevMessages, message)
+	}
+
+	return append(messages, prevMessages...)
+}
+
 func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 	tool := ctx.Tool
 
@@ -261,6 +294,10 @@ func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 
 	if tool.Chat && input == "{}" {
 		input = ""
+	}
+
+	if ctx.Parent == nil {
+		completion.Messages = putHistory(completion.Messages)
 	}
 
 	if input != "" {
