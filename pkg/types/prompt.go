@@ -1,6 +1,9 @@
 package types
 
-const PromptURLEnvVar = "GPTSCRIPT_PROMPT_URL"
+const (
+	PromptURLEnvVar   = "GPTSCRIPT_PROMPT_URL"
+	PromptTokenEnvVar = "GPTSCRIPT_PROMPT_TOKEN"
+)
 
 type Prompt struct {
 	Message   string   `json:"message,omitempty"`

@@ -1,7 +1,6 @@
 package builtin
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -18,9 +17,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/BurntSushi/locker"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
+	"github.com/gptscript-ai/gptscript/pkg/prompt"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/jaytaylor/html2text"
 )
@@ -216,7 +215,7 @@ var tools = map[string]types.Tool{
 					"sensitive", "(true or false) Whether the input should be hidden",
 				),
 			},
-			BuiltinFunc: SysPrompt,
+			BuiltinFunc: prompt.SysPrompt,
 		},
 	},
 	"sys.chat.history": {
@@ -770,79 +769,6 @@ func SysDownload(_ context.Context, env []string, input string) (_ string, err e
 	}
 
 	return fmt.Sprintf("Downloaded %s to %s", params.URL, params.Location), nil
-}
-
-func sysPromptHTTP(ctx context.Context, url string, prompt types.Prompt) (_ string, err error) {
-	data, err := json.Marshal(prompt)
-	if err != nil {
-		return "", err
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(data))
-	if err != nil {
-		return "", err
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("invalid status code [%d], expected 200", resp.StatusCode)
-	}
-
-	data, err = io.ReadAll(resp.Body)
-	return string(data), err
-}
-
-func SysPrompt(ctx context.Context, envs []string, input string) (_ string, err error) {
-	var params struct {
-		Message   string `json:"message,omitempty"`
-		Fields    string `json:"fields,omitempty"`
-		Sensitive string `json:"sensitive,omitempty"`
-	}
-	if err := json.Unmarshal([]byte(input), &params); err != nil {
-		return "", err
-	}
-
-	for _, env := range envs {
-		if url, ok := strings.CutPrefix(env, types.PromptURLEnvVar+"="); ok {
-			httpPrompt := types.Prompt{
-				Message:   params.Message,
-				Fields:    strings.Split(params.Fields, ","),
-				Sensitive: params.Sensitive == "true",
-			}
-			return sysPromptHTTP(ctx, url, httpPrompt)
-		}
-	}
-
-	if params.Message != "" {
-		_, _ = fmt.Fprintln(os.Stderr, params.Message)
-	}
-
-	results := map[string]string{}
-	for _, f := range strings.Split(params.Fields, ",") {
-		var value string
-		if params.Sensitive == "true" {
-			err = survey.AskOne(&survey.Password{Message: f}, &value, survey.WithStdio(os.Stdin, os.Stderr, os.Stderr))
-		} else {
-			err = survey.AskOne(&survey.Input{Message: f}, &value, survey.WithStdio(os.Stdin, os.Stderr, os.Stderr))
-		}
-		if err != nil {
-			return "", err
-		}
-		results[f] = value
-	}
-
-	resultsStr, err := json.Marshal(results)
-	if err != nil {
-		return "", err
-	}
-
-	return string(resultsStr), nil
 }
 
 func SysTimeNow(context.Context, []string, string) (string, error) {

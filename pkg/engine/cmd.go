@@ -14,7 +14,6 @@ import (
 	"strings"
 
 	"github.com/google/shlex"
-	context2 "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -72,12 +71,6 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = io.MultiWriter(all, os.Stderr)
 	cmd.Stdout = io.MultiWriter(all, output)
-
-	if toolCategory == CredentialToolCategory {
-		pause := context2.GetPauseFuncFromCtx(ctx.Ctx)
-		unpause := pause()
-		defer unpause()
-	}
 
 	if err := cmd.Run(); err != nil {
 		if toolCategory == NoCategory {

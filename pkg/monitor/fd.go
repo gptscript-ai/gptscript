@@ -70,6 +70,10 @@ func (s *fileFactory) Start(_ context.Context, prg *types.Program, env []string,
 	return fd, nil
 }
 
+func (s *fileFactory) Pause() func() {
+	return func() {}
+}
+
 func (s *fileFactory) close() {
 	s.lock.Lock()
 	defer s.lock.Unlock()

@@ -38,6 +38,7 @@ type Console struct {
 	dumpState       string
 	displayProgress bool
 	printMessages   bool
+	callLock        sync.Mutex
 }
 
 var (
@@ -47,6 +48,7 @@ var (
 func (c *Console) Start(_ context.Context, prg *types.Program, _ []string, input string) (runner.Monitor, error) {
 	id := counter.Next()
 	mon := newDisplay(c.dumpState, c.displayProgress, c.printMessages)
+	mon.callLock = &c.callLock
 	mon.dump.ID = fmt.Sprint(id)
 	mon.dump.Program = prg
 	mon.dump.Input = input
@@ -55,13 +57,20 @@ func (c *Console) Start(_ context.Context, prg *types.Program, _ []string, input
 	return mon, nil
 }
 
+func (c *Console) Pause() func() {
+	c.callLock.Lock()
+	return func() {
+		c.callLock.Unlock()
+	}
+}
+
 type display struct {
 	dump          dump
 	printMessages bool
 	livePrinter   *livePrinter
 	dumpState     string
 	callIDMap     map[string]string
-	callLock      sync.Mutex
+	callLock      *sync.Mutex
 	usage         types.Usage
 }
 

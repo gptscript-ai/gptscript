@@ -324,6 +324,10 @@ func (s SessionFactory) Start(ctx context.Context, prg *types.Program, env []str
 	}, nil
 }
 
+func (s SessionFactory) Pause() func() {
+	return func() {}
+}
+
 type Session struct {
 	id      string
 	prj     *types.Program
