@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -162,8 +163,12 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 		reqObject.ChatState = "null"
 	}
 
-	// Append a prompt URL for this run.
-	reqObject.Env = append(reqObject.Env, fmt.Sprintf("%s=http://%s/prompt/%s", types.PromptURLEnvVar, s.address, runID))
+	reqObject.Env = append(os.Environ(), reqObject.Env...)
+	// Don't overwrite the PromptURLEnvVar if it is already set in the environment.
+	if !slices.ContainsFunc(reqObject.Env, func(s string) bool { return strings.HasPrefix(s, types.PromptURLEnvVar+"=") }) {
+		// Append a prompt URL for this run.
+		reqObject.Env = append(reqObject.Env, fmt.Sprintf("%s=http://%s/prompt/%s", types.PromptURLEnvVar, s.address, runID))
+	}
 
 	logger.Debugf("executing tool: %+v", reqObject)
 	var (
@@ -179,7 +184,7 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 
 	opts := &gptscript.Options{
 		Cache:             reqObject.Options,
-		Env:               append(os.Environ(), reqObject.Env...),
+		Env:               reqObject.Env,
 		Workspace:         reqObject.Workspace,
 		CredentialContext: reqObject.CredentialContext,
 		Runner: runner.Options{
