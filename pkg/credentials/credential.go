@@ -8,11 +8,13 @@ import (
 	"github.com/docker/cli/cli/config/types"
 )
 
+const ctxSeparator = "///"
+
 type CredentialType string
 
 const (
 	CredentialTypeTool          CredentialType = "tool"
-	CredentialTypeModelProvider CredentialType = "modelprovider"
+	CredentialTypeModelProvider CredentialType = "modelProvider"
 )
 
 type Credential struct {
@@ -50,7 +52,7 @@ func credentialFromDockerAuthConfig(authCfg types.AuthConfig) (Credential, error
 
 	// If it's a tool credential or sys.openai, remove the http[s] prefix.
 	address := authCfg.ServerAddress
-	if credType == string(CredentialTypeTool) || strings.HasPrefix(address, "https://sys.openai///") {
+	if credType == string(CredentialTypeTool) || strings.HasPrefix(address, "https://sys.openai"+ctxSeparator) {
 		address = strings.TrimPrefix(strings.TrimPrefix(address, "https://"), "http://")
 	}
 
@@ -68,13 +70,13 @@ func credentialFromDockerAuthConfig(authCfg types.AuthConfig) (Credential, error
 }
 
 func toolNameWithCtx(toolName, credCtx string) string {
-	return toolName + "///" + credCtx
+	return toolName + ctxSeparator + credCtx
 }
 
 func toolNameAndCtxFromAddress(address string) (string, string, error) {
-	parts := strings.Split(address, "///")
+	parts := strings.Split(address, ctxSeparator)
 	if len(parts) != 2 {
-		return "", "", fmt.Errorf("error parsing tool name and context %q. Tool names cannot contain '///'", address)
+		return "", "", fmt.Errorf("error parsing tool name and context %q. Tool names cannot contain '%s'", address, ctxSeparator)
 	}
 	return parts[0], parts[1], nil
 }
