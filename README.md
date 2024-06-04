@@ -91,15 +91,6 @@ Download and install the archive for your platform and architecture from the [re
 export OPENAI_API_KEY="your-api-key"
 ```
 
-Alternatively Azure OpenAI can be utilized. If the [Azure deployment name is different than the model being used](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/switching-endpoints#keyword-argument-for-model), be sure to include the `OPENAI_AZURE_DEPLOYMENT` argument.
-
-```shell
-export OPENAI_API_KEY="your-api-key"
-export OPENAI_BASE_URL="https://<your-endpoint>.openai.azure.com/"
-export OPENAI_API_TYPE="AZURE"
-export OPENAI_AZURE_DEPLOYMENT="<your-deployment-name>"
-```
-
 #### Windows
 
 ```powershell
@@ -118,9 +109,7 @@ OUTPUT:
 Hello, World!
 ```
 
-The model used by default is `gpt-4-turbo` and you must have access to that model in your OpenAI account.
-
-If using Azure OpenAI, make sure you configure the model to be one of the supported versions with the `--default-model` argument.
+The model used by default is `gpt-4o` and you must have access to that model in your OpenAI account.
 
 ### 4. Extra Credit: Examples and Run Debugging UI
 

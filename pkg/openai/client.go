@@ -23,9 +23,8 @@ const (
 )
 
 var (
-	key        = os.Getenv("OPENAI_API_KEY")
-	url        = os.Getenv("OPENAI_URL")
-	azureModel = os.Getenv("OPENAI_AZURE_DEPLOYMENT")
+	key = os.Getenv("OPENAI_API_KEY")
+	url = os.Getenv("OPENAI_URL")
 )
 
 type Client struct {
@@ -38,15 +37,13 @@ type Client struct {
 }
 
 type Options struct {
-	BaseURL      string         `usage:"OpenAI base URL" name:"openai-base-url" env:"OPENAI_BASE_URL"`
-	APIKey       string         `usage:"OpenAI API KEY" name:"openai-api-key" env:"OPENAI_API_KEY"`
-	APIVersion   string         `usage:"OpenAI API Version (for Azure)" name:"openai-api-version" env:"OPENAI_API_VERSION"`
-	APIType      openai.APIType `usage:"OpenAI API Type (valid: OPEN_AI, AZURE, AZURE_AD)" name:"openai-api-type" env:"OPENAI_API_TYPE"`
-	OrgID        string         `usage:"OpenAI organization ID" name:"openai-org-id" env:"OPENAI_ORG_ID"`
-	DefaultModel string         `usage:"Default LLM model to use" default:"gpt-4o"`
-	ConfigFile   string         `usage:"Path to GPTScript config file" name:"config"`
-	SetSeed      bool           `usage:"-"`
-	CacheKey     string         `usage:"-"`
+	BaseURL      string `usage:"OpenAI base URL" name:"openai-base-url" env:"OPENAI_BASE_URL"`
+	APIKey       string `usage:"OpenAI API KEY" name:"openai-api-key" env:"OPENAI_API_KEY"`
+	OrgID        string `usage:"OpenAI organization ID" name:"openai-org-id" env:"OPENAI_ORG_ID"`
+	DefaultModel string `usage:"Default LLM model to use" default:"gpt-4o"`
+	ConfigFile   string `usage:"Path to GPTScript config file" name:"config"`
+	SetSeed      bool   `usage:"-"`
+	CacheKey     string `usage:"-"`
 	Cache        *cache.Client
 }
 
@@ -56,8 +53,6 @@ func complete(opts ...Options) (result Options, err error) {
 		result.APIKey = types.FirstSet(opt.APIKey, result.APIKey)
 		result.OrgID = types.FirstSet(opt.OrgID, result.OrgID)
 		result.Cache = types.FirstSet(opt.Cache, result.Cache)
-		result.APIVersion = types.FirstSet(opt.APIVersion, result.APIVersion)
-		result.APIType = types.FirstSet(opt.APIType, result.APIType)
 		result.DefaultModel = types.FirstSet(opt.DefaultModel, result.DefaultModel)
 		result.SetSeed = types.FirstSet(opt.SetSeed, result.SetSeed)
 		result.CacheKey = types.FirstSet(opt.CacheKey, result.CacheKey)
@@ -80,19 +75,6 @@ func complete(opts ...Options) (result Options, err error) {
 	return result, err
 }
 
-func GetAzureMapperFunction(defaultModel, azureModel string) func(string) string {
-	if azureModel == "" {
-		return func(model string) string {
-			return model
-		}
-	}
-	return func(model string) string {
-		return map[string]string{
-			defaultModel: azureModel,
-		}[model]
-	}
-}
-
 func NewClient(opts ...Options) (*Client, error) {
 	opt, err := complete(opts...)
 	if err != nil {
@@ -100,15 +82,8 @@ func NewClient(opts ...Options) (*Client, error) {
 	}
 
 	cfg := openai.DefaultConfig(opt.APIKey)
-	if strings.Contains(string(opt.APIType), "AZURE") {
-		cfg = openai.DefaultAzureConfig(key, url)
-		cfg.AzureModelMapperFunc = GetAzureMapperFunction(opt.DefaultModel, azureModel)
-	}
-
 	cfg.BaseURL = types.FirstSet(opt.BaseURL, cfg.BaseURL)
 	cfg.OrgID = types.FirstSet(opt.OrgID, cfg.OrgID)
-	cfg.APIVersion = types.FirstSet(opt.APIVersion, cfg.APIVersion)
-	cfg.APIType = types.FirstSet(opt.APIType, cfg.APIType)
 
 	cacheKeyBase := opt.CacheKey
 	if cacheKeyBase == "" {
