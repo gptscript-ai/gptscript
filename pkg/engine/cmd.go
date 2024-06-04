@@ -20,6 +20,11 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
 
+var requiredFileExtensions = map[string]string{
+	"powershell.exe": "*.ps1",
+	"powershell":     "*.ps1",
+}
+
 func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCategory ToolCategory) (cmdOut string, cmdErr error) {
 	id := counter.Next()
 
@@ -198,7 +203,7 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 	)
 
 	if strings.TrimSpace(rest) != "" {
-		f, err := os.CreateTemp("", version.ProgramName)
+		f, err := os.CreateTemp("", version.ProgramName+requiredFileExtensions[args[0]])
 		if err != nil {
 			return nil, nil, err
 		}
