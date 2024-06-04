@@ -76,7 +76,7 @@ func (e *Eval) Run(cmd *cobra.Command, args []string) error {
 	if e.Chat {
 		return chat.Start(cmd.Context(), nil, runner, func() (types.Program, error) {
 			return prg, nil
-		}, os.Environ(), toolInput)
+		}, os.Environ(), toolInput, "")
 	}
 
 	toolOutput, err := runner.Run(cmd.Context(), prg, opts.Env, toolInput)
