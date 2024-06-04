@@ -2,7 +2,8 @@ run:
   timeout: 5m
 
 output:
-  format: github-actions
+  formats:
+  - github-actions
 
 linters:
   disable-all: true
