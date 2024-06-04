@@ -5,6 +5,12 @@ all: build
 build-exe:
 	GOOS=windows go build -o bin/gptscript.exe -tags "${GO_TAGS}" .
 
+build-linux-amd64:
+	GOOS=linux GOARCH=amd64 go build -o bin/gptscript_linux_amd64 -tags "${GO_TAGS}" .
+
+build-linux-arm64:
+	GOOS=linux GOARCH=arm64 go build -o bin/gptscript_linux_arm64 -tags "${GO_TAGS}" .
+
 build:
 	CGO_ENABLED=0 go build -o bin/gptscript -tags "${GO_TAGS}" -ldflags "-s -w" .
 
@@ -23,6 +29,12 @@ smoke:
 	go test -v -tags='smoke' ./pkg/tests/smoke/...
 
 GOLANGCI_LINT_VERSION ?= v1.60.1
+
+cp: build-linux-amd64 build-linux-arm64
+	cp bin/gptscript_linux_amd64 ~/Workspace/streamlit-gptscript/gptscript/bin/gptscript
+	cp bin/gptscript_linux_amd64 ~/Workspace/streamlit-gptscript/gptscript/bin/gptscript_linux_amd64
+	cp bin/gptscript_linux_arm64 ~/Workspace/streamlit-gptscript/gptscript/bin/gptscript_linux_arm64
+
 lint:
 	if ! command -v golangci-lint &> /dev/null; then \
   		echo "Could not find golangci-lint, installing version $(GOLANGCI_LINT_VERSION)."; \

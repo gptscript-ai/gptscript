@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -636,17 +638,29 @@ func streamProgress(callCtx *engine.Context, monitor Monitor) (chan<- types.Comp
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
+	progressTimeStepMs, err := strconv.Atoi(os.Getenv("GPTSCRIPT_PROGRESS_TIME_STEP_MS"))
+	if err != nil {
+		// 기본값 250ms를 사용하거나 오류를 처리합니다.
+		progressTimeStepMs = 250
+	}
+	progressTimeStep := time.Duration(progressTimeStepMs) * time.Millisecond
 	go func() {
 		defer wg.Done()
+		lastSentTimeMap := make(map[string]time.Time)
 		for status := range progress {
 			if message := status.PartialResponse; message != nil {
-				monitor.Event(Event{
-					Time:             time.Now(),
-					CallContext:      callCtx.GetCallContext(),
-					Type:             EventTypeCallProgress,
-					ChatCompletionID: status.CompletionID,
-					Content:          getEventContent(message.String(), *callCtx),
-				})
+				now := time.Now()
+				lastSentTime, ok := lastSentTimeMap[status.CompletionID]
+				if !ok || now.Sub(lastSentTime) > progressTimeStep {
+					lastSentTimeMap[status.CompletionID] = now
+					monitor.Event(Event{
+						Time:             time.Now(),
+						CallContext:      callCtx.GetCallContext(),
+						Type:             EventTypeCallProgress,
+						ChatCompletionID: status.CompletionID,
+						Content:          getEventContent(message.String(), *callCtx),
+					})
+				}
 			} else {
 				monitor.Event(Event{
 					Time:               time.Now(),
@@ -658,6 +672,7 @@ func streamProgress(callCtx *engine.Context, monitor Monitor) (chan<- types.Comp
 					Usage:              status.Usage,
 					ChatResponseCached: status.Cached,
 				})
+				delete(lastSentTimeMap, status.CompletionID)
 			}
 		}
 	}()

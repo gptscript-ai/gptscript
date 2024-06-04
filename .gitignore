@@ -9,3 +9,5 @@
 /binaries
 /checksums.txt
 /.env*
+ui/
+gptscript.code-workspace

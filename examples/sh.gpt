@@ -1,0 +1,26 @@
+name: main
+tools: answer, extract_hashtag
+Chat: True
+
+당신은 주어진 툴을 이용해서 사용자의 질문에 대답하는 agent입니다.
+처음에는 "안녕"이라 말해주세요.
+
+---
+name: answer
+description: 사용자의 질문에 대해서 답해줍니다.
+args: question : 사용자의 질문
+args: hashtags : example) ["postgres", "mysql"]. 이 인자를 얻기위해서는 반드시 extract_hashtag tool을 사용한 결과로 해야합니다.
+tools: extract_hashtag
+
+#!/usr/bin/env python
+
+print("melong")
+
+---
+name: extract_hashtag
+description: 사용자의 질문에서 해시태그를 추출합니다.
+args: question : 사용자의 질문
+
+#!/usr/bin/env python
+
+print("hash1, hash2")

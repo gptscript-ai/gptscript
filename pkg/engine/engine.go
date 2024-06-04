@@ -1,9 +1,12 @@
 package engine
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
+	"os"
 	"strings"
 	"sync"
 
@@ -281,6 +284,39 @@ func populateMessageParams(ctx Context, completion *types.CompletionRequest, too
 	return nil
 }
 
+func putHistory(messages []types.CompletionMessage) []types.CompletionMessage {
+	prevHistoryFile := strings.TrimSpace(os.Getenv("GPTSCRIPT_PREVIOUS_HISTORY_FILE"))
+
+	if prevHistoryFile == "" {
+		return messages
+	}
+	fp, err := os.Open(prevHistoryFile)
+	if err != nil {
+		slog.Error("Open Error", err)
+		return messages
+	}
+	defer fp.Close()
+
+	scanner := bufio.NewScanner(fp)
+
+	prevMessages := []types.CompletionMessage{}
+	for scanner.Scan() {
+		var message types.CompletionMessage
+		line := scanner.Text()
+		err := json.Unmarshal([]byte(line), &message)
+		if err != nil {
+			slog.Error("Unmarshal Error", err)
+			return messages
+		}
+		if message.Role == "system" {
+			continue
+		}
+		prevMessages = append(prevMessages, message)
+	}
+
+	return append(messages, prevMessages...)
+}
+
 func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 	tool := ctx.Tool
 
@@ -299,6 +335,8 @@ func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 			return e.runOpenAPI(tool, input)
 		} else if tool.IsEcho() {
 			return e.runEcho(tool)
+		} else if tool.IsBreak() {
+			return e.runBreak(tool, input)
 		}
 		s, err := e.runCommand(ctx, tool, input, ctx.ToolCategory)
 		if err != nil {
@@ -320,6 +358,10 @@ func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 
 	if tool.Chat && input == "{}" {
 		input = ""
+	}
+
+	if ctx.Parent == nil {
+		completion.Messages = putHistory(completion.Messages)
 	}
 
 	if input != "" {
