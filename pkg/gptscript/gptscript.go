@@ -5,15 +5,18 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
+	context2 "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/llm"
 	"github.com/gptscript-ai/gptscript/pkg/monitor"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/openai"
+	"github.com/gptscript-ai/gptscript/pkg/prompt"
 	"github.com/gptscript-ai/gptscript/pkg/remote"
 	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
@@ -28,6 +31,8 @@ type GPTScript struct {
 	Cache                  *cache.Client
 	WorkspacePath          string
 	DeleteWorkspaceOnClose bool
+	extraEnv               []string
+	close                  func()
 }
 
 type Options struct {
@@ -96,12 +101,21 @@ func New(opts *Options) (*GPTScript, error) {
 		return nil, err
 	}
 
+	ctx, closeServer := context.WithCancel(context2.AddPauseFuncToCtx(context.Background(), opts.Runner.MonitorFactory.Pause))
+	extraEnv, err := prompt.NewServer(ctx, opts.Env)
+	if err != nil {
+		closeServer()
+		return nil, err
+	}
+
 	return &GPTScript{
 		Registry:               registry,
 		Runner:                 runner,
 		Cache:                  cacheClient,
 		WorkspacePath:          opts.Workspace,
 		DeleteWorkspaceOnClose: opts.Workspace == "",
+		extraEnv:               extraEnv,
+		close:                  closeServer,
 	}, nil
 }
 
@@ -122,10 +136,10 @@ func (g *GPTScript) getEnv(env []string) ([]string, error) {
 	if err := os.MkdirAll(g.WorkspacePath, 0700); err != nil {
 		return nil, err
 	}
-	return append([]string{
+	return slices.Concat(g.extraEnv, []string{
 		fmt.Sprintf("GPTSCRIPT_WORKSPACE_DIR=%s", g.WorkspacePath),
 		fmt.Sprintf("GPTSCRIPT_WORKSPACE_ID=%s", hash.ID(g.WorkspacePath)),
-	}, env...), nil
+	}, env), nil
 }
 
 func (g *GPTScript) Chat(ctx context.Context, prevState runner.ChatState, prg types.Program, envs []string, input string) (runner.ChatResponse, error) {
@@ -152,6 +166,8 @@ func (g *GPTScript) Close(closeDaemons bool) {
 			log.Errorf("failed to delete workspace %s: %s", g.WorkspacePath, err)
 		}
 	}
+
+	g.close()
 
 	if closeDaemons {
 		engine.CloseDaemons()
