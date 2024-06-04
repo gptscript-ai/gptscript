@@ -70,7 +70,7 @@ type GPTScript struct {
 	ForceSequential    bool   `usage:"Force parallel calls to run sequentially"`
 	Workspace          string `usage:"Directory to use for the workspace, if specified it will not be deleted on exit"`
 	UI                 bool   `usage:"Launch the UI" local:"true" name:"ui"`
-	TUI                bool   `usage:"Launch the TUI" local:"true" name:"tui"`
+	DisableTUI         bool   `usage:"Don't use chat TUI but instead verbose output" local:"true" name:"disable-tui"`
 
 	readData []byte
 }
@@ -438,9 +438,14 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 	}
 
 	if prg.IsChat() || r.ForceChat {
-		if r.TUI {
-			return tui.Run(cmd.Context(), args[0], r.Workspace, strings.Join(args[1:], " "), tui.RunOptions{
+		if !r.DisableTUI && !r.Debug && !r.DebugMessages {
+			return tui.Run(cmd.Context(), args[0], tui.RunOptions{
 				TrustedRepoPrefixes: []string{"github.com/gptscript-ai/context"},
+				DisableCache:        r.DisableCache,
+				Input:               strings.Join(args[1:], " "),
+				CacheDir:            r.CacheDir,
+				SubTool:             r.SubTool,
+				Workspace:           r.Workspace,
 			})
 		}
 		return chat.Start(cmd.Context(), nil, gptScript, func() (types.Program, error) {

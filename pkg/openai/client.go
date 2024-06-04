@@ -369,16 +369,15 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		result.Role = types.CompletionMessageRoleTypeAssistant
 	}
 
-	var usage types.Usage
-	if !cacheResponse {
-		usage = result.Usage
+	if cacheResponse {
+		result.Usage = types.Usage{}
 	}
 
 	status <- types.CompletionStatus{
 		CompletionID: id,
 		Chunks:       response,
 		Response:     result,
-		Usage:        usage,
+		Usage:        result.Usage,
 		Cached:       cacheResponse,
 	}
 

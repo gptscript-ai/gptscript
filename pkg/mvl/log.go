@@ -53,6 +53,9 @@ func (f formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	if i, ok := entry.Data["request"]; ok && i != "" {
 		msg += fmt.Sprintf(" [request=%s]", i)
 	}
+	if i, ok := entry.Data["cached"]; ok && i == true {
+		msg += " [cached]"
+	}
 	if i, ok := entry.Data["response"]; ok && i != "" {
 		msg += fmt.Sprintf(" [response=%s]", i)
 	}
