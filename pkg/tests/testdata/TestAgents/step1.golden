@@ -1,0 +1,259 @@
+`{
+  "done": false,
+  "content": "TEST RESULT CALL: 4",
+  "toolID": "testdata/TestAgents/test.gpt:agent3",
+  "state": {
+    "continuation": {
+      "state": {
+        "input": "Input 1",
+        "completion": {
+          "model": "gpt-4o",
+          "internalSystemPrompt": false,
+          "tools": [
+            {
+              "function": {
+                "toolID": "testdata/TestAgents/test.gpt:agent1",
+                "name": "agent1",
+                "parameters": null
+              }
+            },
+            {
+              "function": {
+                "toolID": "testdata/TestAgents/test.gpt:agent2",
+                "name": "agent2",
+                "parameters": null
+              }
+            }
+          ],
+          "messages": [
+            {
+              "role": "system",
+              "content": [
+                {
+                  "text": "I'm the intro"
+                }
+              ],
+              "usage": {}
+            },
+            {
+              "role": "user",
+              "content": [
+                {
+                  "text": "Input 1"
+                }
+              ],
+              "usage": {}
+            },
+            {
+              "role": "assistant",
+              "content": [
+                {
+                  "toolCall": {
+                    "index": 0,
+                    "id": "call_1",
+                    "function": {
+                      "name": "agent1"
+                    }
+                  }
+                }
+              ],
+              "usage": {}
+            }
+          ]
+        },
+        "pending": {
+          "call_1": {
+            "index": 0,
+            "id": "call_1",
+            "function": {
+              "name": "agent1"
+            }
+          }
+        }
+      },
+      "calls": {
+        "call_1": {
+          "toolID": "testdata/TestAgents/test.gpt:agent1"
+        }
+      }
+    },
+    "subCalls": [
+      {
+        "toolId": "testdata/TestAgents/test.gpt:agent1",
+        "callId": "call_1",
+        "state": {
+          "continuation": {
+            "state": {
+              "completion": {
+                "model": "gpt-4o",
+                "internalSystemPrompt": false,
+                "tools": [
+                  {
+                    "function": {
+                      "toolID": "testdata/TestAgents/test.gpt:agent2",
+                      "name": "agent2",
+                      "parameters": null
+                    }
+                  }
+                ],
+                "messages": [
+                  {
+                    "role": "system",
+                    "content": [
+                      {
+                        "text": "I am agent1"
+                      }
+                    ],
+                    "usage": {}
+                  },
+                  {
+                    "role": "assistant",
+                    "content": [
+                      {
+                        "toolCall": {
+                          "index": 0,
+                          "id": "call_2",
+                          "function": {
+                            "name": "agent2"
+                          }
+                        }
+                      }
+                    ],
+                    "usage": {}
+                  }
+                ]
+              },
+              "pending": {
+                "call_2": {
+                  "index": 0,
+                  "id": "call_2",
+                  "function": {
+                    "name": "agent2"
+                  }
+                }
+              }
+            },
+            "calls": {
+              "call_2": {
+                "toolID": "testdata/TestAgents/test.gpt:agent2"
+              }
+            }
+          },
+          "subCalls": [
+            {
+              "toolId": "testdata/TestAgents/test.gpt:agent2",
+              "callId": "call_2",
+              "state": {
+                "continuation": {
+                  "state": {
+                    "completion": {
+                      "model": "gpt-4o",
+                      "internalSystemPrompt": false,
+                      "tools": [
+                        {
+                          "function": {
+                            "toolID": "testdata/TestAgents/test.gpt:agent1",
+                            "name": "agent1",
+                            "parameters": null
+                          }
+                        },
+                        {
+                          "function": {
+                            "toolID": "testdata/TestAgents/test.gpt:agent3",
+                            "name": "agent3",
+                            "parameters": null
+                          }
+                        }
+                      ],
+                      "messages": [
+                        {
+                          "role": "system",
+                          "content": [
+                            {
+                              "text": "I am agent2"
+                            }
+                          ],
+                          "usage": {}
+                        },
+                        {
+                          "role": "assistant",
+                          "content": [
+                            {
+                              "toolCall": {
+                                "index": 1,
+                                "id": "call_3",
+                                "function": {
+                                  "name": "agent3"
+                                }
+                              }
+                            }
+                          ],
+                          "usage": {}
+                        }
+                      ]
+                    },
+                    "pending": {
+                      "call_3": {
+                        "index": 1,
+                        "id": "call_3",
+                        "function": {
+                          "name": "agent3"
+                        }
+                      }
+                    }
+                  },
+                  "calls": {
+                    "call_3": {
+                      "toolID": "testdata/TestAgents/test.gpt:agent3"
+                    }
+                  }
+                },
+                "subCalls": [
+                  {
+                    "toolId": "testdata/TestAgents/test.gpt:agent3",
+                    "callId": "call_3",
+                    "state": {
+                      "continuation": {
+                        "state": {
+                          "completion": {
+                            "model": "gpt-4o",
+                            "internalSystemPrompt": false,
+                            "messages": [
+                              {
+                                "role": "system",
+                                "content": [
+                                  {
+                                    "text": "I am agent3"
+                                  }
+                                ],
+                                "usage": {}
+                              },
+                              {
+                                "role": "assistant",
+                                "content": [
+                                  {
+                                    "text": "TEST RESULT CALL: 4"
+                                  }
+                                ],
+                                "usage": {}
+                              }
+                            ]
+                          }
+                        },
+                        "result": "TEST RESULT CALL: 4"
+                      },
+                      "continuationToolID": "testdata/TestAgents/test.gpt:agent3"
+                    }
+                  }
+                ],
+                "subCallID": "call_3"
+              }
+            }
+          ],
+          "subCallID": "call_2"
+        }
+      }
+    ],
+    "subCallID": "call_1"
+  }
+}`

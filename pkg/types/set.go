@@ -19,6 +19,15 @@ func (t *toolRefSet) List() (result []ToolReference, err error) {
 	return result, t.err
 }
 
+func (t *toolRefSet) HasTool(toolID string) bool {
+	for _, ref := range t.set {
+		if ref.ToolID == toolID {
+			return true
+		}
+	}
+	return false
+}
+
 func (t *toolRefSet) AddAll(values []ToolReference, err error) {
 	if t.err != nil {
 		t.err = err

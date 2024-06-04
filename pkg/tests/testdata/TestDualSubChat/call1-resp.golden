@@ -1,0 +1,26 @@
+`{
+  "role": "assistant",
+  "content": [
+    {
+      "toolCall": {
+        "index": 0,
+        "id": "call_1",
+        "function": {
+          "name": "chatbot",
+          "arguments": "Input to chatbot1"
+        }
+      }
+    },
+    {
+      "toolCall": {
+        "index": 1,
+        "id": "call_2",
+        "function": {
+          "name": "chatbot2",
+          "arguments": "Input to chatbot2"
+        }
+      }
+    }
+  ],
+  "usage": {}
+}`

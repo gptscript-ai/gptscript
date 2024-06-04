@@ -1,0 +1,15 @@
+`{
+  "role": "assistant",
+  "content": [
+    {
+      "toolCall": {
+        "index": 0,
+        "id": "call_1",
+        "function": {
+          "name": "chatbot"
+        }
+      }
+    }
+  ],
+  "usage": {}
+}`
