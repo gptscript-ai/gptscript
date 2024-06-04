@@ -251,10 +251,10 @@ func (t ToolDef) String() string {
 		_, _ = fmt.Fprintf(buf, "Tools: %s\n", strings.Join(t.Parameters.Tools, ", "))
 	}
 	if len(t.Parameters.Export) != 0 {
-		_, _ = fmt.Fprintf(buf, "Export Tools: %s\n", strings.Join(t.Parameters.Export, ", "))
+		_, _ = fmt.Fprintf(buf, "Share Tools: %s\n", strings.Join(t.Parameters.Export, ", "))
 	}
 	if len(t.Parameters.ExportContext) != 0 {
-		_, _ = fmt.Fprintf(buf, "Export Context: %s\n", strings.Join(t.Parameters.ExportContext, ", "))
+		_, _ = fmt.Fprintf(buf, "Share Context: %s\n", strings.Join(t.Parameters.ExportContext, ", "))
 	}
 	if len(t.Parameters.Context) != 0 {
 		_, _ = fmt.Fprintf(buf, "Context: %s\n", strings.Join(t.Parameters.Context, ", "))
