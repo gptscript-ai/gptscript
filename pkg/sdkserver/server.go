@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -17,6 +18,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/rs/cors"
 )
 
@@ -46,14 +48,24 @@ func Start(ctx context.Context, opts Options) error {
 	opts.Options.Runner.MonitorFactory = NewSessionFactory(events)
 	go events.Start(ctx)
 
+	token := uuid.NewString()
+	// Add the prompt token env var so that gptscript doesn't start its own server. We never want this client to start the
+	// prompt server because it is only used for fmt, parse, etc.
+	opts.Env = append(opts.Env, fmt.Sprintf("%s=%s", types.PromptTokenEnvVar, token))
+
 	g, err := gptscript.New(&opts.Options)
 	if err != nil {
 		return err
 	}
 
+	listener, err := net.Listen("tcp", opts.ListenAddress)
+	if err != nil {
+		return fmt.Errorf("failed to listen on %s: %w", opts.ListenAddress, err)
+	}
+
 	s := &server{
-		address:          opts.ListenAddress,
-		token:            uuid.NewString(),
+		address:          listener.Addr().String(),
+		token:            token,
 		client:           g,
 		events:           events,
 		waitingToConfirm: make(map[string]chan runner.AuthorizerResponse),
@@ -64,7 +76,6 @@ func Start(ctx context.Context, opts Options) error {
 	s.addRoutes(http.DefaultServeMux)
 
 	server := http.Server{
-		Addr: opts.ListenAddress,
 		Handler: apply(http.DefaultServeMux,
 			contentType("application/json"),
 			addRequestID,
@@ -74,7 +85,7 @@ func Start(ctx context.Context, opts Options) error {
 		),
 	}
 
-	slog.Info("Starting server", "addr", server.Addr)
+	slog.Info("Starting server", "addr", s.address)
 
 	context.AfterFunc(sigCtx, func() {
 		ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
@@ -85,7 +96,7 @@ func Start(ctx context.Context, opts Options) error {
 		slog.Info("Server stopped")
 	})
 
-	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	if err := server.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("server error: %w", err)
 	}
 
