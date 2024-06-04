@@ -247,6 +247,9 @@ func (t ToolDef) String() string {
 	if t.Parameters.Description != "" {
 		_, _ = fmt.Fprintf(buf, "Description: %s\n", t.Parameters.Description)
 	}
+	if len(t.Parameters.Agents) != 0 {
+		_, _ = fmt.Fprintf(buf, "Agents: %s\n", strings.Join(t.Parameters.Agents, ", "))
+	}
 	if len(t.Parameters.Tools) != 0 {
 		_, _ = fmt.Fprintf(buf, "Tools: %s\n", strings.Join(t.Parameters.Tools, ", "))
 	}
@@ -285,7 +288,7 @@ func (t ToolDef) String() string {
 		sort.Strings(keys)
 		for _, key := range keys {
 			prop := t.Parameters.Arguments.Properties[key]
-			_, _ = fmt.Fprintf(buf, "Args: %s: %s\n", key, prop.Value.Description)
+			_, _ = fmt.Fprintf(buf, "Parameter: %s: %s\n", key, prop.Value.Description)
 		}
 	}
 	if t.Parameters.InternalPrompt != nil {
