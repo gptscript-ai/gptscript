@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
+	gpath "path"
 	"regexp"
 	"strings"
 
@@ -15,7 +15,6 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/repos/git"
-	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
@@ -108,23 +107,45 @@ func Load(ctx context.Context, _ *cache.Client, urlName string) (string, *types.
 	account, repo := parts[1], parts[2]
 	path := strings.Join(parts[3:], "/")
 
-	if path == "" || path == "/" {
-		path = "tool.gpt"
-	} else if !strings.HasSuffix(path, system.Suffix) && !strings.Contains(parts[len(parts)-1], ".") {
-		path += "/tool.gpt"
-	}
-
 	ref, err := getCommit(ctx, account, repo, ref)
 	if err != nil {
 		return "", nil, false, err
 	}
 
 	downloadURL := fmt.Sprintf(githubDownloadURL, account, repo, ref, path)
+	if path == "" || path == "/" || !strings.Contains(parts[len(parts)-1], ".") {
+		var (
+			testPath string
+			testURL  string
+		)
+		for i, ext := range types.DefaultFiles {
+			if strings.HasSuffix(path, "/") {
+				testPath = path + ext
+			} else {
+				testPath = path + "/" + ext
+			}
+			testURL = fmt.Sprintf(githubDownloadURL, account, repo, ref, testPath)
+			if i == len(types.DefaultFiles)-1 {
+				// no reason to test the last one, we are just going to use it. Being that the default list is only
+				// two elements this loop could have been one check, but hey over-engineered code ftw.
+				break
+			}
+			if resp, err := http.Head(testURL); err == nil {
+				_ = resp.Body.Close()
+				if resp.StatusCode == 200 {
+					break
+				}
+			}
+		}
+		downloadURL = testURL
+		path = testPath
+	}
+
 	return downloadURL, &types.Repo{
 		VCS:      "git",
 		Root:     fmt.Sprintf(githubRepoURL, account, repo),
-		Path:     filepath.Dir(path),
-		Name:     filepath.Base(path),
+		Path:     gpath.Dir(path),
+		Name:     gpath.Base(path),
 		Revision: ref,
 	}, true, nil
 }

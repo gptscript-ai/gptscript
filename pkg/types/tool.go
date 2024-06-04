@@ -20,6 +20,10 @@ const (
 	CommandPrefix = "#!"
 )
 
+var (
+	DefaultFiles = []string{"agent.gpt", "tool.gpt"}
+)
+
 type ErrToolNotFound struct {
 	ToolName string
 }
