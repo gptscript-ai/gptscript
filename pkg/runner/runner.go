@@ -816,17 +816,27 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			continue
 		}
 
+		toolName, credentialAlias, args, err := types.ParseCredentialArgs(credToolName, callCtx.Input)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse credential tool %q: %w", credToolName, err)
+		}
+
 		var (
 			cred   *credentials.Credential
 			exists bool
-			err    error
 		)
 
-		// Only try to look up the cred if the tool is on GitHub.
-		if isGitHubTool(credToolName) {
-			cred, exists, err = store.Get(credToolName)
+		// Only try to look up the cred if the tool is on GitHub or has an alias.
+		// If it is a GitHub tool and has an alias, the alias overrides the tool name, so we use it as the credential name.
+		if isGitHubTool(toolName) && credentialAlias == "" {
+			cred, exists, err = store.Get(toolName)
 			if err != nil {
-				return nil, fmt.Errorf("failed to get credentials for tool %s: %w", credToolName, err)
+				return nil, fmt.Errorf("failed to get credentials for tool %s: %w", toolName, err)
+			}
+		} else if credentialAlias != "" {
+			cred, exists, err = store.Get(credentialAlias)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get credentials for tool %s: %w", credentialAlias, err)
 			}
 		}
 
@@ -838,12 +848,21 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 				return nil, fmt.Errorf("failed to find ID for tool %s", credToolName)
 			}
 
-			subCtx, err := callCtx.SubCall(callCtx.Ctx, "", credToolRefs[0].ToolID, "", engine.CredentialToolCategory) // leaving callID as "" will cause it to be set by the engine
+			input := ""
+			if args != nil {
+				inputBytes, err := json.Marshal(args)
+				if err != nil {
+					return nil, fmt.Errorf("failed to marshal args for tool %s: %w", credToolName, err)
+				}
+				input = string(inputBytes)
+			}
+
+			subCtx, err := callCtx.SubCall(callCtx.Ctx, input, credToolRefs[0].ToolID, "", engine.CredentialToolCategory) // leaving callID as "" will cause it to be set by the engine
 			if err != nil {
 				return nil, fmt.Errorf("failed to create subcall context for tool %s: %w", credToolName, err)
 			}
 
-			res, err := r.call(subCtx, monitor, env, "")
+			res, err := r.call(subCtx, monitor, env, input)
 			if err != nil {
 				return nil, fmt.Errorf("failed to run credential tool %s: %w", credToolName, err)
 			}
@@ -860,9 +879,13 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			}
 
 			cred = &credentials.Credential{
-				ToolName: credToolName,
-				Type:     credentials.CredentialTypeTool,
-				Env:      envMap.Env,
+				Type: credentials.CredentialTypeTool,
+				Env:  envMap.Env,
+			}
+			if credentialAlias != "" {
+				cred.ToolName = credentialAlias
+			} else {
+				cred.ToolName = toolName
 			}
 
 			isEmpty := true
@@ -873,15 +896,15 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 				}
 			}
 
-			// Only store the credential if the tool is on GitHub, and the credential is non-empty.
-			if isGitHubTool(credToolName) && callCtx.Program.ToolSet[credToolRefs[0].ToolID].Source.Repo != nil {
+			// Only store the credential if the tool is on GitHub or has an alias, and the credential is non-empty.
+			if (isGitHubTool(toolName) && callCtx.Program.ToolSet[credToolRefs[0].ToolID].Source.Repo != nil) || credentialAlias != "" {
 				if isEmpty {
-					log.Warnf("Not saving empty credential for tool %s", credToolName)
+					log.Warnf("Not saving empty credential for tool %s", toolName)
 				} else if err := store.Add(*cred); err != nil {
-					return nil, fmt.Errorf("failed to add credential for tool %s: %w", credToolName, err)
+					return nil, fmt.Errorf("failed to add credential for tool %s: %w", toolName, err)
 				}
 			} else {
-				log.Warnf("Not saving credential for local tool %s - credentials will only be saved for tools from GitHub.", credToolName)
+				log.Warnf("Not saving credential for tool %s - credentials will only be saved for tools from GitHub, or tools that use aliases.", toolName)
 			}
 		}
 

@@ -8,7 +8,6 @@ directly from user input) and conveniently set them in the environment before ru
 A credential provider tool looks just like any other GPTScript, with the following caveats:
 - It cannot call the LLM and must run a command.
 - It must print contents to stdout in the format `{"env":{"ENV_VAR_1":"value1","ENV_VAR_2":"value2"}}`.
-- Any args defined on the tool will be ignored.
 
 Here is a simple example of a credential provider tool that uses the builtin `sys.prompt` to ask the user for some input:
 
@@ -50,6 +49,30 @@ credentials: credential-tool-1.gpt, credential-tool-2.gpt
 (tool stuff here)
 ```
 
+## Credential Tool Arguments
+
+A credential tool may define arguments. Here is an example:
+
+```yaml
+name: my-credential-tool
+args: env: the environment variable to set
+args: val: the value to set it to
+
+#!/usr/bin/env bash
+
+echo "{\"env\":{\"$ENV\":\"$VAL\"}}"
+```
+
+When you reference this credential tool in another file, you can use syntax like this to set both arguments:
+
+```yaml
+credential: my-credential-tool.gpt with MY_ENV_VAR as env and "my value" as val
+
+(tool stuff here)
+```
+
+In this example, the tool's output would be `{"env":{"MY_ENV_VAR":"my value"}}`
+
 ## Storing Credentials
 
 By default, credentials are automatically stored in a config file at `$XDG_CONFIG_HOME/gptscript/config.json`.
@@ -67,16 +90,30 @@ is called `gptscript-credential-wincred.exe`.)
 There will likely be support added for other credential stores in the future.
 
 :::note
-Credentials received from credential provider tools that are not on GitHub (such as a local file) will not be stored
-in the credentials store.
+Credentials received from credential provider tools that are not on GitHub (such as a local file) and do not have an alias
+will not be stored in the credentials store.
 :::
+
+## Credential Aliases
+
+When you reference a credential tool in your script, you can give it an alias using the `as` keyword like this:
+
+```yaml
+credentials: my-credential-tool.gpt as myAlias
+
+(tool stuff here)
+```
+
+This will store the resulting credential with the name `myAlias`.
+This is useful when you want to reference the same credential tool in scripts that need to handle different credentials,
+or when you want to store credentials that were provided by a tool that is not on GitHub.
 
 ## Credential Contexts
 
-Each stored credential is uniquely identified by the name of its provider tool and the name of its context. A credential
-context is basically a namespace for credentials. If you have multiple credentials from the same provider tool, you can
-switch between them by defining them in different credential contexts. The default context is called `default`, and this
-is used if none is specified.
+Each stored credential is uniquely identified by the name of its provider tool (or alias, if one was specified) and the name of its context.
+A credential  context is basically a namespace for credentials. If you have multiple credentials from the same provider tool,
+you can switch between them by defining them in different credential contexts. The default context is called `default`,
+and this is used if none is specified.
 
 You can set the credential context to use with the `--credential-context` flag when running GPTScript. For
 example:
@@ -97,13 +134,17 @@ credentials in all contexts with `--all-contexts`.
 You can delete a credential by running the following command:
 
 ```bash
-gptscript credential delete --credential-context <credential context> <credential tool name>
+gptscript credential delete --credential-context <credential context> <credential name>
 ```
 
 The `--show-env-vars` argument will also display the names of the environment variables that are set by the credential.
 This is useful when working with credential overrides.
 
-## Credential Overrides
+## Credential Overrides (Advanced)
+
+:::note
+The syntax for this will change at some point in the future.
+:::
 
 You can bypass credential tools and stored credentials by setting the `--credential-override` argument (or the
 `GPTSCRIPT_CREDENTIAL_OVERRIDE` environment variable) when running GPTScript. To set up a credential override, you
