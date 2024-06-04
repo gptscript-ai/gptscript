@@ -43,6 +43,11 @@ func (s *server) promptResponse(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) prompt(w http.ResponseWriter, r *http.Request) {
 	logger := gcontext.GetLogger(r.Context())
+	if r.Header.Get("Authorization") != "Bearer "+s.token {
+		writeError(logger, w, http.StatusUnauthorized, fmt.Errorf("invalid token"))
+		return
+	}
+
 	id := r.PathValue("id")
 
 	s.lock.RLock()

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/acorn-io/broadcaster"
+	"github.com/google/uuid"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
@@ -52,6 +53,7 @@ func Start(ctx context.Context, opts Options) error {
 
 	s := &server{
 		address:          opts.ListenAddress,
+		token:            uuid.NewString(),
 		client:           g,
 		events:           events,
 		waitingToConfirm: make(map[string]chan runner.AuthorizerResponse),
