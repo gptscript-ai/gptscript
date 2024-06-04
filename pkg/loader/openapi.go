@@ -199,6 +199,12 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 						arg.Description = content.Schema.Value.Description
 					}
 
+					// Read Only can not be sent in the request body, so we remove it
+					for key, property := range arg.Properties {
+						if property.Value.ReadOnly {
+							delete(arg.Properties, key)
+						}
+					}
 					// Unfortunately, the request body doesn't contain any good descriptor for it,
 					// so we just use "requestBodyContent" as the name of the arg.
 					tool.Parameters.Arguments.Properties["requestBodyContent"] = &openapi3.SchemaRef{Value: arg}

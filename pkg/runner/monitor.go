@@ -13,6 +13,10 @@ func (n noopFactory) Start(context.Context, *types.Program, []string, string) (M
 	return noopMonitor{}, nil
 }
 
+func (n noopFactory) Pause() func() {
+	return func() {}
+}
+
 type noopMonitor struct {
 }
 

@@ -14,12 +14,16 @@ import (
 	"strings"
 
 	"github.com/google/shlex"
-	context2 "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
+
+var requiredFileExtensions = map[string]string{
+	"powershell.exe": "*.ps1",
+	"powershell":     "*.ps1",
+}
 
 func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCategory ToolCategory) (cmdOut string, cmdErr error) {
 	id := counter.Next()
@@ -72,12 +76,6 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = io.MultiWriter(all, os.Stderr)
 	cmd.Stdout = io.MultiWriter(all, output)
-
-	if toolCategory == CredentialToolCategory {
-		pause := context2.GetPauseFuncFromCtx(ctx.Ctx)
-		unpause := pause()
-		defer unpause()
-	}
 
 	if err := cmd.Run(); err != nil {
 		if toolCategory == NoCategory {
@@ -205,7 +203,7 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 	)
 
 	if strings.TrimSpace(rest) != "" {
-		f, err := os.CreateTemp("", version.ProgramName)
+		f, err := os.CreateTemp("", version.ProgramName+requiredFileExtensions[args[0]])
 		if err != nil {
 			return nil, nil, err
 		}

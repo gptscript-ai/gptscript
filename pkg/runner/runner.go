@@ -21,6 +21,7 @@ import (
 
 type MonitorFactory interface {
 	Start(ctx context.Context, prg *types.Program, env []string, input string) (Monitor, error)
+	Pause() func()
 }
 
 type Monitor interface {
