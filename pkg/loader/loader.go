@@ -75,9 +75,12 @@ func loadLocal(base *source, name string) (*source, bool, error) {
 	filePath := path.Join(base.Path, name)
 
 	if s, err := os.Stat(filepath.Clean(filePath)); err == nil && s.IsDir() {
-		toolPath := path.Join(filePath, "tool.gpt")
-		if s, err := os.Stat(filepath.Clean(toolPath)); err == nil && !s.IsDir() {
-			filePath = toolPath
+		for _, def := range types.DefaultFiles {
+			toolPath := path.Join(filePath, def)
+			if s, err := os.Stat(filepath.Clean(toolPath)); err == nil && !s.IsDir() {
+				filePath = toolPath
+				break
+			}
 		}
 	}
 

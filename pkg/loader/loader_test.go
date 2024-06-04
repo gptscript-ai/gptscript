@@ -194,3 +194,77 @@ func TestHelloWorld(t *testing.T) {
   }
 }`).Equal(t, toString(prg))
 }
+
+func TestDefault(t *testing.T) {
+	prg, err := Program(context.Background(), "./testdata/tool", "")
+	require.NoError(t, err)
+	autogold.Expect(`{
+  "name": "./testdata/tool",
+  "entryToolId": "testdata/tool/tool.gpt:tool",
+  "toolSet": {
+    "testdata/tool/tool.gpt:tool": {
+      "name": "tool",
+      "modelName": "gpt-4o",
+      "internalPrompt": null,
+      "instructions": "a tool",
+      "id": "testdata/tool/tool.gpt:tool",
+      "localTools": {
+        "tool": "testdata/tool/tool.gpt:tool"
+      },
+      "source": {
+        "location": "testdata/tool/tool.gpt",
+        "lineNo": 1
+      },
+      "workingDir": "testdata/tool"
+    }
+  }
+}`).Equal(t, toString(prg))
+
+	prg, err = Program(context.Background(), "./testdata/agent", "")
+	require.NoError(t, err)
+	autogold.Expect(`{
+  "name": "./testdata/agent",
+  "entryToolId": "testdata/agent/agent.gpt:agent",
+  "toolSet": {
+    "testdata/agent/agent.gpt:agent": {
+      "name": "agent",
+      "modelName": "gpt-4o",
+      "internalPrompt": null,
+      "instructions": "an agent",
+      "id": "testdata/agent/agent.gpt:agent",
+      "localTools": {
+        "agent": "testdata/agent/agent.gpt:agent"
+      },
+      "source": {
+        "location": "testdata/agent/agent.gpt",
+        "lineNo": 1
+      },
+      "workingDir": "testdata/agent"
+    }
+  }
+}`).Equal(t, toString(prg))
+
+	prg, err = Program(context.Background(), "./testdata/bothtoolagent", "")
+	require.NoError(t, err)
+	autogold.Expect(`{
+  "name": "./testdata/bothtoolagent",
+  "entryToolId": "testdata/bothtoolagent/agent.gpt:agent",
+  "toolSet": {
+    "testdata/bothtoolagent/agent.gpt:agent": {
+      "name": "agent",
+      "modelName": "gpt-4o",
+      "internalPrompt": null,
+      "instructions": "an agent",
+      "id": "testdata/bothtoolagent/agent.gpt:agent",
+      "localTools": {
+        "agent": "testdata/bothtoolagent/agent.gpt:agent"
+      },
+      "source": {
+        "location": "testdata/bothtoolagent/agent.gpt",
+        "lineNo": 1
+      },
+      "workingDir": "testdata/bothtoolagent"
+    }
+  }
+}`).Equal(t, toString(prg))
+}
