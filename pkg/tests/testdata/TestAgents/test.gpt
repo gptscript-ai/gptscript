@@ -1,0 +1,23 @@
+agents: agent1, agent2
+chat: true
+
+I'm the intro
+
+----
+name: agent1
+chat: true
+
+I am agent1
+
+----
+name: agent2
+chat: true
+agents: agent3
+
+I am agent2
+
+---
+name: agent3
+chat: true
+
+I am agent3

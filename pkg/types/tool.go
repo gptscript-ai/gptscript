@@ -124,8 +124,19 @@ type Parameters struct {
 	Context         []string         `json:"context,omitempty"`
 	ExportContext   []string         `json:"exportContext,omitempty"`
 	Export          []string         `json:"export,omitempty"`
+	Agents          []string         `json:"agents,omitempty"`
 	Credentials     []string         `json:"credentials,omitempty"`
 	Blocking        bool             `json:"-"`
+}
+
+func (p Parameters) ToolRefNames() []string {
+	return slices.Concat(
+		p.Tools,
+		p.Agents,
+		p.Export,
+		p.ExportContext,
+		p.Context,
+		p.Credentials)
 }
 
 type ToolDef struct {
@@ -240,7 +251,7 @@ func (t ToolDef) String() string {
 		_, _ = fmt.Fprintf(buf, "Tools: %s\n", strings.Join(t.Parameters.Tools, ", "))
 	}
 	if len(t.Parameters.Export) != 0 {
-		_, _ = fmt.Fprintf(buf, "Export: %s\n", strings.Join(t.Parameters.Export, ", "))
+		_, _ = fmt.Fprintf(buf, "Export Tools: %s\n", strings.Join(t.Parameters.Export, ", "))
 	}
 	if len(t.Parameters.ExportContext) != 0 {
 		_, _ = fmt.Fprintf(buf, "Export Context: %s\n", strings.Join(t.Parameters.ExportContext, ", "))
@@ -346,12 +357,51 @@ func (t Tool) GetContextTools(prg Program) ([]ToolReference, error) {
 	return result.List()
 }
 
-func (t Tool) GetCompletionTools(prg Program) (result []CompletionTool, err error) {
-	refs, err := t.getCompletionToolRefs(prg)
+func (t Tool) GetAgentGroup(agentGroup []ToolReference, toolID string) (result []ToolReference, _ error) {
+	newAgentGroup := toolRefSet{}
+	if err := t.addAgents(&newAgentGroup); err != nil {
+		return nil, err
+	}
+
+	if newAgentGroup.HasTool(toolID) {
+		// Join new agent group
+		return newAgentGroup.List()
+	}
+
+	existingAgentGroup := toolRefSet{}
+	existingAgentGroup.AddAll(agentGroup, nil)
+
+	if existingAgentGroup.HasTool(toolID) {
+		return existingAgentGroup.List()
+	}
+
+	// No group
+	return nil, nil
+}
+
+func (t Tool) GetCompletionTools(prg Program, agentGroup ...ToolReference) (result []CompletionTool, err error) {
+	refs, err := t.getCompletionToolRefs(prg, agentGroup)
 	if err != nil {
 		return nil, err
 	}
 	return toolRefsToCompletionTools(refs, prg), nil
+}
+
+func (t Tool) addAgents(result *toolRefSet) error {
+	subToolRefs, err := t.GetToolRefsFromNames(t.Parameters.Agents)
+	if err != nil {
+		return err
+	}
+
+	for _, subToolRef := range subToolRefs {
+		// don't add yourself
+		if subToolRef.ToolID != t.ID {
+			// Add the tool itself and no exports
+			result.Add(subToolRef)
+		}
+	}
+
+	return nil
 }
 
 func (t Tool) addReferencedTools(prg Program, result *toolRefSet) error {
@@ -384,14 +434,25 @@ func (t Tool) addContextExportedTools(prg Program, result *toolRefSet) error {
 	return nil
 }
 
-func (t Tool) getCompletionToolRefs(prg Program) ([]ToolReference, error) {
+func (t Tool) getCompletionToolRefs(prg Program, agentGroup []ToolReference) ([]ToolReference, error) {
 	result := toolRefSet{}
+
+	for _, agent := range agentGroup {
+		// don't add yourself
+		if agent.ToolID != t.ID {
+			result.Add(agent)
+		}
+	}
 
 	if err := t.addReferencedTools(prg, &result); err != nil {
 		return nil, err
 	}
 
 	if err := t.addContextExportedTools(prg, &result); err != nil {
+		return nil, err
+	}
+
+	if err := t.addAgents(&result); err != nil {
 		return nil, err
 	}
 
