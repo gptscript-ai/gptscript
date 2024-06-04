@@ -1,0 +1,9 @@
+`{
+  "role": "assistant",
+  "content": [
+    {
+      "text": "Assistent Response 2 - from chatbot2"
+    }
+  ],
+  "usage": {}
+}`
