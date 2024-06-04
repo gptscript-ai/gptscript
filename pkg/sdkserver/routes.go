@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -165,7 +164,14 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 
 	reqObject.Env = append(os.Environ(), reqObject.Env...)
 	// Don't overwrite the PromptURLEnvVar if it is already set in the environment.
-	if !slices.ContainsFunc(reqObject.Env, func(s string) bool { return strings.HasPrefix(s, types.PromptTokenEnvVar+"=") }) {
+	var promptTokenAlreadySet bool
+	for _, env := range reqObject.Env {
+		if strings.HasPrefix(env, types.PromptTokenEnvVar+"=") {
+			promptTokenAlreadySet = true
+			break
+		}
+	}
+	if !promptTokenAlreadySet {
 		// Append a prompt URL for this run.
 		reqObject.Env = append(reqObject.Env, fmt.Sprintf("%s=http://%s/prompt/%s", types.PromptURLEnvVar, s.address, runID), fmt.Sprintf("%s=%s", types.PromptTokenEnvVar, s.token))
 	}

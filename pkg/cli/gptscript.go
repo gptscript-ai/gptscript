@@ -59,7 +59,7 @@ type GPTScript struct {
 	ListModels         bool   `usage:"List the models available and exit" local:"true"`
 	ListTools          bool   `usage:"List built-in tools and exit" local:"true"`
 	Server             bool   `usage:"Start server" local:"true"`
-	ListenAddress      string `usage:"Server listen address" default:"127.0.0.1:9090" local:"true"`
+	ListenAddress      string `usage:"Server listen address" default:"127.0.0.1:0" local:"true"`
 	Chdir              string `usage:"Change current working directory" short:"C"`
 	Daemon             bool   `usage:"Run tool as a daemon" local:"true" hidden:"true"`
 	Ports              string `usage:"The port range to use for ephemeral daemon ports (ex: 11000-12000)" hidden:"true"`

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -212,10 +213,15 @@ func (s *Server) getContext(req *http.Request) (string, context.Context) {
 }
 
 func (s *Server) Start(ctx context.Context) error {
+	listener, err := net.Listen("tcp", s.listenAddress)
+	if err != nil {
+		return fmt.Errorf("could not listen on %s: %w", s.listenAddress, err)
+	}
+
 	s.ctx = ctx
 	s.melody.HandleConnect(s.Connect)
 	go s.events.Start(ctx)
-	log.Infof("Listening on http://%s", s.listenAddress)
+	log.Infof("Listening on http://%s", listener.Addr().String())
 	handler := cors.Default().Handler(s)
 	server := &http.Server{Addr: s.listenAddress, Handler: handler}
 	context.AfterFunc(ctx, func() {
@@ -224,7 +230,7 @@ func (s *Server) Start(ctx context.Context) error {
 		_ = server.Shutdown(ctx)
 	})
 
-	return server.ListenAndServe()
+	return server.Serve(listener)
 }
 
 func (s *Server) Connect(session *melody.Session) {
