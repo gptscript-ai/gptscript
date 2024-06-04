@@ -65,12 +65,13 @@ type GPTScript struct {
 	Ports              string `usage:"The port range to use for ephemeral daemon ports (ex: 11000-12000)" hidden:"true"`
 	CredentialContext  string `usage:"Context name in which to store credentials" default:"default"`
 	CredentialOverride string `usage:"Credentials to override (ex: --credential-override github.com/example/cred-tool:API_TOKEN=1234)"`
-	ChatState          string `usage:"The chat state to continue, or null to start a new chat and return the state"`
-	ForceChat          bool   `usage:"Force an interactive chat session if even the top level tool is not a chat tool"`
-	ForceSequential    bool   `usage:"Force parallel calls to run sequentially"`
+	ChatState          string `usage:"The chat state to continue, or null to start a new chat and return the state" local:"true"`
+	ForceChat          bool   `usage:"Force an interactive chat session if even the top level tool is not a chat tool" local:"true"`
+	ForceSequential    bool   `usage:"Force parallel calls to run sequentially" local:"true"`
 	Workspace          string `usage:"Directory to use for the workspace, if specified it will not be deleted on exit"`
 	UI                 bool   `usage:"Launch the UI" local:"true" name:"ui"`
 	DisableTUI         bool   `usage:"Don't use chat TUI but instead verbose output" local:"true" name:"disable-tui"`
+	SaveChatStateFile  string `usage:"A file to save the chat state to so that a conversation can be resumed with --chat-state" local:"true"`
 
 	readData []byte
 }
@@ -425,8 +426,18 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 		return err
 	}
 
-	if r.ChatState != "" {
-		resp, err := gptScript.Chat(cmd.Context(), r.ChatState, prg, gptOpt.Env, toolInput)
+	var chatState string
+	if r.ChatState != "" && r.ChatState != "null" && !strings.HasPrefix(r.ChatState, "{") {
+		data, err := os.ReadFile(r.ChatState)
+		if err != nil {
+			return fmt.Errorf("reading %s: %w", r.ChatState, err)
+		}
+		chatState = string(data)
+	}
+
+	// This chat in a stateless mode
+	if r.SaveChatStateFile == "-" || r.SaveChatStateFile == "stdout" {
+		resp, err := gptScript.Chat(cmd.Context(), chatState, prg, gptOpt.Env, toolInput)
 		if err != nil {
 			return err
 		}
@@ -446,11 +457,13 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 				CacheDir:            r.CacheDir,
 				SubTool:             r.SubTool,
 				Workspace:           r.Workspace,
+				SaveChatStateFile:   r.SaveChatStateFile,
+				ChatState:           chatState,
 			})
 		}
-		return chat.Start(cmd.Context(), nil, gptScript, func() (types.Program, error) {
+		return chat.Start(cmd.Context(), chatState, gptScript, func() (types.Program, error) {
 			return r.readProgram(ctx, gptScript, args)
-		}, gptOpt.Env, toolInput)
+		}, gptOpt.Env, toolInput, r.SaveChatStateFile)
 	}
 
 	s, err := gptScript.Run(cmd.Context(), prg, gptOpt.Env, toolInput)

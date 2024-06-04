@@ -132,7 +132,7 @@ func (r *Runner) Chat(ctx context.Context, prevState ChatState, prg types.Progra
 		case *State:
 			state = v
 		case string:
-			if v != "null" {
+			if v != "null" && v != "" {
 				state = &State{}
 				if err := json.Unmarshal([]byte(v), state); err != nil {
 					return resp, fmt.Errorf("failed to unmarshal chat state: %w", err)

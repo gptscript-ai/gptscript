@@ -2,6 +2,7 @@ package chat
 
 import (
 	"context"
+	"os"
 
 	"github.com/fatih/color"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
@@ -30,7 +31,7 @@ func getPrompt(prg types.Program, resp runner.ChatResponse) string {
 	return color.GreenString("%s> ", name)
 }
 
-func Start(ctx context.Context, prevState runner.ChatState, chatter Chatter, prg GetProgram, env []string, startInput string) error {
+func Start(ctx context.Context, prevState runner.ChatState, chatter Chatter, prg GetProgram, env []string, startInput, chatStateSaveFile string) error {
 	var (
 		prompter Prompter
 	)
@@ -60,7 +61,7 @@ func Start(ctx context.Context, prevState runner.ChatState, chatter Chatter, prg
 		if startInput != "" {
 			input = startInput
 			startInput = ""
-		} else if targetTool := prg.ToolSet[prg.EntryToolID]; !(prevState == nil && targetTool.Arguments == nil && targetTool.Instructions != "") {
+		} else if targetTool := prg.ToolSet[prg.EntryToolID]; !((prevState == nil || prevState == "") && targetTool.Arguments == nil && targetTool.Instructions != "") {
 			// The above logic will skip prompting if this is the first loop and the chat expects no args
 			input, ok, err = prompter.Readline()
 			if !ok || err != nil {
@@ -69,8 +70,14 @@ func Start(ctx context.Context, prevState runner.ChatState, chatter Chatter, prg
 		}
 
 		resp, err = chatter.Chat(ctx, prevState, prg, env, input)
-		if err != nil || resp.Done {
+		if err != nil {
 			return err
+		}
+		if resp.Done {
+			if chatStateSaveFile != "" {
+				_ = os.Remove(chatStateSaveFile)
+			}
+			return nil
 		}
 
 		if resp.Content != "" {
@@ -78,6 +85,10 @@ func Start(ctx context.Context, prevState runner.ChatState, chatter Chatter, prg
 			if err != nil {
 				return err
 			}
+		}
+
+		if chatStateSaveFile != "" {
+			_ = os.WriteFile(chatStateSaveFile, []byte(resp.Content), 0600)
 		}
 
 		prevState = resp.State
