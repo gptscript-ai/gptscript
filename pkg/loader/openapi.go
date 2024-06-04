@@ -136,7 +136,7 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 						Name:        operation.OperationID,
 						Description: toolDesc,
 						Arguments: &openapi3.Schema{
-							Type:       "object",
+							Type:       &openapi3.Types{"object"},
 							Properties: openapi3.Schemas{},
 							Required:   []string{},
 						},
