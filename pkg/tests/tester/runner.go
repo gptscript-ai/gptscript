@@ -28,7 +28,7 @@ type Result struct {
 	Err     error
 }
 
-func (c *Client) Call(_ context.Context, messageRequest types.CompletionRequest, _ chan<- types.CompletionStatus) (*types.CompletionMessage, error) {
+func (c *Client) Call(_ context.Context, messageRequest types.CompletionRequest, _ chan<- types.CompletionStatus) (resp *types.CompletionMessage, respErr error) {
 	msgData, err := json.MarshalIndent(messageRequest, "", "  ")
 	require.NoError(c.t, err)
 
@@ -39,6 +39,15 @@ func (c *Client) Call(_ context.Context, messageRequest types.CompletionRequest,
 		c.t.Run(fmt.Sprintf("call%d", c.id), func(t *testing.T) {
 			autogold.ExpectFile(t, string(msgData))
 		})
+		defer func() {
+			if respErr == nil {
+				c.t.Run(fmt.Sprintf("call%d-resp", c.id), func(t *testing.T) {
+					msgData, err := json.MarshalIndent(resp, "", "  ")
+					require.NoError(c.t, err)
+					autogold.ExpectFile(t, string(msgData))
+				})
+			}
+		}()
 	}
 	if len(c.result) == 0 {
 		return &types.CompletionMessage{

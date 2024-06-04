@@ -1,0 +1,15 @@
+`{
+  "role": "assistant",
+  "content": [
+    {
+      "toolCall": {
+        "index": 1,
+        "id": "call_3",
+        "function": {
+          "name": "agent3"
+        }
+      }
+    }
+  ],
+  "usage": {}
+}`

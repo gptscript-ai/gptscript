@@ -11,7 +11,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -320,11 +319,7 @@ func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *so
 	// The below is done in two loops so that local names stay as the tool names
 	// and don't get mangled by external references
 
-	for _, targetToolName := range slices.Concat(tool.Parameters.Tools,
-		tool.Parameters.Export,
-		tool.Parameters.ExportContext,
-		tool.Parameters.Context,
-		tool.Parameters.Credentials) {
+	for _, targetToolName := range tool.Parameters.ToolRefNames() {
 		noArgs, _ := types.SplitArg(targetToolName)
 		localTool, ok := localTools[strings.ToLower(noArgs)]
 		if ok {

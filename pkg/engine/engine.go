@@ -54,10 +54,11 @@ type CallResult struct {
 }
 
 type commonContext struct {
-	ID           string         `json:"id"`
-	Tool         types.Tool     `json:"tool"`
-	InputContext []InputContext `json:"inputContext"`
-	ToolCategory ToolCategory   `json:"toolCategory,omitempty"`
+	ID           string                `json:"id"`
+	Tool         types.Tool            `json:"tool"`
+	AgentGroup   []types.ToolReference `json:"agentGroup,omitempty"`
+	InputContext []InputContext        `json:"inputContext"`
+	ToolCategory ToolCategory          `json:"toolCategory,omitempty"`
 }
 
 type CallContext struct {
@@ -170,10 +171,16 @@ func (c *Context) SubCall(ctx context.Context, input, toolID, callID string, too
 		callID = counter.Next()
 	}
 
+	agentGroup, err := c.Tool.GetAgentGroup(c.AgentGroup, toolID)
+	if err != nil {
+		return Context{}, err
+	}
+
 	return Context{
 		commonContext: commonContext{
 			ID:           callID,
 			Tool:         tool,
+			AgentGroup:   agentGroup,
 			ToolCategory: toolCategory,
 		},
 		Ctx:     ctx,
@@ -240,7 +247,7 @@ func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 	}
 
 	var err error
-	completion.Tools, err = tool.GetCompletionTools(*ctx.Program)
+	completion.Tools, err = tool.GetCompletionTools(*ctx.Program, ctx.AgentGroup...)
 	if err != nil {
 		return nil, err
 	}

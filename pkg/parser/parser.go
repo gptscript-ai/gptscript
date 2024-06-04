@@ -104,6 +104,8 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		tool.Parameters.Export = append(tool.Parameters.Export, csv(value)...)
 	case "tool", "tools":
 		tool.Parameters.Tools = append(tool.Parameters.Tools, csv(value)...)
+	case "agent", "agents":
+		tool.Parameters.Agents = append(tool.Parameters.Agents, csv(value)...)
 	case "globaltool", "globaltools":
 		tool.Parameters.GlobalTools = append(tool.Parameters.GlobalTools, csv(value)...)
 	case "exportcontext", "exportcontexts":

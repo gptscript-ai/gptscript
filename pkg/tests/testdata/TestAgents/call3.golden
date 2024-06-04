@@ -1,0 +1,31 @@
+`{
+  "model": "gpt-4o",
+  "internalSystemPrompt": false,
+  "tools": [
+    {
+      "function": {
+        "toolID": "testdata/TestAgents/test.gpt:agent1",
+        "name": "agent1",
+        "parameters": null
+      }
+    },
+    {
+      "function": {
+        "toolID": "testdata/TestAgents/test.gpt:agent3",
+        "name": "agent3",
+        "parameters": null
+      }
+    }
+  ],
+  "messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "I am agent2"
+        }
+      ],
+      "usage": {}
+    }
+  ]
+}`
