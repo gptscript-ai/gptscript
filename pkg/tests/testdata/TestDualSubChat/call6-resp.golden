@@ -1,0 +1,16 @@
+`{
+  "role": "assistant",
+  "content": [
+    {
+      "toolCall": {
+        "index": 0,
+        "id": "call_6",
+        "function": {
+          "name": "chatFinish",
+          "arguments": "{\"return\":\"Chat done2\"}"
+        }
+      }
+    }
+  ],
+  "usage": {}
+}`

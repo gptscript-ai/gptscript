@@ -1,0 +1,9 @@
+`{
+  "role": "assistant",
+  "content": [
+    {
+      "text": "Assistant Response 3 - from main chat tool"
+    }
+  ],
+  "usage": {}
+}`

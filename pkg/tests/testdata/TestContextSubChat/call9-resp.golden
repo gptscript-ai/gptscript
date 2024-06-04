@@ -1,0 +1,9 @@
+`{
+  "role": "assistant",
+  "content": [
+    {
+      "text": "Assistant Response 5 - from context tool resume"
+    }
+  ],
+  "usage": {}
+}`

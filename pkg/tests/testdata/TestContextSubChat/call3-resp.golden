@@ -1,0 +1,16 @@
+`{
+  "role": "assistant",
+  "content": [
+    {
+      "toolCall": {
+        "index": 0,
+        "id": "call_2",
+        "function": {
+          "name": "chatFinish",
+          "arguments": "Response from context chatbot"
+        }
+      }
+    }
+  ],
+  "usage": {}
+}`
