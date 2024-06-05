@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/gptscript-ai/gptscript/pkg/openai"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
@@ -44,15 +45,36 @@ func (r *Registry) Call(ctx context.Context, messageRequest types.CompletionRequ
 	if messageRequest.Model == "" {
 		return nil, fmt.Errorf("model is required")
 	}
+
 	var errs []error
+	var oaiClient *openai.Client
 	for _, client := range r.clients {
 		ok, err := client.Supports(ctx, messageRequest.Model)
 		if err != nil {
+			// If we got an OpenAI invalid auth error back, store the OpenAI client for later.
+			if errors.Is(err, openai.InvalidAuthError{}) {
+				oaiClient = client.(*openai.Client)
+			}
+
 			errs = append(errs, err)
 		} else if ok {
 			return client.Call(ctx, messageRequest, status)
 		}
 	}
+
+	if len(errs) > 0 && oaiClient != nil {
+		// Prompt the user to enter their OpenAI API key and try again.
+		if err := oaiClient.RetrieveAPIKey(ctx); err != nil {
+			return nil, err
+		}
+		ok, err := oaiClient.Supports(ctx, messageRequest.Model)
+		if err != nil {
+			return nil, err
+		} else if ok {
+			return oaiClient.Call(ctx, messageRequest, status)
+		}
+	}
+
 	if len(errs) == 0 {
 		return nil, fmt.Errorf("failed to find a model provider for model [%s]", messageRequest.Model)
 	}

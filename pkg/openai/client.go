@@ -12,20 +12,30 @@ import (
 
 	openai "github.com/gptscript-ai/chat-completion-client"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
+	"github.com/gptscript-ai/gptscript/pkg/config"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
+	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
+	"github.com/gptscript-ai/gptscript/pkg/prompt"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 const (
-	DefaultModel = openai.GPT4o
+	DefaultModel    = openai.GPT4o
+	BuiltinCredName = "sys.openai"
 )
 
 var (
 	key = os.Getenv("OPENAI_API_KEY")
 	url = os.Getenv("OPENAI_URL")
 )
+
+type InvalidAuthError struct{}
+
+func (InvalidAuthError) Error() string {
+	return "OPENAI_API_KEY is not set. Please set the OPENAI_API_KEY environment variable"
+}
 
 type Client struct {
 	defaultModel string
@@ -34,6 +44,9 @@ type Client struct {
 	invalidAuth  bool
 	cacheKeyBase string
 	setSeed      bool
+	cliCfg       *config.CLIConfig
+	credCtx      string
+	envs         []string
 }
 
 type Options struct {
@@ -75,10 +88,26 @@ func complete(opts ...Options) (result Options, err error) {
 	return result, err
 }
 
-func NewClient(opts ...Options) (*Client, error) {
+func NewClient(cliCfg *config.CLIConfig, credCtx string, opts ...Options) (*Client, error) {
 	opt, err := complete(opts...)
 	if err != nil {
 		return nil, err
+	}
+
+	// If the API key is not set, try to get it from the cred store
+	if opt.APIKey == "" && opt.BaseURL == "" {
+		store, err := credentials.NewStore(cliCfg, credCtx)
+		if err != nil {
+			return nil, err
+		}
+
+		cred, exists, err := store.Get(BuiltinCredName)
+		if err != nil {
+			return nil, err
+		}
+		if exists {
+			opt.APIKey = cred.Env["OPENAI_API_KEY"]
+		}
 	}
 
 	cfg := openai.DefaultConfig(opt.APIKey)
@@ -97,14 +126,20 @@ func NewClient(opts ...Options) (*Client, error) {
 		cacheKeyBase: cacheKeyBase,
 		invalidAuth:  opt.APIKey == "" && opt.BaseURL == "",
 		setSeed:      opt.SetSeed,
+		cliCfg:       cliCfg,
+		credCtx:      credCtx,
 	}, nil
 }
 
 func (c *Client) ValidAuth() error {
 	if c.invalidAuth {
-		return fmt.Errorf("OPENAI_API_KEY is not set. Please set the OPENAI_API_KEY environment variable")
+		return InvalidAuthError{}
 	}
 	return nil
+}
+
+func (c *Client) SetEnvs(env []string) {
+	c.envs = env
 }
 
 func (c *Client) Supports(ctx context.Context, modelName string) (bool, error) {
@@ -112,6 +147,12 @@ func (c *Client) Supports(ctx context.Context, modelName string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+
+	if len(models) == 0 {
+		// We got no models back, which means our auth is invalid.
+		return false, InvalidAuthError{}
+	}
+
 	return slices.Contains(models, modelName), nil
 }
 
@@ -121,8 +162,13 @@ func (c *Client) ListModels(ctx context.Context, providers ...string) (result []
 		return nil, nil
 	}
 
+	// If auth is invalid, we just want to return nothing.
+	// Returning an InvalidAuthError here will lead to cases where the user is prompted to enter their OpenAI key,
+	// even when we don't want them to be prompted.
+	// So the UX we settled on is that no models get printed if the user does gptscript --list-models
+	// without having provided their key through the environment variable or the creds store.
 	if err := c.ValidAuth(); err != nil {
-		return nil, err
+		return nil, nil
 	}
 
 	models, err := c.c.ListModels(ctx)
@@ -251,7 +297,9 @@ func toMessages(request types.CompletionRequest, compat bool) (result []openai.C
 
 func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error) {
 	if err := c.ValidAuth(); err != nil {
-		return nil, err
+		if err := c.RetrieveAPIKey(ctx); err != nil {
+			return nil, err
+		}
 	}
 
 	if messageRequest.Model == "" {
@@ -497,6 +545,17 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 		}
 		responses = append(responses, response)
 	}
+}
+
+func (c *Client) RetrieveAPIKey(ctx context.Context) error {
+	k, err := prompt.GetModelProviderCredential(ctx, BuiltinCredName, "OPENAI_API_KEY", "Please provide your OpenAI API key:", c.credCtx, c.envs, c.cliCfg)
+	if err != nil {
+		return err
+	}
+
+	c.c.SetAPIKey(k)
+	c.invalidAuth = false
+	return nil
 }
 
 func ptr[T any](v T) *T {

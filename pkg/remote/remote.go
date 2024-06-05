@@ -10,16 +10,15 @@ import (
 	"sync"
 
 	"github.com/gptscript-ai/gptscript/pkg/cache"
+	"github.com/gptscript-ai/gptscript/pkg/config"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	env2 "github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
-	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/openai"
+	"github.com/gptscript-ai/gptscript/pkg/prompt"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
-
-var log = mvl.Package()
 
 type Client struct {
 	clientsLock sync.Mutex
@@ -28,13 +27,17 @@ type Client struct {
 	models      map[string]*openai.Client
 	runner      *runner.Runner
 	envs        []string
+	cliCfg      *config.CLIConfig
+	credCtx     string
 }
 
-func New(r *runner.Runner, envs []string, cache *cache.Client) *Client {
+func New(r *runner.Runner, envs []string, cache *cache.Client, cliCfg *config.CLIConfig, credCtx string) *Client {
 	return &Client{
-		cache:  cache,
-		runner: r,
-		envs:   envs,
+		cache:   cache,
+		runner:  r,
+		envs:    envs,
+		cliCfg:  cliCfg,
+		credCtx: credCtx,
 	}
 }
 
@@ -98,21 +101,26 @@ func isHTTPURL(toolName string) bool {
 		strings.HasPrefix(toolName, "https://")
 }
 
-func (c *Client) clientFromURL(apiURL string) (*openai.Client, error) {
+func (c *Client) clientFromURL(ctx context.Context, apiURL string) (*openai.Client, error) {
 	parsed, err := url.Parse(apiURL)
 	if err != nil {
 		return nil, err
 	}
 	env := "GPTSCRIPT_PROVIDER_" + env2.ToEnvLike(parsed.Hostname()) + "_API_KEY"
-	apiKey := os.Getenv(env)
-	if apiKey == "" {
-		log.Warnf("No API key found for %s", env)
-		apiKey = "<unset>"
+	key := os.Getenv(env)
+
+	if key == "" {
+		var err error
+		key, err = c.retrieveAPIKey(ctx, env, apiURL)
+		if err != nil {
+			return nil, err
+		}
 	}
-	return openai.NewClient(openai.Options{
+
+	return openai.NewClient(c.cliCfg, c.credCtx, openai.Options{
 		BaseURL: apiURL,
 		Cache:   c.cache,
-		APIKey:  apiKey,
+		APIKey:  key,
 	})
 }
 
@@ -130,7 +138,7 @@ func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, err
 	}
 
 	if isHTTPURL(toolName) {
-		remoteClient, err := c.clientFromURL(toolName)
+		remoteClient, err := c.clientFromURL(ctx, toolName)
 		if err != nil {
 			return nil, err
 		}
@@ -156,7 +164,7 @@ func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, err
 		url += "/v1"
 	}
 
-	client, err = openai.NewClient(openai.Options{
+	client, err = openai.NewClient(c.cliCfg, c.credCtx, openai.Options{
 		BaseURL:  url,
 		Cache:    c.cache,
 		CacheKey: prg.EntryToolID,
@@ -167,4 +175,8 @@ func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, err
 
 	c.clients[toolName] = client
 	return client, nil
+}
+
+func (c *Client) retrieveAPIKey(ctx context.Context, env, url string) (string, error) {
+	return prompt.GetModelProviderCredential(ctx, url, env, fmt.Sprintf("Please provide your API key for %s", url), c.credCtx, c.envs, c.cliCfg)
 }

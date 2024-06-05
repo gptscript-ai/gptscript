@@ -9,6 +9,7 @@ import (
 
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
+	"github.com/gptscript-ai/gptscript/pkg/config"
 	context2 "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
@@ -70,7 +71,12 @@ func New(opts *Options) (*GPTScript, error) {
 		return nil, err
 	}
 
-	oAIClient, err := openai.NewClient(opts.OpenAI, openai.Options{
+	cliCfg, err := config.ReadCLIConfig(opts.OpenAI.ConfigFile)
+	if err != nil {
+		return nil, err
+	}
+
+	oaiClient, err := openai.NewClient(cliCfg, opts.CredentialContext, opts.OpenAI, openai.Options{
 		Cache:   cacheClient,
 		SetSeed: true,
 	})
@@ -78,7 +84,7 @@ func New(opts *Options) (*GPTScript, error) {
 		return nil, err
 	}
 
-	if err := registry.AddClient(oAIClient); err != nil {
+	if err := registry.AddClient(oaiClient); err != nil {
 		return nil, err
 	}
 
@@ -95,15 +101,16 @@ func New(opts *Options) (*GPTScript, error) {
 		return nil, err
 	}
 
-	remoteClient := remote.New(runner, opts.Env, cacheClient)
-
-	if err := registry.AddClient(remoteClient); err != nil {
-		return nil, err
-	}
-
 	ctx, closeServer := context.WithCancel(context2.AddPauseFuncToCtx(context.Background(), opts.Runner.MonitorFactory.Pause))
 	extraEnv, err := prompt.NewServer(ctx, opts.Env)
 	if err != nil {
+		closeServer()
+		return nil, err
+	}
+	oaiClient.SetEnvs(extraEnv)
+
+	remoteClient := remote.New(runner, extraEnv, cacheClient, cliCfg, opts.CredentialContext)
+	if err := registry.AddClient(remoteClient); err != nil {
 		closeServer()
 		return nil, err
 	}
