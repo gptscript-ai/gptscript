@@ -44,3 +44,19 @@ ci: build
 
 serve-docs:
 	(cd docs && npm i && npm start)
+
+
+# This will initialize the node_modules needed to run the docs dev server. Run this before running serve-docs
+init-docs:
+	docker run --rm --workdir=/docs -v $${PWD}/docs:/docs node:18-buster yarn install
+
+# Ensure docs build without errors. Makes sure generated docs are in-sync with CLI.
+validate-docs:
+	docker run --rm --workdir=/docs -v $${PWD}/docs:/docs node:18-buster yarn build
+	go run tools/gendocs/main.go
+	if [ -n "$$(git status --porcelain --untracked-files=no)" ]; then \
+		git status --porcelain --untracked-files=no; \
+		echo "Encountered dirty repo!"; \
+		git diff; \
+		exit 1 \
+	;fi
