@@ -163,6 +163,10 @@ func (c *Client) ListModels(ctx context.Context, providers ...string) (result []
 	}
 
 	// If auth is invalid, we just want to return nothing.
+	// Returning an InvalidAuthError here will lead to cases where the user is prompted to enter their OpenAI key,
+	// even when we don't want them to be prompted.
+	// So the UX we settled on is that no models get printed if the user does gptscript --list-models
+	// without having provided their key through the environment variable or the creds store.
 	if err := c.ValidAuth(); err != nil {
 		return nil, nil
 	}
