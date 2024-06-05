@@ -58,6 +58,9 @@ func complete(opts *Options) (result *Options) {
 	if len(result.Env) == 0 {
 		result.Env = os.Environ()
 	}
+	if result.CredentialContext == "" {
+		opts.CredentialContext = "default"
+	}
 	return
 }
 
@@ -107,9 +110,10 @@ func New(opts *Options) (*GPTScript, error) {
 		closeServer()
 		return nil, err
 	}
-	oaiClient.SetEnvs(extraEnv)
+	opts.Env = append(opts.Env, extraEnv...)
+	oaiClient.SetEnvs(opts.Env)
 
-	remoteClient := remote.New(runner, extraEnv, cacheClient, cliCfg, opts.CredentialContext)
+	remoteClient := remote.New(runner, opts.Env, cacheClient, cliCfg, opts.CredentialContext)
 	if err := registry.AddClient(remoteClient); err != nil {
 		closeServer()
 		return nil, err
