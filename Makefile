@@ -18,8 +18,14 @@ build:
 tidy:
 	go mod tidy
 
-test:
+test: unit
+
+unit:
 	go test -v ./...
+
+int:
+	@docker build -t int -f integration/Dockerfile .
+	@docker run -e OPENAI_API_KEY=${OPENAI_API_KEY} int
 
 GOLANGCI_LINT_VERSION ?= v1.56.1
 lint:
@@ -44,3 +50,9 @@ ci: build
 
 serve-docs:
 	(cd docs && npm i && npm start)
+
+gen-docs: build
+	./bin/gptscript --cache=false ./scripts/gen-docs.gpt
+
+gen-test-cases:
+	./bin/gptscript --cache=false ./scripts/gen-test-cases.gpt
