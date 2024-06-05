@@ -85,7 +85,7 @@ func (s *server) listTools(w http.ResponseWriter, r *http.Request) {
 		} else if reqObject.File != "" {
 			prg, err = loader.Program(r.Context(), reqObject.File, reqObject.SubTool, loader.Options{Cache: s.client.Cache})
 		} else {
-			prg, err = loader.ProgramFromSource(r.Context(), reqObject.ToolDef.String(), reqObject.SubTool, loader.Options{Cache: s.client.Cache})
+			prg, err = loader.ProgramFromSource(r.Context(), reqObject.ToolDefs.String(), reqObject.SubTool, loader.Options{Cache: s.client.Cache})
 		}
 		if err != nil {
 			writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to load program: %w", err))
@@ -178,7 +178,7 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 
 	logger.Debugf("executing tool: %+v", reqObject)
 	var (
-		def           fmt.Stringer = &reqObject.ToolDef
+		def           fmt.Stringer = &reqObject.ToolDefs
 		programLoader loaderFunc   = loader.ProgramFromSource
 	)
 	if reqObject.Content != "" {

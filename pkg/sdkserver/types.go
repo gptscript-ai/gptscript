@@ -2,6 +2,7 @@ package sdkserver
 
 import (
 	"maps"
+	"strings"
 	"time"
 
 	"github.com/gptscript-ai/gptscript/pkg/cache"
@@ -25,12 +26,26 @@ const (
 	Prompt      runner.EventType = "prompt"
 )
 
+type toolDefs []types.ToolDef
+
+func (t toolDefs) String() string {
+	s := new(strings.Builder)
+	for i, tool := range t {
+		s.WriteString(tool.String())
+		if i != len(t)-1 {
+			s.WriteString("\n\n---\n\n")
+		}
+	}
+
+	return s.String()
+}
+
 type toolOrFileRequest struct {
-	cache.Options `json:",inline"`
-	types.ToolDef `json:",inline"`
 	content       `json:",inline"`
 	file          `json:",inline"`
+	cache.Options `json:",inline"`
 
+	ToolDefs          toolDefs `json:"toolDefs,inline"`
 	SubTool           string   `json:"subTool"`
 	Input             string   `json:"input"`
 	ChatState         string   `json:"chatState"`
