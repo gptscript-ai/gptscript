@@ -459,6 +459,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 				Workspace:           r.Workspace,
 				SaveChatStateFile:   r.SaveChatStateFile,
 				ChatState:           chatState,
+				ExtraEnv:            gptScript.ExtraEnv,
 			})
 		}
 		return chat.Start(cmd.Context(), chatState, gptScript, func() (types.Program, error) {

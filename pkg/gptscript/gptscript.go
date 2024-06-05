@@ -32,7 +32,7 @@ type GPTScript struct {
 	Cache                  *cache.Client
 	WorkspacePath          string
 	DeleteWorkspaceOnClose bool
-	extraEnv               []string
+	ExtraEnv               []string
 	close                  func()
 }
 
@@ -125,7 +125,7 @@ func New(opts *Options) (*GPTScript, error) {
 		Cache:                  cacheClient,
 		WorkspacePath:          opts.Workspace,
 		DeleteWorkspaceOnClose: opts.Workspace == "",
-		extraEnv:               extraEnv,
+		ExtraEnv:               extraEnv,
 		close:                  closeServer,
 	}, nil
 }
@@ -147,7 +147,7 @@ func (g *GPTScript) getEnv(env []string) ([]string, error) {
 	if err := os.MkdirAll(g.WorkspacePath, 0700); err != nil {
 		return nil, err
 	}
-	return slices.Concat(g.extraEnv, []string{
+	return slices.Concat(g.ExtraEnv, []string{
 		fmt.Sprintf("GPTSCRIPT_WORKSPACE_DIR=%s", g.WorkspacePath),
 		fmt.Sprintf("GPTSCRIPT_WORKSPACE_ID=%s", hash.ID(g.WorkspacePath)),
 	}, env), nil
