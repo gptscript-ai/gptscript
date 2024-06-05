@@ -14,6 +14,8 @@ import (
 )
 
 func (s *server) authorize(ctx engine.Context, input string) (runner.AuthorizerResponse, error) {
+	defer gcontext.GetPauseFuncFromCtx(ctx.Ctx)()()
+
 	if auth.IsSafe(ctx) {
 		return runner.AuthorizerResponse{
 			Accept: true,

@@ -501,15 +501,15 @@ func toolRefsToCompletionTools(completionTools []ToolReference, prg Program) (re
 
 type Repo struct {
 	// VCS The VCS type, such as "git"
-	VCS string
+	VCS string `json:"vcs,omitempty"`
 	// The URL where the VCS repo can be found
-	Root string
+	Root string `json:"root,omitempty"`
 	// The path in the repo of this source. This should refer to a directory and not the actual file
-	Path string
+	Path string `json:"path,omitempty"`
 	// The filename of the source in the repo, relative to Path
-	Name string
+	Name string `json:"name,omitempty"`
 	// The revision of this source
-	Revision string
+	Revision string `json:"revision,omitempty"`
 }
 
 type ToolSource struct {
