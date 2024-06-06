@@ -31,12 +31,11 @@ jobs:
           cache: false
           go-version: "1.22"
       - name: Build UI
-        run: |
-          if [ ${{ matrix.os }} != 'windows-latest' ]; then
-            make build-ui
-          fi
+        if: matrix.os == 'ubuntu-22.04'
+        run: make build-ui
         shell: bash
       - name: Validate
+        if: matrix.os == 'ubuntu-22.04'
         run: make validate
       - name: Build
         run: make build

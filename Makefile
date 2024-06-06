@@ -21,7 +21,7 @@ tidy:
 test:
 	go test -v ./...
 
-GOLANGCI_LINT_VERSION ?= v1.56.1
+GOLANGCI_LINT_VERSION ?= v1.59.0
 lint:
 	if ! command -v golangci-lint &> /dev/null; then \
   		echo "Could not find golangci-lint, installing version $(GOLANGCI_LINT_VERSION)."; \

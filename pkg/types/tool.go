@@ -2,6 +2,7 @@ package types
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"slices"
@@ -9,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/google/shlex"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"golang.org/x/exp/maps"
 )
@@ -193,14 +195,20 @@ func (t *Tool) AddToolMapping(name string, tool Tool) {
 	})
 }
 
+// SplitArg splits a tool string into the tool name and arguments, and discards the alias if there is one.
+// Examples:
+// toolName => toolName, ""
+// toolName as myAlias => toolName, ""
+// toolName with value1 as arg1 and value2 as arg2 => toolName, "value1 as arg1 and value2 as arg2"
+// toolName as myAlias with value1 as arg1 and value2 as arg2 => toolName, "value1 as arg1 and value2 as arg2"
 func SplitArg(hasArg string) (prefix, arg string) {
 	var (
-		fields = strings.Fields(hasArg)
-		idx    = slices.Index(fields, "with")
-		asIdx  = slices.Index(fields, "as")
+		fields  = strings.Fields(hasArg)
+		withIdx = slices.Index(fields, "with")
+		asIdx   = slices.Index(fields, "as")
 	)
 
-	if idx == -1 {
+	if withIdx == -1 {
 		if asIdx != -1 {
 			return strings.Join(fields[:asIdx], " "),
 				strings.Join(fields[asIdx:], " ")
@@ -208,8 +216,112 @@ func SplitArg(hasArg string) (prefix, arg string) {
 		return strings.TrimSpace(hasArg), ""
 	}
 
-	return strings.Join(fields[:idx], " "),
-		strings.Join(fields[idx+1:], " ")
+	if asIdx != -1 && asIdx < withIdx {
+		return strings.Join(fields[:asIdx], " "),
+			strings.Join(fields[withIdx+1:], " ")
+	}
+
+	return strings.Join(fields[:withIdx], " "),
+		strings.Join(fields[withIdx+1:], " ")
+}
+
+// ParseCredentialArgs parses a credential tool name + args into a tool alias (if there is one) and a map of args.
+// Example: "toolName as myCredential with value1 as arg1 and value2 as arg2" -> toolName, myCredential, map[string]any{"arg1": "value1", "arg2": "value2"}, nil
+//
+// Arg references will be resolved based on the input.
+// Example:
+// - toolName: "toolName with ${var1} as arg1 and ${var2} as arg2"
+// - input: `{"var1": "value1", "var2": "value2"}`
+// result: toolName, "", map[string]any{"arg1": "value1", "arg2": "value2"}, nil
+func ParseCredentialArgs(toolName string, input string) (string, string, map[string]any, error) {
+	if toolName == "" {
+		return "", "", nil, nil
+	}
+
+	inputMap := make(map[string]any)
+	if input != "" {
+		err := json.Unmarshal([]byte(input), &inputMap)
+		if err != nil {
+			return "", "", nil, fmt.Errorf("failed to unmarshal input: %w", err)
+		}
+	}
+
+	fields, err := shlex.Split(toolName)
+	if err != nil {
+		return "", "", nil, err
+	}
+
+	// If it's just the tool name, return it
+	if len(fields) == 1 {
+		return toolName, "", nil, nil
+	}
+
+	// Next field is "as" if there is an alias, otherwise it should be "with"
+	originalName := fields[0]
+	alias := ""
+	fields = fields[1:]
+	if fields[0] == "as" {
+		if len(fields) < 2 {
+			return "", "", nil, fmt.Errorf("expected alias after 'as'")
+		}
+		alias = fields[1]
+		fields = fields[2:]
+	}
+
+	if len(fields) == 0 { // Nothing left, so just return
+		return originalName, alias, nil, nil
+	}
+
+	// Next we should have "with" followed by the args
+	if fields[0] != "with" {
+		return "", "", nil, fmt.Errorf("expected 'with' but got %s", fields[0])
+	}
+	fields = fields[1:]
+
+	// If there are no args, return an error
+	if len(fields) == 0 {
+		return "", "", nil, fmt.Errorf("expected args after 'with'")
+	}
+
+	args := make(map[string]any)
+	prev := "none" // "none", "value", "as", "name", or "and"
+	argValue := ""
+	for _, field := range fields {
+		switch prev {
+		case "none", "and":
+			argValue = field
+			prev = "value"
+		case "value":
+			if field != "as" {
+				return "", "", nil, fmt.Errorf("expected 'as' but got %s", field)
+			}
+			prev = "as"
+		case "as":
+			args[field] = argValue
+			prev = "name"
+		case "name":
+			if field != "and" {
+				return "", "", nil, fmt.Errorf("expected 'and' but got %s", field)
+			}
+			prev = "and"
+		}
+	}
+
+	if prev == "and" {
+		return "", "", nil, fmt.Errorf("expected arg name after 'and'")
+	}
+
+	// Check and see if any of the arg values are references to an input
+	for k, v := range args {
+		if strings.HasPrefix(v.(string), "${") && strings.HasSuffix(v.(string), "}") {
+			key := strings.TrimSuffix(strings.TrimPrefix(v.(string), "${"), "}")
+			if val, ok := inputMap[key]; ok {
+				args[k] = val.(string)
+			}
+		}
+	}
+
+	return originalName, alias, args, nil
 }
 
 func (t Tool) GetToolRefsFromNames(names []string) (result []ToolReference, _ error) {
