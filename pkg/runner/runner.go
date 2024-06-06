@@ -848,7 +848,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 				return nil, fmt.Errorf("failed to find ID for tool %s", credToolName)
 			}
 
-			input := ""
+			var input string
 			if args != nil {
 				inputBytes, err := json.Marshal(args)
 				if err != nil {

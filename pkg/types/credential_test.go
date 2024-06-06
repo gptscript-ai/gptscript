@@ -1,6 +1,11 @@
 package types
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
 
 func TestParseCredentialArgs(t *testing.T) {
 	tests := []struct {
@@ -130,23 +135,18 @@ func TestParseCredentialArgs(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			originalName, alias, args, err := ParseCredentialArgs(tt.toolName, tt.input)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ParseCredentialArgs() error = %v, wantErr %v", err, tt.wantErr)
+			if tt.wantErr {
+				require.Error(t, err, "expected an error but got none")
 				return
 			}
-			if originalName != tt.expectedName {
-				t.Errorf("ParseCredentialArgs() originalName = %v, expectedName %v", originalName, tt.expectedName)
-			}
-			if alias != tt.expectedAlias {
-				t.Errorf("ParseCredentialArgs() alias = %v, expectedAlias %v", alias, tt.expectedAlias)
-			}
-			if len(args) != len(tt.expectedArgs) {
-				t.Errorf("ParseCredentialArgs() args = %v, expectedArgs %v", args, tt.expectedArgs)
-			}
+
+			require.NoError(t, err, "did not expect an error but got one")
+			require.Equal(t, tt.expectedName, originalName, "unexpected original name")
+			require.Equal(t, tt.expectedAlias, alias, "unexpected alias")
+			require.Equal(t, len(tt.expectedArgs), len(args), "unexpected number of args")
+
 			for k, v := range tt.expectedArgs {
-				if args[k] != v {
-					t.Errorf("ParseCredentialArgs() args[%s] = %v, expectedArgs[%s] %v", k, args[k], k, v)
-				}
+				assert.Equal(t, v, args[k], "unexpected value for args[%s]", k)
 			}
 		})
 	}
