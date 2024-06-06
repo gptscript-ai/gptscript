@@ -21,7 +21,7 @@ func main() {
 	cmd := gptscript.New()
 	cmd.DisableAutoGenTag = true
 
-	files, err := filepath.Glob("docs/docs/100-reference/01-command-line/gptscript_*.md")
+	files, err := filepath.Glob("docs/docs/04-command-line-reference/gptscript_*.md")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -31,7 +31,7 @@ func main() {
 		}
 	}
 
-	err = doc.GenMarkdownTreeCustom(cmd, "docs/docs/100-reference/01-command-line", filePrepender, linkHandler)
+	err = doc.GenMarkdownTreeCustom(cmd, "docs/docs/04-command-line-reference", filePrepender, linkHandler)
 	if err != nil {
 		log.Fatal(err)
 	}
