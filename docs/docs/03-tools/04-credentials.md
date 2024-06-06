@@ -41,10 +41,11 @@ LLM about it or even tell the LLM about the tool.
 If GPTScript has called the credential provider tool in the same context (more on that later), then it will use the stored
 credential instead of fetching it again.
 
-You can also specify multiple credential tools for the same script:
+You can also specify multiple credential tools for the same script, but they must be on separate lines:
 
 ```yaml
-credentials: credential-tool-1.gpt, credential-tool-2.gpt
+credentials: credential-tool-1.gpt
+credentials: credential-tool-2.gpt
 
 (tool stuff here)
 ```

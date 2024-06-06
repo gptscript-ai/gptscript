@@ -1,0 +1,4 @@
+cred: github.com/g-linville/credential as mycred1 with hey as message and hey as field and HEY as env
+cred: github.com/g-linville/credential as mycred2 with yo as message and yo as field and YO as env
+
+echo hello
