@@ -166,7 +166,7 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 	// Don't overwrite the PromptURLEnvVar if it is already set in the environment.
 	var promptTokenAlreadySet bool
 	for _, env := range reqObject.Env {
-		if strings.HasPrefix(env, types.PromptTokenEnvVar+"=") {
+		if v, ok := strings.CutPrefix(env, types.PromptTokenEnvVar+"="); ok && v != "" {
 			promptTokenAlreadySet = true
 			break
 		}

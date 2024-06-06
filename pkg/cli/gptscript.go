@@ -467,6 +467,12 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 		}, gptOpt.Env, toolInput, r.SaveChatStateFile)
 	}
 
+	if r.UI {
+		// If the UI is running, then all prompts should go through the SDK and the UI.
+		// Not clearing ExtraEnv here would mean that the prompts would go through the terminal.
+		gptScript.ExtraEnv = nil
+	}
+
 	s, err := gptScript.Run(cmd.Context(), prg, gptOpt.Env, toolInput)
 	if err != nil {
 		return err

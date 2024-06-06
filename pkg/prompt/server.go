@@ -14,11 +14,18 @@ import (
 )
 
 func NewServer(ctx context.Context, envs []string) ([]string, error) {
+	var extraEnvs []string
 	for _, env := range envs {
-		_, v, ok := strings.Cut(env, types.PromptTokenEnvVar+"=")
-		if ok && v != "" {
-			return nil, nil
+		for _, prefix := range []string{types.PromptURLEnvVar, types.PromptTokenEnvVar} {
+			v, ok := strings.CutPrefix(env, prefix+"=")
+			if ok && v != "" {
+				extraEnvs = append(extraEnvs, env)
+			}
 		}
+	}
+
+	if len(extraEnvs) == 2 {
+		return extraEnvs, nil
 	}
 
 	l, err := net.Listen("tcp", "127.0.0.1:0")
