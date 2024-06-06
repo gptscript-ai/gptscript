@@ -3,7 +3,7 @@ run:
 
 output:
   formats:
-  - github-actions
+  - format: github-actions
 
 linters:
   disable-all: true
