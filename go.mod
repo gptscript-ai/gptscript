@@ -12,7 +12,7 @@ require (
 	github.com/docker/cli v26.0.0+incompatible
 	github.com/docker/docker-credential-helpers v0.8.1
 	github.com/fatih/color v1.17.0
-	github.com/getkin/kin-openapi v0.123.0
+	github.com/getkin/kin-openapi v0.124.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/google/uuid v1.6.0
 	github.com/gptscript-ai/chat-completion-client v0.0.0-20240531200700-af8e7ecf0379
