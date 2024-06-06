@@ -12,10 +12,15 @@ Here are some sample use cases of GPTScript:
 
 
 ### Getting started
-MacOS and Linux:
+MacOS and Linux (Homebrew):
 ```
 brew install gptscript-ai/tap/gptscript 
 gptscript github.com/gptscript-ai/llm-basics-demo
+```
+
+MacOS and Linux (install.sh):
+```
+curl https://get.gptscript.ai/install.sh | sh
 ```
 
 Windows:

@@ -20,23 +20,26 @@ Here are some sample use cases of GPTScript:
 ### Getting Started
 
 <Tabs>
-    <TabItem value="MacOS and Linux">
+    <TabItem value="MacOS and Linux (Homebrew)">
     ```shell
     brew install gptscript-ai/tap/gptscript 
     gptscript github.com/gptscript-ai/llm-basics-demo
     ```
-    A few notes:
-    - You'll need an [OpenAI API key](https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key)
-    - The above script is a simple chat-based assistant. You can ask it questions and it will answer to the best of its ability.
+    </TabItem>
+    <TabItem value="MacOS and Linux (install.sh)">
+    ```shell
+    curl https://get.gptscript.ai/install.sh | sh
+    gptscript github.com/gptscript-ai/llm-basics-demo
+    ```
     </TabItem>
     <TabItem value="Windows">
     ```shell
     winget install gptscript-ai.gptscript
     gptscript github.com/gptscript-ai/llm-basics-demo
     ```
-    A few notes:
-    - You'll need an [OpenAI API key](https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key)
-    - After installing gptscript you may need to restart your terminal for the changes to take effect
-    - The above script is a simple chat-based assistant. You can ask it questions and it will answer to the best of its ability.
     </TabItem>
 </Tabs>
+A few notes:
+- You'll need an [OpenAI API key](https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key)
+- On Windows, after installing gptscript you may need to restart your terminal for the changes to take effect
+- The above script is a simple chat-based assistant. You can ask it questions and it will answer to the best of its ability.
