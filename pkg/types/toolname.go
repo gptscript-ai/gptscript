@@ -92,6 +92,6 @@ func PickToolName(toolName string, existing map[string]struct{}) string {
 			existing[testName] = struct{}{}
 			return testName
 		}
-		toolName += "0"
+		testName += "0"
 	}
 }
