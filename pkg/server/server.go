@@ -43,7 +43,7 @@ func complete(opts *Options) (result *Options) {
 
 	result.ListenAddress = types.FirstSet(result.ListenAddress, result.ListenAddress)
 	if result.ListenAddress == "" {
-		result.ListenAddress = "127.0.0.1:9090"
+		result.ListenAddress = "127.0.0.1:0"
 	}
 
 	return
