@@ -137,3 +137,21 @@ func loadURL(ctx context.Context, cache *cache.Client, base *source, name string
 
 	return result, true, nil
 }
+
+func ContentFromURL(url string) (string, error) {
+	cache, err := cache.New()
+	if err != nil {
+		return "", fmt.Errorf("failed to create cache: %w", err)
+	}
+
+	source, ok, err := loadURL(context.Background(), cache, &source{}, url)
+	if err != nil {
+		return "", fmt.Errorf("failed to load %s: %w", url, err)
+	}
+
+	if !ok {
+		return "", nil
+	}
+
+	return string(source.Content), nil
+}
