@@ -110,9 +110,11 @@ func New(opts *Options) (*GPTScript, error) {
 		closeServer()
 		return nil, err
 	}
-	oaiClient.SetEnvs(extraEnv)
 
-	remoteClient := remote.New(runner, extraEnv, cacheClient, cliCfg, opts.CredentialContext)
+	fullEnv := append(opts.Env, extraEnv...)
+	oaiClient.SetEnvs(fullEnv)
+
+	remoteClient := remote.New(runner, fullEnv, cacheClient, cliCfg, opts.CredentialContext)
 	if err := registry.AddClient(remoteClient); err != nil {
 		closeServer()
 		return nil, err
