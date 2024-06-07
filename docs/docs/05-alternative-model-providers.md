@@ -1,4 +1,4 @@
-# Support Models and Platforms
+# Supported Models and Platforms
 
 ## Usage
 
