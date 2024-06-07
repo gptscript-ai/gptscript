@@ -4,18 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gptscript-ai/gptscript/pkg/config"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/tidwall/gjson"
 )
 
-func GetModelProviderCredential(ctx context.Context, credName, env, message, credCtx string, envs []string, cliCfg *config.CLIConfig) (string, error) {
-	store, err := credentials.NewStore(cliCfg, credCtx)
-	if err != nil {
-		return "", err
-	}
-
-	cred, exists, err := store.Get(credName)
+func GetModelProviderCredential(ctx context.Context, credStore *credentials.Store, credName, env, message string, envs []string) (string, error) {
+	cred, exists, err := credStore.Get(credName)
 	if err != nil {
 		return "", err
 	}
@@ -30,7 +24,7 @@ func GetModelProviderCredential(ctx context.Context, credName, env, message, cre
 		}
 
 		k = gjson.Get(result, "key").String()
-		if err := store.Add(credentials.Credential{
+		if err := credStore.Add(credentials.Credential{
 			ToolName: credName,
 			Type:     credentials.CredentialTypeModelProvider,
 			Env: map[string]string{

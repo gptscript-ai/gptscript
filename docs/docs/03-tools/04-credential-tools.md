@@ -1,4 +1,4 @@
-# Credentials
+# Credential Tools
 
 GPTScript supports credential provider tools. These tools can be used to fetch credentials from a secure location (or
 directly from user input) and conveniently set them in the environment before running a script.
@@ -92,24 +92,8 @@ In this example, the tool's output would be `{"env":{"MY_ENV_VAR":"my value"}}`
 
 ## Storing Credentials
 
-By default, credentials are automatically stored in a config file at `$XDG_CONFIG_HOME/gptscript/config.json`.
-This config file also has another parameter, `credsStore`, which indicates where the credentials are being stored.
-
-- `file` (default): The credentials are stored directly in the config file.
-- `osxkeychain`: The credentials are stored in the macOS Keychain.
-- `wincred`: The credentials are stored in the Windows Credential Manager.
-
-In order to use `osxkeychain` or `wincred` as the credsStore, you must have the `gptscript-credential-*` executable
-available in your PATH. There will probably be better packaging for this in the future, but for now, you can build them
-from the [repo](https://github.com/gptscript-ai/gptscript-credential-helpers). (For wincred, make sure the executable
-is called `gptscript-credential-wincred.exe`.)
-
-There will likely be support added for other credential stores in the future.
-
-:::note
-Credentials received from credential provider tools that are not on GitHub (such as a local file) and do not have an alias
-will not be stored in the credentials store.
-:::
+By default, credentials are automatically stored in the credential store. Read the [main credentials page](../02-credentials.md)
+for more information about the credential store.
 
 ## Credential Aliases
 
@@ -128,7 +112,7 @@ or when you want to store credentials that were provided by a tool that is not o
 ## Credential Contexts
 
 Each stored credential is uniquely identified by the name of its provider tool (or alias, if one was specified) and the name of its context.
-A credential  context is basically a namespace for credentials. If you have multiple credentials from the same provider tool,
+A credential context is basically a namespace for credentials. If you have multiple credentials from the same provider tool,
 you can switch between them by defining them in different credential contexts. The default context is called `default`,
 and this is used if none is specified.
 

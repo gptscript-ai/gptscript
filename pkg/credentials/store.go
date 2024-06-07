@@ -2,24 +2,28 @@ package credentials
 
 import (
 	"fmt"
+	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/docker/cli/cli/config/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/config"
 )
 
 type Store struct {
-	credCtx string
-	cfg     *config.CLIConfig
+	credCtx        string
+	credHelperDirs CredentialHelperDirs
+	cfg            *config.CLIConfig
 }
 
-func NewStore(cfg *config.CLIConfig, credCtx string) (*Store, error) {
+func NewStore(cfg *config.CLIConfig, credCtx, cacheDir string) (*Store, error) {
 	if err := validateCredentialCtx(credCtx); err != nil {
 		return nil, err
 	}
 	return &Store{
-		credCtx: credCtx,
-		cfg:     cfg,
+		credCtx:        credCtx,
+		credHelperDirs: GetCredentialHelperDirs(cacheDir),
+		cfg:            cfg,
 	}, nil
 }
 
@@ -103,6 +107,12 @@ func (s *Store) getStoreByHelper(helper string) (credentials.Store, error) {
 	if helper == "" || helper == config.GPTScriptHelperPrefix+"file" {
 		return credentials.NewFileStore(s.cfg), nil
 	}
+
+	// If the helper is referencing one of the credential helper programs, then reference the full path.
+	if strings.HasPrefix(helper, "gptscript-credential-") {
+		helper = filepath.Join(s.credHelperDirs.BinDir, helper)
+	}
+
 	return NewHelper(s.cfg, helper)
 }
 

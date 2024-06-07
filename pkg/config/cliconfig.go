@@ -3,15 +3,22 @@ package config
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"runtime"
+	"slices"
 	"strings"
 	"sync"
 
 	"github.com/adrg/xdg"
 	"github.com/docker/cli/cli/config/types"
+)
+
+var (
+	darwinHelpers  = []string{"osxkeychain", "file"}
+	windowsHelpers = []string{"wincred", "file"}
+	linuxHelpers   = []string{"secretservice", "pass", "file"}
 )
 
 const GPTScriptHelperPrefix = "gptscript-credential-"
@@ -132,21 +139,54 @@ func ReadCLIConfig(gptscriptConfigFile string) (*CLIConfig, error) {
 	}
 
 	if result.CredentialsStore == "" {
-		result.setDefaultCredentialsStore()
+		if err := result.setDefaultCredentialsStore(); err != nil {
+			return nil, err
+		}
+	}
+
+	if !isValidCredentialHelper(result.CredentialsStore) {
+		errMsg := fmt.Sprintf("invalid credential store '%s'", result.CredentialsStore)
+		switch runtime.GOOS {
+		case "darwin":
+			errMsg += " (use 'osxkeychain' or 'file')"
+		case "windows":
+			errMsg += " (use 'wincred' or 'file')"
+		case "linux":
+			errMsg += " (use 'secretservice', 'pass', or 'file')"
+		default:
+			errMsg += " (use 'file')"
+		}
+		errMsg += fmt.Sprintf("\nPlease edit your config file at %s to fix this.", result.GPTScriptConfigFile)
+
+		return nil, errors.New(errMsg)
 	}
 
 	return result, nil
 }
 
-func (c *CLIConfig) setDefaultCredentialsStore() {
-	if runtime.GOOS == "darwin" {
-		// Check for the existence of the helper program
-		fullPath, err := exec.LookPath(GPTScriptHelperPrefix + "osxkeychain")
-		if err == nil && fullPath != "" {
-			c.CredentialsStore = "osxkeychain"
-		}
+func (c *CLIConfig) setDefaultCredentialsStore() error {
+	switch runtime.GOOS {
+	case "darwin":
+		c.CredentialsStore = "osxkeychain"
+	case "windows":
+		c.CredentialsStore = "wincred"
+	default:
+		c.CredentialsStore = "file"
 	}
-	c.CredentialsStore = "file"
+	return c.Save()
+}
+
+func isValidCredentialHelper(helper string) bool {
+	switch runtime.GOOS {
+	case "darwin":
+		return slices.Contains(darwinHelpers, helper)
+	case "windows":
+		return slices.Contains(windowsHelpers, helper)
+	case "linux":
+		return slices.Contains(linuxHelpers, helper)
+	default:
+		return helper == "file"
+	}
 }
 
 func readFile(path string) ([]byte, error) {

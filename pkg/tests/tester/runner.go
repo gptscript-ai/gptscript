@@ -157,7 +157,7 @@ func NewRunner(t *testing.T) *Runner {
 		t: t,
 	}
 
-	run, err := runner.New(c, "default", runner.Options{
+	run, err := runner.New(c, nil, runner.Options{
 		Sequential: true,
 	})
 	require.NoError(t, err)
