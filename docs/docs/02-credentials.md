@@ -68,4 +68,4 @@ prompted to enter it again the next time a tool that requires it is run.
 ## See Also
 
 For more advanced credential usage, including credential contexts, writing credential tools, and using
-credential tools, see [the credential tools documentation](03-tools/04-credential-tools).
+credential tools, see [the credential tools documentation](03-tools/04-credential-tools.md).
