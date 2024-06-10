@@ -158,8 +158,7 @@ func NewRunner(t *testing.T) *Runner {
 		t: t,
 	}
 
-	var noopStore credentials.CredentialStore = credentials.NoopStore{}
-	run, err := runner.New(c, &noopStore, runner.Options{
+	run, err := runner.New(c, credentials.NoopStore{}, runner.Options{
 		Sequential: true,
 	})
 	require.NoError(t, err)
