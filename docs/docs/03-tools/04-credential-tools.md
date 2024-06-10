@@ -95,6 +95,11 @@ In this example, the tool's output would be `{"env":{"MY_ENV_VAR":"my value"}}`
 By default, credentials are automatically stored in the credential store. Read the [main credentials page](../02-credentials.md)
 for more information about the credential store.
 
+:::note
+Credentials received from credential provider tools that are not on GitHub (such as a local file) and do not have an alias
+will not be stored in the credentials store.
+:::
+
 ## Credential Aliases
 
 When you reference a credential tool in your script, you can give it an alias using the `as` keyword like this:
