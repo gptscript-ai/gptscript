@@ -86,11 +86,11 @@ type Runner struct {
 	runtimeManager engine.RuntimeManager
 	credMutex      sync.Mutex
 	credOverrides  string
-	credStore      *credentials.Store
+	credStore      credentials.CredentialStore
 	sequential     bool
 }
 
-func New(client engine.Model, credStore *credentials.Store, opts ...Options) (*Runner, error) {
+func New(client engine.Model, credStore credentials.CredentialStore, opts ...Options) (*Runner, error) {
 	opt := complete(opts...)
 
 	runner := &Runner{

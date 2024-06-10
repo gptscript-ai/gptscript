@@ -57,7 +57,7 @@ func (r *Runtime) BuildCredentialHelper(ctx context.Context, helperName string, 
 		return nil
 	}
 
-	suffix := ""
+	var suffix string
 	if helperName == "wincred" {
 		suffix = ".exe"
 	}

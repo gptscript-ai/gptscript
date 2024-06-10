@@ -27,10 +27,10 @@ type Client struct {
 	models      map[string]*openai.Client
 	runner      *runner.Runner
 	envs        []string
-	credStore   *credentials.Store
+	credStore   credentials.CredentialStore
 }
 
-func New(r *runner.Runner, envs []string, cache *cache.Client, credStore *credentials.Store) *Client {
+func New(r *runner.Runner, envs []string, cache *cache.Client, credStore credentials.CredentialStore) *Client {
 	return &Client{
 		cache:     cache,
 		runner:    r,

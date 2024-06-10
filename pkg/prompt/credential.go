@@ -8,7 +8,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-func GetModelProviderCredential(ctx context.Context, credStore *credentials.Store, credName, env, message string, envs []string) (string, error) {
+func GetModelProviderCredential(ctx context.Context, credStore credentials.CredentialStore, credName, env, message string, envs []string) (string, error) {
 	cred, exists, err := credStore.Get(credName)
 	if err != nil {
 		return "", err

@@ -62,8 +62,10 @@ func New(cacheDir string, runtimes ...Runtime) *Manager {
 }
 
 func (m *Manager) SetUpCredentialHelpers(ctx context.Context, cliCfg *config.CLIConfig, env []string) error {
-	helperName := cliCfg.CredentialsStore
-	suffix := ""
+	var (
+		helperName = cliCfg.CredentialsStore
+		suffix     string
+	)
 	if helperName == "wincred" {
 		suffix = ".exe"
 	}

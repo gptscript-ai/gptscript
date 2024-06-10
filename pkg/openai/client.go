@@ -44,7 +44,7 @@ type Client struct {
 	cacheKeyBase string
 	setSeed      bool
 	envs         []string
-	credStore    *credentials.Store
+	credStore    credentials.CredentialStore
 }
 
 type Options struct {
@@ -86,7 +86,7 @@ func complete(opts ...Options) (result Options, err error) {
 	return result, err
 }
 
-func NewClient(credStore *credentials.Store, opts ...Options) (*Client, error) {
+func NewClient(credStore credentials.CredentialStore, opts ...Options) (*Client, error) {
 	opt, err := complete(opts...)
 	if err != nil {
 		return nil, err

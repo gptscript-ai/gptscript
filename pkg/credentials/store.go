@@ -10,24 +10,31 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/config"
 )
 
+type CredentialStore interface {
+	Get(toolName string) (*Credential, bool, error)
+	Add(cred Credential) error
+	Remove(toolName string) error
+	List() ([]Credential, error)
+}
+
 type Store struct {
 	credCtx        string
 	credHelperDirs CredentialHelperDirs
 	cfg            *config.CLIConfig
 }
 
-func NewStore(cfg *config.CLIConfig, credCtx, cacheDir string) (*Store, error) {
+func NewStore(cfg *config.CLIConfig, credCtx, cacheDir string) (CredentialStore, error) {
 	if err := validateCredentialCtx(credCtx); err != nil {
 		return nil, err
 	}
-	return &Store{
+	return Store{
 		credCtx:        credCtx,
 		credHelperDirs: GetCredentialHelperDirs(cacheDir),
 		cfg:            cfg,
 	}, nil
 }
 
-func (s *Store) Get(toolName string) (*Credential, bool, error) {
+func (s Store) Get(toolName string) (*Credential, bool, error) {
 	store, err := s.getStore()
 	if err != nil {
 		return nil, false, err
@@ -50,7 +57,7 @@ func (s *Store) Get(toolName string) (*Credential, bool, error) {
 	return &cred, true, nil
 }
 
-func (s *Store) Add(cred Credential) error {
+func (s Store) Add(cred Credential) error {
 	cred.Context = s.credCtx
 	store, err := s.getStore()
 	if err != nil {
@@ -63,7 +70,7 @@ func (s *Store) Add(cred Credential) error {
 	return store.Store(auth)
 }
 
-func (s *Store) Remove(toolName string) error {
+func (s Store) Remove(toolName string) error {
 	store, err := s.getStore()
 	if err != nil {
 		return err
@@ -71,7 +78,7 @@ func (s *Store) Remove(toolName string) error {
 	return store.Erase(toolNameWithCtx(toolName, s.credCtx))
 }
 
-func (s *Store) List() ([]Credential, error) {
+func (s Store) List() ([]Credential, error) {
 	store, err := s.getStore()
 	if err != nil {
 		return nil, err
