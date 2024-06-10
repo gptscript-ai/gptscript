@@ -50,6 +50,22 @@ credentials: credential-tool-2.gpt
 (tool stuff here)
 ```
 
+### Generic Credential Tool
+
+GPTScript also provides a generic credential tool (`github.com/gptscript-ai/credential`) that is ideal for cases
+where you only need to set one environment variable. Here is an example of how to use it:
+
+```yaml
+credentials: github.com/gptscript-ai/credential as myCredentialName with MY_ENV_VAR as env and "this message will be displayed to the user" as message and key as field
+
+(tool stuff here)
+```
+
+When this tool is run, the user will be shown the message and prompted to enter a key. The value entered will be set as
+the environment variable `MY_ENV_VAR` and stored in a credential called `myCredentialName`.
+
+See [the repo](https://github.com/gptscript-ai/credential) for more information.
+
 ## Credential Tool Arguments
 
 A credential tool may define arguments. Here is an example:
