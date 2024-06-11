@@ -221,7 +221,7 @@ func (r *GPTScript) PersistentPre(*cobra.Command, []string) error {
 		}
 	}
 
-	_ = os.Setenv("GPTSCRIPT_BIN", system.Bin())
+	_ = os.Setenv(system.BinEnvVar, system.Bin())
 
 	if r.DefaultModel != "" {
 		builtin.SetDefaultModel(r.DefaultModel)
@@ -344,6 +344,9 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 			}
 
 			gptOpt.Env = append(gptOpt.Env, "SCRIPTS_PATH="+filepath.Dir(absPathToScript))
+			if os.Getenv(system.BinEnvVar) == "" {
+				gptOpt.Env = append(gptOpt.Env, system.BinEnvVar+"="+system.Bin())
+			}
 
 			args = append([]string{args[0]}, "--file="+filepath.Base(args[1]))
 			if len(args) > 2 {
