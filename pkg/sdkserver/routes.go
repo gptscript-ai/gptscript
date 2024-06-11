@@ -15,6 +15,7 @@ import (
 	"github.com/acorn-io/broadcaster"
 	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
+	"github.com/gptscript-ai/gptscript/pkg/input"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/parser"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
@@ -225,15 +226,14 @@ func (s *server) parse(w http.ResponseWriter, r *http.Request) {
 	if reqObject.Content != "" {
 		out, err = parser.Parse(strings.NewReader(reqObject.Content), reqObject.Options)
 	} else {
-		var file *os.File
-		file, err = os.Open(reqObject.File)
-		if err != nil {
-			logger.Errorf("failed to open file: %v", err)
-			writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to open file: %w", err))
+		content, loadErr := input.FromLocation(reqObject.File)
+		if loadErr != nil {
+			logger.Errorf(loadErr.Error())
+			writeError(logger, w, http.StatusInternalServerError, loadErr)
 			return
 		}
-		out, err = parser.Parse(file, reqObject.Options)
-		_ = file.Close()
+
+		out, err = parser.Parse(strings.NewReader(content), reqObject.Options)
 	}
 	if err != nil {
 		logger.Errorf("failed to parse file: %v", err)

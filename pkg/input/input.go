@@ -5,6 +5,8 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	"github.com/gptscript-ai/gptscript/pkg/loader"
 )
 
 func FromArgs(args []string) string {
@@ -38,4 +40,24 @@ func FromFile(file string) (string, error) {
 	}
 
 	return "", nil
+}
+
+// FromLocation takes a string that can be a file path or a URL to a file and returns the content of that file.
+func FromLocation(s string) (string, error) {
+	// Attempt to read the file first, if that fails, try to load the URL. Finally,
+	// return an error if both fail.
+	content, err := FromFile(s)
+	if err != nil {
+		log.Debugf("failed to read file %s (due to %v) attempting to load the URL...", s, err)
+		content, err = loader.ContentFromURL(s)
+		if err != nil {
+			return "", err
+		}
+		// If the content is empty and there was no error, this is not a remote file. Return a generic
+		// error indicating that the file could not be loaded.
+		if content == "" {
+			return "", fmt.Errorf("failed to load %v", s)
+		}
+	}
+	return content, nil
 }
