@@ -33,6 +33,7 @@ jobs:
           GORELEASER_CURRENT_TAG: ${{ github.ref_name }}
   winget-release:
     needs: release-tag
+    if: "! contains(github.ref_name, '-rc')"
     runs-on: windows-latest
     steps:
       - name: Install winget-create
