@@ -48,10 +48,25 @@ type Options struct {
 	Env               []string
 }
 
-func complete(opts *Options) (result *Options) {
-	result = opts
-	if result == nil {
-		result = &Options{}
+func complete(opts ...Options) (Options, error) {
+	var (
+		result Options
+		err    error
+	)
+
+	for _, opt := range opts {
+		result.Cache = cache.Complete(result.Cache, opt.Cache)
+		result.Monitor = monitor.Complete(result.Monitor, opt.Monitor)
+		result.Runner = runner.Complete(result.Runner, opt.Runner)
+		result.OpenAI, err = openai.Complete(result.OpenAI, opt.OpenAI)
+		if err != nil {
+			return Options{}, err
+		}
+
+		result.CredentialContext = types.FirstSet(opt.CredentialContext, result.CredentialContext)
+		result.Quiet = types.FirstSet(opt.Quiet, result.Quiet)
+		result.Workspace = types.FirstSet(opt.Workspace, result.Workspace)
+		result.Env = append(result.Env, opt.Env...)
 	}
 	if result.Quiet == nil {
 		result.Quiet = new(bool)
@@ -60,13 +75,17 @@ func complete(opts *Options) (result *Options) {
 		result.Env = os.Environ()
 	}
 	if result.CredentialContext == "" {
-		opts.CredentialContext = "default"
+		result.CredentialContext = "default"
 	}
-	return
+
+	return result, nil
 }
 
-func New(opts *Options) (*GPTScript, error) {
-	opts = complete(opts)
+func New(o ...Options) (*GPTScript, error) {
+	opts, err := complete(o...)
+	if err != nil {
+		return nil, err
+	}
 
 	registry := llm.NewRegistry()
 

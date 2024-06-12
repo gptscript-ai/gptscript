@@ -7,6 +7,7 @@ import (
 
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
+	"github.com/gptscript-ai/gptscript/pkg/openai"
 	"github.com/gptscript-ai/gptscript/pkg/parser"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	gserver "github.com/gptscript-ai/gptscript/pkg/server"
@@ -40,10 +41,16 @@ func (t toolDefs) String() string {
 	return s.String()
 }
 
+type (
+	cacheOptions  cache.Options
+	openAIOptions openai.Options
+)
+
 type toolOrFileRequest struct {
 	content       `json:",inline"`
 	file          `json:",inline"`
-	cache.Options `json:",inline"`
+	cacheOptions  `json:",inline"`
+	openAIOptions `json:",inline"`
 
 	ToolDefs          toolDefs `json:"toolDefs,inline"`
 	SubTool           string   `json:"subTool"`
