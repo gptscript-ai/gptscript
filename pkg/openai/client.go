@@ -12,7 +12,6 @@ import (
 
 	openai "github.com/gptscript-ai/chat-completion-client"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
-	"github.com/gptscript-ai/gptscript/pkg/config"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
@@ -44,9 +43,8 @@ type Client struct {
 	invalidAuth  bool
 	cacheKeyBase string
 	setSeed      bool
-	cliCfg       *config.CLIConfig
-	credCtx      string
 	envs         []string
+	credStore    credentials.CredentialStore
 }
 
 type Options struct {
@@ -88,7 +86,7 @@ func complete(opts ...Options) (result Options, err error) {
 	return result, err
 }
 
-func NewClient(cliCfg *config.CLIConfig, credCtx string, opts ...Options) (*Client, error) {
+func NewClient(credStore credentials.CredentialStore, opts ...Options) (*Client, error) {
 	opt, err := complete(opts...)
 	if err != nil {
 		return nil, err
@@ -96,12 +94,7 @@ func NewClient(cliCfg *config.CLIConfig, credCtx string, opts ...Options) (*Clie
 
 	// If the API key is not set, try to get it from the cred store
 	if opt.APIKey == "" && opt.BaseURL == "" {
-		store, err := credentials.NewStore(cliCfg, credCtx)
-		if err != nil {
-			return nil, err
-		}
-
-		cred, exists, err := store.Get(BuiltinCredName)
+		cred, exists, err := credStore.Get(BuiltinCredName)
 		if err != nil {
 			return nil, err
 		}
@@ -126,8 +119,7 @@ func NewClient(cliCfg *config.CLIConfig, credCtx string, opts ...Options) (*Clie
 		cacheKeyBase: cacheKeyBase,
 		invalidAuth:  opt.APIKey == "" && opt.BaseURL == "",
 		setSeed:      opt.SetSeed,
-		cliCfg:       cliCfg,
-		credCtx:      credCtx,
+		credStore:    credStore,
 	}, nil
 }
 
@@ -548,7 +540,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 }
 
 func (c *Client) RetrieveAPIKey(ctx context.Context) error {
-	k, err := prompt.GetModelProviderCredential(ctx, BuiltinCredName, "OPENAI_API_KEY", "Please provide your OpenAI API key:", c.credCtx, c.envs, c.cliCfg)
+	k, err := prompt.GetModelProviderCredential(ctx, c.credStore, BuiltinCredName, "OPENAI_API_KEY", "Please provide your OpenAI API key:", c.envs)
 	if err != nil {
 		return err
 	}

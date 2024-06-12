@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
-	"github.com/gptscript-ai/gptscript/pkg/config"
 	context2 "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
@@ -85,22 +84,22 @@ type Runner struct {
 	auth           AuthorizerFunc
 	factory        MonitorFactory
 	runtimeManager engine.RuntimeManager
-	credCtx        string
 	credMutex      sync.Mutex
 	credOverrides  string
+	credStore      credentials.CredentialStore
 	sequential     bool
 }
 
-func New(client engine.Model, credCtx string, opts ...Options) (*Runner, error) {
+func New(client engine.Model, credStore credentials.CredentialStore, opts ...Options) (*Runner, error) {
 	opt := complete(opts...)
 
 	runner := &Runner{
 		c:              client,
 		factory:        opt.MonitorFactory,
 		runtimeManager: opt.RuntimeManager,
-		credCtx:        credCtx,
 		credMutex:      sync.Mutex{},
 		credOverrides:  opt.CredentialOverride,
+		credStore:      credStore,
 		sequential:     opt.Sequential,
 		auth:           opt.Authorizer,
 	}
@@ -787,19 +786,11 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 	r.credMutex.Lock()
 	defer r.credMutex.Unlock()
 
-	// Set up the credential store.
-	c, err := config.ReadCLIConfig("")
-	if err != nil {
-		return nil, fmt.Errorf("failed to read CLI config: %w", err)
-	}
-
-	store, err := credentials.NewStore(c, r.credCtx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create credentials store: %w", err)
-	}
-
 	// Parse the credential overrides from the command line argument, if there are any.
-	var credOverrides map[string]map[string]string
+	var (
+		credOverrides map[string]map[string]string
+		err           error
+	)
 	if r.credOverrides != "" {
 		credOverrides, err = parseCredentialOverrides(r.credOverrides)
 		if err != nil {
@@ -829,12 +820,12 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 		// Only try to look up the cred if the tool is on GitHub or has an alias.
 		// If it is a GitHub tool and has an alias, the alias overrides the tool name, so we use it as the credential name.
 		if isGitHubTool(toolName) && credentialAlias == "" {
-			cred, exists, err = store.Get(toolName)
+			cred, exists, err = r.credStore.Get(toolName)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get credentials for tool %s: %w", toolName, err)
 			}
 		} else if credentialAlias != "" {
-			cred, exists, err = store.Get(credentialAlias)
+			cred, exists, err = r.credStore.Get(credentialAlias)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get credentials for tool %s: %w", credentialAlias, err)
 			}
@@ -900,7 +891,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			if (isGitHubTool(toolName) && callCtx.Program.ToolSet[credToolRefs[0].ToolID].Source.Repo != nil) || credentialAlias != "" {
 				if isEmpty {
 					log.Warnf("Not saving empty credential for tool %s", toolName)
-				} else if err := store.Add(*cred); err != nil {
+				} else if err := r.credStore.Add(*cred); err != nil {
 					return nil, fmt.Errorf("failed to add credential for tool %s: %w", toolName, err)
 				}
 			} else {

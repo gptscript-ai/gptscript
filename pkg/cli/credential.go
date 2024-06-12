@@ -8,6 +8,7 @@ import (
 	"text/tabwriter"
 
 	cmd2 "github.com/acorn-io/cmd"
+	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/spf13/cobra"
@@ -38,7 +39,13 @@ func (c *Credential) Run(_ *cobra.Command, _ []string) error {
 		ctx = "*"
 	}
 
-	store, err := credentials.NewStore(cfg, ctx)
+	opts, err := c.root.NewGPTScriptOpts()
+	if err != nil {
+		return err
+	}
+	opts.Cache = cache.Complete(opts.Cache)
+
+	store, err := credentials.NewStore(cfg, ctx, opts.Cache.CacheDir)
 	if err != nil {
 		return fmt.Errorf("failed to get credentials store: %w", err)
 	}

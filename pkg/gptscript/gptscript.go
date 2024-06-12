@@ -11,6 +11,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	context2 "github.com/gptscript-ai/gptscript/pkg/context"
+	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/llm"
@@ -79,7 +80,20 @@ func New(opts *Options) (*GPTScript, error) {
 		return nil, err
 	}
 
-	oaiClient, err := openai.NewClient(cliCfg, opts.CredentialContext, opts.OpenAI, openai.Options{
+	credStore, err := credentials.NewStore(cliCfg, opts.CredentialContext, cacheClient.CacheDir())
+	if err != nil {
+		return nil, err
+	}
+
+	if opts.Runner.RuntimeManager == nil {
+		opts.Runner.RuntimeManager = runtimes.Default(cacheClient.CacheDir())
+	}
+
+	if err := opts.Runner.RuntimeManager.SetUpCredentialHelpers(context.Background(), cliCfg, opts.Env); err != nil {
+		return nil, err
+	}
+
+	oaiClient, err := openai.NewClient(credStore, opts.OpenAI, openai.Options{
 		Cache:   cacheClient,
 		SetSeed: true,
 	})
@@ -95,11 +109,7 @@ func New(opts *Options) (*GPTScript, error) {
 		opts.Runner.MonitorFactory = monitor.NewConsole(opts.Monitor, monitor.Options{DebugMessages: *opts.Quiet})
 	}
 
-	if opts.Runner.RuntimeManager == nil {
-		opts.Runner.RuntimeManager = runtimes.Default(cacheClient.CacheDir())
-	}
-
-	runner, err := runner.New(registry, opts.CredentialContext, opts.Runner)
+	runner, err := runner.New(registry, credStore, opts.Runner)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +124,7 @@ func New(opts *Options) (*GPTScript, error) {
 	fullEnv := append(opts.Env, extraEnv...)
 	oaiClient.SetEnvs(fullEnv)
 
-	remoteClient := remote.New(runner, fullEnv, cacheClient, cliCfg, opts.CredentialContext)
+	remoteClient := remote.New(runner, fullEnv, cacheClient, credStore)
 	if err := registry.AddClient(remoteClient); err != nil {
 		closeServer()
 		return nil, err

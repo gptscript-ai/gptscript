@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -157,7 +158,7 @@ func NewRunner(t *testing.T) *Runner {
 		t: t,
 	}
 
-	run, err := runner.New(c, "default", runner.Options{
+	run, err := runner.New(c, credentials.NoopStore{}, runner.Options{
 		Sequential: true,
 	})
 	require.NoError(t, err)

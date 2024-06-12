@@ -13,6 +13,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/debugcmd"
 	runtimeEnv "github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
@@ -49,6 +50,32 @@ func (r *Runtime) Setup(ctx context.Context, dataRoot, toolSource string, env []
 	}
 
 	return newEnv, nil
+}
+
+func (r *Runtime) BuildCredentialHelper(ctx context.Context, helperName string, credHelperDirs credentials.CredentialHelperDirs, dataRoot, revision string, env []string) error {
+	if helperName == "file" {
+		return nil
+	}
+
+	var suffix string
+	if helperName == "wincred" {
+		suffix = ".exe"
+	}
+
+	binPath, err := r.getRuntime(ctx, dataRoot)
+	if err != nil {
+		return err
+	}
+	newEnv := runtimeEnv.AppendPath(env, binPath)
+
+	log.Infof("Building credential helper %s", helperName)
+	cmd := debugcmd.New(ctx, filepath.Join(binPath, "go"),
+		"build", "-buildvcs=false", "-o",
+		filepath.Join(credHelperDirs.BinDir, "gptscript-credential-"+helperName+suffix),
+		fmt.Sprintf("./%s/cmd/", helperName))
+	cmd.Env = stripGo(append(env, newEnv...))
+	cmd.Dir = filepath.Join(credHelperDirs.RepoDir, revision)
+	return cmd.Run()
 }
 
 func (r *Runtime) getReleaseAndDigest() (string, string, error) {
