@@ -53,7 +53,7 @@ func Start(ctx context.Context, opts Options) error {
 	// prompt server because it is only used for fmt, parse, etc.
 	opts.Env = append(opts.Env, fmt.Sprintf("%s=%s", types.PromptTokenEnvVar, token))
 
-	g, err := gptscript.New(&opts.Options)
+	g, err := gptscript.New(opts.Options)
 	if err != nil {
 		return err
 	}
@@ -64,6 +64,7 @@ func Start(ctx context.Context, opts Options) error {
 	}
 
 	s := &server{
+		gptscriptOpts:    opts.Options,
 		address:          listener.Addr().String(),
 		token:            token,
 		client:           g,

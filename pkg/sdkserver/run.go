@@ -16,8 +16,8 @@ import (
 
 type loaderFunc func(context.Context, string, string, ...loader.Options) (types.Program, error)
 
-func (s *server) execAndStream(ctx context.Context, programLoader loaderFunc, logger mvl.Logger, w http.ResponseWriter, opts *gptscript.Options, chatState, input, subTool string, toolDef fmt.Stringer) {
-	g, err := gptscript.New(opts)
+func (s *server) execAndStream(ctx context.Context, programLoader loaderFunc, logger mvl.Logger, w http.ResponseWriter, opts gptscript.Options, chatState, input, subTool string, toolDef fmt.Stringer) {
+	g, err := gptscript.New(s.gptscriptOpts, opts)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to initialize gptscript: %w", err))
 		return

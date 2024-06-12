@@ -58,7 +58,7 @@ type Options struct {
 	Cache        *cache.Client
 }
 
-func complete(opts ...Options) (result Options, err error) {
+func Complete(opts ...Options) (result Options, err error) {
 	for _, opt := range opts {
 		result.BaseURL = types.FirstSet(opt.BaseURL, result.BaseURL)
 		result.APIKey = types.FirstSet(opt.APIKey, result.APIKey)
@@ -87,7 +87,7 @@ func complete(opts ...Options) (result Options, err error) {
 }
 
 func NewClient(credStore credentials.CredentialStore, opts ...Options) (*Client, error) {
-	opt, err := complete(opts...)
+	opt, err := Complete(opts...)
 	if err != nil {
 		return nil, err
 	}

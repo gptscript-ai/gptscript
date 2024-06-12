@@ -54,7 +54,7 @@ func New(opts *Options) (*Server, error) {
 	opts = complete(opts)
 	opts.GPTScript.Runner.MonitorFactory = NewSessionFactory(events)
 
-	g, err := gptscript.New(&opts.GPTScript)
+	g, err := gptscript.New(opts.GPTScript)
 	if err != nil {
 		return nil, err
 	}

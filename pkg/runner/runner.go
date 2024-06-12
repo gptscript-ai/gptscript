@@ -52,7 +52,7 @@ func DefaultAuthorizer(engine.Context, string) (AuthorizerResponse, error) {
 	}, nil
 }
 
-func complete(opts ...Options) (result Options) {
+func Complete(opts ...Options) (result Options) {
 	for _, opt := range opts {
 		result.MonitorFactory = types.FirstSet(opt.MonitorFactory, result.MonitorFactory)
 		result.RuntimeManager = types.FirstSet(opt.RuntimeManager, result.RuntimeManager)
@@ -91,7 +91,7 @@ type Runner struct {
 }
 
 func New(client engine.Model, credStore credentials.CredentialStore, opts ...Options) (*Runner, error) {
-	opt := complete(opts...)
+	opt := Complete(opts...)
 
 	runner := &Runner{
 		c:              client,

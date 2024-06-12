@@ -13,10 +13,12 @@ import (
 	"time"
 
 	"github.com/acorn-io/broadcaster"
+	"github.com/gptscript-ai/gptscript/pkg/cache"
 	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/input"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/openai"
 	"github.com/gptscript-ai/gptscript/pkg/parser"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	gserver "github.com/gptscript-ai/gptscript/pkg/server"
@@ -27,6 +29,7 @@ import (
 const toolRunTimeout = 15 * time.Minute
 
 type server struct {
+	gptscriptOpts  gptscript.Options
 	address, token string
 	client         *gptscript.GPTScript
 	events         *broadcaster.Broadcaster[event]
@@ -189,8 +192,9 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 		programLoader = loader.Program
 	}
 
-	opts := &gptscript.Options{
-		Cache:             reqObject.Options,
+	opts := gptscript.Options{
+		Cache:             cache.Options(reqObject.cacheOptions),
+		OpenAI:            openai.Options(reqObject.openAIOptions),
 		Env:               reqObject.Env,
 		Workspace:         reqObject.Workspace,
 		CredentialContext: reqObject.CredentialContext,

@@ -25,7 +25,7 @@ type Options struct {
 	DebugMessages   bool   `usage:"Enable logging of chat completion calls"`
 }
 
-func complete(opts ...Options) (result Options) {
+func Complete(opts ...Options) (result Options) {
 	for _, opt := range opts {
 		result.DumpState = types.FirstSet(opt.DumpState, result.DumpState)
 		result.DisplayProgress = types.FirstSet(opt.DisplayProgress, result.DisplayProgress)
@@ -313,7 +313,7 @@ func (d *display) Stop(output string, err error) {
 }
 
 func NewConsole(opts ...Options) *Console {
-	opt := complete(opts...)
+	opt := Complete(opts...)
 	return &Console{
 		dumpState:       opt.DumpState,
 		displayProgress: opt.DisplayProgress,
