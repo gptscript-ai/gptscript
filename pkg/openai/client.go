@@ -28,7 +28,7 @@ const (
 
 var (
 	key = os.Getenv("OPENAI_API_KEY")
-	url = os.Getenv("OPENAI_URL")
+	url = os.Getenv("OPENAI_BASE_URL")
 )
 
 type InvalidAuthError struct{}
