@@ -234,7 +234,7 @@ export function random32s(count: number): number[] {
   const out = []
   let i: number
 
-  if ( process.server || typeof window === 'undefined' ) {
+  if ( import.meta.server || typeof window === 'undefined' ) {
     for ( i = 0; i < count; i++ ) {
       out[i] = crypto.randomBytes(4).readUInt32BE(0)
     }
