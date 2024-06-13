@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"os"
 	"path"
 	"path/filepath"
 	"strconv"
@@ -19,6 +18,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi2"
 	"github.com/getkin/kin-openapi/openapi2conv"
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/gptscript-ai/gptscript/internal"
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
@@ -61,7 +61,7 @@ func (s *source) String() string {
 }
 
 func openFile(path string) (io.ReadCloser, bool, error) {
-	f, err := os.Open(path)
+	f, err := internal.FS.Open(path)
 	if errors.Is(err, fs.ErrNotExist) {
 		return nil, false, nil
 	} else if err != nil {
@@ -74,10 +74,10 @@ func loadLocal(base *source, name string) (*source, bool, error) {
 	// We want to keep all strings in / format, and only convert to platform specific when reading
 	filePath := path.Join(base.Path, name)
 
-	if s, err := os.Stat(filepath.Clean(filePath)); err == nil && s.IsDir() {
+	if s, err := fs.Stat(internal.FS, filepath.Clean(filePath)); err == nil && s.IsDir() {
 		for _, def := range types.DefaultFiles {
 			toolPath := path.Join(filePath, def)
-			if s, err := os.Stat(filepath.Clean(toolPath)); err == nil && !s.IsDir() {
+			if s, err := fs.Stat(internal.FS, filepath.Clean(toolPath)); err == nil && !s.IsDir() {
 				filePath = toolPath
 				break
 			}
