@@ -28,3 +28,22 @@ func (n noopMonitor) Stop(string, error) {}
 func (n noopMonitor) Pause() func() {
 	return func() {}
 }
+
+type credWrapper struct {
+	m Monitor
+}
+
+func (n credWrapper) Event(e Event) {
+	if e.Type == EventTypeCallFinish {
+		e.Content = "credential tool output redacted"
+	}
+	n.m.Event(e)
+}
+
+func (n credWrapper) Stop(s string, err error) {
+	n.m.Stop(s, err)
+}
+
+func (n credWrapper) Pause() func() {
+	return n.m.Pause()
+}

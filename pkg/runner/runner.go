@@ -858,7 +858,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 				return nil, fmt.Errorf("failed to create subcall context for tool %s: %w", credToolName, err)
 			}
 
-			res, err := r.call(subCtx, monitor, env, input)
+			res, err := r.call(subCtx, credWrapper{monitor}, env, input)
 			if err != nil {
 				return nil, fmt.Errorf("failed to run credential tool %s: %w", credToolName, err)
 			}
