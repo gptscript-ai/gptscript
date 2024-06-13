@@ -10,6 +10,7 @@ type SDKServer struct {
 }
 
 func (c *SDKServer) Customize(cmd *cobra.Command) {
+	cmd.Use = "sys.sdkserver"
 	cmd.Args = cobra.NoArgs
 	cmd.Hidden = true
 }
