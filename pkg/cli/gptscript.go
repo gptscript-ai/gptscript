@@ -26,7 +26,6 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/openai"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
-	"github.com/gptscript-ai/gptscript/pkg/server"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
@@ -58,7 +57,6 @@ type GPTScript struct {
 	Assemble           bool   `usage:"Assemble tool to a single artifact, saved to --output" hidden:"true" local:"true"`
 	ListModels         bool   `usage:"List the models available and exit" local:"true"`
 	ListTools          bool   `usage:"List built-in tools and exit" local:"true"`
-	Server             bool   `usage:"Start server" local:"true"`
 	ListenAddress      string `usage:"Server listen address" default:"127.0.0.1:0"`
 	Chdir              string `usage:"Change current working directory" short:"C"`
 	Daemon             bool   `usage:"Run tool as a daemon" local:"true" hidden:"true"`
@@ -365,18 +363,6 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 	}
 
 	ctx := cmd.Context()
-
-	if r.Server {
-		s, err := server.New(&server.Options{
-			ListenAddress: r.ListenAddress,
-			GPTScript:     gptOpt,
-		})
-		if err != nil {
-			return err
-		}
-		defer s.Close(true)
-		return s.Start(ctx)
-	}
 
 	gptScript, err := gptscript.New(gptOpt)
 	if err != nil {

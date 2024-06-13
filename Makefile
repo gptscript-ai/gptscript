@@ -1,13 +1,6 @@
 .DEFAULT_GOAL := build
 
-all: build-ui build
-
-build-ui:
-	$(MAKE) -C ui
-	rm -rf static/ui
-	mkdir -p static/ui/_nuxt
-	touch static/ui/placeholder static/ui/_nuxt/_placeholder
-	cp -rp ui/.output/public/* static/ui/
+all: build
 
 build-exe:
 	GOOS=windows go build -o bin/gptscript.exe -tags "${GO_TAGS}" .
