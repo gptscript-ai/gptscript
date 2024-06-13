@@ -57,7 +57,6 @@ type GPTScript struct {
 	Assemble           bool   `usage:"Assemble tool to a single artifact, saved to --output" hidden:"true" local:"true"`
 	ListModels         bool   `usage:"List the models available and exit" local:"true"`
 	ListTools          bool   `usage:"List built-in tools and exit" local:"true"`
-	ListenAddress      string `usage:"Server listen address" default:"127.0.0.1:0"`
 	Chdir              string `usage:"Change current working directory" short:"C"`
 	Daemon             bool   `usage:"Run tool as a daemon" local:"true" hidden:"true"`
 	Ports              string `usage:"The port range to use for ephemeral daemon ports (ex: 11000-12000)" hidden:"true"`
@@ -439,8 +438,12 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 
 	if prg.IsChat() || r.ForceChat {
 		if !r.DisableTUI && !r.Debug && !r.DebugMessages {
-			return tui.Run(cmd.Context(), args[0], tui.RunOptions{
-				TrustedRepoPrefixes: []string{"github.com/gptscript-ai/context"},
+			// Don't use cmd.Context() because then sigint will cancel everything
+			return tui.Run(context.Background(), args[0], tui.RunOptions{
+				OpenAIAPIKey:        r.OpenAIOptions.APIKey,
+				OpenAIBaseURL:       r.OpenAIOptions.BaseURL,
+				DefaultModel:        r.DefaultModel,
+				TrustedRepoPrefixes: []string{"github.com/gptscript-ai"},
 				DisableCache:        r.DisableCache,
 				Input:               strings.Join(args[1:], " "),
 				CacheDir:            r.CacheDir,

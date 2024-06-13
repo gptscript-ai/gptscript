@@ -30,7 +30,7 @@ type Options struct {
 }
 
 func Start(ctx context.Context, opts Options) error {
-	sigCtx, cancel := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGKILL)
+	sigCtx, cancel := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGKILL)
 	defer cancel()
 	go func() {
 		// This is a hack. This server will be run as a forked process in the SDKs. The SDKs will hold stdin open for as long
