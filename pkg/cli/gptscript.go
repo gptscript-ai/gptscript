@@ -218,7 +218,7 @@ func (r *GPTScript) PersistentPre(*cobra.Command, []string) error {
 		}
 	}
 
-	_ = os.Setenv(system.BinEnvVar, system.Bin())
+	system.SetBinToSelf()
 
 	if r.DefaultModel != "" {
 		builtin.SetDefaultModel(r.DefaultModel)

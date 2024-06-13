@@ -24,7 +24,8 @@ func normalize(key string) string {
 }
 
 func toBool(line string) (bool, error) {
-	if line == "true" {
+	line = normalize(line)
+	if line == "true" || line == "t" {
 		return true, nil
 	} else if line != "false" {
 		return false, fmt.Errorf("invalid boolean parameter, must be \"true\" or \"false\", got [%s]", line)
