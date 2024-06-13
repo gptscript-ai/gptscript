@@ -80,7 +80,7 @@ func (c *Credential) Run(_ *cobra.Command, _ []string) error {
 				_, _ = fmt.Fprintf(w, "%s\t%s\t%s\n", cred.Context, cred.ToolName, strings.Join(envVars, ", "))
 			}
 		} else {
-			_, _ = w.Write([]byte("CONTEXT\tTOOL\n"))
+			_, _ = w.Write([]byte("CONTEXT\tCREDENTIAL\n"))
 			for _, cred := range creds {
 				_, _ = fmt.Fprintf(w, "%s\t%s\n", cred.Context, cred.ToolName)
 			}
