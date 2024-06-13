@@ -16,7 +16,7 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/google/uuid v1.6.0
 	github.com/gptscript-ai/chat-completion-client v0.0.0-20240531200700-af8e7ecf0379
-	github.com/gptscript-ai/tui v0.0.0-20240607210407-edb2d427695e
+	github.com/gptscript-ai/tui v0.0.0-20240613214935-03d62e2c7822
 	github.com/hexops/autogold/v2 v2.2.1
 	github.com/hexops/valast v1.4.4
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
@@ -61,7 +61,7 @@ require (
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/gookit/color v1.5.4 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
-	github.com/gptscript-ai/go-gptscript v0.0.0-20240604231423-7a845df843b1 // indirect
+	github.com/gptscript-ai/go-gptscript v0.0.0-20240613214812-8111c2b02d71 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hexops/autogold v1.3.1 // indirect
