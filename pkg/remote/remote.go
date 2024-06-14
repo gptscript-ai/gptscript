@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/gptscript-ai/gptscript/pkg/cache"
+	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	env2 "github.com/gptscript-ai/gptscript/pkg/env"
@@ -176,5 +177,5 @@ func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, err
 }
 
 func (c *Client) retrieveAPIKey(ctx context.Context, env, url string) (string, error) {
-	return prompt.GetModelProviderCredential(ctx, c.credStore, url, env, fmt.Sprintf("Please provide your API key for %s", url), c.envs)
+	return prompt.GetModelProviderCredential(ctx, c.credStore, url, env, fmt.Sprintf("Please provide your API key for %s", url), append(gcontext.GetEnv(ctx), c.envs...))
 }

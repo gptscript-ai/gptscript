@@ -41,7 +41,7 @@ func sysPromptHTTP(ctx context.Context, envs []string, url string, prompt types.
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("invalid status code [%d], expected 200", resp.StatusCode)
+		return "", fmt.Errorf("getting prompt response invalid status code [%d], expected 200", resp.StatusCode)
 	}
 
 	data, err = io.ReadAll(resp.Body)
@@ -75,17 +75,23 @@ func SysPrompt(ctx context.Context, envs []string, input string) (_ string, err 
 func sysPrompt(ctx context.Context, req types.Prompt) (_ string, err error) {
 	defer context2.GetPauseFuncFromCtx(ctx)()()
 
-	if req.Message != "" {
+	if req.Message != "" && len(req.Fields) != 1 {
 		_, _ = fmt.Fprintln(os.Stderr, req.Message)
 	}
 
 	results := map[string]string{}
 	for _, f := range req.Fields {
-		var value string
+		var (
+			value string
+			msg   = f
+		)
+		if len(req.Fields) == 1 && req.Message != "" {
+			msg = req.Message
+		}
 		if req.Sensitive {
-			err = survey.AskOne(&survey.Password{Message: f}, &value, survey.WithStdio(os.Stdin, os.Stderr, os.Stderr))
+			err = survey.AskOne(&survey.Password{Message: msg}, &value, survey.WithStdio(os.Stdin, os.Stderr, os.Stderr))
 		} else {
-			err = survey.AskOne(&survey.Input{Message: f}, &value, survey.WithStdio(os.Stdin, os.Stderr, os.Stderr))
+			err = survey.AskOne(&survey.Input{Message: msg}, &value, survey.WithStdio(os.Stdin, os.Stderr, os.Stderr))
 		}
 		if err != nil {
 			return "", err

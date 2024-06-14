@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/gptscript-ai/gptscript/pkg/config"
+	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -328,7 +329,7 @@ func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 		}
 	}()
 
-	resp, err := e.Model.Call(ctx, state.Completion, progress)
+	resp, err := e.Model.Call(gcontext.WithEnv(ctx, e.Env), state.Completion, progress)
 	if err != nil {
 		return nil, err
 	}
