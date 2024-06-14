@@ -26,6 +26,7 @@ func (c *Credential) Customize(cmd *cobra.Command) {
 	cmd.Short = "List stored credentials"
 	cmd.Args = cobra.NoArgs
 	cmd.AddCommand(cmd2.Command(&Delete{root: c.root}))
+	cmd.AddCommand(cmd2.Command(&Show{root: c.root}))
 }
 
 func (c *Credential) Run(_ *cobra.Command, _ []string) error {
@@ -68,7 +69,7 @@ func (c *Credential) Run(_ *cobra.Command, _ []string) error {
 		defer w.Flush()
 
 		if c.ShowEnvVars {
-			_, _ = w.Write([]byte("CONTEXT\tTOOL\tENVIRONMENT VARIABLES\n"))
+			_, _ = w.Write([]byte("CONTEXT\tCREDENTIAL\tENVIRONMENT VARIABLES\n"))
 
 			for _, cred := range creds {
 				envVars := make([]string, 0, len(cred.Env))
@@ -79,7 +80,7 @@ func (c *Credential) Run(_ *cobra.Command, _ []string) error {
 				_, _ = fmt.Fprintf(w, "%s\t%s\t%s\n", cred.Context, cred.ToolName, strings.Join(envVars, ", "))
 			}
 		} else {
-			_, _ = w.Write([]byte("CONTEXT\tTOOL\n"))
+			_, _ = w.Write([]byte("CONTEXT\tCREDENTIAL\n"))
 			for _, cred := range creds {
 				_, _ = fmt.Fprintf(w, "%s\t%s\n", cred.Context, cred.ToolName)
 			}
@@ -93,7 +94,7 @@ func (c *Credential) Run(_ *cobra.Command, _ []string) error {
 		if c.ShowEnvVars {
 			w := tabwriter.NewWriter(os.Stdout, 10, 1, 3, ' ', 0)
 			defer w.Flush()
-			_, _ = w.Write([]byte("TOOL\tENVIRONMENT VARIABLES\n"))
+			_, _ = w.Write([]byte("CREDENTIAL\tENVIRONMENT VARIABLES\n"))
 
 			for _, cred := range creds {
 				envVars := make([]string, 0, len(cred.Env))
