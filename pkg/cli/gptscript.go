@@ -57,6 +57,7 @@ type GPTScript struct {
 	Assemble           bool   `usage:"Assemble tool to a single artifact, saved to --output" hidden:"true" local:"true"`
 	ListModels         bool   `usage:"List the models available and exit" local:"true"`
 	ListTools          bool   `usage:"List built-in tools and exit" local:"true"`
+	ListenAddress      string `usage:"Server listen address" default:"127.0.0.1:0" hidden:"true"`
 	Chdir              string `usage:"Change current working directory" short:"C"`
 	Daemon             bool   `usage:"Run tool as a daemon" local:"true" hidden:"true"`
 	Ports              string `usage:"The port range to use for ephemeral daemon ports (ex: 11000-12000)" hidden:"true"`
