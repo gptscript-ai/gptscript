@@ -787,6 +787,7 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 }
 
 func getFinishEventContent(state State, callCtx engine.Context) string {
+	// If it is a credential tool, the finish event contains its output, which is sensitive, so we don't return it.
 	if callCtx.ToolCategory == engine.CredentialToolCategory {
 		return ""
 	}
