@@ -64,6 +64,11 @@ func Complete(opts ...Options) (result Options) {
 			result.Authorizer = opt.Authorizer
 		}
 	}
+	return
+}
+
+func complete(opts ...Options) Options {
+	result := Complete(opts...)
 	if result.MonitorFactory == nil {
 		result.MonitorFactory = noopFactory{}
 	}
@@ -76,7 +81,7 @@ func Complete(opts ...Options) (result Options) {
 	if result.Authorizer == nil {
 		result.Authorizer = DefaultAuthorizer
 	}
-	return
+	return result
 }
 
 type Runner struct {
@@ -91,7 +96,7 @@ type Runner struct {
 }
 
 func New(client engine.Model, credStore credentials.CredentialStore, opts ...Options) (*Runner, error) {
-	opt := Complete(opts...)
+	opt := complete(opts...)
 
 	runner := &Runner{
 		c:              client,
