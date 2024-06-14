@@ -11,12 +11,12 @@ import (
 
 type SDKServer struct {
 	*GPTScript
-	ListenAddress string `usage:"Server listen address" default:"127.0.0.1:0" local:"true"`
 }
 
 func (c *SDKServer) Customize(cmd *cobra.Command) {
 	cmd.Use = "sys.sdkserver"
 	cmd.Args = cobra.NoArgs
+	cmd.Aliases = []string{"sdkserver"}
 	cmd.Hidden = true
 }
 
