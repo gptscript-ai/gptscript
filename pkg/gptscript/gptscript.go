@@ -38,14 +38,15 @@ type GPTScript struct {
 }
 
 type Options struct {
-	Cache             cache.Options
-	OpenAI            openai.Options
-	Monitor           monitor.Options
-	Runner            runner.Options
-	CredentialContext string
-	Quiet             *bool
-	Workspace         string
-	Env               []string
+	Cache               cache.Options
+	OpenAI              openai.Options
+	Monitor             monitor.Options
+	Runner              runner.Options
+	CredentialContext   string
+	Quiet               *bool
+	Workspace           string
+	DisablePromptServer bool
+	Env                 []string
 }
 
 func complete(opts ...Options) Options {
@@ -60,6 +61,7 @@ func complete(opts ...Options) Options {
 		result.Quiet = types.FirstSet(opt.Quiet, result.Quiet)
 		result.Workspace = types.FirstSet(opt.Workspace, result.Workspace)
 		result.Env = append(result.Env, opt.Env...)
+		result.DisablePromptServer = types.FirstSet(opt.DisablePromptServer, result.DisablePromptServer)
 	}
 
 	if result.Quiet == nil {
@@ -123,15 +125,21 @@ func New(o ...Options) (*GPTScript, error) {
 		return nil, err
 	}
 
-	ctx, closeServer := context.WithCancel(context2.AddPauseFuncToCtx(context.Background(), opts.Runner.MonitorFactory.Pause))
-	extraEnv, err := prompt.NewServer(ctx, opts.Env)
-	if err != nil {
-		closeServer()
-		return nil, err
+	var (
+		extraEnv    []string
+		closeServer = func() {}
+	)
+	if !opts.DisablePromptServer {
+		var ctx context.Context
+		ctx, closeServer = context.WithCancel(context2.AddPauseFuncToCtx(context.Background(), opts.Runner.MonitorFactory.Pause))
+		extraEnv, err = prompt.NewServer(ctx, opts.Env)
+		if err != nil {
+			closeServer()
+			return nil, err
+		}
 	}
 
 	fullEnv := append(opts.Env, extraEnv...)
-	oaiClient.SetEnvs(fullEnv)
 
 	remoteClient := remote.New(runner, fullEnv, cacheClient, credStore)
 	if err := registry.AddClient(remoteClient); err != nil {

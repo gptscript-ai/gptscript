@@ -132,10 +132,11 @@ func (r *GPTScript) NewGPTScriptOpts() (gptscript.Options, error) {
 			CredentialOverride: r.CredentialOverride,
 			Sequential:         r.ForceSequential,
 		},
-		Quiet:             r.Quiet,
-		Env:               os.Environ(),
-		CredentialContext: r.CredentialContext,
-		Workspace:         r.Workspace,
+		Quiet:               r.Quiet,
+		Env:                 os.Environ(),
+		CredentialContext:   r.CredentialContext,
+		Workspace:           r.Workspace,
+		DisablePromptServer: r.UI,
 	}
 
 	if r.Confirm {
@@ -452,7 +453,6 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 				Workspace:           r.Workspace,
 				SaveChatStateFile:   r.SaveChatStateFile,
 				ChatState:           chatState,
-				ExtraEnv:            gptScript.ExtraEnv,
 			})
 		}
 		return chat.Start(cmd.Context(), chatState, gptScript, func() (types.Program, error) {

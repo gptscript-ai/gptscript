@@ -15,9 +15,11 @@ import (
 
 func NewServer(ctx context.Context, envs []string) ([]string, error) {
 	for _, env := range envs {
-		v, ok := strings.CutPrefix(env, types.PromptTokenEnvVar+"=")
-		if ok && v != "" {
-			return nil, nil
+		for _, k := range []string{types.PromptURLEnvVar, types.PromptTokenEnvVar} {
+			v, ok := strings.CutPrefix(env, k+"=")
+			if ok && v != "" {
+				return nil, nil
+			}
 		}
 	}
 
@@ -34,7 +36,7 @@ func NewServer(ctx context.Context, envs []string) ([]string, error) {
 		Handler: http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 			if r.Header.Get("Authorization") != "Bearer "+token {
 				rw.WriteHeader(http.StatusUnauthorized)
-				_, _ = rw.Write([]byte("Unauthorized"))
+				_, _ = rw.Write([]byte("Unauthorized (invalid token)"))
 				return
 			}
 

@@ -12,6 +12,7 @@ import (
 
 	openai "github.com/gptscript-ai/chat-completion-client"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
+	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
@@ -43,7 +44,6 @@ type Client struct {
 	invalidAuth  bool
 	cacheKeyBase string
 	setSeed      bool
-	envs         []string
 	credStore    credentials.CredentialStore
 }
 
@@ -134,10 +134,6 @@ func (c *Client) ValidAuth() error {
 		return InvalidAuthError{}
 	}
 	return nil
-}
-
-func (c *Client) SetEnvs(env []string) {
-	c.envs = env
 }
 
 func (c *Client) Supports(ctx context.Context, modelName string) (bool, error) {
@@ -546,7 +542,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 }
 
 func (c *Client) RetrieveAPIKey(ctx context.Context) error {
-	k, err := prompt.GetModelProviderCredential(ctx, c.credStore, BuiltinCredName, "OPENAI_API_KEY", "Please provide your OpenAI API key:", c.envs)
+	k, err := prompt.GetModelProviderCredential(ctx, c.credStore, BuiltinCredName, "OPENAI_API_KEY", "Please provide your OpenAI API key:", gcontext.GetEnv(ctx))
 	if err != nil {
 		return err
 	}
