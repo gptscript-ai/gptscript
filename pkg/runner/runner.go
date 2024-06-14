@@ -542,7 +542,7 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 				Time:        time.Now(),
 				CallContext: callCtx.GetCallContext(),
 				Type:        EventTypeCallFinish,
-				Content:     *state.Continuation.Result,
+				Content:     getFinishEventContent(*state, callCtx),
 			})
 			if callCtx.Tool.Chat {
 				return &State{
@@ -784,6 +784,15 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 	}
 
 	return state, callResults, nil
+}
+
+func getFinishEventContent(state State, callCtx engine.Context) string {
+	// If it is a credential tool, the finish event contains its output, which is sensitive, so we don't return it.
+	if callCtx.ToolCategory == engine.CredentialToolCategory {
+		return ""
+	}
+
+	return *state.Continuation.Result
 }
 
 func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env []string) ([]string, error) {
