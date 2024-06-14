@@ -50,7 +50,8 @@ Temperature: 0.800000
 Parameter: arg1: desc1
 Parameter: arg2: desc2
 Internal Prompt: true
-Credentials: Credential1, Credential2
+Credential: Credential1
+Credential: Credential2
 Chat: true
 
 This is a sample instruction

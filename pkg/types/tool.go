@@ -411,7 +411,9 @@ func (t ToolDef) String() string {
 		_, _ = fmt.Fprintf(buf, "Internal Prompt: %v\n", *t.Parameters.InternalPrompt)
 	}
 	if len(t.Parameters.Credentials) > 0 {
-		_, _ = fmt.Fprintf(buf, "Credentials: %s\n", strings.Join(t.Parameters.Credentials, ", "))
+		for _, cred := range t.Parameters.Credentials {
+			_, _ = fmt.Fprintf(buf, "Credential: %s\n", cred)
+		}
 	}
 	if t.Parameters.Chat {
 		_, _ = fmt.Fprintf(buf, "Chat: true\n")

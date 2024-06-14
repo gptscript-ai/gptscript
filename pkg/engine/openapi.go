@@ -13,6 +13,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/tidwall/gjson"
+	"golang.org/x/exp/maps"
 )
 
 var (
@@ -33,6 +34,45 @@ type SecurityInfo struct {
 	Scheme     string `json:"scheme"`     // bearer or basic, for type==http
 	APIKeyName string `json:"apiKeyName"` // name of the API key, for type==apiKey
 	In         string `json:"in"`         // header, query, or cookie, for type==apiKey
+}
+
+func (i SecurityInfo) GetCredentialToolStrings(hostname string) []string {
+	vars := i.getCredentialNamesAndEnvVars(hostname)
+	var tools []string
+
+	for cred, v := range vars {
+		field := "value"
+		switch i.Type {
+		case "apiKey":
+			field = i.APIKeyName
+		case "http":
+			if i.Scheme == "bearer" {
+				field = "bearer token"
+			} else {
+				if strings.Contains(v, "PASSWORD") {
+					field = "password"
+				} else {
+					field = "username"
+				}
+			}
+		}
+
+		tools = append(tools, fmt.Sprintf("github.com/gptscript-ai/credential as %s with %s as env and %q as message and %q as field",
+			cred, v, "Please provide a value for the "+v+" environment variable", field))
+	}
+	return tools
+}
+
+func (i SecurityInfo) getCredentialNamesAndEnvVars(hostname string) map[string]string {
+	if i.Type == "http" && i.Scheme == "basic" {
+		return map[string]string{
+			hostname + i.Name + "Username": "GPTSCRIPT_" + env.ToEnvLike(hostname) + "_" + env.ToEnvLike(i.Name) + "_USERNAME",
+			hostname + i.Name + "Password": "GPTSCRIPT_" + env.ToEnvLike(hostname) + "_" + env.ToEnvLike(i.Name) + "_PASSWORD",
+		}
+	}
+	return map[string]string{
+		hostname + i.Name: "GPTSCRIPT_" + env.ToEnvLike(hostname) + "_" + env.ToEnvLike(i.Name),
+	}
 }
 
 type OpenAPIInstructions struct {
@@ -83,8 +123,8 @@ func (e *Engine) runOpenAPI(tool types.Tool, input string) (*Return, error) {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	// Check for authentication (only if using HTTPS)
-	if u.Scheme == "https" {
+	// Check for authentication (only if using HTTPS or localhost)
+	if u.Scheme == "https" || u.Hostname() == "localhost" || u.Hostname() == "127.0.0.1" {
 		if len(instructions.SecurityInfos) > 0 {
 			if err := handleAuths(req, envMap, instructions.SecurityInfos); err != nil {
 				return nil, fmt.Errorf("error setting up authentication: %w", err)
@@ -181,15 +221,9 @@ func handleAuths(req *http.Request, envMap map[string]string, infoSets [][]Secur
 	for _, infoSet := range infoSets {
 		var missing []string // Keep track of any missing environment variables
 		for _, info := range infoSet {
-			envNames := []string{"GPTSCRIPT_" + env.ToEnvLike(req.URL.Hostname()) + "_" + env.ToEnvLike(info.Name)}
-			if info.Type == "http" && info.Scheme == "basic" {
-				envNames = []string{
-					"GPTSCRIPT_" + env.ToEnvLike(req.URL.Hostname()) + "_" + env.ToEnvLike(info.Name) + "_USERNAME",
-					"GPTSCRIPT_" + env.ToEnvLike(req.URL.Hostname()) + "_" + env.ToEnvLike(info.Name) + "_PASSWORD",
-				}
-			}
+			vars := info.getCredentialNamesAndEnvVars(req.URL.Hostname())
 
-			for _, envName := range envNames {
+			for _, envName := range vars {
 				if _, ok := envMap[envName]; !ok {
 					missing = append(missing, envName)
 				}
@@ -203,28 +237,28 @@ func handleAuths(req *http.Request, envMap map[string]string, infoSets [][]Secur
 		// We're using this info set, because no environment variables were missing.
 		// Set up the request as needed.
 		for _, info := range infoSet {
-			envName := "GPTSCRIPT_" + env.ToEnvLike(req.URL.Hostname()) + "_" + env.ToEnvLike(info.Name)
+			envNames := maps.Values(info.getCredentialNamesAndEnvVars(req.URL.Hostname()))
 			switch info.Type {
 			case "apiKey":
 				switch info.In {
 				case "header":
-					req.Header.Set(info.APIKeyName, envMap[envName])
+					req.Header.Set(info.APIKeyName, envMap[envNames[0]])
 				case "query":
 					v := url.Values{}
-					v.Add(info.APIKeyName, envMap[envName])
+					v.Add(info.APIKeyName, envMap[envNames[0]])
 					req.URL.RawQuery = v.Encode()
 				case "cookie":
 					req.AddCookie(&http.Cookie{
 						Name:  info.APIKeyName,
-						Value: envMap[envName],
+						Value: envMap[envNames[0]],
 					})
 				}
 			case "http":
 				switch info.Scheme {
 				case "bearer":
-					req.Header.Set("Authorization", "Bearer "+envMap[envName])
+					req.Header.Set("Authorization", "Bearer "+envMap[envNames[0]])
 				case "basic":
-					req.SetBasicAuth(envMap[envName+"_USERNAME"], envMap[envName+"_PASSWORD"])
+					req.SetBasicAuth(envMap[envNames[0]], envMap[envNames[1]])
 				}
 			}
 		}
