@@ -337,17 +337,31 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 				return fmt.Errorf("chat UI only supports files, cannot read from stdin")
 			}
 
-			absPathToScript, err := filepath.Abs(args[1])
-			if err != nil {
-				return fmt.Errorf("cannot determine absolute path to script %s: %v", args[1], err)
+			file := args[1]
+
+			// If the file is external, then set the SCRIPTS_PATH to the current working directory. Otherwise,
+			// set it to the directory of the script and set the file to the base.
+			if !(strings.HasPrefix(file, "http://") || strings.HasPrefix(file, "https://") || strings.HasPrefix(file, "github.com")) {
+				absPathToScript, err := filepath.Abs(file)
+				if err != nil {
+					return fmt.Errorf("cannot determine absolute path to script %s: %v", file, err)
+				}
+				gptOpt.Env = append(gptOpt.Env, "SCRIPTS_PATH="+filepath.Dir(absPathToScript))
+				file = filepath.Base(file)
+			} else {
+				cwd, err := os.Getwd()
+				if err != nil {
+					return fmt.Errorf("could not determine current working directory: %w", err)
+				}
+				gptOpt.Env = append(gptOpt.Env, "SCRIPTS_PATH="+cwd)
 			}
 
-			gptOpt.Env = append(gptOpt.Env, "SCRIPTS_PATH="+filepath.Dir(absPathToScript))
 			if os.Getenv(system.BinEnvVar) == "" {
 				gptOpt.Env = append(gptOpt.Env, system.BinEnvVar+"="+system.Bin())
 			}
 
-			args = append([]string{args[0]}, "--file="+filepath.Base(args[1]))
+			args = append([]string{args[0]}, "--file="+file)
+
 			if len(args) > 2 {
 				args = append(args, args[2:]...)
 			}
