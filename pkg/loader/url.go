@@ -105,19 +105,12 @@ func loadURL(ctx context.Context, cache *cache.Client, base *source, name string
 		return nil, false, err
 	}
 
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, false, err
-	} else if resp.StatusCode != http.StatusOK {
-		return nil, false, fmt.Errorf("error loading %s: %s", url, resp.Status)
-	}
-
-	log.Debugf("opened %s", url)
-
-	data, err := io.ReadAll(resp.Body)
+	data, err := getWithDefaults(req)
 	if err != nil {
 		return nil, false, fmt.Errorf("error loading %s: %v", url, err)
 	}
+
+	log.Debugf("opened %s", url)
 
 	result := &source{
 		Content:  data,
@@ -136,6 +129,33 @@ func loadURL(ctx context.Context, cache *cache.Client, base *source, name string
 	}
 
 	return result, true, nil
+}
+
+func getWithDefaults(req *http.Request) ([]byte, error) {
+	originalPath := req.URL.Path
+	for i, def := range types.DefaultFiles {
+		base := path.Base(originalPath)
+		if !strings.Contains(base, ".") {
+			req.URL.Path = path.Join(originalPath, def)
+		}
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode == http.StatusNotFound && i != len(types.DefaultFiles)-1 {
+			continue
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("error loading %s: %s", req.URL.String(), resp.Status)
+		}
+
+		return io.ReadAll(resp.Body)
+	}
+	panic("unreachable")
 }
 
 func ContentFromURL(url string) (string, error) {
