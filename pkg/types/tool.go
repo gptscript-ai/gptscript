@@ -30,6 +30,13 @@ type ErrToolNotFound struct {
 	ToolName string
 }
 
+func ToToolName(toolName, subTool string) string {
+	if subTool == "" {
+		return toolName
+	}
+	return fmt.Sprintf("%s from %s", subTool, toolName)
+}
+
 func NewErrToolNotFound(toolName string) *ErrToolNotFound {
 	return &ErrToolNotFound{
 		ToolName: toolName,

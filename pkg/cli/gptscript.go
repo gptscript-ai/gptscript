@@ -453,7 +453,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 	}
 
 	if prg.IsChat() || r.ForceChat {
-		if !r.DisableTUI && !r.Debug && !r.DebugMessages {
+		if !r.DisableTUI && !r.Debug && !r.DebugMessages && !r.NoTrunc {
 			// Don't use cmd.Context() because then sigint will cancel everything
 			return tui.Run(context.Background(), args[0], tui.RunOptions{
 				OpenAIAPIKey:        r.OpenAIOptions.APIKey,
