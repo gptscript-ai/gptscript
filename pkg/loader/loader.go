@@ -296,8 +296,13 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 }
 
 func linkAll(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, tools []types.Tool, localTools types.ToolSet) (result []types.Tool, _ error) {
+	localToolsMapping := make(map[string]string, len(tools))
+	for _, localTool := range localTools {
+		localToolsMapping[strings.ToLower(localTool.Parameters.Name)] = localTool.ID
+	}
+
 	for _, tool := range tools {
-		tool, err := link(ctx, cache, prg, base, tool, localTools)
+		tool, err := link(ctx, cache, prg, base, tool, localTools, localToolsMapping)
 		if err != nil {
 			return nil, err
 		}
@@ -306,7 +311,7 @@ func linkAll(ctx context.Context, cache *cache.Client, prg *types.Program, base 
 	return
 }
 
-func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, tool types.Tool, localTools types.ToolSet) (types.Tool, error) {
+func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, tool types.Tool, localTools types.ToolSet, localToolsMapping map[string]string) (types.Tool, error) {
 	if existing, ok := prg.ToolSet[tool.ID]; ok {
 		return existing, nil
 	}
@@ -331,7 +336,7 @@ func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *so
 				linkedTool = existing
 			} else {
 				var err error
-				linkedTool, err = link(ctx, cache, prg, base, localTool, localTools)
+				linkedTool, err = link(ctx, cache, prg, base, localTool, localTools, localToolsMapping)
 				if err != nil {
 					return types.Tool{}, fmt.Errorf("failed linking %s at %s: %w", targetToolName, base, err)
 				}
@@ -351,9 +356,7 @@ func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *so
 		}
 	}
 
-	for _, localTool := range localTools {
-		tool.LocalTools[strings.ToLower(localTool.Parameters.Name)] = localTool.ID
-	}
+	tool.LocalTools = localToolsMapping
 
 	tool = builtin.SetDefaults(tool)
 	prg.ToolSet[tool.ID] = tool
@@ -438,7 +441,16 @@ func resolve(ctx context.Context, cache *cache.Client, prg *types.Program, base 
 		return nil, err
 	}
 
-	return readTool(ctx, cache, prg, s, subTool)
+	result, err := readTool(ctx, cache, prg, s, subTool)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(result) == 0 {
+		return nil, types.NewErrToolNotFound(types.ToToolName(name, subTool))
+	}
+
+	return result, nil
 }
 
 func input(ctx context.Context, cache *cache.Client, base *source, name string) (*source, error) {
