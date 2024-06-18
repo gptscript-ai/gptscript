@@ -162,7 +162,7 @@ need to be aware of which environment variables the credential tool sets. You ca
 :::info
 In the examples that follow, `toolA`, `toolB`, etc. are the names of credentials.
 By default, a credential has the same name as the tool that created it.
-This can be overridden with a credential aliases, i.e. `credential: my-cred-tool.gpt as myAlias`.
+This can be overridden with a credential alias, i.e. `credential: my-cred-tool.gpt as myAlias`.
 If the credential has an alias, use it instead of the tool name when you specify an override.
 :::
 
