@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/BurntSushi/locker"
 	"github.com/gptscript-ai/gptscript/pkg/config"
@@ -43,11 +44,19 @@ func (n noopRuntime) Setup(_ context.Context, _, _ string, _ []string) ([]string
 }
 
 type Manager struct {
-	storageDir     string
-	gitDir         string
-	runtimeDir     string
-	credHelperDirs credentials.CredentialHelperDirs
-	runtimes       []Runtime
+	storageDir       string
+	gitDir           string
+	runtimeDir       string
+	credHelperDirs   credentials.CredentialHelperDirs
+	runtimes         []Runtime
+	credHelperConfig *credHelperConfig
+}
+
+type credHelperConfig struct {
+	lock        sync.Mutex
+	initialized bool
+	cliCfg      *config.CLIConfig
+	env         []string
 }
 
 func New(cacheDir string, runtimes ...Runtime) *Manager {
@@ -61,7 +70,32 @@ func New(cacheDir string, runtimes ...Runtime) *Manager {
 	}
 }
 
-func (m *Manager) SetUpCredentialHelpers(ctx context.Context, cliCfg *config.CLIConfig, env []string) error {
+func (m *Manager) EnsureCredentialHelpers(ctx context.Context) error {
+	if m.credHelperConfig == nil {
+		return nil
+	}
+	m.credHelperConfig.lock.Lock()
+	defer m.credHelperConfig.lock.Unlock()
+
+	if !m.credHelperConfig.initialized {
+		if err := m.deferredSetUpCredentialHelpers(ctx, m.credHelperConfig.cliCfg, m.credHelperConfig.env); err != nil {
+			return err
+		}
+		m.credHelperConfig.initialized = true
+	}
+
+	return nil
+}
+
+func (m *Manager) SetUpCredentialHelpers(_ context.Context, cliCfg *config.CLIConfig, env []string) error {
+	m.credHelperConfig = &credHelperConfig{
+		cliCfg: cliCfg,
+		env:    env,
+	}
+	return nil
+}
+
+func (m *Manager) deferredSetUpCredentialHelpers(ctx context.Context, cliCfg *config.CLIConfig, env []string) error {
 	var (
 		helperName = cliCfg.CredentialsStore
 		suffix     string

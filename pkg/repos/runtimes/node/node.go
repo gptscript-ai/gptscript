@@ -101,7 +101,7 @@ func (r *Runtime) getReleaseAndDigest() (string, string, error) {
 }
 
 func (r *Runtime) runNPM(ctx context.Context, toolSource, binDir string, env []string) error {
-	log.Infof("Running npm in %s", toolSource)
+	log.InfofCtx(ctx, "Running npm in %s", toolSource)
 	cmd := debugcmd.New(ctx, filepath.Join(binDir, "npm"), "install")
 	cmd.Env = env
 	cmd.Dir = toolSource
@@ -141,7 +141,7 @@ func (r *Runtime) getRuntime(ctx context.Context, cwd string) (string, error) {
 		return "", err
 	}
 
-	log.Infof("Downloading Node %s.x", r.Version)
+	log.InfofCtx(ctx, "Downloading Node %s.x", r.Version)
 	tmp := target + ".download"
 	defer os.RemoveAll(tmp)
 

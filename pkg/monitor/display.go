@@ -20,25 +20,22 @@ import (
 )
 
 type Options struct {
-	DisplayProgress bool   `usage:"-"`
-	DumpState       string `usage:"Dump the internal execution state to a file"`
-	DebugMessages   bool   `usage:"Enable logging of chat completion calls"`
+	DumpState     string `usage:"Dump the internal execution state to a file"`
+	DebugMessages bool   `usage:"Enable logging of chat completion calls"`
 }
 
 func Complete(opts ...Options) (result Options) {
 	for _, opt := range opts {
 		result.DumpState = types.FirstSet(opt.DumpState, result.DumpState)
-		result.DisplayProgress = types.FirstSet(opt.DisplayProgress, result.DisplayProgress)
 		result.DebugMessages = types.FirstSet(opt.DebugMessages, result.DebugMessages)
 	}
 	return
 }
 
 type Console struct {
-	dumpState       string
-	displayProgress bool
-	printMessages   bool
-	callLock        sync.Mutex
+	dumpState     string
+	printMessages bool
+	callLock      sync.Mutex
 }
 
 var (
@@ -47,7 +44,7 @@ var (
 
 func (c *Console) Start(_ context.Context, prg *types.Program, _ []string, input string) (runner.Monitor, error) {
 	id := counter.Next()
-	mon := newDisplay(c.dumpState, c.displayProgress, c.printMessages)
+	mon := newDisplay(c.dumpState, c.printMessages)
 	mon.callLock = &c.callLock
 	mon.dump.ID = fmt.Sprint(id)
 	mon.dump.Program = prg
@@ -315,23 +312,20 @@ func (d *display) Stop(output string, err error) {
 func NewConsole(opts ...Options) *Console {
 	opt := Complete(opts...)
 	return &Console{
-		dumpState:       opt.DumpState,
-		displayProgress: opt.DisplayProgress,
-		printMessages:   opt.DebugMessages,
+		dumpState:     opt.DumpState,
+		printMessages: opt.DebugMessages,
 	}
 }
 
-func newDisplay(dumpState string, progress, printMessages bool) *display {
+func newDisplay(dumpState string, printMessages bool) *display {
 	display := &display{
 		dumpState:     dumpState,
 		callIDMap:     make(map[string]string),
 		printMessages: printMessages,
 	}
-	if progress {
-		display.livePrinter = &livePrinter{
-			lastContent: map[string]string{},
-			callIDMap:   display.callIDMap,
-		}
+	display.livePrinter = &livePrinter{
+		lastContent: map[string]string{},
+		callIDMap:   display.callIDMap,
 	}
 	return display
 }

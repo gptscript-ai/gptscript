@@ -33,7 +33,7 @@ func Checkout(ctx context.Context, base, repo, commit, toDir string) error {
 		return err
 	}
 
-	log.Infof("Checking out %s to %s", commit, toDir)
+	log.InfofCtx(ctx, "Checking out %s to %s", commit, toDir)
 	return gitWorktreeAdd(ctx, gitDir(base, repo), toDir, commit)
 }
 
@@ -46,11 +46,11 @@ func Fetch(ctx context.Context, base, repo, commit string) error {
 	if found, err := exists(gitDir); err != nil {
 		return err
 	} else if !found {
-		log.Infof("Cloning %s", repo)
+		log.InfofCtx(ctx, "Cloning %s", repo)
 		if err := cloneBare(ctx, repo, gitDir); err != nil {
 			return err
 		}
 	}
-	log.Infof("Fetching %s at %s", commit, repo)
+	log.InfofCtx(ctx, "Fetching %s at %s", commit, repo)
 	return fetchCommit(ctx, gitDir, commit)
 }
