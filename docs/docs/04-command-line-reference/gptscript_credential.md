@@ -27,4 +27,5 @@ gptscript credential [flags]
 
 * [gptscript](gptscript.md)	 - 
 * [gptscript credential delete](gptscript_credential_delete.md)	 - Delete a stored credential
+* [gptscript credential show](gptscript_credential_show.md)	 - Show the secret value of a stored credential
 

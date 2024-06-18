@@ -1,18 +1,18 @@
 ---
-title: "gptscript credential delete"
+title: "gptscript credential show"
 ---
-## gptscript credential delete
+## gptscript credential show
 
-Delete a stored credential
+Show the secret value of a stored credential
 
 ```
-gptscript credential delete <credential name> [flags]
+gptscript credential show <credential name> [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for delete
+  -h, --help   help for show
 ```
 
 ### Options inherited from parent commands

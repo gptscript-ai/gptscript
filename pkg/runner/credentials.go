@@ -8,18 +8,18 @@ import (
 
 // parseCredentialOverrides parses a string of credential overrides that the user provided as a command line arg.
 // The format of credential overrides can be one of three things:
-// tool1:ENV1,ENV2;tool2:ENV1,ENV2 (direct mapping of environment variables)
-// tool1:ENV1=VALUE1,ENV2=VALUE2;tool2:ENV1=VALUE1,ENV2=VALUE2 (key-value pairs)
-// tool1:ENV1->OTHER_ENV1,ENV2->OTHER_ENV2;tool2:ENV1->OTHER_ENV1,ENV2->OTHER_ENV2 (mapping to other environment variables)
+// cred1:ENV1,ENV2;cred2:ENV1,ENV2 (direct mapping of environment variables)
+// cred1:ENV1=VALUE1,ENV2=VALUE2;cred2:ENV1=VALUE1,ENV2=VALUE2 (key-value pairs)
+// cred1:ENV1->OTHER_ENV1,ENV2->OTHER_ENV2;cred2:ENV1->OTHER_ENV1,ENV2->OTHER_ENV2 (mapping to other environment variables)
 //
 // This function turns it into a map[string]map[string]string like this:
 //
 //	{
-//	  "tool1": {
+//	  "cred1": {
 //	    "ENV1": "VALUE1",
 //	    "ENV2": "VALUE2",
 //	  },
-//	  "tool2": {
+//	  "cred2": {
 //	    "ENV1": "VALUE1",
 //	    "ENV2": "VALUE2",
 //	  },
@@ -28,7 +28,7 @@ func parseCredentialOverrides(override string) (map[string]map[string]string, er
 	credentialOverrides := make(map[string]map[string]string)
 
 	for _, o := range strings.Split(override, ";") {
-		toolName, envs, found := strings.Cut(o, ":")
+		credName, envs, found := strings.Cut(o, ":")
 		if !found {
 			return nil, fmt.Errorf("invalid credential override: %s", o)
 		}
@@ -48,7 +48,7 @@ func parseCredentialOverrides(override string) (map[string]map[string]string, er
 			}
 			envMap[key] = value
 		}
-		credentialOverrides[toolName] = envMap
+		credentialOverrides[credName] = envMap
 	}
 
 	return credentialOverrides, nil

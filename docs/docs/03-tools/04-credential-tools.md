@@ -159,6 +159,13 @@ need to be aware of which environment variables the credential tool sets. You ca
 
 ### Format
 
+:::info
+In the examples that follow, `toolA`, `toolB`, etc. are the names of credentials.
+By default, a credential has the same name as the tool that created it.
+This can be overridden with a credential alias, i.e. `credential: my-cred-tool.gpt as myAlias`.
+If the credential has an alias, use it instead of the tool name when you specify an override.
+:::
+
 The `--credential-override` argument must be formatted in one of the following three ways:
 
 #### 1. Key-Value Pairs
