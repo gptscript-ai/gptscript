@@ -813,17 +813,22 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 	}
 
 	for _, credToolName := range callCtx.Tool.Credentials {
+		toolName, credentialAlias, args, err := types.ParseCredentialArgs(credToolName, callCtx.Input)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse credential tool %q: %w", credToolName, err)
+		}
+
+		credName := toolName
+		if credentialAlias != "" {
+			credName = credentialAlias
+		}
+
 		// Check whether the credential was overridden before we attempt to find it in the store or run the tool.
-		if override, exists := credOverrides[credToolName]; exists {
+		if override, exists := credOverrides[credName]; exists {
 			for k, v := range override {
 				env = append(env, fmt.Sprintf("%s=%s", k, v))
 			}
 			continue
-		}
-
-		toolName, credentialAlias, args, err := types.ParseCredentialArgs(credToolName, callCtx.Input)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse credential tool %q: %w", credToolName, err)
 		}
 
 		var (
@@ -884,13 +889,9 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			}
 
 			cred = &credentials.Credential{
-				Type: credentials.CredentialTypeTool,
-				Env:  envMap.Env,
-			}
-			if credentialAlias != "" {
-				cred.ToolName = credentialAlias
-			} else {
-				cred.ToolName = toolName
+				Type:     credentials.CredentialTypeTool,
+				Env:      envMap.Env,
+				ToolName: credName,
 			}
 
 			isEmpty := true
