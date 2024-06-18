@@ -6,14 +6,30 @@
       "function": {
         "toolID": "testdata/TestAgents/test.gpt:agent1",
         "name": "agent1",
-        "parameters": null
+        "parameters": {
+          "properties": {
+            "prompt": {
+              "description": "Prompt to send to the assistant. This may be an instruction or question.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
       }
     },
     {
       "function": {
         "toolID": "testdata/TestAgents/test.gpt:agent3",
         "name": "agent3",
-        "parameters": null
+        "parameters": {
+          "properties": {
+            "prompt": {
+              "description": "Prompt to send to the assistant. This may be an instruction or question.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
       }
     }
   ],

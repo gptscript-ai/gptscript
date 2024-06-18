@@ -319,7 +319,15 @@ func TestSubChat(t *testing.T) {
               "function": {
                 "toolID": "testdata/TestSubChat/test.gpt:chatbot",
                 "name": "chatbot",
-                "parameters": null
+                "parameters": {
+                  "properties": {
+                    "prompt": {
+                      "description": "Prompt to send to the assistant. This may be an instruction or question.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
               }
             }
           ],
@@ -435,7 +443,15 @@ func TestSubChat(t *testing.T) {
               "function": {
                 "toolID": "testdata/TestSubChat/test.gpt:chatbot",
                 "name": "chatbot",
-                "parameters": null
+                "parameters": {
+                  "properties": {
+                    "prompt": {
+                      "description": "Prompt to send to the assistant. This may be an instruction or question.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
               }
             }
           ],

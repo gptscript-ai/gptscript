@@ -6,7 +6,15 @@
       "function": {
         "toolID": "testdata/TestAgents/test.gpt:agent2",
         "name": "agent2",
-        "parameters": null
+        "parameters": {
+          "properties": {
+            "prompt": {
+              "description": "Prompt to send to the assistant. This may be an instruction or question.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
       }
     }
   ],

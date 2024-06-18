@@ -106,6 +106,21 @@ type InputContext struct {
 	Content string `json:"content,omitempty"`
 }
 
+type ErrChatFinish struct {
+	Message string
+}
+
+func (e *ErrChatFinish) Error() string {
+	return fmt.Sprintf("CHAT FINISH: %s", e.Message)
+}
+
+func IsChatFinishMessage(msg string) error {
+	if msg, ok := strings.CutPrefix(msg, "CHAT FINISH: "); ok {
+		return &ErrChatFinish{Message: msg}
+	}
+	return nil
+}
+
 func (c *Context) ParentID() string {
 	if c.Parent == nil {
 		return ""

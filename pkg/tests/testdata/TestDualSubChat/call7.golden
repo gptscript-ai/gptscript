@@ -5,14 +5,30 @@
       "function": {
         "toolID": "testdata/TestDualSubChat/test.gpt:chatbot",
         "name": "chatbot",
-        "parameters": null
+        "parameters": {
+          "properties": {
+            "prompt": {
+              "description": "Prompt to send to the assistant. This may be an instruction or question.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
       }
     },
     {
       "function": {
         "toolID": "testdata/TestDualSubChat/test.gpt:chatbot2",
         "name": "chatbot2",
-        "parameters": null
+        "parameters": {
+          "properties": {
+            "prompt": {
+              "description": "Prompt to send to the assistant. This may be an instruction or question.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
       }
     }
   ],

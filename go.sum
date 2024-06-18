@@ -173,8 +173,8 @@ github.com/gptscript-ai/chat-completion-client v0.0.0-20240531200700-af8e7ecf037
 github.com/gptscript-ai/chat-completion-client v0.0.0-20240531200700-af8e7ecf0379/go.mod h1:7P/o6/IWa1KqsntVf68hSnLKuu3+xuqm6lYhch1w4jo=
 github.com/gptscript-ai/go-gptscript v0.0.0-20240613214812-8111c2b02d71 h1:WehkkausLuXI91ePpIVrzZ6eBmfFIU/HfNsSA1CHiwo=
 github.com/gptscript-ai/go-gptscript v0.0.0-20240613214812-8111c2b02d71/go.mod h1:Dh6vYRAiVcyC3ElZIGzTvNF1FxtYwA07BHfSiFKQY7s=
-github.com/gptscript-ai/tui v0.0.0-20240618175050-a1d627a00cff h1:mjcUKZ4hHVpT8EkyIsxGpU608BTNko0EovpsY0fGfvU=
-github.com/gptscript-ai/tui v0.0.0-20240618175050-a1d627a00cff/go.mod h1:ZlyM+BRiD6mV04w+Xw2mXP1VKGEUbn8BvwrosWlplUo=
+github.com/gptscript-ai/tui v0.0.0-20240618230843-2b5961f3341b h1:OJfmpDQ/6ffz5P4UdJJEd5xeqo2dfWnsg1YZLDqJWYo=
+github.com/gptscript-ai/tui v0.0.0-20240618230843-2b5961f3341b/go.mod h1:ZlyM+BRiD6mV04w+Xw2mXP1VKGEUbn8BvwrosWlplUo=
 github.com/hashicorp/errwrap v1.0.0 h1:hLrqtEDnRye3+sgx6z4qVLNuviH3MR5aQ0ykNJa/UYA=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+lD48awMYo=
