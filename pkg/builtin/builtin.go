@@ -593,14 +593,6 @@ func SysGetenv(_ context.Context, env []string, input string) (string, error) {
 	return value, nil
 }
 
-type ErrChatFinish struct {
-	Message string
-}
-
-func (e *ErrChatFinish) Error() string {
-	return fmt.Sprintf("CHAT FINISH: %s", e.Message)
-}
-
 func invalidArgument(input string, err error) string {
 	return fmt.Sprintf("Failed to parse arguments %s: %v", input, err)
 }
@@ -640,11 +632,11 @@ func SysChatFinish(_ context.Context, _ []string, input string) (string, error) 
 		Message string `json:"return,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
-		return "", &ErrChatFinish{
+		return "", &engine.ErrChatFinish{
 			Message: input,
 		}
 	}
-	return "", &ErrChatFinish{
+	return "", &engine.ErrChatFinish{
 		Message: params.Message,
 	}
 }

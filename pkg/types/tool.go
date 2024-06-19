@@ -601,6 +601,8 @@ func toolRefsToCompletionTools(completionTools []ToolReference, prg Program) (re
 		args := subTool.Parameters.Arguments
 		if args == nil && !subTool.IsCommand() && !subTool.Chat {
 			args = &system.DefaultToolSchema
+		} else if args == nil && !subTool.IsCommand() {
+			args = &system.DefaultChatSchema
 		}
 
 		if subTool.Instructions == "" {

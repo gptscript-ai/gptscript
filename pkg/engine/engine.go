@@ -21,6 +21,7 @@ type Model interface {
 
 type RuntimeManager interface {
 	GetContext(ctx context.Context, tool types.Tool, cmd, env []string) (string, []string, error)
+	EnsureCredentialHelpers(ctx context.Context) error
 	SetUpCredentialHelpers(ctx context.Context, cliCfg *config.CLIConfig, env []string) error
 }
 
@@ -103,6 +104,21 @@ const (
 type InputContext struct {
 	ToolID  string `json:"toolID,omitempty"`
 	Content string `json:"content,omitempty"`
+}
+
+type ErrChatFinish struct {
+	Message string
+}
+
+func (e *ErrChatFinish) Error() string {
+	return fmt.Sprintf("CHAT FINISH: %s", e.Message)
+}
+
+func IsChatFinishMessage(msg string) error {
+	if msg, ok := strings.CutPrefix(msg, "CHAT FINISH: "); ok {
+		return &ErrChatFinish{Message: msg}
+	}
+	return nil
 }
 
 func (c *Context) ParentID() string {

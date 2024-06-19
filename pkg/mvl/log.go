@@ -1,6 +1,7 @@
 package mvl
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -154,6 +155,25 @@ func (l *Logger) Fields(kv ...any) *Logger {
 		log:    l.log,
 		fields: newFields,
 	}
+}
+
+type InfoLogger interface {
+	Infof(msg string, args ...any)
+}
+
+type infoKey struct{}
+
+func WithInfo(ctx context.Context, logger InfoLogger) context.Context {
+	return context.WithValue(ctx, infoKey{}, logger)
+}
+
+func (l *Logger) InfofCtx(ctx context.Context, msg string, args ...any) {
+	il, ok := ctx.Value(infoKey{}).(InfoLogger)
+	if ok {
+		il.Infof(msg, args...)
+		return
+	}
+	l.log.WithFields(l.fields).Infof(msg, args...)
 }
 
 func (l *Logger) Infof(msg string, args ...any) {

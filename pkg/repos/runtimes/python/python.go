@@ -76,7 +76,7 @@ func uvBin(binDir string) string {
 }
 
 func (r *Runtime) installVenv(ctx context.Context, binDir, venvPath string) error {
-	log.Infof("Creating virtualenv in %s", venvPath)
+	log.InfofCtx(ctx, "Creating virtualenv in %s", venvPath)
 	cmd := debugcmd.New(ctx, uvBin(binDir), "venv", "-p", pythonCmd(binDir), venvPath)
 	return cmd.Run()
 }
@@ -171,7 +171,7 @@ func (r *Runtime) getReleaseAndDigest() (string, string, error) {
 }
 
 func (r *Runtime) runPip(ctx context.Context, toolSource, binDir string, env []string) error {
-	log.Infof("Running pip in %s", toolSource)
+	log.InfofCtx(ctx, "Running pip in %s", toolSource)
 	for _, req := range []string{"requirements-gptscript.txt", "requirements.txt"} {
 		reqFile := filepath.Join(toolSource, req)
 		if s, err := os.Stat(reqFile); err == nil && !s.IsDir() {
@@ -203,7 +203,7 @@ func (r *Runtime) getRuntime(ctx context.Context, cwd string) (string, error) {
 		return "", err
 	}
 
-	log.Infof("Downloading Python %s.x", r.Version)
+	log.InfofCtx(ctx, "Downloading Python %s.x", r.Version)
 	tmp := target + ".download"
 	defer os.RemoveAll(tmp)
 

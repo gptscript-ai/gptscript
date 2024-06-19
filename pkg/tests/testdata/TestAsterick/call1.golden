@@ -7,14 +7,11 @@
         "name": "afoo",
         "parameters": {
           "properties": {
-            "defaultPromptParameter": {
-              "description": "Prompt to send to the tool or assistant. This may be instructions or question.",
+            "prompt": {
+              "description": "Prompt to send to the tool. This may be an instruction or question.",
               "type": "string"
             }
           },
-          "required": [
-            "defaultPromptParameter"
-          ],
           "type": "object"
         }
       }
@@ -25,14 +22,11 @@
         "name": "a",
         "parameters": {
           "properties": {
-            "defaultPromptParameter": {
-              "description": "Prompt to send to the tool or assistant. This may be instructions or question.",
+            "prompt": {
+              "description": "Prompt to send to the tool. This may be an instruction or question.",
               "type": "string"
             }
           },
-          "required": [
-            "defaultPromptParameter"
-          ],
           "type": "object"
         }
       }

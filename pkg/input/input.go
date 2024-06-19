@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 func FromArgs(args []string) string {
@@ -31,6 +33,14 @@ func FromFile(file string) (string, error) {
 		}
 		return string(data), nil
 	} else if file != "" {
+		if s, err := os.Stat(file); err == nil && s.IsDir() {
+			for _, ext := range types.DefaultFiles {
+				if _, err := os.Stat(filepath.Join(file, ext)); err == nil {
+					file = filepath.Join(file, ext)
+					break
+				}
+			}
+		}
 		log.Debugf("reading file %s", file)
 		data, err := os.ReadFile(file)
 		if err != nil {

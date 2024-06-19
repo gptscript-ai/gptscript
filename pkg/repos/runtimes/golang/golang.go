@@ -68,7 +68,7 @@ func (r *Runtime) BuildCredentialHelper(ctx context.Context, helperName string, 
 	}
 	newEnv := runtimeEnv.AppendPath(env, binPath)
 
-	log.Infof("Building credential helper %s", helperName)
+	log.InfofCtx(ctx, "Building credential helper %s", helperName)
 	cmd := debugcmd.New(ctx, filepath.Join(binPath, "go"),
 		"build", "-buildvcs=false", "-o",
 		filepath.Join(credHelperDirs.BinDir, "gptscript-credential-"+helperName+suffix),
@@ -103,7 +103,7 @@ func stripGo(env []string) (result []string) {
 }
 
 func (r *Runtime) runBuild(ctx context.Context, toolSource, binDir string, env []string) error {
-	log.Infof("Running go build in %s", toolSource)
+	log.InfofCtx(ctx, "Running go build in %s", toolSource)
 	cmd := debugcmd.New(ctx, filepath.Join(binDir, "go"), "build", "-buildvcs=false", "-o", artifactName())
 	cmd.Env = stripGo(env)
 	cmd.Dir = toolSource
@@ -134,7 +134,7 @@ func (r *Runtime) getRuntime(ctx context.Context, cwd string) (string, error) {
 		return "", err
 	}
 
-	log.Infof("Downloading Go %s", r.Version)
+	log.InfofCtx(ctx, "Downloading Go %s", r.Version)
 	tmp := target + ".download"
 	defer os.RemoveAll(tmp)
 

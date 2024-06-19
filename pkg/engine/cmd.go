@@ -25,6 +25,24 @@ var requiredFileExtensions = map[string]string{
 	"powershell":     "*.ps1",
 }
 
+type outputWriter struct {
+	id       string
+	progress chan<- types.CompletionStatus
+	buf      bytes.Buffer
+}
+
+func (o *outputWriter) Write(p []byte) (n int, err error) {
+	o.buf.Write(p)
+	o.progress <- types.CompletionStatus{
+		CompletionID: o.id,
+		PartialResponse: &types.CompletionMessage{
+			Role:    types.CompletionMessageRoleTypeAssistant,
+			Content: types.Text(o.buf.String()),
+		},
+	}
+	return len(p), nil
+}
+
 func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCategory ToolCategory) (cmdOut string, cmdErr error) {
 	id := counter.Next()
 
@@ -74,7 +92,10 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 	output := &bytes.Buffer{}
 	all := &bytes.Buffer{}
 	cmd.Stderr = io.MultiWriter(all, os.Stderr)
-	cmd.Stdout = io.MultiWriter(all, output)
+	cmd.Stdout = io.MultiWriter(all, output, &outputWriter{
+		id:       id,
+		progress: e.Progress,
+	})
 
 	if err := cmd.Run(); err != nil {
 		if toolCategory == NoCategory {
@@ -85,7 +106,7 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 		return "", fmt.Errorf("ERROR: %s: %w", all, err)
 	}
 
-	return output.String(), nil
+	return output.String(), IsChatFinishMessage(output.String())
 }
 
 func (e *Engine) getRuntimeEnv(ctx context.Context, tool types.Tool, cmd, env []string) ([]string, error) {
@@ -161,7 +182,7 @@ func appendInputAsEnv(env []string, input string) []string {
 		}
 	}
 
-	env = appendEnv(env, "GPTSCRIPT_INPUT", input)
+	env = appendEnv(env, "GPTSCRIPT_INPUT_CONTENT", input)
 	return env
 }
 

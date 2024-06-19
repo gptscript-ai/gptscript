@@ -437,6 +437,8 @@ func appendMessage(msg types.CompletionMessage, response openai.ChatCompletionSt
 		if tc.ToolCall.Function.Name != tool.Function.Name {
 			tc.ToolCall.Function.Name += tool.Function.Name
 		}
+		// OpenAI like to sometimes add this prefix for no good reason
+		tc.ToolCall.Function.Name = strings.TrimPrefix(tc.ToolCall.Function.Name, "namespace.")
 		tc.ToolCall.Function.Arguments += tool.Function.Arguments
 
 		msg.Content[idx] = tc
