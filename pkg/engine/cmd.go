@@ -182,7 +182,7 @@ func appendInputAsEnv(env []string, input string) []string {
 		}
 	}
 
-	env = appendEnv(env, "GPTSCRIPT_INPUT_CONTENT", input)
+	env = appendEnv(env, "GPTSCRIPT_INPUT", input)
 	return env
 }
 
