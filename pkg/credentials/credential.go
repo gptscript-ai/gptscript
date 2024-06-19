@@ -49,7 +49,7 @@ func (c Credential) toDockerAuthConfig() (types.AuthConfig, error) {
 
 func credentialFromDockerAuthConfig(authCfg types.AuthConfig) (Credential, error) {
 	var cred Credential
-	if err := json.Unmarshal([]byte(authCfg.Password), &cred); err != nil {
+	if err := json.Unmarshal([]byte(authCfg.Password), &cred); err != nil || len(cred.Env) == 0 {
 		// Legacy: try unmarshalling into just an env map
 		var env map[string]string
 		if err := json.Unmarshal([]byte(authCfg.Password), &env); err != nil {

@@ -904,11 +904,11 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 
 			// If the existing credential is expired, we need to provide it to the cred tool through the environment.
 			if exists && c.IsExpired() {
-				credJson, err := json.Marshal(c)
+				credJSON, err := json.Marshal(c)
 				if err != nil {
 					return nil, fmt.Errorf("failed to marshal credential: %w", err)
 				}
-				env = append(env, fmt.Sprintf("%s=%s", credentials.ExistingCredential, string(credJson)))
+				env = append(env, fmt.Sprintf("%s=%s", credentials.ExistingCredential, string(credJSON)))
 			}
 
 			// Get the input for the credential tool, if there is any.
