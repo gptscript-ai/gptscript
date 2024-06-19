@@ -45,14 +45,15 @@ type GPTScript struct {
 	CacheOptions
 	OpenAIOptions
 	DisplayOptions
-	Color              *bool  `usage:"Use color in output (default true)" default:"true"`
-	Confirm            bool   `usage:"Prompt before running potentially dangerous commands"`
-	Debug              bool   `usage:"Enable debug logging"`
-	NoTrunc            bool   `usage:"Do not truncate long log messages"`
-	Quiet              *bool  `usage:"No output logging (set --quiet=false to force on even when there is no TTY)" short:"q"`
-	Output             string `usage:"Save output to a file, or - for stdout" short:"o"`
-	EventsStreamTo     string `usage:"Stream events to this location, could be a file descriptor/handle (e.g. fd://2), filename, or named pipe (e.g. \\\\.\\pipe\\my-pipe)" name:"events-stream-to"`
-	Input              string `usage:"Read input from a file (\"-\" for stdin)" short:"f"`
+	Color          *bool  `usage:"Use color in output (default true)" default:"true"`
+	Confirm        bool   `usage:"Prompt before running potentially dangerous commands"`
+	Debug          bool   `usage:"Enable debug logging"`
+	NoTrunc        bool   `usage:"Do not truncate long log messages"`
+	Quiet          *bool  `usage:"No output logging (set --quiet=false to force on even when there is no TTY)" short:"q"`
+	Output         string `usage:"Save output to a file, or - for stdout" short:"o"`
+	EventsStreamTo string `usage:"Stream events to this location, could be a file descriptor/handle (e.g. fd://2), filename, or named pipe (e.g. \\\\.\\pipe\\my-pipe)" name:"events-stream-to"`
+	// Input should not be using GPTSCRIPT_INPUT env var because that is the same value that is set in tool executions
+	Input              string `usage:"Read input from a file (\"-\" for stdin)" short:"f" env:"GPTSCRIPT_INPUT_FILE"`
 	SubTool            string `usage:"Use tool of this name, not the first tool in file" local:"true"`
 	Assemble           bool   `usage:"Assemble tool to a single artifact, saved to --output" hidden:"true" local:"true"`
 	ListModels         bool   `usage:"List the models available and exit" local:"true"`
