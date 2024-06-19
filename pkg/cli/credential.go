@@ -93,7 +93,7 @@ func (c *Credential) Run(_ *cobra.Command, _ []string) error {
 		expires := "never"
 		if cred.ExpiresAt != nil {
 			if !cred.IsExpired() {
-				expires = cred.ExpiresAt.Sub(time.Now()).Truncate(time.Second).String()
+				expires = time.Until(*cred.ExpiresAt).Truncate(time.Second).String()
 			} else {
 				expires = "expired"
 			}
