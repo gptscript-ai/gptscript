@@ -41,7 +41,7 @@ func (c Credential) toDockerAuthConfig() (types.AuthConfig, error) {
 	}
 
 	return types.AuthConfig{
-		Username:      string(c.Type), // Username is required, but not used
+		Username:      string(c.Type),
 		Password:      string(cred),
 		ServerAddress: toolNameWithCtx(c.ToolName, c.Context),
 	}, nil
