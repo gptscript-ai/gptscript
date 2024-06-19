@@ -1,4 +1,4 @@
-name: test
+name: smoke
 
 on:
   pull_request_target:
