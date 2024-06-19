@@ -1,0 +1,3 @@
+# Ignore intermediate event stream JSON files
+*-events.json
+

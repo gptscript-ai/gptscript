@@ -1,0 +1,10 @@
+tools: bob
+
+Ask Bob how he is doing and let me know exactly what he said.
+
+---
+name: bob
+description: I'm Bob, a friendly guy.
+args: question: The question to ask Bob.
+
+When asked how I am doing, respond with "Thanks for asking "${question}", I'm doing great fellow friendly AI tool!"
