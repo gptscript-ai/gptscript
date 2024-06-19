@@ -934,6 +934,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 				return nil, fmt.Errorf("failed to unmarshal credential tool %s response: %w", credToolName, err)
 			}
 			c.ToolName = credName
+			c.Type = credentials.CredentialTypeTool
 
 			isEmpty := true
 			for _, v := range c.Env {
