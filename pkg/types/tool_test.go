@@ -9,26 +9,28 @@ import (
 func TestToolDef_String(t *testing.T) {
 	tool := ToolDef{
 		Parameters: Parameters{
-			Name:            "Tool Sample",
-			Description:     "This is a sample tool",
-			MaxTokens:       1024,
-			ModelName:       "ModelSample",
-			ModelProvider:   true,
-			JSONResponse:    true,
-			Chat:            true,
-			Temperature:     float32Ptr(0.8),
-			Cache:           boolPtr(true),
-			InternalPrompt:  boolPtr(true),
-			Arguments:       ObjectSchema("arg1", "desc1", "arg2", "desc2"),
-			Tools:           []string{"Tool1", "Tool2"},
-			GlobalTools:     []string{"GlobalTool1", "GlobalTool2"},
-			GlobalModelName: "GlobalModelSample",
-			Context:         []string{"Context1", "Context2"},
-			ExportContext:   []string{"ExportContext1", "ExportContext2"},
-			Export:          []string{"Export1", "Export2"},
-			Agents:          []string{"Agent1", "Agent2"},
-			Credentials:     []string{"Credential1", "Credential2"},
-			Blocking:        true,
+			Name:               "Tool Sample",
+			Description:        "This is a sample tool",
+			MaxTokens:          1024,
+			ModelName:          "ModelSample",
+			ModelProvider:      true,
+			JSONResponse:       true,
+			Chat:               true,
+			Temperature:        float32Ptr(0.8),
+			Cache:              boolPtr(true),
+			InternalPrompt:     boolPtr(true),
+			Arguments:          ObjectSchema("arg1", "desc1", "arg2", "desc2"),
+			Tools:              []string{"Tool1", "Tool2"},
+			GlobalTools:        []string{"GlobalTool1", "GlobalTool2"},
+			GlobalModelName:    "GlobalModelSample",
+			Context:            []string{"Context1", "Context2"},
+			ExportContext:      []string{"ExportContext1", "ExportContext2"},
+			Export:             []string{"Export1", "Export2"},
+			Agents:             []string{"Agent1", "Agent2"},
+			Credentials:        []string{"Credential1", "Credential2"},
+			Blocking:           true,
+			InputFilters:       []string{"Filter1", "Filter2"},
+			ExportInputFilters: []string{"SharedFilter1", "SharedFilter2"},
 		},
 		Instructions: "This is a sample instruction",
 	}
@@ -40,8 +42,10 @@ Description: This is a sample tool
 Agents: Agent1, Agent2
 Tools: Tool1, Tool2
 Share Tools: Export1, Export2
-Share Context: ExportContext1, ExportContext2
 Context: Context1, Context2
+Share Context: ExportContext1, ExportContext2
+Input Filters: Filter1, Filter2
+Share Input Filters: SharedFilter1, SharedFilter2
 Max Tokens: 1024
 Model: ModelSample
 Model Provider: true

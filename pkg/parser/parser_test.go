@@ -191,3 +191,27 @@ name: bad
 		},
 	}}).Equal(t, out)
 }
+
+func TestParseInput(t *testing.T) {
+	input := `
+input filters: input
+share input filters: shared
+`
+	out, err := Parse(strings.NewReader(input))
+	require.NoError(t, err)
+	autogold.Expect(Document{Nodes: []Node{
+		{ToolNode: &ToolNode{
+			Tool: types.Tool{
+				ToolDef: types.ToolDef{
+					Parameters: types.Parameters{
+						InputFilters: []string{
+							"input",
+						},
+						ExportInputFilters: []string{"shared"},
+					},
+				},
+				Source: types.ToolSource{LineNo: 1},
+			},
+		}},
+	}}).Equal(t, out)
+}

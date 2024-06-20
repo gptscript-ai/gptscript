@@ -1,0 +1,65 @@
+`{
+  "done": false,
+  "content": "TEST RESULT CALL: 2",
+  "toolID": "testdata/TestInput/test.gpt:",
+  "state": {
+    "continuation": {
+      "state": {
+        "input": "No, You're stupid!\n ha ha ha\n",
+        "completion": {
+          "model": "gpt-4o",
+          "internalSystemPrompt": false,
+          "messages": [
+            {
+              "role": "system",
+              "content": [
+                {
+                  "text": "\nTool body"
+                }
+              ],
+              "usage": {}
+            },
+            {
+              "role": "user",
+              "content": [
+                {
+                  "text": "No, You're stupid!\n ha ha ha\n"
+                }
+              ],
+              "usage": {}
+            },
+            {
+              "role": "assistant",
+              "content": [
+                {
+                  "text": "TEST RESULT CALL: 1"
+                }
+              ],
+              "usage": {}
+            },
+            {
+              "role": "user",
+              "content": [
+                {
+                  "text": "No, You're ugly!\n ha ha ha\n"
+                }
+              ],
+              "usage": {}
+            },
+            {
+              "role": "assistant",
+              "content": [
+                {
+                  "text": "TEST RESULT CALL: 2"
+                }
+              ],
+              "usage": {}
+            }
+          ]
+        }
+      },
+      "result": "TEST RESULT CALL: 2"
+    },
+    "continuationToolID": "testdata/TestInput/test.gpt:"
+  }
+}`

@@ -2,7 +2,6 @@ package openai
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log/slog"
 	"os"
@@ -16,6 +15,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
+	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/prompt"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -29,6 +29,7 @@ const (
 var (
 	key = os.Getenv("OPENAI_API_KEY")
 	url = os.Getenv("OPENAI_BASE_URL")
+	log = mvl.Package()
 )
 
 type InvalidAuthError struct{}
@@ -305,7 +306,11 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	}
 
 	if len(msgs) == 0 {
-		return nil, fmt.Errorf("invalid request, no messages to send to LLM")
+		log.Errorf("invalid request, no messages to send to LLM")
+		return &types.CompletionMessage{
+			Role:    types.CompletionMessageRoleTypeAssistant,
+			Content: types.Text(""),
+		}, nil
 	}
 
 	request := openai.ChatCompletionRequest{

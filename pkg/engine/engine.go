@@ -98,6 +98,7 @@ const (
 	ProviderToolCategory   ToolCategory = "provider"
 	CredentialToolCategory ToolCategory = "credential"
 	ContextToolCategory    ToolCategory = "context"
+	InputToolCategory      ToolCategory = "input"
 	NoCategory             ToolCategory = ""
 )
 
@@ -180,7 +181,7 @@ func NewContext(ctx context.Context, prg *types.Program, input string) Context {
 	return callCtx
 }
 
-func (c *Context) SubCall(ctx context.Context, input, toolID, callID string, toolCategory ToolCategory) (Context, error) {
+func (c *Context) SubCallContext(ctx context.Context, input, toolID, callID string, toolCategory ToolCategory) (Context, error) {
 	tool, ok := c.Program.ToolSet[toolID]
 	if !ok {
 		return Context{}, fmt.Errorf("failed to file tool for id [%s]", toolID)
