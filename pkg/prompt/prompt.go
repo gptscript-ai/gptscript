@@ -48,7 +48,7 @@ func sysPromptHTTP(ctx context.Context, envs []string, url string, prompt types.
 	return string(data), err
 }
 
-func SysPrompt(ctx context.Context, envs []string, input string) (_ string, err error) {
+func SysPrompt(ctx context.Context, envs []string, input string, _ chan<- string) (_ string, err error) {
 	var params struct {
 		Message   string `json:"message,omitempty"`
 		Fields    string `json:"fields,omitempty"`

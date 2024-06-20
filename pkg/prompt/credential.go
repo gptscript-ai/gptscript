@@ -18,7 +18,8 @@ func GetModelProviderCredential(ctx context.Context, credStore credentials.Crede
 	if exists {
 		k = cred.Env[env]
 	} else {
-		result, err := SysPrompt(ctx, envs, fmt.Sprintf(`{"message":"%s","fields":"key","sensitive":"true"}`, message))
+		// we know progress isn't used so pass as nil
+		result, err := SysPrompt(ctx, envs, fmt.Sprintf(`{"message":"%s","fields":"key","sensitive":"true"}`, message), nil)
 		if err != nil {
 			return "", err
 		}

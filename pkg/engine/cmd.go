@@ -12,6 +12,7 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/google/shlex"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
@@ -64,7 +65,30 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 				"input":   input,
 			},
 		}
-		return tool.BuiltinFunc(ctx.WrappedContext(), e.Env, input)
+
+		var (
+			progress = make(chan string)
+			wg       sync.WaitGroup
+		)
+		wg.Add(1)
+		defer wg.Wait()
+		defer close(progress)
+		go func() {
+			defer wg.Done()
+			buf := strings.Builder{}
+			for line := range progress {
+				buf.WriteString(line)
+				e.Progress <- types.CompletionStatus{
+					CompletionID: id,
+					PartialResponse: &types.CompletionMessage{
+						Role:    types.CompletionMessageRoleTypeAssistant,
+						Content: types.Text(buf.String()),
+					},
+				}
+			}
+		}()
+
+		return tool.BuiltinFunc(ctx.WrappedContext(), e.Env, input, progress)
 	}
 
 	var instructions []string
