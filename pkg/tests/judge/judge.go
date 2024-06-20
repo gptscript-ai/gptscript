@@ -9,12 +9,15 @@ import (
 	openai "github.com/gptscript-ai/chat-completion-client"
 )
 
-const instructions = `When given JSON objects that conform to the following JSONSchema:
+const instructions = `"actual" is considered equivalent to "expected" if and only if the following rules are satisfied:
 
 %s
 
-Determine if "actual" is equal to "expected" based on the comparison constraints described by "criteria".
-"actual" is considered equal to "expected" if and only if the all of the constraints described by "criteria" are satisfied.
+When given JSON objects that conform to the following JSONSchema:
+
+%s
+
+Determine if "actual" is considered equivalent to "expected".
 
 After making a determination, respond with a JSON object that conforms to the following JSONSchema:
 
@@ -28,7 +31,7 @@ After making a determination, respond with a JSON object that conforms to the fo
       },
     "reasoning": {
       "type": "string",
-      "description": "The reasoning used to come to the determination, that points out all instances where the given criteria was violated"
+      "description": "The reasoning used to come to the determination"
     }
   },
   "required": [
@@ -41,14 +44,13 @@ Your responses are concise and include only the json object described above.
 `
 
 type Judge[T any] struct {
-	client       *openai.Client
-	instructions string
+	client           *openai.Client
+	comparisonSchema string
 }
 
 type comparison[T any] struct {
-	Expected T      `json:"expected"`
-	Actual   T      `json:"actual"`
-	Criteria string `json:"criteria"`
+	Expected T `json:"expected"`
+	Actual   T `json:"actual"`
 }
 
 type ruling struct {
@@ -70,14 +72,14 @@ func New[T any](client *openai.Client) (*Judge[T], error) {
 		return nil, fmt.Errorf("failed to generate JSONSchema for %T: %w", new(T), err)
 	}
 
-	schemaJSON, err := json.MarshalIndent(schema, "", "    ")
+	marshaled, err := json.MarshalIndent(schema, "", "    ")
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal JSONSchema for %T: %w", new(T), err)
 	}
 
 	return &Judge[T]{
-		client:       client,
-		instructions: fmt.Sprintf(instructions, schemaJSON),
+		client:           client,
+		comparisonSchema: string(marshaled),
 	}, nil
 }
 
@@ -85,7 +87,6 @@ func (j *Judge[T]) Equal(ctx context.Context, expected, actual T, criteria strin
 	comparisonJSON, err := json.MarshalIndent(&comparison[T]{
 		Expected: expected,
 		Actual:   actual,
-		Criteria: criteria,
 	}, "", "    ")
 	if err != nil {
 		return false, "", fmt.Errorf("failed to marshal judge testcase JSON: %w", err)
@@ -101,7 +102,7 @@ func (j *Judge[T]) Equal(ctx context.Context, expected, actual T, criteria strin
 		Messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,
-				Content: j.instructions,
+				Content: fmt.Sprintf(instructions, criteria, j.comparisonSchema),
 			},
 			{
 				Role:    openai.ChatMessageRoleUser,
@@ -111,11 +112,11 @@ func (j *Judge[T]) Equal(ctx context.Context, expected, actual T, criteria strin
 	}
 	response, err := j.client.CreateChatCompletion(ctx, request)
 	if err != nil {
-		return false, "", fmt.Errorf("failed to make judge chat completion request: %w", err)
+		return false, "", fmt.Errorf("failed to create chat completion request: %w", err)
 	}
 
 	if len(response.Choices) < 1 {
-		return false, "", fmt.Errorf("judge chat completion request returned no choices")
+		return false, "", fmt.Errorf("chat completion request returned no choices")
 	}
 
 	var equality ruling

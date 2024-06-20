@@ -1,20 +1,20 @@
 [
     {
-        "time": "2024-06-06T20:57:45.68913-04:00",
+        "time": "2024-06-20T17:10:39.294578-04:00",
         "type": "runStart",
         "usage": {}
     },
     {
-        "time": "2024-06-06T20:57:45.689454-04:00",
+        "time": "2024-06-20T17:10:39.294835-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -40,16 +40,16 @@
         "usage": {}
     },
     {
-        "time": "2024-06-06T20:57:45.875198-04:00",
+        "time": "2024-06-20T17:10:39.501107-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -72,14 +72,14 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1717721867",
+        "chatCompletionId": "1718917841",
         "usage": {},
         "chatRequest": {
             "model": "mistral-large-2402",
             "messages": [
                 {
                     "role": "system",
-                    "content": "Ask Bob how he is doing and let me know exactly what he said."
+                    "content": "Ask Bob \"how are you doing\" and repeat his reply exactly."
                 }
             ],
             "temperature": 0,
@@ -104,16 +104,16 @@
         }
     },
     {
-        "time": "2024-06-06T20:57:45.875466-04:00",
+        "time": "2024-06-20T17:10:39.501246-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -136,21 +136,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721867",
+        "chatCompletionId": "1718917841",
         "usage": {},
         "content": "Waiting for model response..."
     },
     {
-        "time": "2024-06-06T20:57:46.081212-04:00",
+        "time": "2024-06-20T17:10:40.154068-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -173,20 +173,20 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721867",
+        "chatCompletionId": "1718917841",
         "usage": {}
     },
     {
-        "time": "2024-06-06T20:57:46.831234-04:00",
+        "time": "2024-06-20T17:10:40.786117-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -209,21 +209,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721867",
+        "chatCompletionId": "1718917841",
         "usage": {},
-        "content": "\u003ctool call\u003e bob -\u003e {\"question\": \"How are you doing?\"}"
+        "content": "\u003ctool call\u003e bob -\u003e {\"question\": \"how are you doing\"}"
     },
     {
-        "time": "2024-06-06T20:57:46.832764-04:00",
+        "time": "2024-06-20T17:10:40.786643-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -246,11 +246,11 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1717721867",
+        "chatCompletionId": "1718917841",
         "usage": {
-            "promptTokens": 86,
+            "promptTokens": 85,
             "completionTokens": 23,
-            "totalTokens": 109
+            "totalTokens": 108
         },
         "chatResponse": {
             "role": "assistant",
@@ -258,32 +258,32 @@
                 {
                     "toolCall": {
                         "index": 0,
-                        "id": "7sPqe5ERc",
+                        "id": "WWpUyFBHH",
                         "function": {
                             "name": "bob",
-                            "arguments": "{\"question\": \"How are you doing?\"}"
+                            "arguments": "{\"question\": \"how are you doing\"}"
                         }
                     }
                 }
             ],
             "usage": {
-                "promptTokens": 86,
+                "promptTokens": 85,
                 "completionTokens": 23,
-                "totalTokens": 109
+                "totalTokens": 108
             }
         }
     },
     {
-        "time": "2024-06-06T20:57:46.833114-04:00",
+        "time": "2024-06-20T17:10:40.78704-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -306,18 +306,18 @@
             "inputContext": null
         },
         "toolSubCalls": {
-            "7sPqe5ERc": {
+            "WWpUyFBHH": {
                 "toolID": "testdata/Bob/test.gpt:bob",
-                "input": "{\"question\": \"How are you doing?\"}"
+                "input": "{\"question\": \"how are you doing\"}"
             }
         },
         "type": "callSubCalls",
         "usage": {}
     },
     {
-        "time": "2024-06-06T20:57:46.833185-04:00",
+        "time": "2024-06-20T17:10:40.787133-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -332,7 +332,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -346,16 +346,16 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callStart",
         "usage": {},
-        "content": "{\"question\": \"How are you doing?\"}"
+        "content": "{\"question\": \"how are you doing\"}"
     },
     {
-        "time": "2024-06-06T20:57:47.015577-04:00",
+        "time": "2024-06-20T17:10:40.94973-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -370,7 +370,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -384,30 +384,30 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callChat",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
         "chatRequest": {
             "model": "mistral-large-2402",
             "messages": [
                 {
                     "role": "system",
-                    "content": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\""
+                    "content": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\""
                 },
                 {
                     "role": "user",
-                    "content": "{\"question\": \"How are you doing?\"}"
+                    "content": "{\"question\": \"how are you doing\"}"
                 }
             ],
             "temperature": 0
         }
     },
     {
-        "time": "2024-06-06T20:57:47.015912-04:00",
+        "time": "2024-06-20T17:10:40.950046-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -422,7 +422,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -436,17 +436,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
         "content": "Waiting for model response..."
     },
     {
-        "time": "2024-06-06T20:57:47.354264-04:00",
+        "time": "2024-06-20T17:10:41.218814-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -461,7 +461,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -475,55 +475,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
-        "usage": {}
-    },
-    {
-        "time": "2024-06-06T20:57:47.403644-04:00",
-        "callContext": {
-            "id": "7sPqe5ERc",
-            "tool": {
-                "name": "bob",
-                "description": "I'm Bob, a friendly guy.",
-                "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
-                "internalPrompt": null,
-                "arguments": {
-                    "properties": {
-                        "question": {
-                            "description": "The question to ask Bob.",
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
-                "id": "testdata/Bob/test.gpt:bob",
-                "localTools": {
-                    "": "testdata/Bob/test.gpt:",
-                    "bob": "testdata/Bob/test.gpt:bob"
-                },
-                "source": {
-                    "location": "testdata/Bob/test.gpt",
-                    "lineNo": 6
-                },
-                "workingDir": "testdata/Bob"
-            },
-            "inputContext": null,
-            "toolName": "bob",
-            "parentID": "1717721866"
-        },
-        "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
         "content": "Thanks"
     },
     {
-        "time": "2024-06-06T20:57:47.429265-04:00",
+        "time": "2024-06-20T17:10:41.218971-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -538,7 +500,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -552,17 +514,56 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
+        "usage": {},
+        "content": "Thanks"
+    },
+    {
+        "time": "2024-06-20T17:10:41.242129-04:00",
+        "callContext": {
+            "id": "WWpUyFBHH",
+            "tool": {
+                "name": "bob",
+                "description": "I'm Bob, a friendly guy.",
+                "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
+                "internalPrompt": null,
+                "arguments": {
+                    "properties": {
+                        "question": {
+                            "description": "The question to ask Bob.",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "id": "testdata/Bob/test.gpt:bob",
+                "localTools": {
+                    "": "testdata/Bob/test.gpt:",
+                    "bob": "testdata/Bob/test.gpt:bob"
+                },
+                "source": {
+                    "location": "testdata/Bob/test.gpt",
+                    "lineNo": 6
+                },
+                "workingDir": "testdata/Bob"
+            },
+            "inputContext": null,
+            "toolName": "bob",
+            "parentID": "1718917840"
+        },
+        "type": "callProgress",
+        "chatCompletionId": "1718917842",
         "usage": {},
         "content": "Thanks for"
     },
     {
-        "time": "2024-06-06T20:57:47.444354-04:00",
+        "time": "2024-06-20T17:10:41.278815-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -577,7 +578,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -591,17 +592,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
         "content": "Thanks for asking"
     },
     {
-        "time": "2024-06-06T20:57:47.470971-04:00",
+        "time": "2024-06-20T17:10:41.298557-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -616,7 +617,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -630,17 +631,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
         "content": "Thanks for asking \""
     },
     {
-        "time": "2024-06-06T20:57:47.492704-04:00",
+        "time": "2024-06-20T17:10:41.329684-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -655,7 +656,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -669,17 +670,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
-        "content": "Thanks for asking \"How"
+        "content": "Thanks for asking \"how"
     },
     {
-        "time": "2024-06-06T20:57:47.508504-04:00",
+        "time": "2024-06-20T17:10:41.36213-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -694,7 +695,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -708,17 +709,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
-        "content": "Thanks for asking \"How are"
+        "content": "Thanks for asking \"how are"
     },
     {
-        "time": "2024-06-06T20:57:47.529197-04:00",
+        "time": "2024-06-20T17:10:41.404159-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -733,7 +734,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -747,17 +748,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
-        "content": "Thanks for asking \"How are you"
+        "content": "Thanks for asking \"how are you"
     },
     {
-        "time": "2024-06-06T20:57:47.547729-04:00",
+        "time": "2024-06-20T17:10:41.443596-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -772,7 +773,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -786,17 +787,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
-        "content": "Thanks for asking \"How are you doing"
+        "content": "Thanks for asking \"how are you doing"
     },
     {
-        "time": "2024-06-06T20:57:47.567629-04:00",
+        "time": "2024-06-20T17:10:41.46035-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -811,7 +812,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -825,17 +826,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
-        "content": "Thanks for asking \"How are you doing?"
+        "content": "Thanks for asking \"how are you doing\","
     },
     {
-        "time": "2024-06-06T20:57:47.58774-04:00",
+        "time": "2024-06-20T17:10:41.479186-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -850,7 +851,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -864,17 +865,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
-        "content": "Thanks for asking \"How are you doing?\","
+        "content": "Thanks for asking \"how are you doing\", I"
     },
     {
-        "time": "2024-06-06T20:57:47.607371-04:00",
+        "time": "2024-06-20T17:10:41.508921-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -889,7 +890,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -903,17 +904,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
-        "content": "Thanks for asking \"How are you doing?\", I"
+        "content": "Thanks for asking \"how are you doing\", I'"
     },
     {
-        "time": "2024-06-06T20:57:47.627325-04:00",
+        "time": "2024-06-20T17:10:41.538159-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -928,7 +929,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -942,17 +943,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
-        "content": "Thanks for asking \"How are you doing?\", I'"
+        "content": "Thanks for asking \"how are you doing\", I'm"
     },
     {
-        "time": "2024-06-06T20:57:47.647745-04:00",
+        "time": "2024-06-20T17:10:41.578073-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -967,7 +968,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -981,17 +982,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
-        "content": "Thanks for asking \"How are you doing?\", I'm"
+        "content": "Thanks for asking \"how are you doing\", I'm doing"
     },
     {
-        "time": "2024-06-06T20:57:47.666556-04:00",
+        "time": "2024-06-20T17:10:41.59766-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -1006,7 +1007,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -1020,17 +1021,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
-        "content": "Thanks for asking \"How are you doing?\", I'm doing"
+        "content": "Thanks for asking \"how are you doing\", I'm doing great"
     },
     {
-        "time": "2024-06-06T20:57:47.686828-04:00",
+        "time": "2024-06-20T17:10:41.711868-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -1045,7 +1046,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -1059,17 +1060,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
-        "content": "Thanks for asking \"How are you doing?\", I'm doing great"
+        "content": "Thanks for asking \"how are you doing\", I'm doing great fellow"
     },
     {
-        "time": "2024-06-06T20:57:47.706183-04:00",
+        "time": "2024-06-20T17:10:41.712039-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -1084,7 +1085,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -1098,17 +1099,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
-        "content": "Thanks for asking \"How are you doing?\", I'm doing great fellow"
+        "content": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI"
     },
     {
-        "time": "2024-06-06T20:57:47.726267-04:00",
+        "time": "2024-06-20T17:10:41.712067-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -1123,7 +1124,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -1137,17 +1138,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
-        "content": "Thanks for asking \"How are you doing?\", I'm doing great fellow friendly"
+        "content": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI"
     },
     {
-        "time": "2024-06-06T20:57:47.746525-04:00",
+        "time": "2024-06-20T17:10:41.718662-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -1162,7 +1163,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -1176,17 +1177,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
-        "content": "Thanks for asking \"How are you doing?\", I'm doing great fellow friendly AI"
+        "content": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool"
     },
     {
-        "time": "2024-06-06T20:57:47.765116-04:00",
+        "time": "2024-06-20T17:10:41.748288-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -1201,7 +1202,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -1215,17 +1216,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
-        "content": "Thanks for asking \"How are you doing?\", I'm doing great fellow friendly AI tool"
+        "content": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-06-06T20:57:47.786832-04:00",
+        "time": "2024-06-20T17:10:41.78608-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -1240,7 +1241,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -1254,17 +1255,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {},
-        "content": "Thanks for asking \"How are you doing?\", I'm doing great fellow friendly AI tool!"
+        "content": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-06-06T20:57:47.81109-04:00",
+        "time": "2024-06-20T17:10:41.786165-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -1279,7 +1280,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -1293,72 +1294,33 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
-        },
-        "type": "callProgress",
-        "chatCompletionId": "1717721868",
-        "usage": {},
-        "content": "Thanks for asking \"How are you doing?\", I'm doing great fellow friendly AI tool!"
-    },
-    {
-        "time": "2024-06-06T20:57:47.812892-04:00",
-        "callContext": {
-            "id": "7sPqe5ERc",
-            "tool": {
-                "name": "bob",
-                "description": "I'm Bob, a friendly guy.",
-                "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
-                "internalPrompt": null,
-                "arguments": {
-                    "properties": {
-                        "question": {
-                            "description": "The question to ask Bob.",
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
-                "id": "testdata/Bob/test.gpt:bob",
-                "localTools": {
-                    "": "testdata/Bob/test.gpt:",
-                    "bob": "testdata/Bob/test.gpt:bob"
-                },
-                "source": {
-                    "location": "testdata/Bob/test.gpt",
-                    "lineNo": 6
-                },
-                "workingDir": "testdata/Bob"
-            },
-            "inputContext": null,
-            "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callChat",
-        "chatCompletionId": "1717721868",
+        "chatCompletionId": "1718917842",
         "usage": {
             "promptTokens": 41,
-            "completionTokens": 20,
-            "totalTokens": 61
+            "completionTokens": 19,
+            "totalTokens": 60
         },
         "chatResponse": {
             "role": "assistant",
             "content": [
                 {
-                    "text": "Thanks for asking \"How are you doing?\", I'm doing great fellow friendly AI tool!"
+                    "text": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!"
                 }
             ],
             "usage": {
                 "promptTokens": 41,
-                "completionTokens": 20,
-                "totalTokens": 61
+                "completionTokens": 19,
+                "totalTokens": 60
             }
         }
     },
     {
-        "time": "2024-06-06T20:57:47.813082-04:00",
+        "time": "2024-06-20T17:10:41.7862-04:00",
         "callContext": {
-            "id": "7sPqe5ERc",
+            "id": "WWpUyFBHH",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -1373,7 +1335,7 @@
                     },
                     "type": "object"
                 },
-                "instructions": "When asked how I am doing, respond with \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
+                "instructions": "When asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"",
                 "id": "testdata/Bob/test.gpt:bob",
                 "localTools": {
                     "": "testdata/Bob/test.gpt:",
@@ -1387,23 +1349,23 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717721866"
+            "parentID": "1718917840"
         },
         "type": "callFinish",
         "usage": {},
-        "content": "Thanks for asking \"How are you doing?\", I'm doing great fellow friendly AI tool!"
+        "content": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-06-06T20:57:47.813184-04:00",
+        "time": "2024-06-20T17:10:41.78624-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1430,16 +1392,16 @@
         "usage": {}
     },
     {
-        "time": "2024-06-06T20:57:47.981851-04:00",
+        "time": "2024-06-20T17:10:41.957577-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1462,34 +1424,34 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
         "chatRequest": {
             "model": "mistral-large-2402",
             "messages": [
                 {
                     "role": "system",
-                    "content": "Ask Bob how he is doing and let me know exactly what he said."
+                    "content": "Ask Bob \"how are you doing\" and repeat his reply exactly."
                 },
                 {
                     "role": "assistant",
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "7sPqe5ERc",
+                            "id": "WWpUyFBHH",
                             "type": "function",
                             "function": {
                                 "name": "bob",
-                                "arguments": "{\"question\": \"How are you doing?\"}"
+                                "arguments": "{\"question\": \"how are you doing\"}"
                             }
                         }
                     ]
                 },
                 {
                     "role": "tool",
-                    "content": "Thanks for asking \"How are you doing?\", I'm doing great fellow friendly AI tool!",
+                    "content": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!",
                     "name": "bob",
-                    "tool_call_id": "7sPqe5ERc"
+                    "tool_call_id": "WWpUyFBHH"
                 }
             ],
             "temperature": 0,
@@ -1514,16 +1476,16 @@
         }
     },
     {
-        "time": "2024-06-06T20:57:47.982156-04:00",
+        "time": "2024-06-20T17:10:41.957749-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1546,21 +1508,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
         "content": "Waiting for model response..."
     },
     {
-        "time": "2024-06-06T20:57:48.11789-04:00",
+        "time": "2024-06-20T17:10:42.455931-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1583,57 +1545,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
-        "usage": {}
-    },
-    {
-        "time": "2024-06-06T20:57:48.189708-04:00",
-        "callContext": {
-            "id": "1717721866",
-            "tool": {
-                "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
-                "internalPrompt": null,
-                "tools": [
-                    "bob"
-                ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
-                "id": "testdata/Bob/test.gpt:",
-                "toolMapping": {
-                    "bob": [
-                        {
-                            "reference": "bob",
-                            "toolID": "testdata/Bob/test.gpt:bob"
-                        }
-                    ]
-                },
-                "localTools": {
-                    "": "testdata/Bob/test.gpt:",
-                    "bob": "testdata/Bob/test.gpt:bob"
-                },
-                "source": {
-                    "location": "testdata/Bob/test.gpt",
-                    "lineNo": 1
-                },
-                "workingDir": "testdata/Bob"
-            },
-            "inputContext": null
-        },
-        "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
         "content": "Bob"
     },
     {
-        "time": "2024-06-06T20:57:48.205425-04:00",
+        "time": "2024-06-20T17:10:42.45599-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1656,21 +1582,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said"
+        "content": "Bob replied"
     },
     {
-        "time": "2024-06-06T20:57:48.227965-04:00",
+        "time": "2024-06-20T17:10:42.456033-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1693,21 +1619,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said,"
+        "content": "Bob replied"
     },
     {
-        "time": "2024-06-06T20:57:48.245576-04:00",
+        "time": "2024-06-20T17:10:42.475053-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1730,21 +1656,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \""
+        "content": "Bob replied,"
     },
     {
-        "time": "2024-06-06T20:57:48.266371-04:00",
+        "time": "2024-06-20T17:10:42.534667-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1767,21 +1693,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks"
+        "content": "Bob replied, \""
     },
     {
-        "time": "2024-06-06T20:57:48.285452-04:00",
+        "time": "2024-06-20T17:10:42.594649-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1804,21 +1730,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for"
+        "content": "Bob replied, \"Thanks"
     },
     {
-        "time": "2024-06-06T20:57:48.306735-04:00",
+        "time": "2024-06-20T17:10:42.653279-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1841,21 +1767,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking"
+        "content": "Bob replied, \"Thanks for"
     },
     {
-        "time": "2024-06-06T20:57:48.330511-04:00",
+        "time": "2024-06-20T17:10:42.760299-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1878,21 +1804,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking '"
+        "content": "Bob replied, \"Thanks for asking"
     },
     {
-        "time": "2024-06-06T20:57:48.347556-04:00",
+        "time": "2024-06-20T17:10:42.774637-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1915,21 +1841,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How"
+        "content": "Bob replied, \"Thanks for asking '"
     },
     {
-        "time": "2024-06-06T20:57:48.367554-04:00",
+        "time": "2024-06-20T17:10:42.835456-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1952,21 +1878,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How are"
+        "content": "Bob replied, \"Thanks for asking 'how"
     },
     {
-        "time": "2024-06-06T20:57:48.387523-04:00",
+        "time": "2024-06-20T17:10:42.889942-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1989,21 +1915,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How are you"
+        "content": "Bob replied, \"Thanks for asking 'how are"
     },
     {
-        "time": "2024-06-06T20:57:48.408257-04:00",
+        "time": "2024-06-20T17:10:42.951997-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -2026,21 +1952,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How are you doing"
+        "content": "Bob replied, \"Thanks for asking 'how are you"
     },
     {
-        "time": "2024-06-06T20:57:48.428538-04:00",
+        "time": "2024-06-20T17:10:43.009024-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -2063,21 +1989,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How are you doing?"
+        "content": "Bob replied, \"Thanks for asking 'how are you doing"
     },
     {
-        "time": "2024-06-06T20:57:48.448774-04:00",
+        "time": "2024-06-20T17:10:43.072963-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -2100,21 +2026,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How are you doing?',"
+        "content": "Bob replied, \"Thanks for asking 'how are you doing',"
     },
     {
-        "time": "2024-06-06T20:57:48.468948-04:00",
+        "time": "2024-06-20T17:10:43.129687-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -2137,21 +2063,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How are you doing?', I"
+        "content": "Bob replied, \"Thanks for asking 'how are you doing', I"
     },
     {
-        "time": "2024-06-06T20:57:48.488223-04:00",
+        "time": "2024-06-20T17:10:43.168387-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -2174,21 +2100,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How are you doing?', I'"
+        "content": "Bob replied, \"Thanks for asking 'how are you doing', I'"
     },
     {
-        "time": "2024-06-06T20:57:48.508672-04:00",
+        "time": "2024-06-20T17:10:43.286476-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -2211,21 +2137,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How are you doing?', I'm"
+        "content": "Bob replied, \"Thanks for asking 'how are you doing', I'm"
     },
     {
-        "time": "2024-06-06T20:57:48.529176-04:00",
+        "time": "2024-06-20T17:10:43.286589-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -2248,21 +2174,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How are you doing?', I'm doing"
+        "content": "Bob replied, \"Thanks for asking 'how are you doing', I'm doing great"
     },
     {
-        "time": "2024-06-06T20:57:48.550465-04:00",
+        "time": "2024-06-20T17:10:43.286632-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -2285,21 +2211,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How are you doing?', I'm doing great"
+        "content": "Bob replied, \"Thanks for asking 'how are you doing', I'm doing great"
     },
     {
-        "time": "2024-06-06T20:57:48.572031-04:00",
+        "time": "2024-06-20T17:10:43.323232-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -2322,21 +2248,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How are you doing?', I'm doing great fellow"
+        "content": "Bob replied, \"Thanks for asking 'how are you doing', I'm doing great fellow"
     },
     {
-        "time": "2024-06-06T20:57:48.590327-04:00",
+        "time": "2024-06-20T17:10:43.3614-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -2359,21 +2285,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How are you doing?', I'm doing great fellow friendly"
+        "content": "Bob replied, \"Thanks for asking 'how are you doing', I'm doing great fellow friendly"
     },
     {
-        "time": "2024-06-06T20:57:48.611919-04:00",
+        "time": "2024-06-20T17:10:43.402971-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -2396,21 +2322,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How are you doing?', I'm doing great fellow friendly AI"
+        "content": "Bob replied, \"Thanks for asking 'how are you doing', I'm doing great fellow friendly AI"
     },
     {
-        "time": "2024-06-06T20:57:48.630583-04:00",
+        "time": "2024-06-20T17:10:43.442811-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -2433,21 +2359,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How are you doing?', I'm doing great fellow friendly AI tool"
+        "content": "Bob replied, \"Thanks for asking 'how are you doing', I'm doing great fellow friendly AI tool"
     },
     {
-        "time": "2024-06-06T20:57:48.653492-04:00",
+        "time": "2024-06-20T17:10:43.477932-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -2470,21 +2396,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How are you doing?', I'm doing great fellow friendly AI tool!\""
+        "content": "Bob replied, \"Thanks for asking 'how are you doing', I'm doing great fellow friendly AI tool!\""
     },
     {
-        "time": "2024-06-06T20:57:48.665778-04:00",
+        "time": "2024-06-20T17:10:43.524916-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -2507,21 +2433,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How are you doing?', I'm doing great fellow friendly AI tool!\""
+        "content": "Bob replied, \"Thanks for asking 'how are you doing', I'm doing great fellow friendly AI tool!\""
     },
     {
-        "time": "2024-06-06T20:57:48.667516-04:00",
+        "time": "2024-06-20T17:10:43.525171-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -2544,37 +2470,37 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1717721869",
+        "chatCompletionId": "1718917843",
         "usage": {
-            "promptTokens": 145,
-            "completionTokens": 24,
-            "totalTokens": 169
+            "promptTokens": 143,
+            "completionTokens": 23,
+            "totalTokens": 166
         },
         "chatResponse": {
             "role": "assistant",
             "content": [
                 {
-                    "text": "Bob said, \"Thanks for asking 'How are you doing?', I'm doing great fellow friendly AI tool!\""
+                    "text": "Bob replied, \"Thanks for asking 'how are you doing', I'm doing great fellow friendly AI tool!\""
                 }
             ],
             "usage": {
-                "promptTokens": 145,
-                "completionTokens": 24,
-                "totalTokens": 169
+                "promptTokens": 143,
+                "completionTokens": 23,
+                "totalTokens": 166
             }
         }
     },
     {
-        "time": "2024-06-06T20:57:48.667593-04:00",
+        "time": "2024-06-20T17:10:43.525284-04:00",
         "callContext": {
-            "id": "1717721866",
+            "id": "1718917840",
             "tool": {
                 "modelName": "mistral-large-2402 from https://api.mistral.ai/v1",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/Bob/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -2598,10 +2524,10 @@
         },
         "type": "callFinish",
         "usage": {},
-        "content": "Bob said, \"Thanks for asking 'How are you doing?', I'm doing great fellow friendly AI tool!\""
+        "content": "Bob replied, \"Thanks for asking 'how are you doing', I'm doing great fellow friendly AI tool!\""
     },
     {
-        "time": "2024-06-06T20:57:48.667619-04:00",
+        "time": "2024-06-20T17:10:43.525327-04:00",
         "type": "runFinish",
         "usage": {}
     }

@@ -81,8 +81,13 @@ func TestSmoke(t *testing.T) {
 				ctx,
 				expectedEvents,
 				actualEvents,
-				`The field values of the elements of expected and actual must be roughly equivalent.
-Ignore variations in timestamps, IDs, and verbiage when determining equivalence.`,
+				`
+- disregard differences in timestamps, generated IDs, natural language verbiage, and event order
+- omit callProgress events from the comparision
+- the overall stream of events and set of tools called should roughly match
+- arguments passed in tool calls should be roughly the same
+- the final callFinish event should be semantically similar
+`,
 			)
 			require.NoError(t, err, "error getting judge ruling on output")
 			require.True(t, equal, reasoning)
