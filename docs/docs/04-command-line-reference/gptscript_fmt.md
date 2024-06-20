@@ -32,7 +32,7 @@ gptscript fmt [flags]
       --disable-cache                Disable caching of LLM API responses ($GPTSCRIPT_DISABLE_CACHE)
       --dump-state string            Dump the internal execution state to a file ($GPTSCRIPT_DUMP_STATE)
       --events-stream-to string      Stream events to this location, could be a file descriptor/handle (e.g. fd://2), filename, or named pipe (e.g. \\.\pipe\my-pipe) ($GPTSCRIPT_EVENTS_STREAM_TO)
-  -f, --input string                 Read input from a file ("-" for stdin) ($GPTSCRIPT_INPUT)
+  -f, --input string                 Read input from a file ("-" for stdin) ($GPTSCRIPT_INPUT_FILE)
       --no-trunc                     Do not truncate long log messages ($GPTSCRIPT_NO_TRUNC)
       --openai-api-key string        OpenAI API KEY ($OPENAI_API_KEY)
       --openai-base-url string       OpenAI base URL ($OPENAI_BASE_URL)

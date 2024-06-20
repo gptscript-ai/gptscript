@@ -30,7 +30,7 @@ gptscript [flags] PROGRAM_FILE [INPUT...]
       --force-chat                    Force an interactive chat session if even the top level tool is not a chat tool ($GPTSCRIPT_FORCE_CHAT)
       --force-sequential              Force parallel calls to run sequentially ($GPTSCRIPT_FORCE_SEQUENTIAL)
   -h, --help                          help for gptscript
-  -f, --input string                  Read input from a file ("-" for stdin) ($GPTSCRIPT_INPUT)
+  -f, --input string                  Read input from a file ("-" for stdin) ($GPTSCRIPT_INPUT_FILE)
       --list-models                   List the models available and exit ($GPTSCRIPT_LIST_MODELS)
       --list-tools                    List built-in tools and exit ($GPTSCRIPT_LIST_TOOLS)
       --no-trunc                      Do not truncate long log messages ($GPTSCRIPT_NO_TRUNC)
