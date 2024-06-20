@@ -117,7 +117,7 @@ func (p Program) SetBlocking() Program {
 	return p
 }
 
-type BuiltinFunc func(ctx context.Context, env []string, input string) (string, error)
+type BuiltinFunc func(ctx context.Context, env []string, input string, progress chan<- string) (string, error)
 
 type Parameters struct {
 	Name            string           `json:"name,omitempty"`

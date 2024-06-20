@@ -10,15 +10,17 @@ import (
 )
 
 func TestSysGetenv(t *testing.T) {
+	p, c := DiscardProgress()
+	defer c()
 	v, err := SysGetenv(context.Background(), []string{
 		"MAGIC=VALUE",
-	}, `{"name":"MAGIC"}`)
+	}, `{"name":"MAGIC"}`, nil)
 	require.NoError(t, err)
 	autogold.Expect("VALUE").Equal(t, v)
 
 	v, err = SysGetenv(context.Background(), []string{
 		"MAGIC=VALUE",
-	}, `{"name":"MAGIC2"}`)
+	}, `{"name":"MAGIC2"}`, p)
 	require.NoError(t, err)
 	autogold.Expect("MAGIC2 is not set or has no value").Equal(t, v)
 }

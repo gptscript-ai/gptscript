@@ -1,6 +1,7 @@
 package builtin
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -264,7 +265,7 @@ func Builtin(name string) (types.Tool, bool) {
 	return SetDefaults(t), ok
 }
 
-func SysFind(_ context.Context, _ []string, input string) (string, error) {
+func SysFind(_ context.Context, _ []string, input string, _ chan<- string) (string, error) {
 	var result []string
 	var params struct {
 		Pattern   string `json:"pattern,omitempty"`
@@ -305,7 +306,7 @@ func SysFind(_ context.Context, _ []string, input string) (string, error) {
 	return strings.Join(result, "\n"), nil
 }
 
-func SysExec(_ context.Context, env []string, input string) (string, error) {
+func SysExec(_ context.Context, env []string, input string, progress chan<- string) (string, error) {
 	var params struct {
 		Command   string `json:"command,omitempty"`
 		Directory string `json:"directory,omitempty"`
@@ -328,13 +329,30 @@ func SysExec(_ context.Context, env []string, input string) (string, error) {
 		cmd = exec.Command("/bin/sh", "-c", params.Command)
 	}
 
+	var (
+		out bytes.Buffer
+		pw  = progressWriter{
+			out: progress,
+		}
+		combined = io.MultiWriter(&out, &pw)
+	)
 	cmd.Env = env
 	cmd.Dir = params.Directory
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Sprintf("ERROR: %s\nOUTPUT:\n%s", err, out), nil
+	cmd.Stdout = combined
+	cmd.Stderr = combined
+	if err := cmd.Run(); err != nil {
+		return fmt.Sprintf("ERROR: %s\nOUTPUT:\n%s", err, &out), nil
 	}
-	return string(out), nil
+	return out.String(), nil
+}
+
+type progressWriter struct {
+	out chan<- string
+}
+
+func (pw *progressWriter) Write(p []byte) (n int, err error) {
+	pw.out <- string(p)
+	return len(p), nil
 }
 
 func getWorkspaceDir(envs []string) (string, error) {
@@ -347,7 +365,7 @@ func getWorkspaceDir(envs []string) (string, error) {
 	return "", fmt.Errorf("no workspace directory found in env")
 }
 
-func SysLs(_ context.Context, _ []string, input string) (string, error) {
+func SysLs(_ context.Context, _ []string, input string, _ chan<- string) (string, error) {
 	var params struct {
 		Dir string `json:"dir,omitempty"`
 	}
@@ -383,7 +401,7 @@ func SysLs(_ context.Context, _ []string, input string) (string, error) {
 	return strings.Join(result, "\n"), nil
 }
 
-func SysRead(_ context.Context, _ []string, input string) (string, error) {
+func SysRead(_ context.Context, _ []string, input string, _ chan<- string) (string, error) {
 	var params struct {
 		Filename string `json:"filename,omitempty"`
 	}
@@ -411,7 +429,7 @@ func SysRead(_ context.Context, _ []string, input string) (string, error) {
 	return string(data), nil
 }
 
-func SysWrite(_ context.Context, _ []string, input string) (string, error) {
+func SysWrite(_ context.Context, _ []string, input string, _ chan<- string) (string, error) {
 	var params struct {
 		Filename string `json:"filename,omitempty"`
 		Content  string `json:"content,omitempty"`
@@ -443,7 +461,7 @@ func SysWrite(_ context.Context, _ []string, input string) (string, error) {
 	return fmt.Sprintf("Wrote (%d) bytes to file %s", len(data), file), nil
 }
 
-func SysAppend(_ context.Context, _ []string, input string) (string, error) {
+func SysAppend(_ context.Context, _ []string, input string, _ chan<- string) (string, error) {
 	var params struct {
 		Filename string `json:"filename,omitempty"`
 		Content  string `json:"content,omitempty"`
@@ -489,7 +507,7 @@ func fixQueries(u string) string {
 	return url.String()
 }
 
-func SysHTTPGet(_ context.Context, _ []string, input string) (_ string, err error) {
+func SysHTTPGet(_ context.Context, _ []string, input string, _ chan<- string) (_ string, err error) {
 	var params struct {
 		URL string `json:"url,omitempty"`
 	}
@@ -523,8 +541,8 @@ func SysHTTPGet(_ context.Context, _ []string, input string) (_ string, err erro
 	return string(data), nil
 }
 
-func SysHTTPHtml2Text(ctx context.Context, env []string, input string) (string, error) {
-	content, err := SysHTTPGet(ctx, env, input)
+func SysHTTPHtml2Text(ctx context.Context, env []string, input string, progress chan<- string) (string, error) {
+	content, err := SysHTTPGet(ctx, env, input, progress)
 	if err != nil {
 		return "", err
 	}
@@ -533,7 +551,7 @@ func SysHTTPHtml2Text(ctx context.Context, env []string, input string) (string, 
 	})
 }
 
-func SysHTTPPost(ctx context.Context, _ []string, input string) (_ string, err error) {
+func SysHTTPPost(ctx context.Context, _ []string, input string, _ chan<- string) (_ string, err error) {
 	var params struct {
 		URL         string `json:"url,omitempty"`
 		Content     string `json:"content,omitempty"`
@@ -569,7 +587,18 @@ func SysHTTPPost(ctx context.Context, _ []string, input string) (_ string, err e
 	return fmt.Sprintf("Wrote %d to %s", len([]byte(params.Content)), params.URL), nil
 }
 
-func SysGetenv(_ context.Context, env []string, input string) (string, error) {
+func DiscardProgress() (progress chan<- string, closeFunc func()) {
+	ch := make(chan string)
+	go func() {
+		for range ch {
+		}
+	}()
+	return ch, func() {
+		close(ch)
+	}
+}
+
+func SysGetenv(_ context.Context, env []string, input string, _ chan<- string) (string, error) {
 	var params struct {
 		Name string `json:"name,omitempty"`
 	}
@@ -597,7 +626,7 @@ func invalidArgument(input string, err error) string {
 	return fmt.Sprintf("Failed to parse arguments %s: %v", input, err)
 }
 
-func SysChatHistory(ctx context.Context, _ []string, _ string) (string, error) {
+func SysChatHistory(ctx context.Context, _ []string, _ string, _ chan<- string) (string, error) {
 	engineContext, _ := engine.FromContext(ctx)
 
 	data, err := json.Marshal(engine.ChatHistory{
@@ -627,7 +656,7 @@ func writeHistory(ctx *engine.Context) (result []engine.ChatHistoryCall) {
 	return
 }
 
-func SysChatFinish(_ context.Context, _ []string, input string) (string, error) {
+func SysChatFinish(_ context.Context, _ []string, input string, _ chan<- string) (string, error) {
 	var params struct {
 		Message string `json:"return,omitempty"`
 	}
@@ -641,7 +670,7 @@ func SysChatFinish(_ context.Context, _ []string, input string) (string, error) 
 	}
 }
 
-func SysAbort(_ context.Context, _ []string, input string) (string, error) {
+func SysAbort(_ context.Context, _ []string, input string, _ chan<- string) (string, error) {
 	var params struct {
 		Message string `json:"message,omitempty"`
 	}
@@ -651,7 +680,7 @@ func SysAbort(_ context.Context, _ []string, input string) (string, error) {
 	return "", fmt.Errorf("ABORT: %s", params.Message)
 }
 
-func SysRemove(_ context.Context, _ []string, input string) (string, error) {
+func SysRemove(_ context.Context, _ []string, input string, _ chan<- string) (string, error) {
 	var params struct {
 		Location string `json:"location,omitempty"`
 	}
@@ -670,7 +699,7 @@ func SysRemove(_ context.Context, _ []string, input string) (string, error) {
 	return fmt.Sprintf("Removed file: %s", params.Location), nil
 }
 
-func SysStat(_ context.Context, _ []string, input string) (string, error) {
+func SysStat(_ context.Context, _ []string, input string, _ chan<- string) (string, error) {
 	var params struct {
 		Filepath string `json:"filepath,omitempty"`
 	}
@@ -690,7 +719,7 @@ func SysStat(_ context.Context, _ []string, input string) (string, error) {
 	return fmt.Sprintf("%s %s mode: %s, size: %d bytes, modtime: %s", title, params.Filepath, stat.Mode().String(), stat.Size(), stat.ModTime().String()), nil
 }
 
-func SysDownload(_ context.Context, env []string, input string) (_ string, err error) {
+func SysDownload(_ context.Context, env []string, input string, _ chan<- string) (_ string, err error) {
 	var params struct {
 		URL      string `json:"url,omitempty"`
 		Location string `json:"location,omitempty"`
@@ -763,6 +792,6 @@ func SysDownload(_ context.Context, env []string, input string) (_ string, err e
 	return fmt.Sprintf("Downloaded %s to %s", params.URL, params.Location), nil
 }
 
-func SysTimeNow(context.Context, []string, string) (string, error) {
+func SysTimeNow(context.Context, []string, string, chan<- string) (string, error) {
 	return time.Now().Format(time.RFC3339), nil
 }
