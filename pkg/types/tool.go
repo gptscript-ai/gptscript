@@ -335,6 +335,30 @@ func ParseCredentialArgs(toolName string, input string) (string, string, map[str
 	return originalName, alias, args, nil
 }
 
+func (t Tool) GetAgents(prg Program) (result []ToolReference, _ error) {
+	toolRefs, err := t.GetToolRefsFromNames(t.Agents)
+	if err != nil {
+		return nil, err
+	}
+
+	// Agent Tool refs must be named
+	for i, toolRef := range toolRefs {
+		if toolRef.Named != "" {
+			continue
+		}
+		tool := prg.ToolSet[toolRef.ToolID]
+		name := tool.Name
+		if name == "" {
+			name = toolRef.Reference
+		}
+		normed := ToolNormalizer(name)
+		normed = strings.TrimSuffix(strings.TrimSuffix(normed, "Agent"), "Assistant")
+		toolRefs[i].Named = normed
+	}
+
+	return toolRefs, nil
+}
+
 func (t Tool) GetToolRefsFromNames(names []string) (result []ToolReference, _ error) {
 	for _, toolName := range names {
 		toolRefs, ok := t.ToolMapping[toolName]
@@ -522,9 +546,9 @@ func (t Tool) GetInputFilterTools(program Program) ([]ToolReference, error) {
 	return result.List()
 }
 
-func (t Tool) GetAgentGroup(agentGroup []ToolReference, toolID string) (result []ToolReference, _ error) {
+func (t Tool) GetNextAgentGroup(prg Program, agentGroup []ToolReference, toolID string) (result []ToolReference, _ error) {
 	newAgentGroup := toolRefSet{}
-	if err := t.addAgents(&newAgentGroup); err != nil {
+	if err := t.addAgents(prg, &newAgentGroup); err != nil {
 		return nil, err
 	}
 
@@ -533,15 +557,7 @@ func (t Tool) GetAgentGroup(agentGroup []ToolReference, toolID string) (result [
 		return newAgentGroup.List()
 	}
 
-	existingAgentGroup := toolRefSet{}
-	existingAgentGroup.AddAll(agentGroup, nil)
-
-	if existingAgentGroup.HasTool(toolID) {
-		return existingAgentGroup.List()
-	}
-
-	// No group
-	return nil, nil
+	return agentGroup, nil
 }
 
 func (t Tool) GetCompletionTools(prg Program, agentGroup ...ToolReference) (result []CompletionTool, err error) {
@@ -552,8 +568,8 @@ func (t Tool) GetCompletionTools(prg Program, agentGroup ...ToolReference) (resu
 	return toolRefsToCompletionTools(refs, prg), nil
 }
 
-func (t Tool) addAgents(result *toolRefSet) error {
-	subToolRefs, err := t.GetToolRefsFromNames(t.Parameters.Agents)
+func (t Tool) addAgents(prg Program, result *toolRefSet) error {
+	subToolRefs, err := t.GetAgents(prg)
 	if err != nil {
 		return err
 	}
@@ -617,7 +633,7 @@ func (t Tool) getCompletionToolRefs(prg Program, agentGroup []ToolReference) ([]
 		return nil, err
 	}
 
-	if err := t.addAgents(&result); err != nil {
+	if err := t.addAgents(prg, &result); err != nil {
 		return nil, err
 	}
 

@@ -1,0 +1,14 @@
+context: agents
+agents: ./file.gpt
+chat: true
+
+Tool body
+
+---
+name: agents
+context: sys.context
+
+#!/bin/bash
+
+echo "${GPTSCRIPT_CONTEXT}"
+echo "${GPTSCRIPT_CONTEXT}" > ${GPTSCRIPT_TOOL_DIR}/context.json

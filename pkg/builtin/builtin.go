@@ -32,6 +32,7 @@ var SafeTools = map[string]struct{}{
 	"sys.echo":         {},
 	"sys.prompt":       {},
 	"sys.time.now":     {},
+	"sys.context":      {},
 }
 
 var tools = map[string]types.Tool{
@@ -228,16 +229,15 @@ var tools = map[string]types.Tool{
 			BuiltinFunc: SysChatHistory,
 		},
 	},
-}
-
-func SysProgram() *types.Program {
-	result := &types.Program{
-		ToolSet: types.ToolSet{},
-	}
-	for _, tool := range ListTools() {
-		result.ToolSet[tool.ID] = tool
-	}
-	return result
+	"sys.context": {
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Retrieves the current internal GPTScript tool call context information",
+				Arguments:   types.ObjectSchema(),
+			},
+			BuiltinFunc: SysContext,
+		},
+	},
 }
 
 func ListTools() (result []types.Tool) {
@@ -624,6 +624,23 @@ func SysGetenv(_ context.Context, env []string, input string, _ chan<- string) (
 
 func invalidArgument(input string, err error) string {
 	return fmt.Sprintf("Failed to parse arguments %s: %v", input, err)
+}
+
+func SysContext(ctx context.Context, _ []string, _ string, _ chan<- string) (string, error) {
+	engineContext, _ := engine.FromContext(ctx)
+
+	callContext := *engineContext.GetCallContext()
+	callContext.ID = ""
+	callContext.ParentID = ""
+	data, err := json.Marshal(map[string]any{
+		"program": engineContext.Program,
+		"call":    callContext,
+	})
+	if err != nil {
+		return invalidArgument("", err), nil
+	}
+
+	return string(data), nil
 }
 
 func SysChatHistory(ctx context.Context, _ []string, _ string, _ chan<- string) (string, error) {

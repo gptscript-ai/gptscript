@@ -165,7 +165,11 @@ func (r *Runner) Chat(ctx context.Context, prevState ChatState, prg types.Progra
 		monitor.Stop(resp.Content, err)
 	}()
 
-	callCtx := engine.NewContext(ctx, &prg, input)
+	callCtx, err := engine.NewContext(ctx, &prg, input)
+	if err != nil {
+		return resp, err
+	}
+
 	if state == nil || state.StartContinuation {
 		if state != nil {
 			state = state.WithResumeInput(&input)
