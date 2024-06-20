@@ -30,3 +30,26 @@ When the cache is disabled, GPTScript will check that it has the latest version 
 With regards to LLM responses, when the cache is enabled GPTScript will cache the LLM’s response to a chat completion request. Each response is stored as a gob-encoded file in $XDG_CACHE_HOME/gptscript, where the file name is a hash of the chat completion request.
 
 It is important to note that all [messages in chat completion request](https://platform.openai.com/docs/api-reference/chat/create#chat-create-messages) are used to generate the hash that is used as the file name. This means that every message between user and LLM affects the cache lookup. So, when using GPTScript in chat mode, it is very unlikely you’ll receive a cached LLM response. Conversely, non-chat GPTScript automations are much more likely to be consistent and thus make use of cached LLM responses.
+
+### I see there's a --workspace flag. How do I make use of that?
+
+Every invocation of GPTScript has a workspace directory available to it. By default, this directory is a one-off temp directory, but you can override this and explicitly set a workspace using the `--workspace` flag, like so:
+```
+gptscript --workspace . my-script.gpt
+```
+In the above example, the user’s current directory (denoted by `.`) will be set as the workspace. Both absolute and relative paths are supported.
+
+Regardless of whether it is set implicitly or explicitly, the workspace is then made available to the script execution as the `GPTSCRIPT_WORKSPACE_DIR` environment variable.
+
+:::info
+GPTScript does not force scripts or tools to write to, read from, or otherwise use the workspace. The tools must decide to make use of the workspace environment variable.
+:::
+
+To make prompt-based tools workspace aware, you can add our workspace context, like so:
+```
+Context: github.com/gptscript-ai/context/workspace
+```
+This tells the LLM (by way of a [system message](https://platform.openai.com/docs/guides/text-generation/chat-completions-api)) what the workspace directory is, what its initial contents are, and that if it decides to create a file or directory, it should do so in the workspace directory. This will not, however, have any impact on code-based tools (ie python, bash, or go tools). Such tools will have the `GPTSCRIPT_WORKSPACE_DIR` environment variable available to them, but they must be written in such a way that they make use of it.
+
+This context also automatically shares the `sys.ls`, `sys.read`, and `sys.write` tools with the tool that is using it as a context. This is because if a tool intends to interact with the workspace, it minimally needs these tools.
+
