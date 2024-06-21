@@ -1,0 +1,31 @@
+output filter: prefix
+context: context
+chat: true
+
+Tool body
+
+---
+name: context
+share output filters: suffix
+
+---
+name: prefix
+args: chat: is it chat
+args: output: the output content
+args: continuation: if this is a non-terminating response
+args: chatFinish: chat finish message
+
+#!/bin/bash
+
+echo CHAT: ${CHAT}
+echo CONTENT: ${OUTPUT}
+echo CONTINUATION: ${CONTINUATION}
+echo FINISH: ${CHATFINISH}
+
+---
+name: suffix
+args: output: the output content
+
+#!/bin/bash
+
+echo ${OUTPUT} suffix

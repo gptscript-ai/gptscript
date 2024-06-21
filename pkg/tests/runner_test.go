@@ -849,6 +849,52 @@ func TestInput(t *testing.T) {
 	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step2"))
 }
 
+func TestOutput(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip()
+	}
+
+	r := tester.NewRunner(t)
+	r.RespondWith(tester.Result{
+		Text: "Response 1",
+	})
+
+	prg, err := r.Load("")
+	require.NoError(t, err)
+
+	resp, err := r.Chat(context.Background(), nil, prg, nil, "Input 1")
+	require.NoError(t, err)
+	r.AssertResponded(t)
+	assert.False(t, resp.Done)
+	autogold.Expect(`CHAT: true CONTENT: Response 1 CONTINUATION: true FINISH: false suffix
+`).Equal(t, resp.Content)
+	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step1"))
+
+	r.RespondWith(tester.Result{
+		Text: "Response 2",
+	})
+	resp, err = r.Chat(context.Background(), resp.State, prg, nil, "Input 2")
+	require.NoError(t, err)
+	r.AssertResponded(t)
+	assert.False(t, resp.Done)
+	autogold.Expect(`CHAT: true CONTENT: Response 2 CONTINUATION: true FINISH: false suffix
+`).Equal(t, resp.Content)
+	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step2"))
+
+	r.RespondWith(tester.Result{
+		Err: &engine.ErrChatFinish{
+			Message: "Chat Done",
+		},
+	})
+	resp, err = r.Chat(context.Background(), resp.State, prg, nil, "Input 3")
+	require.NoError(t, err)
+	r.AssertResponded(t)
+	assert.True(t, resp.Done)
+	autogold.Expect(`CHAT FINISH: CHAT: true CONTENT: Chat Done CONTINUATION: false FINISH: true suffix
+`).Equal(t, resp.Content)
+	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step3"))
+}
+
 func TestSysContext(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip()

@@ -215,3 +215,27 @@ share input filters: shared
 		}},
 	}}).Equal(t, out)
 }
+
+func TestParseOutput(t *testing.T) {
+	output := `
+output filters: output
+share output filters: shared
+`
+	out, err := Parse(strings.NewReader(output))
+	require.NoError(t, err)
+	autogold.Expect(Document{Nodes: []Node{
+		{ToolNode: &ToolNode{
+			Tool: types.Tool{
+				ToolDef: types.ToolDef{
+					Parameters: types.Parameters{
+						OutputFilters: []string{
+							"output",
+						},
+						ExportOutputFilters: []string{"shared"},
+					},
+				},
+				Source: types.ToolSource{LineNo: 1},
+			},
+		}},
+	}}).Equal(t, out)
+}

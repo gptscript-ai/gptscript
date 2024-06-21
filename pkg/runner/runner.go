@@ -536,7 +536,11 @@ type Needed struct {
 	Input   string `json:"input,omitempty"`
 }
 
-func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, state *State) (*State, error) {
+func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, state *State) (retState *State, retErr error) {
+	defer func() {
+		retState, retErr = r.handleOutput(callCtx, monitor, env, retState, retErr)
+	}()
+
 	if state.StartContinuation {
 		return nil, fmt.Errorf("invalid state, resume should not have StartContinuation set to true")
 	}

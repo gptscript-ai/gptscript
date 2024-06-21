@@ -99,6 +99,7 @@ const (
 	CredentialToolCategory ToolCategory = "credential"
 	ContextToolCategory    ToolCategory = "context"
 	InputToolCategory      ToolCategory = "input"
+	OutputToolCategory     ToolCategory = "output"
 	NoCategory             ToolCategory = ""
 )
 
