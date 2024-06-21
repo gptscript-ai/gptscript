@@ -1,0 +1,42 @@
+`{
+  "model": "gpt-4o",
+  "internalSystemPrompt": false,
+  "messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "\nTool body"
+        }
+      ],
+      "usage": {}
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "Input 1"
+        }
+      ],
+      "usage": {}
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "Response 1"
+        }
+      ],
+      "usage": {}
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "Input 2"
+        }
+      ],
+      "usage": {}
+    }
+  ]
+}`

@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/gptscript-ai/gptscript/pkg/engine"
@@ -13,7 +14,13 @@ func (r *Runner) handleInput(callCtx engine.Context, monitor Monitor, env []stri
 	}
 
 	for _, inputToolRef := range inputToolRefs {
-		res, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, inputToolRef.ToolID, input, "", engine.InputToolCategory)
+		inputData, err := json.Marshal(map[string]any{
+			"input": input,
+		})
+		if err != nil {
+			return "", fmt.Errorf("failed to marshal input: %w", err)
+		}
+		res, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, inputToolRef.ToolID, string(inputData), "", engine.InputToolCategory)
 		if err != nil {
 			return "", err
 		}

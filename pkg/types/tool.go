@@ -120,28 +120,30 @@ func (p Program) SetBlocking() Program {
 type BuiltinFunc func(ctx context.Context, env []string, input string, progress chan<- string) (string, error)
 
 type Parameters struct {
-	Name               string           `json:"name,omitempty"`
-	Description        string           `json:"description,omitempty"`
-	MaxTokens          int              `json:"maxTokens,omitempty"`
-	ModelName          string           `json:"modelName,omitempty"`
-	ModelProvider      bool             `json:"modelProvider,omitempty"`
-	JSONResponse       bool             `json:"jsonResponse,omitempty"`
-	Chat               bool             `json:"chat,omitempty"`
-	Temperature        *float32         `json:"temperature,omitempty"`
-	Cache              *bool            `json:"cache,omitempty"`
-	InternalPrompt     *bool            `json:"internalPrompt"`
-	Arguments          *openapi3.Schema `json:"arguments,omitempty"`
-	Tools              []string         `json:"tools,omitempty"`
-	GlobalTools        []string         `json:"globalTools,omitempty"`
-	GlobalModelName    string           `json:"globalModelName,omitempty"`
-	Context            []string         `json:"context,omitempty"`
-	ExportContext      []string         `json:"exportContext,omitempty"`
-	Export             []string         `json:"export,omitempty"`
-	Agents             []string         `json:"agents,omitempty"`
-	Credentials        []string         `json:"credentials,omitempty"`
-	InputFilters       []string         `json:"inputFilters,omitempty"`
-	ExportInputFilters []string         `json:"exportInputFilters,omitempty"`
-	Blocking           bool             `json:"-"`
+	Name                string           `json:"name,omitempty"`
+	Description         string           `json:"description,omitempty"`
+	MaxTokens           int              `json:"maxTokens,omitempty"`
+	ModelName           string           `json:"modelName,omitempty"`
+	ModelProvider       bool             `json:"modelProvider,omitempty"`
+	JSONResponse        bool             `json:"jsonResponse,omitempty"`
+	Chat                bool             `json:"chat,omitempty"`
+	Temperature         *float32         `json:"temperature,omitempty"`
+	Cache               *bool            `json:"cache,omitempty"`
+	InternalPrompt      *bool            `json:"internalPrompt"`
+	Arguments           *openapi3.Schema `json:"arguments,omitempty"`
+	Tools               []string         `json:"tools,omitempty"`
+	GlobalTools         []string         `json:"globalTools,omitempty"`
+	GlobalModelName     string           `json:"globalModelName,omitempty"`
+	Context             []string         `json:"context,omitempty"`
+	ExportContext       []string         `json:"exportContext,omitempty"`
+	Export              []string         `json:"export,omitempty"`
+	Agents              []string         `json:"agents,omitempty"`
+	Credentials         []string         `json:"credentials,omitempty"`
+	InputFilters        []string         `json:"inputFilters,omitempty"`
+	ExportInputFilters  []string         `json:"exportInputFilters,omitempty"`
+	OutputFilters       []string         `json:"outputFilters,omitempty"`
+	ExportOutputFilters []string         `json:"exportOutputFilters,omitempty"`
+	Blocking            bool             `json:"-"`
 }
 
 func (p Parameters) ToolRefNames() []string {
@@ -153,7 +155,9 @@ func (p Parameters) ToolRefNames() []string {
 		p.Context,
 		p.Credentials,
 		p.InputFilters,
-		p.ExportInputFilters)
+		p.ExportInputFilters,
+		p.OutputFilters,
+		p.ExportOutputFilters)
 }
 
 type ToolDef struct {
@@ -419,6 +423,12 @@ func (t ToolDef) String() string {
 	if len(t.Parameters.ExportInputFilters) != 0 {
 		_, _ = fmt.Fprintf(buf, "Share Input Filters: %s\n", strings.Join(t.Parameters.ExportInputFilters, ", "))
 	}
+	if len(t.Parameters.OutputFilters) != 0 {
+		_, _ = fmt.Fprintf(buf, "Output Filters: %s\n", strings.Join(t.Parameters.OutputFilters, ", "))
+	}
+	if len(t.Parameters.ExportOutputFilters) != 0 {
+		_, _ = fmt.Fprintf(buf, "Share Output Filters: %s\n", strings.Join(t.Parameters.ExportOutputFilters, ", "))
+	}
 	if t.Parameters.MaxTokens != 0 {
 		_, _ = fmt.Fprintf(buf, "Max Tokens: %d\n", t.Parameters.MaxTokens)
 	}
@@ -516,6 +526,31 @@ func (t Tool) GetContextTools(prg Program) ([]ToolReference, error) {
 	for _, contextRef := range contextRefs {
 		result.AddAll(prg.ToolSet[contextRef.ToolID].GetExportedContext(prg))
 		result.Add(contextRef)
+	}
+
+	return result.List()
+}
+
+func (t Tool) GetOutputFilterTools(program Program) ([]ToolReference, error) {
+	result := &toolRefSet{}
+
+	outputFilterRefs, err := t.GetToolRefsFromNames(t.OutputFilters)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, outputFilterRef := range outputFilterRefs {
+		result.Add(outputFilterRef)
+	}
+
+	contextRefs, err := t.GetContextTools(program)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, contextRef := range contextRefs {
+		contextTool := program.ToolSet[contextRef.ToolID]
+		result.AddAll(contextTool.GetToolRefsFromNames(contextTool.ExportOutputFilters))
 	}
 
 	return result.List()

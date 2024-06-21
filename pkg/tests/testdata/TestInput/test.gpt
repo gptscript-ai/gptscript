@@ -7,9 +7,10 @@ Tool body
 ---
 name: taunt
 args: foo: this is useless
+args: input: this is used
 #!/bin/bash
 
-echo "No, ${GPTSCRIPT_INPUT}!"
+echo "No, ${INPUT}!"
 
 ---
 name: exporter
@@ -18,6 +19,7 @@ share input filters: taunt2
 ---
 name: taunt2
 args: foo: this is useless
+args: input: this is used
 
 #!/bin/bash
-echo "${GPTSCRIPT_INPUT} ha ha ha"
+echo "${INPUT} ha ha ha"

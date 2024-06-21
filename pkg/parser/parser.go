@@ -109,6 +109,10 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		tool.Parameters.InputFilters = append(tool.Parameters.InputFilters, csv(value)...)
 	case "shareinputfilter", "shareinputfilters":
 		tool.Parameters.ExportInputFilters = append(tool.Parameters.ExportInputFilters, csv(value)...)
+	case "outputfilter", "outputfilters":
+		tool.Parameters.OutputFilters = append(tool.Parameters.OutputFilters, csv(value)...)
+	case "shareoutputfilter", "shareoutputfilters":
+		tool.Parameters.ExportOutputFilters = append(tool.Parameters.ExportOutputFilters, csv(value)...)
 	case "agent", "agents":
 		tool.Parameters.Agents = append(tool.Parameters.Agents, csv(value)...)
 	case "globaltool", "globaltools":
@@ -194,6 +198,7 @@ func (c *context) finish(tools *[]Node) {
 		c.tool.GlobalModelName != "" ||
 		len(c.tool.GlobalTools) > 0 ||
 		len(c.tool.ExportInputFilters) > 0 ||
+		len(c.tool.ExportOutputFilters) > 0 ||
 		c.tool.Chat {
 		*tools = append(*tools, Node{
 			ToolNode: &ToolNode{
