@@ -37,7 +37,7 @@ jobs:
               AUTHOR="${{ github.event.pull_request.user.login }}"
 
               # Check for org membership
-              MEMBERSHIP_RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              MEMBERSHIP_RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token ${{ secrets.SMOKE_GH_TOKEN }}" \
                 "https://api.github.com/orgs/$ORG/members/$AUTHOR")
 
               if [ "$MEMBERSHIP_RESPONSE_CODE" -eq 204 ]; then
@@ -59,7 +59,7 @@ jobs:
 
           echo "run_smoke_tests=false" >> $GITHUB_OUTPUT
 
-  smoke-gpt-4o-2024-05-13:
+  gpt-4o-2024-05-13:
     needs: check-label
     if: ${{ needs.check-label.outputs.run_smoke_tests == 'true' }}
     runs-on: ubuntu-22.04
@@ -88,7 +88,7 @@ jobs:
           export PATH="$(pwd)/bin:${PATH}"
           make smoke
 
-  smoke-gpt-4-turbo-2024-04-09:
+  gpt-4-turbo-2024-04-09:
     needs: check-label
     if: ${{ needs.check-label.outputs.run_smoke_tests == 'true' }}
     runs-on: ubuntu-22.04
@@ -117,7 +117,7 @@ jobs:
           export PATH="$(pwd)/bin:${PATH}"
           make smoke
 
-  smoke-claude-3-opus-20240229:
+  claude-3-opus-20240229:
     needs: check-label
     if: ${{ needs.check-label.outputs.run_smoke_tests == 'true' }}
     runs-on: ubuntu-22.04
@@ -147,7 +147,7 @@ jobs:
           export PATH="$(pwd)/bin:${PATH}"
           make smoke
 
-  smoke-mistral-large-2402:
+  mistral-large-2402:
     needs: check-label
     if: ${{ needs.check-label.outputs.run_smoke_tests == 'true' }}
     runs-on: ubuntu-22.04
