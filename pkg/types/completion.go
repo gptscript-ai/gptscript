@@ -104,6 +104,7 @@ func Text(text string) []ContentPart {
 }
 
 func (c CompletionMessage) String() string {
+	// Change to test smoke test workflow org membership gating
 	buf := strings.Builder{}
 	for i, content := range c.Content {
 		if i > 0 {
