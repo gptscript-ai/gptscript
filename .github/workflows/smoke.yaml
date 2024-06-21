@@ -37,7 +37,7 @@ jobs:
               AUTHOR="${{ github.event.pull_request.user.login }}"
 
               # Check for org membership
-              MEMBERSHIP_RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              MEMBERSHIP_RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token ${{ secrets.SMOKE_GH_TOKEN }}" \
                 "https://api.github.com/orgs/$ORG/members/$AUTHOR")
 
               if [ "$MEMBERSHIP_RESPONSE_CODE" -eq 204 ]; then
