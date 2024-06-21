@@ -1,7 +1,7 @@
 
 tools: bob
 
-Ask Bob how he is doing and let me know exactly what he said.
+Ask Bob "how are you doing" and repeat his reply exactly.
 
 ---
 name: bob

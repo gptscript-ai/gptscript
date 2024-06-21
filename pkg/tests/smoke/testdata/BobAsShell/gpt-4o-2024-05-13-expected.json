@@ -1,20 +1,20 @@
 [
     {
-        "time": "2024-06-06T20:21:49.457487-04:00",
+        "time": "2024-06-20T16:58:14.093283-04:00",
         "type": "runStart",
         "usage": {}
     },
     {
-        "time": "2024-06-06T20:21:49.457771-04:00",
+        "time": "2024-06-20T16:58:14.093568-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -40,16 +40,16 @@
         "usage": {}
     },
     {
-        "time": "2024-06-06T20:21:49.67064-04:00",
+        "time": "2024-06-20T16:58:14.31069-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -72,14 +72,14 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1717719711",
+        "chatCompletionId": "1718917096",
         "usage": {},
         "chatRequest": {
             "model": "gpt-4o-2024-05-13",
             "messages": [
                 {
                     "role": "system",
-                    "content": "\nYou are task oriented system.\nYou receive input from a user, process the input from the given instructions, and then output the result.\nYour objective is to provide consistent and correct results.\nYou do not need to explain the steps taken, only provide the result to the given instructions.\nYou are referred to as a tool.\nYou don't move to the next step until you have a result.\n\nAsk Bob how he is doing and let me know exactly what he said."
+                    "content": "\nYou are task oriented system.\nYou receive input from a user, process the input from the given instructions, and then output the result.\nYour objective is to provide consistent and correct results.\nYou do not need to explain the steps taken, only provide the result to the given instructions.\nYou are referred to as a tool.\nYou don't move to the next step until you have a result.\n\nAsk Bob \"how are you doing\" and repeat his reply exactly."
                 }
             ],
             "temperature": 0,
@@ -104,16 +104,16 @@
         }
     },
     {
-        "time": "2024-06-06T20:21:49.670852-04:00",
+        "time": "2024-06-20T16:58:14.311071-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -136,21 +136,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719711",
+        "chatCompletionId": "1718917096",
         "usage": {},
         "content": "Waiting for model response..."
     },
     {
-        "time": "2024-06-06T20:21:50.142412-04:00",
+        "time": "2024-06-20T16:58:14.807492-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -173,21 +173,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719711",
+        "chatCompletionId": "1718917096",
         "usage": {},
         "content": "\u003ctool call\u003e bob -\u003e {\""
     },
     {
-        "time": "2024-06-06T20:21:50.142691-04:00",
+        "time": "2024-06-20T16:58:14.807779-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -210,21 +210,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719711",
+        "chatCompletionId": "1718917096",
         "usage": {},
         "content": "\u003ctool call\u003e bob -\u003e {\""
     },
     {
-        "time": "2024-06-06T20:21:50.164329-04:00",
+        "time": "2024-06-20T16:58:14.832551-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -247,21 +247,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719711",
+        "chatCompletionId": "1718917096",
         "usage": {},
         "content": "\u003ctool call\u003e bob -\u003e {\"question\":\""
     },
     {
-        "time": "2024-06-06T20:21:50.164636-04:00",
+        "time": "2024-06-20T16:58:14.832684-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -284,21 +284,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719711",
+        "chatCompletionId": "1718917096",
         "usage": {},
         "content": "\u003ctool call\u003e bob -\u003e {\"question\":\""
     },
     {
-        "time": "2024-06-06T20:21:50.182304-04:00",
+        "time": "2024-06-20T16:58:14.865368-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -321,21 +321,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719711",
+        "chatCompletionId": "1718917096",
         "usage": {},
-        "content": "\u003ctool call\u003e bob -\u003e {\"question\":\"How are"
+        "content": "\u003ctool call\u003e bob -\u003e {\"question\":\"how are"
     },
     {
-        "time": "2024-06-06T20:21:50.182411-04:00",
+        "time": "2024-06-20T16:58:14.865484-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -358,21 +358,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719711",
+        "chatCompletionId": "1718917096",
         "usage": {},
-        "content": "\u003ctool call\u003e bob -\u003e {\"question\":\"How are"
+        "content": "\u003ctool call\u003e bob -\u003e {\"question\":\"how are"
     },
     {
-        "time": "2024-06-06T20:21:50.210798-04:00",
+        "time": "2024-06-20T16:58:14.899511-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -395,21 +395,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719711",
+        "chatCompletionId": "1718917096",
         "usage": {},
-        "content": "\u003ctool call\u003e bob -\u003e {\"question\":\"How are you doing"
+        "content": "\u003ctool call\u003e bob -\u003e {\"question\":\"how are you doing"
     },
     {
-        "time": "2024-06-06T20:21:50.210958-04:00",
+        "time": "2024-06-20T16:58:14.899668-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -432,21 +432,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719711",
+        "chatCompletionId": "1718917096",
         "usage": {},
-        "content": "\u003ctool call\u003e bob -\u003e {\"question\":\"How are you doing"
+        "content": "\u003ctool call\u003e bob -\u003e {\"question\":\"how are you doing"
     },
     {
-        "time": "2024-06-06T20:21:50.220648-04:00",
+        "time": "2024-06-20T16:58:14.900883-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -469,21 +469,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719711",
+        "chatCompletionId": "1718917096",
         "usage": {},
-        "content": "\u003ctool call\u003e bob -\u003e {\"question\":\"How are you doing?\"}"
+        "content": "\u003ctool call\u003e bob -\u003e {\"question\":\"how are you doing\"}"
     },
     {
-        "time": "2024-06-06T20:21:50.220734-04:00",
+        "time": "2024-06-20T16:58:14.900938-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -506,21 +506,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719711",
+        "chatCompletionId": "1718917096",
         "usage": {},
-        "content": "\u003ctool call\u003e bob -\u003e {\"question\":\"How are you doing?\"}"
+        "content": "\u003ctool call\u003e bob -\u003e {\"question\":\"how are you doing\"}"
     },
     {
-        "time": "2024-06-06T20:21:50.220753-04:00",
+        "time": "2024-06-20T16:58:14.900969-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -543,58 +543,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719711",
+        "chatCompletionId": "1718917096",
         "usage": {},
-        "content": "\u003ctool call\u003e bob -\u003e {\"question\":\"How are you doing?\"}"
+        "content": "\u003ctool call\u003e bob -\u003e {\"question\":\"how are you doing\"}"
     },
     {
-        "time": "2024-06-06T20:21:50.220768-04:00",
+        "time": "2024-06-20T16:58:14.901222-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
-                "id": "testdata/BobAsShell/test.gpt:",
-                "toolMapping": {
-                    "bob": [
-                        {
-                            "reference": "bob",
-                            "toolID": "testdata/BobAsShell/test.gpt:bob"
-                        }
-                    ]
-                },
-                "localTools": {
-                    "": "testdata/BobAsShell/test.gpt:",
-                    "bob": "testdata/BobAsShell/test.gpt:bob"
-                },
-                "source": {
-                    "location": "testdata/BobAsShell/test.gpt",
-                    "lineNo": 1
-                },
-                "workingDir": "testdata/BobAsShell"
-            },
-            "inputContext": null
-        },
-        "type": "callProgress",
-        "chatCompletionId": "1717719711",
-        "usage": {},
-        "content": "\u003ctool call\u003e bob -\u003e {\"question\":\"How are you doing?\"}"
-    },
-    {
-        "time": "2024-06-06T20:21:50.221021-04:00",
-        "callContext": {
-            "id": "1717719710",
-            "tool": {
-                "modelName": "gpt-4o-2024-05-13",
-                "internalPrompt": null,
-                "tools": [
-                    "bob"
-                ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -617,11 +580,11 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1717719711",
+        "chatCompletionId": "1718917096",
         "usage": {
-            "promptTokens": 139,
-            "completionTokens": 18,
-            "totalTokens": 157
+            "promptTokens": 138,
+            "completionTokens": 17,
+            "totalTokens": 155
         },
         "chatResponse": {
             "role": "assistant",
@@ -629,32 +592,32 @@
                 {
                     "toolCall": {
                         "index": 0,
-                        "id": "call_AZtZBeP4Ofv9CbW8Tiw066Cr",
+                        "id": "call_PGLxooO6eBPt3eSEBCMkuWYN",
                         "function": {
                             "name": "bob",
-                            "arguments": "{\"question\":\"How are you doing?\"}"
+                            "arguments": "{\"question\":\"how are you doing\"}"
                         }
                     }
                 }
             ],
             "usage": {
-                "promptTokens": 139,
-                "completionTokens": 18,
-                "totalTokens": 157
+                "promptTokens": 138,
+                "completionTokens": 17,
+                "totalTokens": 155
             }
         }
     },
     {
-        "time": "2024-06-06T20:21:50.221288-04:00",
+        "time": "2024-06-20T16:58:14.901521-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -677,18 +640,18 @@
             "inputContext": null
         },
         "toolSubCalls": {
-            "call_AZtZBeP4Ofv9CbW8Tiw066Cr": {
+            "call_PGLxooO6eBPt3eSEBCMkuWYN": {
                 "toolID": "testdata/BobAsShell/test.gpt:bob",
-                "input": "{\"question\":\"How are you doing?\"}"
+                "input": "{\"question\":\"how are you doing\"}"
             }
         },
         "type": "callSubCalls",
         "usage": {}
     },
     {
-        "time": "2024-06-06T20:21:50.221358-04:00",
+        "time": "2024-06-20T16:58:14.901599-04:00",
         "callContext": {
-            "id": "call_AZtZBeP4Ofv9CbW8Tiw066Cr",
+            "id": "call_PGLxooO6eBPt3eSEBCMkuWYN",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -717,17 +680,17 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717719710",
+            "parentID": "1718917095",
             "displayText": "Running bob from testdata/BobAsShell/test.gpt"
         },
         "type": "callStart",
         "usage": {},
-        "content": "{\"question\":\"How are you doing?\"}"
+        "content": "{\"question\":\"how are you doing\"}"
     },
     {
-        "time": "2024-06-06T20:21:50.22312-04:00",
+        "time": "2024-06-20T16:58:14.90268-04:00",
         "callContext": {
-            "id": "call_AZtZBeP4Ofv9CbW8Tiw066Cr",
+            "id": "call_PGLxooO6eBPt3eSEBCMkuWYN",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -756,11 +719,11 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717719710",
+            "parentID": "1718917095",
             "displayText": "Running bob from testdata/BobAsShell/test.gpt"
         },
         "type": "callChat",
-        "chatCompletionId": "1717719712",
+        "chatCompletionId": "1718917097",
         "usage": {},
         "chatRequest": {
             "model": "",
@@ -768,9 +731,9 @@
         }
     },
     {
-        "time": "2024-06-06T20:21:50.231558-04:00",
+        "time": "2024-06-20T16:58:14.908538-04:00",
         "callContext": {
-            "id": "call_AZtZBeP4Ofv9CbW8Tiw066Cr",
+            "id": "call_PGLxooO6eBPt3eSEBCMkuWYN",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -799,20 +762,60 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717719710",
+            "parentID": "1718917095",
+            "displayText": "Running bob from testdata/BobAsShell/test.gpt"
+        },
+        "type": "callProgress",
+        "chatCompletionId": "1718917097",
+        "usage": {},
+        "content": "Thanks for asking how are you doing, I'm doing great fellow friendly AI tool!\n"
+    },
+    {
+        "time": "2024-06-20T16:58:14.908991-04:00",
+        "callContext": {
+            "id": "call_PGLxooO6eBPt3eSEBCMkuWYN",
+            "tool": {
+                "name": "bob",
+                "description": "I'm Bob, a friendly guy.",
+                "modelName": "gpt-4o-2024-05-13",
+                "internalPrompt": null,
+                "arguments": {
+                    "properties": {
+                        "question": {
+                            "description": "The question to ask Bob.",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "instructions": "#!/bin/bash\n\necho \"Thanks for asking ${question}, I'm doing great fellow friendly AI tool!\"",
+                "id": "testdata/BobAsShell/test.gpt:bob",
+                "localTools": {
+                    "": "testdata/BobAsShell/test.gpt:",
+                    "bob": "testdata/BobAsShell/test.gpt:bob"
+                },
+                "source": {
+                    "location": "testdata/BobAsShell/test.gpt",
+                    "lineNo": 7
+                },
+                "workingDir": "testdata/BobAsShell"
+            },
+            "inputContext": null,
+            "toolName": "bob",
+            "parentID": "1718917095",
             "displayText": "Running bob from testdata/BobAsShell/test.gpt"
         },
         "type": "callChat",
-        "chatCompletionId": "1717719712",
+        "chatCompletionId": "1718917097",
         "usage": {},
         "chatResponse": {
             "usage": {}
         }
     },
     {
-        "time": "2024-06-06T20:21:50.232297-04:00",
+        "time": "2024-06-20T16:58:14.909126-04:00",
         "callContext": {
-            "id": "call_AZtZBeP4Ofv9CbW8Tiw066Cr",
+            "id": "call_PGLxooO6eBPt3eSEBCMkuWYN",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -841,24 +844,24 @@
             },
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1717719710",
+            "parentID": "1718917095",
             "displayText": "Running bob from testdata/BobAsShell/test.gpt"
         },
         "type": "callFinish",
         "usage": {},
-        "content": "Thanks for asking How are you doing?, I'm doing great fellow friendly AI tool!\n"
+        "content": "Thanks for asking how are you doing, I'm doing great fellow friendly AI tool!\n"
     },
     {
-        "time": "2024-06-06T20:21:50.232391-04:00",
+        "time": "2024-06-20T16:58:14.909293-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -885,16 +888,16 @@
         "usage": {}
     },
     {
-        "time": "2024-06-06T20:21:50.398083-04:00",
+        "time": "2024-06-20T16:58:15.10962-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -917,34 +920,34 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
         "chatRequest": {
             "model": "gpt-4o-2024-05-13",
             "messages": [
                 {
                     "role": "system",
-                    "content": "\nYou are task oriented system.\nYou receive input from a user, process the input from the given instructions, and then output the result.\nYour objective is to provide consistent and correct results.\nYou do not need to explain the steps taken, only provide the result to the given instructions.\nYou are referred to as a tool.\nYou don't move to the next step until you have a result.\n\nAsk Bob how he is doing and let me know exactly what he said."
+                    "content": "\nYou are task oriented system.\nYou receive input from a user, process the input from the given instructions, and then output the result.\nYour objective is to provide consistent and correct results.\nYou do not need to explain the steps taken, only provide the result to the given instructions.\nYou are referred to as a tool.\nYou don't move to the next step until you have a result.\n\nAsk Bob \"how are you doing\" and repeat his reply exactly."
                 },
                 {
                     "role": "assistant",
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "call_AZtZBeP4Ofv9CbW8Tiw066Cr",
+                            "id": "call_PGLxooO6eBPt3eSEBCMkuWYN",
                             "type": "function",
                             "function": {
                                 "name": "bob",
-                                "arguments": "{\"question\":\"How are you doing?\"}"
+                                "arguments": "{\"question\":\"how are you doing\"}"
                             }
                         }
                     ]
                 },
                 {
                     "role": "tool",
-                    "content": "Thanks for asking How are you doing?, I'm doing great fellow friendly AI tool!\n",
+                    "content": "Thanks for asking how are you doing, I'm doing great fellow friendly AI tool!\n",
                     "name": "bob",
-                    "tool_call_id": "call_AZtZBeP4Ofv9CbW8Tiw066Cr"
+                    "tool_call_id": "call_PGLxooO6eBPt3eSEBCMkuWYN"
                 }
             ],
             "temperature": 0,
@@ -969,16 +972,16 @@
         }
     },
     {
-        "time": "2024-06-06T20:21:50.398429-04:00",
+        "time": "2024-06-20T16:58:15.110087-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1001,21 +1004,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
         "content": "Waiting for model response..."
     },
     {
-        "time": "2024-06-06T20:21:50.873677-04:00",
+        "time": "2024-06-20T16:58:15.629792-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1038,21 +1041,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob"
+        "content": "Thanks"
     },
     {
-        "time": "2024-06-06T20:21:50.873906-04:00",
+        "time": "2024-06-20T16:58:15.629968-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1075,21 +1078,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob"
+        "content": "Thanks"
     },
     {
-        "time": "2024-06-06T20:21:50.875164-04:00",
+        "time": "2024-06-20T16:58:15.749206-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1112,21 +1115,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob said:"
+        "content": "Thanks for"
     },
     {
-        "time": "2024-06-06T20:21:50.875259-04:00",
+        "time": "2024-06-20T16:58:15.749324-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1149,21 +1152,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob said: \""
+        "content": "Thanks for asking"
     },
     {
-        "time": "2024-06-06T20:21:50.875299-04:00",
+        "time": "2024-06-20T16:58:15.780062-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1186,21 +1189,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob said: \""
+        "content": "Thanks for asking how are"
     },
     {
-        "time": "2024-06-06T20:21:50.875379-04:00",
+        "time": "2024-06-20T16:58:15.780171-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1223,21 +1226,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob said: \"Thanks for"
+        "content": "Thanks for asking how are you"
     },
     {
-        "time": "2024-06-06T20:21:50.875553-04:00",
+        "time": "2024-06-20T16:58:15.780293-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1260,21 +1263,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob said: \"Thanks for asking"
+        "content": "Thanks for asking how are you doing"
     },
     {
-        "time": "2024-06-06T20:21:50.875607-04:00",
+        "time": "2024-06-20T16:58:15.780335-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1297,21 +1300,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob said: \"Thanks for asking"
+        "content": "Thanks for asking how are you doing"
     },
     {
-        "time": "2024-06-06T20:21:50.945695-04:00",
+        "time": "2024-06-20T16:58:15.780406-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1334,21 +1337,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob said: \"Thanks for asking How are"
+        "content": "Thanks for asking how are you doing, I'm"
     },
     {
-        "time": "2024-06-06T20:21:50.945912-04:00",
+        "time": "2024-06-20T16:58:15.780445-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1371,21 +1374,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob said: \"Thanks for asking How are"
+        "content": "Thanks for asking how are you doing, I'm"
     },
     {
-        "time": "2024-06-06T20:21:50.973355-04:00",
+        "time": "2024-06-20T16:58:15.780477-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1408,21 +1411,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob said: \"Thanks for asking How are you doing?,"
+        "content": "Thanks for asking how are you doing, I'm doing"
     },
     {
-        "time": "2024-06-06T20:21:50.973495-04:00",
+        "time": "2024-06-20T16:58:15.780511-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1445,21 +1448,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob said: \"Thanks for asking How are you doing?,"
+        "content": "Thanks for asking how are you doing, I'm doing great"
     },
     {
-        "time": "2024-06-06T20:21:50.973577-04:00",
+        "time": "2024-06-20T16:58:15.816742-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1482,21 +1485,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob said: \"Thanks for asking How are you doing?, I'm"
+        "content": "Thanks for asking how are you doing, I'm doing great fellow friendly"
     },
     {
-        "time": "2024-06-06T20:21:50.973604-04:00",
+        "time": "2024-06-20T16:58:15.816889-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1519,21 +1522,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob said: \"Thanks for asking How are you doing?, I'm"
+        "content": "Thanks for asking how are you doing, I'm doing great fellow friendly"
     },
     {
-        "time": "2024-06-06T20:21:50.973625-04:00",
+        "time": "2024-06-20T16:58:15.859699-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1556,21 +1559,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob said: \"Thanks for asking How are you doing?, I'm doing"
+        "content": "Thanks for asking how are you doing, I'm doing great fellow friendly AI tool"
     },
     {
-        "time": "2024-06-06T20:21:50.973646-04:00",
+        "time": "2024-06-20T16:58:15.859764-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1593,21 +1596,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob said: \"Thanks for asking How are you doing?, I'm doing great"
+        "content": "Thanks for asking how are you doing, I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-06-06T20:21:50.994229-04:00",
+        "time": "2024-06-20T16:58:15.859784-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1630,21 +1633,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob said: \"Thanks for asking How are you doing?, I'm doing great fellow friendly"
+        "content": "Thanks for asking how are you doing, I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-06-06T20:21:50.994426-04:00",
+        "time": "2024-06-20T16:58:15.859841-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1667,21 +1670,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob said: \"Thanks for asking How are you doing?, I'm doing great fellow friendly"
+        "content": "Thanks for asking how are you doing, I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-06-06T20:21:51.017952-04:00",
+        "time": "2024-06-20T16:58:15.85986-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1704,169 +1707,21 @@
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {},
-        "content": "Bob said: \"Thanks for asking How are you doing?, I'm doing great fellow friendly AI tool"
+        "content": "Thanks for asking how are you doing, I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-06-06T20:21:51.018129-04:00",
+        "time": "2024-06-20T16:58:15.860819-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
-                "id": "testdata/BobAsShell/test.gpt:",
-                "toolMapping": {
-                    "bob": [
-                        {
-                            "reference": "bob",
-                            "toolID": "testdata/BobAsShell/test.gpt:bob"
-                        }
-                    ]
-                },
-                "localTools": {
-                    "": "testdata/BobAsShell/test.gpt:",
-                    "bob": "testdata/BobAsShell/test.gpt:bob"
-                },
-                "source": {
-                    "location": "testdata/BobAsShell/test.gpt",
-                    "lineNo": 1
-                },
-                "workingDir": "testdata/BobAsShell"
-            },
-            "inputContext": null
-        },
-        "type": "callProgress",
-        "chatCompletionId": "1717719713",
-        "usage": {},
-        "content": "Bob said: \"Thanks for asking How are you doing?, I'm doing great fellow friendly AI tool"
-    },
-    {
-        "time": "2024-06-06T20:21:51.020818-04:00",
-        "callContext": {
-            "id": "1717719710",
-            "tool": {
-                "modelName": "gpt-4o-2024-05-13",
-                "internalPrompt": null,
-                "tools": [
-                    "bob"
-                ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
-                "id": "testdata/BobAsShell/test.gpt:",
-                "toolMapping": {
-                    "bob": [
-                        {
-                            "reference": "bob",
-                            "toolID": "testdata/BobAsShell/test.gpt:bob"
-                        }
-                    ]
-                },
-                "localTools": {
-                    "": "testdata/BobAsShell/test.gpt:",
-                    "bob": "testdata/BobAsShell/test.gpt:bob"
-                },
-                "source": {
-                    "location": "testdata/BobAsShell/test.gpt",
-                    "lineNo": 1
-                },
-                "workingDir": "testdata/BobAsShell"
-            },
-            "inputContext": null
-        },
-        "type": "callProgress",
-        "chatCompletionId": "1717719713",
-        "usage": {},
-        "content": "Bob said: \"Thanks for asking How are you doing?, I'm doing great fellow friendly AI tool!\""
-    },
-    {
-        "time": "2024-06-06T20:21:51.020913-04:00",
-        "callContext": {
-            "id": "1717719710",
-            "tool": {
-                "modelName": "gpt-4o-2024-05-13",
-                "internalPrompt": null,
-                "tools": [
-                    "bob"
-                ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
-                "id": "testdata/BobAsShell/test.gpt:",
-                "toolMapping": {
-                    "bob": [
-                        {
-                            "reference": "bob",
-                            "toolID": "testdata/BobAsShell/test.gpt:bob"
-                        }
-                    ]
-                },
-                "localTools": {
-                    "": "testdata/BobAsShell/test.gpt:",
-                    "bob": "testdata/BobAsShell/test.gpt:bob"
-                },
-                "source": {
-                    "location": "testdata/BobAsShell/test.gpt",
-                    "lineNo": 1
-                },
-                "workingDir": "testdata/BobAsShell"
-            },
-            "inputContext": null
-        },
-        "type": "callProgress",
-        "chatCompletionId": "1717719713",
-        "usage": {},
-        "content": "Bob said: \"Thanks for asking How are you doing?, I'm doing great fellow friendly AI tool!\""
-    },
-    {
-        "time": "2024-06-06T20:21:51.020955-04:00",
-        "callContext": {
-            "id": "1717719710",
-            "tool": {
-                "modelName": "gpt-4o-2024-05-13",
-                "internalPrompt": null,
-                "tools": [
-                    "bob"
-                ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
-                "id": "testdata/BobAsShell/test.gpt:",
-                "toolMapping": {
-                    "bob": [
-                        {
-                            "reference": "bob",
-                            "toolID": "testdata/BobAsShell/test.gpt:bob"
-                        }
-                    ]
-                },
-                "localTools": {
-                    "": "testdata/BobAsShell/test.gpt:",
-                    "bob": "testdata/BobAsShell/test.gpt:bob"
-                },
-                "source": {
-                    "location": "testdata/BobAsShell/test.gpt",
-                    "lineNo": 1
-                },
-                "workingDir": "testdata/BobAsShell"
-            },
-            "inputContext": null
-        },
-        "type": "callProgress",
-        "chatCompletionId": "1717719713",
-        "usage": {},
-        "content": "Bob said: \"Thanks for asking How are you doing?, I'm doing great fellow friendly AI tool!\""
-    },
-    {
-        "time": "2024-06-06T20:21:51.02285-04:00",
-        "callContext": {
-            "id": "1717719710",
-            "tool": {
-                "modelName": "gpt-4o-2024-05-13",
-                "internalPrompt": null,
-                "tools": [
-                    "bob"
-                ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1889,37 +1744,37 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1717719713",
+        "chatCompletionId": "1718917098",
         "usage": {
-            "promptTokens": 180,
-            "completionTokens": 21,
-            "totalTokens": 201
+            "promptTokens": 178,
+            "completionTokens": 17,
+            "totalTokens": 195
         },
         "chatResponse": {
             "role": "assistant",
             "content": [
                 {
-                    "text": "Bob said: \"Thanks for asking How are you doing?, I'm doing great fellow friendly AI tool!\""
+                    "text": "Thanks for asking how are you doing, I'm doing great fellow friendly AI tool!"
                 }
             ],
             "usage": {
-                "promptTokens": 180,
-                "completionTokens": 21,
-                "totalTokens": 201
+                "promptTokens": 178,
+                "completionTokens": 17,
+                "totalTokens": 195
             }
         }
     },
     {
-        "time": "2024-06-06T20:21:51.022991-04:00",
+        "time": "2024-06-20T16:58:15.860872-04:00",
         "callContext": {
-            "id": "1717719710",
+            "id": "1718917095",
             "tool": {
                 "modelName": "gpt-4o-2024-05-13",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob how he is doing and let me know exactly what he said.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -1943,10 +1798,10 @@
         },
         "type": "callFinish",
         "usage": {},
-        "content": "Bob said: \"Thanks for asking How are you doing?, I'm doing great fellow friendly AI tool!\""
+        "content": "Thanks for asking how are you doing, I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-06-06T20:21:51.023016-04:00",
+        "time": "2024-06-20T16:58:15.860919-04:00",
         "type": "runFinish",
         "usage": {}
     }
