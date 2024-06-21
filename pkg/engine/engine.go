@@ -165,7 +165,7 @@ func WithToolCategory(ctx context.Context, toolCategory ToolCategory) context.Co
 	return context.WithValue(ctx, toolCategoryKey{}, toolCategory)
 }
 
-func NewContext(ctx context.Context, prg *types.Program, input string) Context {
+func NewContext(ctx context.Context, prg *types.Program, input string) (Context, error) {
 	category, _ := ctx.Value(toolCategoryKey{}).(ToolCategory)
 
 	callCtx := Context{
@@ -178,7 +178,14 @@ func NewContext(ctx context.Context, prg *types.Program, input string) Context {
 		Program: prg,
 		Input:   input,
 	}
-	return callCtx
+
+	agentGroup, err := callCtx.Tool.GetAgents(*prg)
+	if err != nil {
+		return callCtx, err
+	}
+
+	callCtx.AgentGroup = agentGroup
+	return callCtx, nil
 }
 
 func (c *Context) SubCallContext(ctx context.Context, input, toolID, callID string, toolCategory ToolCategory) (Context, error) {
@@ -191,7 +198,7 @@ func (c *Context) SubCallContext(ctx context.Context, input, toolID, callID stri
 		callID = counter.Next()
 	}
 
-	agentGroup, err := c.Tool.GetAgentGroup(c.AgentGroup, toolID)
+	agentGroup, err := c.Tool.GetNextAgentGroup(*c.Program, c.AgentGroup, toolID)
 	if err != nil {
 		return Context{}, err
 	}

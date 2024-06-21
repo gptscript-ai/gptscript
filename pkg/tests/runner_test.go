@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/tests/tester"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/hexops/autogold/v2"
@@ -846,4 +847,34 @@ func TestInput(t *testing.T) {
 	assert.False(t, resp.Done)
 	autogold.Expect("TEST RESULT CALL: 2").Equal(t, resp.Content)
 	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step2"))
+}
+
+func TestSysContext(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip()
+	}
+
+	r := tester.NewRunner(t)
+
+	prg, err := r.Load("")
+	require.NoError(t, err)
+
+	resp, err := r.Chat(context.Background(), nil, prg, nil, "input 1")
+	require.NoError(t, err)
+	r.AssertResponded(t)
+	assert.False(t, resp.Done)
+	autogold.Expect("TEST RESULT CALL: 1").Equal(t, resp.Content)
+	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step1"))
+
+	data, err := os.ReadFile("testdata/TestSysContext/context.json")
+	require.NoError(t, err)
+
+	context := struct {
+		Call engine.CallContext `json:"call"`
+	}{}
+	err = json.Unmarshal(data, &context)
+	require.NoError(t, err)
+
+	require.Len(t, context.Call.AgentGroup, 1)
+	assert.Equal(t, context.Call.AgentGroup[0].Named, "iAmSuperman")
 }

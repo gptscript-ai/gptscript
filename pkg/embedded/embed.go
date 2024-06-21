@@ -3,7 +3,6 @@ package embedded
 import (
 	"io/fs"
 	"os"
-	"strings"
 
 	"github.com/gptscript-ai/gptscript/internal"
 	"github.com/gptscript-ai/gptscript/pkg/cli"
@@ -22,10 +21,11 @@ func Run(opts ...Options) bool {
 	}
 
 	system.SetBinToSelf()
-	if len(os.Args) > 1 && strings.HasPrefix(os.Args[1], "sys.") {
+	if os.Getenv("GPTSCRIPT_EMBEDDED") == "true" {
 		cli.Main()
 		return true
 	}
 
+	_ = os.Setenv("GPTSCRIPT_EMBEDDED", "true")
 	return false
 }
