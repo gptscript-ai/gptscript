@@ -185,6 +185,8 @@ func appendInputAsEnv(env []string, input string) []string {
 	dec := json.NewDecoder(bytes.NewReader([]byte(input)))
 	dec.UseNumber()
 
+	env = appendEnv(env, "GPTSCRIPT_INPUT", input)
+
 	if err := json.Unmarshal([]byte(input), &data); err != nil {
 		// ignore invalid JSON
 		return env
@@ -206,7 +208,6 @@ func appendInputAsEnv(env []string, input string) []string {
 		}
 	}
 
-	env = appendEnv(env, "GPTSCRIPT_INPUT", input)
 	return env
 }
 

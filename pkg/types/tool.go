@@ -120,26 +120,28 @@ func (p Program) SetBlocking() Program {
 type BuiltinFunc func(ctx context.Context, env []string, input string, progress chan<- string) (string, error)
 
 type Parameters struct {
-	Name            string           `json:"name,omitempty"`
-	Description     string           `json:"description,omitempty"`
-	MaxTokens       int              `json:"maxTokens,omitempty"`
-	ModelName       string           `json:"modelName,omitempty"`
-	ModelProvider   bool             `json:"modelProvider,omitempty"`
-	JSONResponse    bool             `json:"jsonResponse,omitempty"`
-	Chat            bool             `json:"chat,omitempty"`
-	Temperature     *float32         `json:"temperature,omitempty"`
-	Cache           *bool            `json:"cache,omitempty"`
-	InternalPrompt  *bool            `json:"internalPrompt"`
-	Arguments       *openapi3.Schema `json:"arguments,omitempty"`
-	Tools           []string         `json:"tools,omitempty"`
-	GlobalTools     []string         `json:"globalTools,omitempty"`
-	GlobalModelName string           `json:"globalModelName,omitempty"`
-	Context         []string         `json:"context,omitempty"`
-	ExportContext   []string         `json:"exportContext,omitempty"`
-	Export          []string         `json:"export,omitempty"`
-	Agents          []string         `json:"agents,omitempty"`
-	Credentials     []string         `json:"credentials,omitempty"`
-	Blocking        bool             `json:"-"`
+	Name               string           `json:"name,omitempty"`
+	Description        string           `json:"description,omitempty"`
+	MaxTokens          int              `json:"maxTokens,omitempty"`
+	ModelName          string           `json:"modelName,omitempty"`
+	ModelProvider      bool             `json:"modelProvider,omitempty"`
+	JSONResponse       bool             `json:"jsonResponse,omitempty"`
+	Chat               bool             `json:"chat,omitempty"`
+	Temperature        *float32         `json:"temperature,omitempty"`
+	Cache              *bool            `json:"cache,omitempty"`
+	InternalPrompt     *bool            `json:"internalPrompt"`
+	Arguments          *openapi3.Schema `json:"arguments,omitempty"`
+	Tools              []string         `json:"tools,omitempty"`
+	GlobalTools        []string         `json:"globalTools,omitempty"`
+	GlobalModelName    string           `json:"globalModelName,omitempty"`
+	Context            []string         `json:"context,omitempty"`
+	ExportContext      []string         `json:"exportContext,omitempty"`
+	Export             []string         `json:"export,omitempty"`
+	Agents             []string         `json:"agents,omitempty"`
+	Credentials        []string         `json:"credentials,omitempty"`
+	InputFilters       []string         `json:"inputFilters,omitempty"`
+	ExportInputFilters []string         `json:"exportInputFilters,omitempty"`
+	Blocking           bool             `json:"-"`
 }
 
 func (p Parameters) ToolRefNames() []string {
@@ -149,7 +151,9 @@ func (p Parameters) ToolRefNames() []string {
 		p.Export,
 		p.ExportContext,
 		p.Context,
-		p.Credentials)
+		p.Credentials,
+		p.InputFilters,
+		p.ExportInputFilters)
 }
 
 type ToolDef struct {
@@ -379,11 +383,17 @@ func (t ToolDef) String() string {
 	if len(t.Parameters.Export) != 0 {
 		_, _ = fmt.Fprintf(buf, "Share Tools: %s\n", strings.Join(t.Parameters.Export, ", "))
 	}
+	if len(t.Parameters.Context) != 0 {
+		_, _ = fmt.Fprintf(buf, "Context: %s\n", strings.Join(t.Parameters.Context, ", "))
+	}
 	if len(t.Parameters.ExportContext) != 0 {
 		_, _ = fmt.Fprintf(buf, "Share Context: %s\n", strings.Join(t.Parameters.ExportContext, ", "))
 	}
-	if len(t.Parameters.Context) != 0 {
-		_, _ = fmt.Fprintf(buf, "Context: %s\n", strings.Join(t.Parameters.Context, ", "))
+	if len(t.Parameters.InputFilters) != 0 {
+		_, _ = fmt.Fprintf(buf, "Input Filters: %s\n", strings.Join(t.Parameters.InputFilters, ", "))
+	}
+	if len(t.Parameters.ExportInputFilters) != 0 {
+		_, _ = fmt.Fprintf(buf, "Share Input Filters: %s\n", strings.Join(t.Parameters.ExportInputFilters, ", "))
 	}
 	if t.Parameters.MaxTokens != 0 {
 		_, _ = fmt.Fprintf(buf, "Max Tokens: %d\n", t.Parameters.MaxTokens)
@@ -469,6 +479,8 @@ func (t Tool) GetExportedTools(prg Program) ([]ToolReference, error) {
 	return result.List()
 }
 
+// GetContextTools returns all tools that are in the context of the tool including all the
+// contexts that are exported by the context tools. This will recurse all exports.
 func (t Tool) GetContextTools(prg Program) ([]ToolReference, error) {
 	result := &toolRefSet{}
 
@@ -480,6 +492,31 @@ func (t Tool) GetContextTools(prg Program) ([]ToolReference, error) {
 	for _, contextRef := range contextRefs {
 		result.AddAll(prg.ToolSet[contextRef.ToolID].GetExportedContext(prg))
 		result.Add(contextRef)
+	}
+
+	return result.List()
+}
+
+func (t Tool) GetInputFilterTools(program Program) ([]ToolReference, error) {
+	result := &toolRefSet{}
+
+	inputFilterRefs, err := t.GetToolRefsFromNames(t.InputFilters)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, inputFilterRef := range inputFilterRefs {
+		result.Add(inputFilterRef)
+	}
+
+	contextRefs, err := t.GetContextTools(program)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, contextRef := range contextRefs {
+		contextTool := program.ToolSet[contextRef.ToolID]
+		result.AddAll(contextTool.GetToolRefsFromNames(contextTool.ExportInputFilters))
 	}
 
 	return result.List()
@@ -657,6 +694,10 @@ func (t Tool) GetInterpreter() string {
 		}
 	}
 	return fields[0]
+}
+
+func (t Tool) IsNoop() bool {
+	return t.Instructions == ""
 }
 
 func (t Tool) IsCommand() bool {

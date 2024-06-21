@@ -822,3 +822,28 @@ func TestAgents(t *testing.T) {
 	autogold.Expect("TEST RESULT CALL: 4").Equal(t, resp.Content)
 	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step1"))
 }
+
+func TestInput(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip()
+	}
+
+	r := tester.NewRunner(t)
+
+	prg, err := r.Load("")
+	require.NoError(t, err)
+
+	resp, err := r.Chat(context.Background(), nil, prg, nil, "You're stupid")
+	require.NoError(t, err)
+	r.AssertResponded(t)
+	assert.False(t, resp.Done)
+	autogold.Expect("TEST RESULT CALL: 1").Equal(t, resp.Content)
+	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step1"))
+
+	resp, err = r.Chat(context.Background(), resp.State, prg, nil, "You're ugly")
+	require.NoError(t, err)
+	r.AssertResponded(t)
+	assert.False(t, resp.Done)
+	autogold.Expect("TEST RESULT CALL: 2").Equal(t, resp.Content)
+	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step2"))
+}

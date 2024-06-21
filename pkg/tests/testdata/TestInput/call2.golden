@@ -1,0 +1,42 @@
+`{
+  "model": "gpt-4o",
+  "internalSystemPrompt": false,
+  "messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "\nTool body"
+        }
+      ],
+      "usage": {}
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "No, You're stupid!\n ha ha ha\n"
+        }
+      ],
+      "usage": {}
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "TEST RESULT CALL: 1"
+        }
+      ],
+      "usage": {}
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "No, You're ugly!\n ha ha ha\n"
+        }
+      ],
+      "usage": {}
+    }
+  ]
+}`

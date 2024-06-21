@@ -29,7 +29,7 @@ func (t *toolRefSet) HasTool(toolID string) bool {
 }
 
 func (t *toolRefSet) AddAll(values []ToolReference, err error) {
-	if t.err != nil {
+	if err != nil {
 		t.err = err
 	}
 	for _, v := range values {

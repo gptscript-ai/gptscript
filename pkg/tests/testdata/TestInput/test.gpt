@@ -1,0 +1,23 @@
+input filter: taunt
+context: exporter
+chat: true
+
+Tool body
+
+---
+name: taunt
+args: foo: this is useless
+#!/bin/bash
+
+echo "No, ${GPTSCRIPT_INPUT}!"
+
+---
+name: exporter
+share input filters: taunt2
+
+---
+name: taunt2
+args: foo: this is useless
+
+#!/bin/bash
+echo "${GPTSCRIPT_INPUT} ha ha ha"
