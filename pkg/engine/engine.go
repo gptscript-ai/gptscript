@@ -10,7 +10,6 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
-	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
@@ -281,11 +280,6 @@ func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 	}
 
 	completion.Messages = addUpdateSystem(ctx, tool, completion.Messages)
-
-	if _, def := system.IsDefaultPrompt(input); tool.Chat && def {
-		// Ignore "default prompts" from chat
-		input = ""
-	}
 
 	if tool.Chat && input == "{}" {
 		input = ""
