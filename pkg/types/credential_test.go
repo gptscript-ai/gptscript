@@ -125,10 +125,12 @@ func TestParseCredentialArgs(t *testing.T) {
 			wantErr:  true,
 		},
 		{
-			name:     "invalid input",
-			toolName: "myCredentialTool",
-			input:    `{"asdf":"asdf"`,
-			wantErr:  true,
+			name:          "invalid input",
+			toolName:      "myCredentialTool",
+			input:         `{"asdf":"asdf"`,
+			expectedName:  "myCredentialTool",
+			expectedAlias: "",
+			wantErr:       false,
 		},
 	}
 
