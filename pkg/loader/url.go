@@ -134,8 +134,7 @@ func loadURL(ctx context.Context, cache *cache.Client, base *source, name string
 func getWithDefaults(req *http.Request) ([]byte, error) {
 	originalPath := req.URL.Path
 
-	// First, try to get the original path as is.
-	// It might be an OpenAPI definition.
+	// First, try to get the original path as is. It might be an OpenAPI definition.
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
