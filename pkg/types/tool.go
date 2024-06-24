@@ -721,6 +721,9 @@ type Repo struct {
 	Name string
 	// The revision of this source
 	Revision string
+
+	// Additional headers to pass when making requests for this repo
+	Headers map[string]string
 }
 
 type ToolSource struct {
