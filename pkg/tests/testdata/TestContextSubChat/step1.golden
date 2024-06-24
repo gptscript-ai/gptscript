@@ -128,7 +128,8 @@
                       ],
                       "usage": {}
                     }
-                  ]
+                  ],
+                  "chat": true
                 }
               },
               "result": "Assistant Response 1 - from chatbot1"

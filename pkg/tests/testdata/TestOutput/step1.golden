@@ -1,6 +1,6 @@
 `{
   "done": false,
-  "content": "CHAT: true CONTENT: Response 1 CONTINUATION: true FINISH: false suffix\n",
+  "content": "CHAT: true CONTENT: Response 1 CONTINUATION: true suffix\n",
   "toolID": "testdata/TestOutput/test.gpt:",
   "state": {
     "continuation": {
@@ -37,10 +37,11 @@
               ],
               "usage": {}
             }
-          ]
+          ],
+          "chat": true
         }
       },
-      "result": "CHAT: true CONTENT: Response 1 CONTINUATION: true FINISH: false suffix\n"
+      "result": "CHAT: true CONTENT: Response 1 CONTINUATION: true suffix\n"
     },
     "continuationToolID": "testdata/TestOutput/test.gpt:"
   }

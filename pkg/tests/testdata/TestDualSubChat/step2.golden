@@ -181,7 +181,8 @@
                     ],
                     "usage": {}
                   }
-                ]
+                ],
+                "chat": true
               }
             },
             "result": "Assistent Response 2 - from chatbot2"

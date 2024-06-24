@@ -37,7 +37,8 @@
               ],
               "usage": {}
             }
-          ]
+          ],
+          "chat": true
         }
       },
       "result": "Assistant Response 3 - from main chat tool"

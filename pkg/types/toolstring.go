@@ -74,7 +74,7 @@ func ToSysDisplayString(id string, args map[string]string) (string, error) {
 		return fmt.Sprintf("Removing `%s`", args["location"]), nil
 	case "sys.write":
 		return fmt.Sprintf("Writing `%s`", args["filename"]), nil
-	case "sys.context", "sys.stat", "sys.getenv", "sys.abort", "sys.chat.finish", "sys.chat.history", "sys.echo", "sys.prompt", "sys.time.now":
+	case "sys.context", "sys.stat", "sys.getenv", "sys.abort", "sys.chat.current", "sys.chat.finish", "sys.chat.history", "sys.echo", "sys.prompt", "sys.time.now":
 		return "", nil
 	default:
 		return "", fmt.Errorf("unknown tool for display string: %s", id)

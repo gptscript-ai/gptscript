@@ -55,7 +55,8 @@
               ],
               "usage": {}
             }
-          ]
+          ],
+          "chat": true
         }
       },
       "result": "TEST RESULT CALL: 2"
