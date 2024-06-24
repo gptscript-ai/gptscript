@@ -330,7 +330,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 
 	// If the user is trying to launch the chat-builder UI, then set up the tool and options here.
 	if r.UI {
-		args = append([]string{env.VarOrDefault("GPTSCRIPT_CHAT_UI_TOOL", "github.com/gptscript-ai/ui@v2")}, args...)
+		args = append([]string{env.VarOrDefault("GPTSCRIPT_CHAT_UI_TOOL", "github.com/gptscript-ai/ui@v0.8.4")}, args...)
 
 		// If args has more than one element, then the user has provided a file.
 		if len(args) > 1 {
