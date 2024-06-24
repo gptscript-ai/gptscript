@@ -348,7 +348,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 					return fmt.Errorf("cannot determine absolute path to script %s: %v", file, err)
 				}
 				gptOpt.Env = append(gptOpt.Env, "SCRIPTS_PATH="+filepath.Dir(absPathToScript))
-				file = filepath.Base(file)
+				file = strings.TrimSuffix(filepath.Base(file), ".gpt")
 			} else {
 				cwd, err := os.Getwd()
 				if err != nil {
