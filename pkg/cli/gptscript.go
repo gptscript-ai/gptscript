@@ -23,6 +23,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/input"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/loader/github"
 	"github.com/gptscript-ai/gptscript/pkg/monitor"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/openai"
@@ -54,25 +55,26 @@ type GPTScript struct {
 	Output         string `usage:"Save output to a file, or - for stdout" short:"o"`
 	EventsStreamTo string `usage:"Stream events to this location, could be a file descriptor/handle (e.g. fd://2), filename, or named pipe (e.g. \\\\.\\pipe\\my-pipe)" name:"events-stream-to"`
 	// Input should not be using GPTSCRIPT_INPUT env var because that is the same value that is set in tool executions
-	Input                string   `usage:"Read input from a file (\"-\" for stdin)" short:"f" env:"GPTSCRIPT_INPUT_FILE"`
-	SubTool              string   `usage:"Use tool of this name, not the first tool in file" local:"true"`
-	Assemble             bool     `usage:"Assemble tool to a single artifact, saved to --output" hidden:"true" local:"true"`
-	ListModels           bool     `usage:"List the models available and exit" local:"true"`
-	ListTools            bool     `usage:"List built-in tools and exit" local:"true"`
-	ListenAddress        string   `usage:"Server listen address" default:"127.0.0.1:0" hidden:"true"`
-	Chdir                string   `usage:"Change current working directory" short:"C"`
-	Daemon               bool     `usage:"Run tool as a daemon" local:"true" hidden:"true"`
-	Ports                string   `usage:"The port range to use for ephemeral daemon ports (ex: 11000-12000)" hidden:"true"`
-	CredentialContext    string   `usage:"Context name in which to store credentials" default:"default"`
-	CredentialOverride   []string `usage:"Credentials to override (ex: --credential-override github.com/example/cred-tool:API_TOKEN=1234)"`
-	ChatState            string   `usage:"The chat state to continue, or null to start a new chat and return the state" local:"true"`
-	ForceChat            bool     `usage:"Force an interactive chat session if even the top level tool is not a chat tool" local:"true"`
-	ForceSequential      bool     `usage:"Force parallel calls to run sequentially" local:"true"`
-	Workspace            string   `usage:"Directory to use for the workspace, if specified it will not be deleted on exit"`
-	UI                   bool     `usage:"Launch the UI" local:"true" name:"ui"`
-	DisableTUI           bool     `usage:"Don't use chat TUI but instead verbose output" local:"true" name:"disable-tui"`
-	SaveChatStateFile    string   `usage:"A file to save the chat state to so that a conversation can be resumed with --chat-state" local:"true"`
-	DefaultModelProvider string   `usage:"Default LLM model provider to use, this will override OpenAI settings"`
+	Input                    string   `usage:"Read input from a file (\"-\" for stdin)" short:"f" env:"GPTSCRIPT_INPUT_FILE"`
+	SubTool                  string   `usage:"Use tool of this name, not the first tool in file" local:"true"`
+	Assemble                 bool     `usage:"Assemble tool to a single artifact, saved to --output" hidden:"true" local:"true"`
+	ListModels               bool     `usage:"List the models available and exit" local:"true"`
+	ListTools                bool     `usage:"List built-in tools and exit" local:"true"`
+	ListenAddress            string   `usage:"Server listen address" default:"127.0.0.1:0" hidden:"true"`
+	Chdir                    string   `usage:"Change current working directory" short:"C"`
+	Daemon                   bool     `usage:"Run tool as a daemon" local:"true" hidden:"true"`
+	Ports                    string   `usage:"The port range to use for ephemeral daemon ports (ex: 11000-12000)" hidden:"true"`
+	CredentialContext        string   `usage:"Context name in which to store credentials" default:"default"`
+	CredentialOverride       []string `usage:"Credentials to override (ex: --credential-override github.com/example/cred-tool:API_TOKEN=1234)"`
+	ChatState                string   `usage:"The chat state to continue, or null to start a new chat and return the state" local:"true"`
+	ForceChat                bool     `usage:"Force an interactive chat session if even the top level tool is not a chat tool" local:"true"`
+	ForceSequential          bool     `usage:"Force parallel calls to run sequentially" local:"true"`
+	Workspace                string   `usage:"Directory to use for the workspace, if specified it will not be deleted on exit"`
+	UI                       bool     `usage:"Launch the UI" local:"true" name:"ui"`
+	DisableTUI               bool     `usage:"Don't use chat TUI but instead verbose output" local:"true" name:"disable-tui"`
+	SaveChatStateFile        string   `usage:"A file to save the chat state to so that a conversation can be resumed with --chat-state" local:"true"`
+	DefaultModelProvider     string   `usage:"Default LLM model provider to use, this will override OpenAI settings"`
+	GithubEnterpriseHostname string   `usage:"The host name for a Github Enterprise instance to enable for remote loading" local:"true"`
 
 	readData []byte
 }
@@ -332,6 +334,10 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 	gptOpt, err := r.NewGPTScriptOpts()
 	if err != nil {
 		return err
+	}
+
+	if r.GithubEnterpriseHostname != "" {
+		loader.AddVSC(github.LoaderForPrefix(r.GithubEnterpriseHostname))
 	}
 
 	// If the user is trying to launch the chat-builder UI, then set up the tool and options here.
