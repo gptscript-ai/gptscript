@@ -4,43 +4,58 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/docker/cli/cli/config/types"
 )
 
-const ctxSeparator = "///"
-
 type CredentialType string
 
 const (
+	ctxSeparator                               = "///"
 	CredentialTypeTool          CredentialType = "tool"
 	CredentialTypeModelProvider CredentialType = "modelProvider"
+	ExistingCredential                         = "GPTSCRIPT_EXISTING_CREDENTIAL"
 )
 
 type Credential struct {
-	Context  string            `json:"context"`
-	ToolName string            `json:"toolName"`
-	Type     CredentialType    `json:"type"`
-	Env      map[string]string `json:"env"`
+	Context      string            `json:"context"`
+	ToolName     string            `json:"toolName"`
+	Type         CredentialType    `json:"type"`
+	Env          map[string]string `json:"env"`
+	ExpiresAt    *time.Time        `json:"expiresAt"`
+	RefreshToken string            `json:"refreshToken"`
+}
+
+func (c Credential) IsExpired() bool {
+	if c.ExpiresAt == nil {
+		return false
+	}
+	return time.Now().After(*c.ExpiresAt)
 }
 
 func (c Credential) toDockerAuthConfig() (types.AuthConfig, error) {
-	env, err := json.Marshal(c.Env)
+	cred, err := json.Marshal(c)
 	if err != nil {
 		return types.AuthConfig{}, err
 	}
 
 	return types.AuthConfig{
 		Username:      string(c.Type),
-		Password:      string(env),
+		Password:      string(cred),
 		ServerAddress: toolNameWithCtx(c.ToolName, c.Context),
 	}, nil
 }
 
 func credentialFromDockerAuthConfig(authCfg types.AuthConfig) (Credential, error) {
-	var env map[string]string
-	if err := json.Unmarshal([]byte(authCfg.Password), &env); err != nil {
-		return Credential{}, err
+	var cred Credential
+	if err := json.Unmarshal([]byte(authCfg.Password), &cred); err != nil || len(cred.Env) == 0 {
+		// Legacy: try unmarshalling into just an env map
+		var env map[string]string
+		if err := json.Unmarshal([]byte(authCfg.Password), &env); err != nil {
+			return Credential{}, err
+		}
+		cred.Env = env
 	}
 
 	// We used to hardcode the username as "gptscript" before CredentialType was introduced, so
@@ -62,10 +77,12 @@ func credentialFromDockerAuthConfig(authCfg types.AuthConfig) (Credential, error
 	}
 
 	return Credential{
-		Context:  ctx,
-		ToolName: tool,
-		Type:     CredentialType(credType),
-		Env:      env,
+		Context:      ctx,
+		ToolName:     tool,
+		Type:         CredentialType(credType),
+		Env:          cred.Env,
+		ExpiresAt:    cred.ExpiresAt,
+		RefreshToken: cred.RefreshToken,
 	}, nil
 }
 
