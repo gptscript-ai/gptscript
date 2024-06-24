@@ -75,6 +75,13 @@ func SysPrompt(ctx context.Context, envs []string, input string, _ chan<- string
 func sysPrompt(ctx context.Context, req types.Prompt) (_ string, err error) {
 	defer context2.GetPauseFuncFromCtx(ctx)()()
 
+	if req.Message != "" && len(req.Fields) == 1 && strings.TrimSpace(req.Fields[0]) == "" {
+		_, _ = fmt.Fprintln(os.Stderr, req.Message)
+		_, _ = fmt.Fprintln(os.Stderr, "Press enter to continue...")
+		_, _ = fmt.Fscanln(os.Stdin)
+		return "", nil
+	}
+
 	if req.Message != "" && len(req.Fields) != 1 {
 		_, _ = fmt.Fprintln(os.Stderr, req.Message)
 	}

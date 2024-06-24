@@ -255,10 +255,10 @@ func ParseCredentialArgs(toolName string, input string) (string, string, map[str
 
 	inputMap := make(map[string]any)
 	if input != "" {
-		err := json.Unmarshal([]byte(input), &inputMap)
-		if err != nil {
-			return "", "", nil, fmt.Errorf("failed to unmarshal input: %w", err)
-		}
+		// Sometimes this function can be called with input that is not a JSON string.
+		// This typically happens during chat mode.
+		// That's why we ignore the error if this fails to unmarshal.
+		_ = json.Unmarshal([]byte(input), &inputMap)
 	}
 
 	fields, err := shlex.Split(toolName)
