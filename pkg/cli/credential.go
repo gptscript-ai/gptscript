@@ -15,6 +15,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	expiresNever   = "never"
+	expiresExpired = "expired"
+)
+
 type Credential struct {
 	root        *GPTScript
 	AllContexts bool `usage:"List credentials for all contexts" local:"true"`
@@ -90,12 +95,11 @@ func (c *Credential) Run(_ *cobra.Command, _ []string) error {
 	}
 
 	for _, cred := range creds {
-		expires := "never"
+		expires := expiresNever
 		if cred.ExpiresAt != nil {
+			expires = expiresExpired
 			if !cred.IsExpired() {
 				expires = time.Until(*cred.ExpiresAt).Truncate(time.Second).String()
-			} else {
-				expires = "expired"
 			}
 		}
 
