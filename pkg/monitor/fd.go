@@ -139,7 +139,7 @@ func (f *fd) event(event Event) {
 	}
 }
 
-func (f *fd) Stop(output string, err error) {
+func (f *fd) Stop(_ context.Context, output string, err error) {
 	e := Event{
 		Event: runner.Event{
 			Time: time.Now(),

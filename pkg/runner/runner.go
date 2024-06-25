@@ -26,7 +26,7 @@ type MonitorFactory interface {
 type Monitor interface {
 	Event(event Event)
 	Pause() func()
-	Stop(output string, err error)
+	Stop(ctx context.Context, output string, err error)
 }
 
 type Options struct {
@@ -162,7 +162,7 @@ func (r *Runner) Chat(ctx context.Context, prevState ChatState, prg types.Progra
 		return resp, err
 	}
 	defer func() {
-		monitor.Stop(resp.Content, err)
+		monitor.Stop(ctx, resp.Content, err)
 	}()
 
 	callCtx, err := engine.NewContext(ctx, &prg, input)
@@ -425,9 +425,7 @@ func (r *Runner) start(callCtx engine.Context, state *State, monitor Monitor, en
 		}
 	}
 
-	var (
-		newState *State
-	)
+	var newState *State
 	callCtx.InputContext, newState, err = r.getContext(callCtx, state, monitor, env, input)
 	if err != nil {
 		return nil, err
@@ -632,9 +630,7 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 			Env:            env,
 		}
 
-		var (
-			contentInput string
-		)
+		var contentInput string
 
 		if state.Continuation != nil && state.Continuation.State != nil {
 			contentInput = state.Continuation.State.Input
@@ -745,9 +741,7 @@ func (r *Runner) newDispatcher(ctx context.Context) dispatcher {
 }
 
 func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string, state *State, toolCategory engine.ToolCategory) (_ *State, callResults []SubCallResult, _ error) {
-	var (
-		resultLock sync.Mutex
-	)
+	var resultLock sync.Mutex
 
 	if state.Continuation != nil {
 		callCtx.LastReturn = state.Continuation

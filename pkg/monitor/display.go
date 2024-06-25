@@ -38,9 +38,7 @@ type Console struct {
 	callLock      sync.Mutex
 }
 
-var (
-	prettyIDCounter int64
-)
+var prettyIDCounter int64
 
 func (c *Console) Start(_ context.Context, prg *types.Program, _ []string, input string) (runner.Monitor, error) {
 	id := counter.Next()
@@ -290,7 +288,7 @@ func (d *display) Event(event runner.Event) {
 	d.dump.Calls[currentIndex] = currentCall
 }
 
-func (d *display) Stop(output string, err error) {
+func (d *display) Stop(_ context.Context, output string, err error) {
 	d.callLock.Lock()
 	defer d.callLock.Unlock()
 
