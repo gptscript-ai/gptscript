@@ -31,13 +31,13 @@ Create a file called `tool.gpt` with the following contents:
 
 ```
 Description: Returns the contents of a webpage.
-Args: url: The URL of the webpage.
+Param: url: The URL of the webpage.
 
 #!/usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/tool.py
 ```
 
 :::tip
-Every arg becomes an environment variable when the tool is invoked. So instead of accepting args using flags like `--size="${size}"`, your program can just read the `size` environment variable.
+Every param becomes an environment variable when the tool is invoked. So instead of accepting params using flags like `--size="${size}"`, your program can just read the `size` environment variable.
 :::
 
 The `GPTSCRIPT_TOOL_DIR` environment variable is automatically populated by GPTScript so that the tool
@@ -57,9 +57,15 @@ Tools: github.com/<user>/<repo name>
 Get the contents of https://github.com
 ```
 
+You can also run the tool directly and set the parameter from the command line using a JSON string:
+
+```bash
+gptscript github.com/<user>/<repo name> '{"url": "https://github.com"}'
+```
+
 ## Sharing Tools
 
-GPTScript is designed to easily export and import tools. Doing this is currently based entirely around the use of GitHub repositories. You can export a tool by creating a GitHub repository and ensureing you have the `tool.gpt` file in the root of the repository. You can then import the tool into a GPTScript by specifying the URL of the repository in the `tools` section of the script. For example, we can leverage the `image-generation` tool by adding the following line to a GPTScript:
+GPTScript is designed to easily export and import tools. Doing this is currently based entirely around the use of GitHub repositories. You can export a tool by creating a GitHub repository and ensuring you have the `tool.gpt` file in the root of the repository. You can then import the tool into a GPTScript by specifying the URL of the repository in the `tools` section of the script. For example, we can leverage the `image-generation` tool by adding the following line to a GPTScript:
 
 ```yaml
 tools: github.com/gptscript-ai/dalle-image-generation
@@ -71,11 +77,11 @@ Generate an image of a city skyline at night.
 
 GPTScript can execute any binary that you ask it to. However, it can also manage the installation of a language runtime and dependencies for you. Currently this is only supported for a few languages. Here are the supported languages and examples of tools written in those languages:
 
-| Language | Example                                                                                                        |
-|----------|----------------------------------------------------------------------------------------------------------------|
-| `Python`   | [Image Generation](https://github.com/gptscript-ai/dalle-image-generation) - Generate images based on a prompt |
-| `Node.js`  | [Vision](https://github.com/gptscript-ai/gpt4-v-vision) - Analyze and interpret images                         |
-| `Golang`   | [Search](https://github.com/gptscript-ai/search) - Use various providers to search the internet                |
+| Language  | Example                                                                                                        |
+|-----------|----------------------------------------------------------------------------------------------------------------|
+| `Python`  | [Image Generation](https://github.com/gptscript-ai/dalle-image-generation) - Generate images based on a prompt |
+| `Node.js` | [Vision](https://github.com/gptscript-ai/gpt4-v-vision) - Analyze and interpret images                         |
+| `Golang`  | [Search](https://github.com/gptscript-ai/search) - Use various providers to search the internet                |
 
 
 ### Automatic Documentation
