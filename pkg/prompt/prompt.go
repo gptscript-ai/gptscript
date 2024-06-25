@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -74,6 +75,17 @@ func SysPrompt(ctx context.Context, envs []string, input string, _ chan<- string
 
 func sysPrompt(ctx context.Context, req types.Prompt) (_ string, err error) {
 	defer context2.GetPauseFuncFromCtx(ctx)()()
+
+	if req.Message != "" && len(req.Fields) == 1 && strings.TrimSpace(req.Fields[0]) == "" {
+		var errs []error
+		_, err := fmt.Fprintln(os.Stderr, req.Message)
+		errs = append(errs, err)
+		_, err = fmt.Fprintln(os.Stderr, "Press enter to continue...")
+		errs = append(errs, err)
+		_, err = fmt.Fscanln(os.Stdin)
+		errs = append(errs, err)
+		return "", errors.Join(errs...)
+	}
 
 	if req.Message != "" && len(req.Fields) != 1 {
 		_, _ = fmt.Fprintln(os.Stderr, req.Message)

@@ -567,7 +567,7 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 				Time:        time.Now(),
 				CallContext: callCtx.GetCallContext(),
 				Type:        EventTypeCallFinish,
-				Content:     getFinishEventContent(*state, callCtx),
+				Content:     getEventContent(*state.Continuation.Result, callCtx),
 			})
 			if callCtx.Tool.Chat {
 				return &State{
@@ -681,7 +681,7 @@ func streamProgress(callCtx *engine.Context, monitor Monitor) (chan<- types.Comp
 					CallContext:      callCtx.GetCallContext(),
 					Type:             EventTypeCallProgress,
 					ChatCompletionID: status.CompletionID,
-					Content:          message.String(),
+					Content:          getEventContent(message.String(), *callCtx),
 				})
 			} else {
 				monitor.Event(Event{
@@ -821,13 +821,13 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 	return state, callResults, nil
 }
 
-func getFinishEventContent(state State, callCtx engine.Context) string {
-	// If it is a credential tool, the finish event contains its output, which is sensitive, so we don't return it.
+func getEventContent(content string, callCtx engine.Context) string {
+	// If it is a credential tool, the progress and finish events may contain its output, which is sensitive, so we don't return it.
 	if callCtx.ToolCategory == engine.CredentialToolCategory {
 		return ""
 	}
 
-	return *state.Continuation.Result
+	return content
 }
 
 func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env []string) ([]string, error) {
