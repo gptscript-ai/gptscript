@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gptscript-ai/broadcaster"
+	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	gserver "github.com/gptscript-ai/gptscript/pkg/server"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -23,16 +24,19 @@ func NewSessionFactory(events *broadcaster.Broadcaster[event]) *SessionFactory {
 
 func (s SessionFactory) Start(ctx context.Context, prg *types.Program, env []string, input string) (runner.Monitor, error) {
 	id := gserver.RunIDFromContext(ctx)
+	category := engine.ToolCategoryFromContext(ctx)
 
-	s.events.C <- event{
-		Event: gserver.Event{
-			Event: runner.Event{
-				Time: time.Now(),
-				Type: runner.EventTypeRunStart,
+	if category == engine.NoCategory {
+		s.events.C <- event{
+			Event: gserver.Event{
+				Event: runner.Event{
+					Time: time.Now(),
+					Type: runner.EventTypeRunStart,
+				},
+				RunID:   id,
+				Program: prg,
 			},
-			RunID:   id,
-			Program: prg,
-		},
+		}
 	}
 
 	return &Session{
@@ -69,7 +73,13 @@ func (s *Session) Event(e runner.Event) {
 	}
 }
 
-func (s *Session) Stop(output string, err error) {
+func (s *Session) Stop(ctx context.Context, output string, err error) {
+	category := engine.ToolCategoryFromContext(ctx)
+
+	if category != engine.NoCategory {
+		return
+	}
+
 	e := event{
 		Event: gserver.Event{
 			Event: runner.Event{

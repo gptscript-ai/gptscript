@@ -165,8 +165,13 @@ func WithToolCategory(ctx context.Context, toolCategory ToolCategory) context.Co
 	return context.WithValue(ctx, toolCategoryKey{}, toolCategory)
 }
 
-func NewContext(ctx context.Context, prg *types.Program, input string) (Context, error) {
+func ToolCategoryFromContext(ctx context.Context) ToolCategory {
 	category, _ := ctx.Value(toolCategoryKey{}).(ToolCategory)
+	return category
+}
+
+func NewContext(ctx context.Context, prg *types.Program, input string) (Context, error) {
+	category := ToolCategoryFromContext(ctx)
 
 	callCtx := Context{
 		commonContext: commonContext{
