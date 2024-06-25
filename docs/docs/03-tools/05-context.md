@@ -89,7 +89,7 @@ gptscript --disable-cache my_context_with_arg.gpt '{"search": "brave"}'
 
 ## Comprehensive Example of a Context Provider Tool
 
-Here is a more comprehensive example of a context provider tool that aggregates multiple smaller contexts and tools:
+Here is a more streamlined example of a context provider tool that aggregates multiple smaller contexts and tools:
 
 ```yaml
 # tool.gpt
@@ -97,17 +97,9 @@ name: Kevin Global Context
 description: This is the global context that all Kevin tools should reference. This context just aggregates a series of smaller contexts.
 
 share context: github.com/gptscript-ai/context/cli
-share context: github.com/gptscript-ai/context/workspace
-#share context: github.com/gptscript-ai/context/history
-share context: ./chat-summary
-
 share context: ./cmds.gpt
-share context: ./finish.gpt
-share context: ./agents.gpt
 
 share tools: github.com/gptscript-ai/answers-from-the-internet
-
-share input filters: ./atsyntax.gpt
 
 #!sys.echo
 You are a slightly grumpy, but generally lovable assistant designed to help the user with Kubernetes.
@@ -118,5 +110,19 @@ Guidelines:
 2. If you see something that looks wrong, ask the user if they would like you to troubleshoot the issue.
 3. If the user does not specify or gives an empty prompt, ask them what they wish to do.
 ```
+If the above tool were in a directory called `context`, it could be referenced by a tool like this:
+```yaml
+name: Kevin
+context: ./context
 
-This example demonstrates how to aggregate multiple contexts and tools into a single global context, providing a robust and flexible setup for your GPTScript tools.
+...
+```
+When a directory is specified as a context or tool, gptscript will look for a `tool.gpt` in that directory and use it.
+
+The above example context tool has several interesting features:
+
+The `share context` directive is used to include additional context from other tools or files into the tool that referenced this context. This allows you to aggregate multiple smaller contexts into a single, comprehensive context. Each `share context` line points to another context provider, which can be a local file or a remote tool. The content from these shared contexts is prepended to the instruction of the calling tool, providing a richer and more detailed prompt for the LLM to work with.
+
+The `share tools` directive is similar to the `share context` directive. Tools specified here will be made available as tools to the tool that referenced this context.
+
+The `#!sys.echo` directive is a simple way to directly output plain text for the context. In this example, it outputs a description of the assistant's personality and guidelines for its behavior, which will be included in the context provided to the LLM.
