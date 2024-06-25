@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/acorn-io/broadcaster"
+	"github.com/gptscript-ai/broadcaster"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	gserver "github.com/gptscript-ai/gptscript/pkg/server"
 	"github.com/gptscript-ai/gptscript/pkg/types"

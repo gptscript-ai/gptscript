@@ -13,8 +13,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/acorn-io/broadcaster"
 	"github.com/google/uuid"
+	"github.com/gptscript-ai/broadcaster"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
