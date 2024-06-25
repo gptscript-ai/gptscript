@@ -3,7 +3,7 @@ package cli
 import (
 	"os"
 
-	"github.com/acorn-io/cmd"
+	"github.com/gptscript-ai/cmd"
 	"github.com/gptscript-ai/gptscript/pkg/daemon"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 )

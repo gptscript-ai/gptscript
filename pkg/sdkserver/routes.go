@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/acorn-io/broadcaster"
+	"github.com/gptscript-ai/broadcaster"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"

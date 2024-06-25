@@ -8,7 +8,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	cmd2 "github.com/acorn-io/cmd"
+	cmd2 "github.com/gptscript-ai/cmd"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"

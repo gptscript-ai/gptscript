@@ -5,8 +5,6 @@ go 1.22.3
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/BurntSushi/locker v0.0.0-20171006230638-a6e239ea1c69
-	github.com/acorn-io/broadcaster v0.0.0-20240105011354-bfadd4a7b45d
-	github.com/acorn-io/cmd v0.0.0-20240404013709-34f690bde37b
 	github.com/adrg/xdg v0.4.0
 	github.com/chzyer/readline v1.5.1
 	github.com/docker/cli v26.0.0+incompatible
@@ -15,8 +13,10 @@ require (
 	github.com/getkin/kin-openapi v0.124.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/google/uuid v1.6.0
+	github.com/gptscript-ai/broadcaster v0.0.0-20240625175512-c43682019b86
 	github.com/gptscript-ai/chat-completion-client v0.0.0-20240531200700-af8e7ecf0379
-	github.com/gptscript-ai/tui v0.0.0-20240618230843-2b5961f3341b
+	github.com/gptscript-ai/cmd v0.0.0-20240625175447-4250b42feb7d
+	github.com/gptscript-ai/tui v0.0.0-20240625175717-1e6eca7a66c1
 	github.com/hexops/autogold/v2 v2.2.1
 	github.com/hexops/valast v1.4.4
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056

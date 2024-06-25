@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/acorn-io/cmd"
 	"github.com/fatih/color"
+	"github.com/gptscript-ai/cmd"
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/auth"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
@@ -84,7 +84,7 @@ func New() *cobra.Command {
 		&Parse{},
 		&Fmt{},
 		&SDKServer{
-			GPTScript: *root,
+			GPTScript: root,
 		},
 	)
 
