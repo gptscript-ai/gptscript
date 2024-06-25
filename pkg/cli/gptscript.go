@@ -84,7 +84,7 @@ func New() *cobra.Command {
 		&Parse{},
 		&Fmt{},
 		&SDKServer{
-			GPTScript: root,
+			GPTScript: *root,
 		},
 	)
 

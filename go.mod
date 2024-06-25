@@ -62,7 +62,7 @@ require (
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/gookit/color v1.5.4 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
-	github.com/gptscript-ai/go-gptscript v0.0.0-20240613214812-8111c2b02d71 // indirect
+	github.com/gptscript-ai/go-gptscript v0.0.0-20240625134437-4b83849794cc // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hexops/autogold v1.3.1 // indirect

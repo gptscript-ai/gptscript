@@ -10,7 +10,7 @@ import (
 )
 
 type SDKServer struct {
-	*GPTScript
+	GPTScript
 }
 
 func (c *SDKServer) Customize(cmd *cobra.Command) {
