@@ -103,6 +103,9 @@ func New(o ...Options) (*GPTScript, error) {
 	if err := opts.Runner.RuntimeManager.SetUpCredentialHelpers(context.Background(), cliCfg, opts.Env); err != nil {
 		return nil, err
 	}
+	if err := opts.Runner.RuntimeManager.EnsureCredentialHelpers(context.Background()); err != nil {
+		return nil, err
+	}
 
 	oaiClient, err := openai.NewClient(credStore, opts.OpenAI, openai.Options{
 		Cache:   cacheClient,
