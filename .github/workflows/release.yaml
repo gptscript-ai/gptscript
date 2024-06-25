@@ -54,3 +54,14 @@ jobs:
           repository: gptscript-ai/node-gptscript
           event-type: release
           client-payload: '{"tag": "${{ github.ref_name }}"}'
+  python-release:
+    needs: release-tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: trigger dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.DISPATCH_PAT }}
+          repository: gptscript-ai/py-gptscript
+          event-type: release
+          client-payload: '{"tag": "${{ github.ref_name }}"}'
