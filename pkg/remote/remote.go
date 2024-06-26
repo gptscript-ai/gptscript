@@ -108,7 +108,7 @@ func (c *Client) clientFromURL(ctx context.Context, apiURL string) (*openai.Clie
 	env := "GPTSCRIPT_PROVIDER_" + env2.ToEnvLike(parsed.Hostname()) + "_API_KEY"
 	key := os.Getenv(env)
 
-	if key == "" {
+	if key == "" && !isLocalhost(apiURL) {
 		var err error
 		key, err = c.retrieveAPIKey(ctx, env, apiURL)
 		if err != nil {
@@ -178,4 +178,9 @@ func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, err
 
 func (c *Client) retrieveAPIKey(ctx context.Context, env, url string) (string, error) {
 	return prompt.GetModelProviderCredential(ctx, c.credStore, url, env, fmt.Sprintf("Please provide your API key for %s", url), append(gcontext.GetEnv(ctx), c.envs...))
+}
+
+func isLocalhost(url string) bool {
+	return strings.HasPrefix(url, "http://localhost") || strings.HasPrefix(url, "http://127.0.0.1") ||
+		strings.HasPrefix(url, "https://localhost") || strings.HasPrefix(url, "https://127.0.0.1")
 }
