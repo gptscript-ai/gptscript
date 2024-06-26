@@ -787,5 +787,5 @@ func FirstSet[T comparable](in ...T) (result T) {
 }
 
 func isAlphaNumeric(s string) bool {
-	return regexp.MustCompile(`^[a-zA-Z0-9_]+$`).MatchString(s)
+	return regexp.MustCompile(`^[a-zA-Z0-9_.]+$`).MatchString(s)
 }
