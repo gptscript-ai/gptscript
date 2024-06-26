@@ -380,7 +380,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 
 	ctx := cmd.Context()
 
-	gptScript, err := gptscript.New(gptOpt)
+	gptScript, err := gptscript.New(ctx, gptOpt)
 	if err != nil {
 		return err
 	}

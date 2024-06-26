@@ -56,7 +56,7 @@ func (e *Eval) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	runner, err := gptscript.New(opts)
+	runner, err := gptscript.New(cmd.Context(), opts)
 	if err != nil {
 		return err
 	}

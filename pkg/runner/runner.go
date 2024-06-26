@@ -873,12 +873,12 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 		// Only try to look up the cred if the tool is on GitHub or has an alias.
 		// If it is a GitHub tool and has an alias, the alias overrides the tool name, so we use it as the credential name.
 		if isGitHubTool(toolName) && credentialAlias == "" {
-			c, exists, err = r.credStore.Get(toolName)
+			c, exists, err = r.credStore.Get(callCtx.Ctx, toolName)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get credentials for tool %s: %w", toolName, err)
 			}
 		} else if credentialAlias != "" {
-			c, exists, err = r.credStore.Get(credentialAlias)
+			c, exists, err = r.credStore.Get(callCtx.Ctx, credentialAlias)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get credentials for tool %s: %w", credentialAlias, err)
 			}
@@ -942,7 +942,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			if (isGitHubTool(toolName) && callCtx.Program.ToolSet[credToolRefs[0].ToolID].Source.Repo != nil) || credentialAlias != "" {
 				if isEmpty {
 					log.Warnf("Not saving empty credential for tool %s", toolName)
-				} else if err := r.credStore.Add(*c); err != nil {
+				} else if err := r.credStore.Add(callCtx.Ctx, *c); err != nil {
 					return nil, fmt.Errorf("failed to add credential for tool %s: %w", toolName, err)
 				}
 			} else {
