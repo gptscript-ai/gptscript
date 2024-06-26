@@ -336,6 +336,11 @@ func SysExec(_ context.Context, env []string, input string, progress chan<- stri
 		}
 		combined = io.MultiWriter(&out, &pw)
 	)
+
+	if envvars, err := getWorkspaceEnvFileContents(env); err == nil {
+		env = append(env, envvars...)
+	}
+
 	cmd.Env = env
 	cmd.Dir = params.Directory
 	cmd.Stdout = combined
@@ -353,6 +358,43 @@ type progressWriter struct {
 func (pw *progressWriter) Write(p []byte) (n int, err error) {
 	pw.out <- string(p)
 	return len(p), nil
+}
+
+func getWorkspaceEnvFileContents(envs []string) ([]string, error) {
+	dir, err := getWorkspaceDir(envs)
+	if err != nil {
+		return nil, err
+	}
+
+	file := filepath.Join(dir, "gptscript.env")
+
+	// Lock the file to prevent concurrent writes from other tool calls.
+	locker.RLock(file)
+	defer locker.RUnlock(file)
+
+	// This is optional, so no errors are returned if the file does not exist.
+	log.Debugf("Reading file %s", file)
+	data, err := os.ReadFile(file)
+	if errors.Is(err, fs.ErrNotExist) {
+		log.Debugf("The file %s does not exist", file)
+		return []string{}, nil
+	} else if err != nil {
+		log.Debugf("Failed to read file %s: %v", file, err.Error())
+		return []string{}, nil
+	}
+
+	lines := strings.Split(string(data), "\n")
+	var envContents []string
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if strings.Contains(line, "=") {
+			envContents = append(envContents, line)
+		}
+	}
+
+	return envContents, nil
+
 }
 
 func getWorkspaceDir(envs []string) (string, error) {
