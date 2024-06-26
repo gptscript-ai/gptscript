@@ -43,36 +43,3 @@ jobs:
         run: |
             $url = "${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}/gptscript-${{ github.ref_name }}-windows-amd64.zip"
             ./wingetcreate.exe update --submit --token "${{ secrets.WINGET_GH_TOKEN }}" --urls $url --version "${{ github.ref_name }}" gptscript-ai.gptscript
-  node-release:
-    needs: release-tag
-    runs-on: ubuntu-latest
-    steps:
-      - name: trigger dispatch
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.DISPATCH_PAT }}
-          repository: gptscript-ai/node-gptscript
-          event-type: release
-          client-payload: '{"tag": "${{ github.ref_name }}"}'
-  python-release:
-    needs: release-tag
-    runs-on: ubuntu-latest
-    steps:
-      - name: trigger dispatch
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.DISPATCH_PAT }}
-          repository: gptscript-ai/py-gptscript
-          event-type: release
-          client-payload: '{"tag": "${{ github.ref_name }}"}'
-  go-release:
-    needs: release-tag
-    runs-on: ubuntu-latest
-    steps:
-      - name: trigger dispatch
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.DISPATCH_PAT }}
-          repository: gptscript-ai/go-gptscript
-          event-type: release
-          client-payload: '{"tag": "${{ github.ref_name }}"}'
