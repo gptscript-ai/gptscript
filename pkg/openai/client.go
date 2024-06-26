@@ -93,7 +93,7 @@ func complete(opts ...Options) (Options, error) {
 	return result, err
 }
 
-func NewClient(credStore credentials.CredentialStore, opts ...Options) (*Client, error) {
+func NewClient(ctx context.Context, credStore credentials.CredentialStore, opts ...Options) (*Client, error) {
 	opt, err := complete(opts...)
 	if err != nil {
 		return nil, err
@@ -101,7 +101,7 @@ func NewClient(credStore credentials.CredentialStore, opts ...Options) (*Client,
 
 	// If the API key is not set, try to get it from the cred store
 	if opt.APIKey == "" && opt.BaseURL == "" {
-		cred, exists, err := credStore.Get(BuiltinCredName)
+		cred, exists, err := credStore.Get(ctx, BuiltinCredName)
 		if err != nil {
 			return nil, err
 		}

@@ -77,7 +77,7 @@ func complete(opts ...Options) Options {
 	return result
 }
 
-func New(o ...Options) (*GPTScript, error) {
+func New(ctx context.Context, o ...Options) (*GPTScript, error) {
 	opts := complete(o...)
 	registry := llm.NewRegistry()
 
@@ -91,11 +91,6 @@ func New(o ...Options) (*GPTScript, error) {
 		return nil, err
 	}
 
-	credStore, err := credentials.NewStore(cliCfg, opts.CredentialContext, cacheClient.CacheDir())
-	if err != nil {
-		return nil, err
-	}
-
 	if opts.Runner.RuntimeManager == nil {
 		opts.Runner.RuntimeManager = runtimes.Default(cacheClient.CacheDir())
 	}
@@ -103,11 +98,13 @@ func New(o ...Options) (*GPTScript, error) {
 	if err := opts.Runner.RuntimeManager.SetUpCredentialHelpers(context.Background(), cliCfg, opts.Env); err != nil {
 		return nil, err
 	}
-	if err := opts.Runner.RuntimeManager.EnsureCredentialHelpers(context.Background()); err != nil {
+
+	credStore, err := credentials.NewStore(cliCfg, opts.Runner.RuntimeManager, opts.CredentialContext, cacheClient.CacheDir())
+	if err != nil {
 		return nil, err
 	}
 
-	oaiClient, err := openai.NewClient(credStore, opts.OpenAI, openai.Options{
+	oaiClient, err := openai.NewClient(ctx, credStore, opts.OpenAI, openai.Options{
 		Cache:   cacheClient,
 		SetSeed: true,
 	})

@@ -116,7 +116,7 @@ func (c *Client) clientFromURL(ctx context.Context, apiURL string) (*openai.Clie
 		}
 	}
 
-	return openai.NewClient(c.credStore, openai.Options{
+	return openai.NewClient(ctx, c.credStore, openai.Options{
 		BaseURL: apiURL,
 		Cache:   c.cache,
 		APIKey:  key,
@@ -163,7 +163,7 @@ func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, err
 		url += "/v1"
 	}
 
-	client, err = openai.NewClient(c.credStore, openai.Options{
+	client, err = openai.NewClient(ctx, c.credStore, openai.Options{
 		BaseURL:  url,
 		Cache:    c.cache,
 		CacheKey: prg.EntryToolID,

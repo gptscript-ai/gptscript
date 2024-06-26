@@ -9,7 +9,7 @@ import (
 )
 
 func GetModelProviderCredential(ctx context.Context, credStore credentials.CredentialStore, credName, env, message string, envs []string) (string, error) {
-	cred, exists, err := credStore.Get(credName)
+	cred, exists, err := credStore.Get(ctx, credName)
 	if err != nil {
 		return "", err
 	}
@@ -25,7 +25,7 @@ func GetModelProviderCredential(ctx context.Context, credStore credentials.Crede
 		}
 
 		k = gjson.Get(result, "key").String()
-		if err := credStore.Add(credentials.Credential{
+		if err := credStore.Add(ctx, credentials.Credential{
 			ToolName: credName,
 			Type:     credentials.CredentialTypeModelProvider,
 			Env: map[string]string{

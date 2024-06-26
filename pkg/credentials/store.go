@@ -1,6 +1,7 @@
 package credentials
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -10,32 +11,38 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/config"
 )
 
+type CredentialBuilder interface {
+	EnsureCredentialHelpers(ctx context.Context) error
+}
+
 type CredentialStore interface {
-	Get(toolName string) (*Credential, bool, error)
-	Add(cred Credential) error
-	Remove(toolName string) error
-	List() ([]Credential, error)
+	Get(ctx context.Context, toolName string) (*Credential, bool, error)
+	Add(ctx context.Context, cred Credential) error
+	Remove(ctx context.Context, toolName string) error
+	List(ctx context.Context) ([]Credential, error)
 }
 
 type Store struct {
 	credCtx        string
+	credBuilder    CredentialBuilder
 	credHelperDirs CredentialHelperDirs
 	cfg            *config.CLIConfig
 }
 
-func NewStore(cfg *config.CLIConfig, credCtx, cacheDir string) (CredentialStore, error) {
+func NewStore(cfg *config.CLIConfig, credentialBuilder CredentialBuilder, credCtx, cacheDir string) (CredentialStore, error) {
 	if err := validateCredentialCtx(credCtx); err != nil {
 		return nil, err
 	}
 	return Store{
 		credCtx:        credCtx,
+		credBuilder:    credentialBuilder,
 		credHelperDirs: GetCredentialHelperDirs(cacheDir),
 		cfg:            cfg,
 	}, nil
 }
 
-func (s Store) Get(toolName string) (*Credential, bool, error) {
-	store, err := s.getStore()
+func (s Store) Get(ctx context.Context, toolName string) (*Credential, bool, error) {
+	store, err := s.getStore(ctx)
 	if err != nil {
 		return nil, false, err
 	}
@@ -57,9 +64,9 @@ func (s Store) Get(toolName string) (*Credential, bool, error) {
 	return &cred, true, nil
 }
 
-func (s Store) Add(cred Credential) error {
+func (s Store) Add(ctx context.Context, cred Credential) error {
 	cred.Context = s.credCtx
-	store, err := s.getStore()
+	store, err := s.getStore(ctx)
 	if err != nil {
 		return err
 	}
@@ -70,16 +77,16 @@ func (s Store) Add(cred Credential) error {
 	return store.Store(auth)
 }
 
-func (s Store) Remove(toolName string) error {
-	store, err := s.getStore()
+func (s Store) Remove(ctx context.Context, toolName string) error {
+	store, err := s.getStore(ctx)
 	if err != nil {
 		return err
 	}
 	return store.Erase(toolNameWithCtx(toolName, s.credCtx))
 }
 
-func (s Store) List() ([]Credential, error) {
-	store, err := s.getStore()
+func (s Store) List(ctx context.Context) ([]Credential, error) {
+	store, err := s.getStore(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -106,17 +113,21 @@ func (s Store) List() ([]Credential, error) {
 	return creds, nil
 }
 
-func (s *Store) getStore() (credentials.Store, error) {
-	return s.getStoreByHelper(config.GPTScriptHelperPrefix + s.cfg.CredentialsStore)
+func (s *Store) getStore(ctx context.Context) (credentials.Store, error) {
+	return s.getStoreByHelper(ctx, config.GPTScriptHelperPrefix+s.cfg.CredentialsStore)
 }
 
-func (s *Store) getStoreByHelper(helper string) (credentials.Store, error) {
+func (s *Store) getStoreByHelper(ctx context.Context, helper string) (credentials.Store, error) {
 	if helper == "" || helper == config.GPTScriptHelperPrefix+"file" {
 		return credentials.NewFileStore(s.cfg), nil
 	}
 
 	// If the helper is referencing one of the credential helper programs, then reference the full path.
 	if strings.HasPrefix(helper, "gptscript-credential-") {
+		if err := s.credBuilder.EnsureCredentialHelpers(ctx); err != nil {
+			return nil, err
+		}
+
 		helper = filepath.Join(s.credHelperDirs.BinDir, helper)
 	}
 
