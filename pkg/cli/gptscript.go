@@ -330,7 +330,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 
 	// If the user is trying to launch the chat-builder UI, then set up the tool and options here.
 	if r.UI {
-		args = append([]string{env.VarOrDefault("GPTSCRIPT_CHAT_UI_TOOL", "github.com/gptscript-ai/ui")}, args...)
+		args = append([]string{uiTool()}, args...)
 
 		// If args has more than one element, then the user has provided a file.
 		if len(args) > 1 {
@@ -492,4 +492,16 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 	}
 
 	return r.PrintOutput(toolInput, s)
+}
+
+// uiTool returns the versioned UI tool reference for the current GPTScript version.
+// For release versions, a reference with a matching release tag is returned.
+// For all other versions, a reference to main is returned.
+func uiTool() string {
+	ref := "github.com/gptscript-ai/ui"
+	if tag := version.Tag; !strings.Contains(tag, "v0.0.0-dev") {
+		ref = fmt.Sprintf("%s@%s", ref, tag)
+	}
+
+	return env.VarOrDefault("GPTSCRIPT_CHAT_UI_TOOL", ref)
 }
