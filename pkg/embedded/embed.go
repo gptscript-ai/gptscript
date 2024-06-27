@@ -15,7 +15,7 @@ type Options struct {
 
 func Run(opts ...Options) bool {
 	for _, opt := range opts {
-		if opt.FS == nil {
+		if opt.FS != nil {
 			internal.FS = opt.FS
 		}
 	}
