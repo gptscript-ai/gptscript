@@ -276,6 +276,9 @@ func toMessages(request types.CompletionRequest, compat bool) (result []openai.C
 		}
 
 		if len(chatMessage.MultiContent) == 1 && chatMessage.MultiContent[0].Type == openai.ChatMessagePartTypeText {
+			if !request.Chat && strings.TrimSpace(chatMessage.MultiContent[0].Text) == "{}" {
+				continue
+			}
 			chatMessage.Content = chatMessage.MultiContent[0].Text
 			chatMessage.MultiContent = nil
 
