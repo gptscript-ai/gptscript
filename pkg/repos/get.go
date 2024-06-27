@@ -127,7 +127,7 @@ func (m *Manager) deferredSetUpCredentialHelpers(ctx context.Context, cliCfg *co
 	}
 
 	// Load the credential helpers repo information.
-	_, repo, _, err := github.Load(ctx, nil, credentialHelpersRepo)
+	_, _, repo, _, err := github.Load(ctx, nil, credentialHelpersRepo)
 	if err != nil {
 		return err
 	}
