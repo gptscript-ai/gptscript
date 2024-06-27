@@ -322,7 +322,7 @@ func TestSubChat(t *testing.T) {
                 "name": "chatbot",
                 "parameters": {
                   "properties": {
-                    "prompt": {
+                    "defaultPromptParameter": {
                       "description": "Prompt to send to the assistant. This may be an instruction or question.",
                       "type": "string"
                     }
@@ -447,7 +447,7 @@ func TestSubChat(t *testing.T) {
                 "name": "chatbot",
                 "parameters": {
                   "properties": {
-                    "prompt": {
+                    "defaultPromptParameter": {
                       "description": "Prompt to send to the assistant. This may be an instruction or question.",
                       "type": "string"
                     }

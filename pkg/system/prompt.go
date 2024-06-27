@@ -24,7 +24,7 @@ You don't move to the next step until you have a result.
 
 // DefaultPromptParameter is used as the key in a json map to indication that we really wanted
 // to just send pure text but the interface required JSON (as that is the fundamental interface of tools in OpenAI)
-var DefaultPromptParameter = "prompt"
+var DefaultPromptParameter = "defaultPromptParameter"
 
 var DefaultToolSchema = openapi3.Schema{
 	Type: &openapi3.Types{"object"},

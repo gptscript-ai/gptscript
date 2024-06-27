@@ -7,7 +7,7 @@
         "name": "subtool",
         "parameters": {
           "properties": {
-            "prompt": {
+            "defaultPromptParameter": {
               "description": "Prompt to send to the tool. This may be an instruction or question.",
               "type": "string"
             }
