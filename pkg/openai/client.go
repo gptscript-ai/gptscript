@@ -300,9 +300,14 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	if messageRequest.Model == "" {
 		messageRequest.Model = c.defaultModel
 	}
+
 	msgs, err := toMessages(messageRequest, !c.setSeed)
 	if err != nil {
 		return nil, err
+	}
+
+	if messageRequest.Chat {
+		msgs = dropMessagesOverCount(messageRequest.MaxTokens, msgs)
 	}
 
 	if len(msgs) == 0 {

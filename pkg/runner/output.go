@@ -41,7 +41,6 @@ func (r *Runner) handleOutput(callCtx engine.Context, monitor Monitor, env []str
 	for _, outputToolRef := range outputToolRefs {
 		inputData, err := json.Marshal(map[string]any{
 			"output":       output,
-			"chatFinish":   chatFinish,
 			"continuation": continuation,
 			"chat":         callCtx.Tool.Chat,
 		})

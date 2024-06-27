@@ -14,6 +14,7 @@ type CompletionRequest struct {
 	Tools                []CompletionTool    `json:"tools,omitempty"`
 	Messages             []CompletionMessage `json:"messages,omitempty"`
 	MaxTokens            int                 `json:"maxTokens,omitempty"`
+	Chat                 bool                `json:"chat,omitempty"`
 	Temperature          *float32            `json:"temperature,omitempty"`
 	JSONResponse         bool                `json:"jsonResponse,omitempty"`
 	Cache                *bool               `json:"cache,omitempty"`

@@ -20,7 +20,6 @@ args: chatFinish: chat finish message
 echo CHAT: ${CHAT}
 echo CONTENT: ${OUTPUT}
 echo CONTINUATION: ${CONTINUATION}
-echo FINISH: ${CHATFINISH}
 
 ---
 name: suffix

@@ -174,7 +174,8 @@
                     ],
                     "usage": {}
                   }
-                ]
+                ],
+                "chat": true
               }
             },
             "result": "Assistant Response 1 - from chatbot1"
@@ -238,7 +239,8 @@
                     ],
                     "usage": {}
                   }
-                ]
+                ],
+                "chat": true
               }
             },
             "result": "Assistent Response 2 - from chatbot2"

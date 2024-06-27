@@ -59,6 +59,7 @@ type CallResult struct {
 type commonContext struct {
 	ID           string                `json:"id"`
 	Tool         types.Tool            `json:"tool"`
+	CurrentAgent types.ToolReference   `json:"currentAgent,omitempty"`
 	AgentGroup   []types.ToolReference `json:"agentGroup,omitempty"`
 	InputContext []InputContext        `json:"inputContext"`
 	ToolCategory ToolCategory          `json:"toolCategory,omitempty"`
@@ -73,10 +74,11 @@ type CallContext struct {
 
 type Context struct {
 	commonContext
-	Ctx        context.Context
-	Parent     *Context
-	LastReturn *Return
-	Program    *types.Program
+	Ctx           context.Context
+	Parent        *Context
+	LastReturn    *Return
+	CurrentReturn *Return
+	Program       *types.Program
 	// Input is saved only so that we can render display text, don't use otherwise
 	Input string
 }
@@ -129,6 +131,18 @@ func (c *Context) ParentID() string {
 	return c.Parent.ID
 }
 
+func (c *Context) CurrentAgent() types.ToolReference {
+	for _, ref := range c.AgentGroup {
+		if ref.ToolID == c.Tool.ID {
+			return ref
+		}
+	}
+	if c.Parent != nil {
+		return c.Parent.CurrentAgent()
+	}
+	return types.ToolReference{}
+}
+
 func (c *Context) GetCallContext() *CallContext {
 	var toolName string
 	if c.Parent != nil {
@@ -143,12 +157,15 @@ func (c *Context) GetCallContext() *CallContext {
 		}
 	}
 
-	return &CallContext{
+	result := &CallContext{
 		commonContext: c.commonContext,
 		ParentID:      c.ParentID(),
 		ToolName:      toolName,
 		DisplayText:   types.ToDisplayText(c.Tool, c.Input),
 	}
+
+	result.CurrentAgent = c.CurrentAgent()
+	return result
 }
 
 func (c *Context) UnmarshalJSON([]byte) error {
@@ -215,10 +232,11 @@ func (c *Context) SubCallContext(ctx context.Context, input, toolID, callID stri
 			AgentGroup:   agentGroup,
 			ToolCategory: toolCategory,
 		},
-		Ctx:     ctx,
-		Parent:  c,
-		Program: c.Program,
-		Input:   input,
+		Ctx:           ctx,
+		Parent:        c,
+		Program:       c.Program,
+		CurrentReturn: c.CurrentReturn,
+		Input:         input,
 	}, nil
 }
 
@@ -270,6 +288,7 @@ func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 		MaxTokens:            tool.Parameters.MaxTokens,
 		JSONResponse:         tool.Parameters.JSONResponse,
 		Cache:                tool.Parameters.Cache,
+		Chat:                 tool.Parameters.Chat,
 		Temperature:          tool.Parameters.Temperature,
 		InternalSystemPrompt: tool.Parameters.InternalPrompt,
 	}

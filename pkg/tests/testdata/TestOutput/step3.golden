@@ -1,6 +1,6 @@
 `{
   "done": true,
-  "content": "CHAT FINISH: CHAT: true CONTENT: Chat Done CONTINUATION: false FINISH: true suffix\n",
+  "content": "CHAT FINISH: CHAT: true CONTENT: Chat Done CONTINUATION: false suffix\n",
   "toolID": "",
   "state": null
 }`

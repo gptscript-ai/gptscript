@@ -413,7 +413,8 @@ func TestSubChat(t *testing.T) {
                     ],
                     "usage": {}
                   }
-                ]
+                ],
+                "chat": true
               }
             },
             "result": "Assistant 1"
@@ -555,7 +556,8 @@ func TestSubChat(t *testing.T) {
                     ],
                     "usage": {}
                   }
-                ]
+                ],
+                "chat": true
               }
             },
             "result": "Assistant 2"
@@ -622,7 +624,8 @@ func TestChat(t *testing.T) {
               ],
               "usage": {}
             }
-          ]
+          ],
+          "chat": true
         }
       },
       "result": "Assistant 1"
@@ -691,7 +694,8 @@ func TestChat(t *testing.T) {
               ],
               "usage": {}
             }
-          ]
+          ],
+          "chat": true
         }
       },
       "result": "Assistant 2"
@@ -866,7 +870,7 @@ func TestOutput(t *testing.T) {
 	require.NoError(t, err)
 	r.AssertResponded(t)
 	assert.False(t, resp.Done)
-	autogold.Expect(`CHAT: true CONTENT: Response 1 CONTINUATION: true FINISH: false suffix
+	autogold.Expect(`CHAT: true CONTENT: Response 1 CONTINUATION: true suffix
 `).Equal(t, resp.Content)
 	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step1"))
 
@@ -877,7 +881,7 @@ func TestOutput(t *testing.T) {
 	require.NoError(t, err)
 	r.AssertResponded(t)
 	assert.False(t, resp.Done)
-	autogold.Expect(`CHAT: true CONTENT: Response 2 CONTINUATION: true FINISH: false suffix
+	autogold.Expect(`CHAT: true CONTENT: Response 2 CONTINUATION: true suffix
 `).Equal(t, resp.Content)
 	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step2"))
 
@@ -890,7 +894,7 @@ func TestOutput(t *testing.T) {
 	require.NoError(t, err)
 	r.AssertResponded(t)
 	assert.True(t, resp.Done)
-	autogold.Expect(`CHAT FINISH: CHAT: true CONTENT: Chat Done CONTINUATION: false FINISH: true suffix
+	autogold.Expect(`CHAT FINISH: CHAT: true CONTENT: Chat Done CONTINUATION: false suffix
 `).Equal(t, resp.Content)
 	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step3"))
 }

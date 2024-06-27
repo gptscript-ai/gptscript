@@ -29,6 +29,7 @@ var SafeTools = map[string]struct{}{
 	"sys.abort":        {},
 	"sys.chat.finish":  {},
 	"sys.chat.history": {},
+	"sys.chat.current": {},
 	"sys.echo":         {},
 	"sys.prompt":       {},
 	"sys.time.now":     {},
@@ -227,6 +228,15 @@ var tools = map[string]types.Tool{
 				Arguments:   types.ObjectSchema(),
 			},
 			BuiltinFunc: SysChatHistory,
+		},
+	},
+	"sys.chat.current": {
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "Retrieves the current chat dialog",
+				Arguments:   types.ObjectSchema(),
+			},
+			BuiltinFunc: SysChatCurrent,
 		},
 	},
 	"sys.context": {
@@ -713,6 +723,28 @@ func writeHistory(ctx *engine.Context) (result []engine.ChatHistoryCall) {
 		})
 	}
 	return
+}
+
+func SysChatCurrent(ctx context.Context, _ []string, _ string, _ chan<- string) (string, error) {
+	engineContext, _ := engine.FromContext(ctx)
+
+	var call any
+	if engineContext != nil && engineContext.CurrentReturn != nil && engineContext.CurrentReturn.State != nil {
+		call = engine.ChatHistoryCall{
+			ID:         engineContext.ID,
+			Tool:       engineContext.Tool,
+			Completion: engineContext.CurrentReturn.State.Completion,
+		}
+	} else {
+		call = map[string]any{}
+	}
+
+	data, err := json.Marshal(call)
+	if err != nil {
+		return invalidArgument("", err), nil
+	}
+
+	return string(data), nil
 }
 
 func SysChatFinish(_ context.Context, _ []string, input string, _ chan<- string) (string, error) {

@@ -55,7 +55,8 @@
               ],
               "usage": {}
             }
-          ]
+          ],
+          "chat": true
         }
       },
       "result": "Assistant Response 6 - from main chat tool resume"

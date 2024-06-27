@@ -199,7 +199,8 @@
                     ],
                     "usage": {}
                   }
-                ]
+                ],
+                "chat": true
               }
             },
             "result": "Assistant 3"

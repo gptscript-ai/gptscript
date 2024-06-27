@@ -559,6 +559,8 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 	}
 
 	for {
+		callCtx.CurrentReturn = state.Continuation
+
 		if state.Continuation.Result != nil && len(state.Continuation.Calls) == 0 && state.SubCallID == "" && state.ResumeInput == nil {
 			progressClose()
 			monitor.Event(Event{

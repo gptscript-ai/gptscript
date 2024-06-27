@@ -37,7 +37,8 @@
               ],
               "usage": {}
             }
-          ]
+          ],
+          "chat": true
         }
       },
       "result": "Assistant Response 3 - from main chat tool"
@@ -169,7 +170,8 @@
                       ],
                       "usage": {}
                     }
-                  ]
+                  ],
+                  "chat": true
                 }
               },
               "result": "Assistant Response 4 - from chatbot1"
