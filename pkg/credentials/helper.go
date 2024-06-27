@@ -2,6 +2,7 @@ package credentials
 
 import (
 	"errors"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -71,9 +72,18 @@ func (h *HelperStore) GetAll() (map[string]types.AuthConfig, error) {
 		contextPieces := strings.Split(ctx, ":")
 		if len(contextPieces) > 1 {
 			possiblePortNumber := contextPieces[len(contextPieces)-1]
-			if regexp.MustCompile(`\d+$`).MatchString(possiblePortNumber) {
+			if regexp.MustCompile(`^\d+$`).MatchString(possiblePortNumber) {
 				// port number confirmed
-				toolName = toolName + ":" + possiblePortNumber
+				toolURL, err := url.Parse(toolName)
+				if err != nil {
+					return nil, err
+				}
+
+				// Save the path so we can put it back after removing it.
+				path := toolURL.Path
+				toolURL.Path = ""
+
+				toolName = toolURL.String() + ":" + possiblePortNumber + path
 				ctx = strings.TrimSuffix(ctx, ":"+possiblePortNumber)
 			}
 		}

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"sort"
 	"strings"
@@ -281,6 +282,10 @@ func ParseCredentialArgs(toolName string, input string) (string, string, map[str
 		}
 		alias = fields[1]
 		fields = fields[2:]
+	}
+
+	if alias != "" && !isAlphaNumeric(alias) {
+		return "", "", nil, fmt.Errorf("credential alias must be alphanumeric")
 	}
 
 	if len(fields) == 0 { // Nothing left, so just return
@@ -779,4 +784,8 @@ func FirstSet[T comparable](in ...T) (result T) {
 		}
 	}
 	return
+}
+
+func isAlphaNumeric(s string) bool {
+	return regexp.MustCompile(`^[a-zA-Z0-9_.]+$`).MatchString(s)
 }
