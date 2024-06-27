@@ -119,7 +119,7 @@ func (m *Manager) deferredSetUpCredentialHelpers(ctx context.Context, cliCfg *co
 		if t, err := time.Parse(time.RFC3339, strings.TrimSpace(string(lastChecked))); err == nil && time.Since(t) < 24*time.Hour {
 			// Make sure the binary still exists, and if it does, return.
 			if _, err := os.Stat(filepath.Join(m.credHelperDirs.BinDir, "gptscript-credential-"+helperName+suffix)); err == nil {
-				log.Debugf("Not checking for new version of credential helper %s, last checked %v", helperName, t)
+				log.Debugf("Credential helper %s up-to-date as of %v, checking for updates after %v", helperName, t, lastChecked.Add(24*time.Hour))
 				return nil
 			}
 		}
