@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/BurntSushi/locker"
 	"github.com/gptscript-ai/gptscript/pkg/config"
@@ -112,8 +113,26 @@ func (m *Manager) deferredSetUpCredentialHelpers(ctx context.Context, cliCfg *co
 	locker.Lock("gptscript-credential-helpers")
 	defer locker.Unlock("gptscript-credential-helpers")
 
+	// Load the last-checked file to make sure we haven't checked the repo in the last 24 hours.
+	lastChecked, err := os.ReadFile(m.credHelperDirs.LastCheckedFile)
+	if err == nil {
+		if t, err := time.Parse(time.RFC3339, strings.TrimSpace(string(lastChecked))); err == nil && time.Since(t) < 24*time.Hour {
+			// Make sure the binary still exists, and if it does, return.
+			if _, err := os.Stat(filepath.Join(m.credHelperDirs.BinDir, "gptscript-credential-"+helperName+suffix)); err == nil {
+				log.Debugf("Not checking for new version of credential helper %s, last checked %v", helperName, t)
+				return nil
+			}
+		}
+	}
+
+	// Load the credential helpers repo information.
 	_, repo, _, err := github.Load(ctx, nil, credentialHelpersRepo)
 	if err != nil {
+		return err
+	}
+
+	// Update the last-checked file.
+	if err := os.WriteFile(m.credHelperDirs.LastCheckedFile, []byte(time.Now().Format(time.RFC3339)), 0644); err != nil {
 		return err
 	}
 
