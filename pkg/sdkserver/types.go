@@ -52,14 +52,15 @@ type toolOrFileRequest struct {
 	cacheOptions  `json:",inline"`
 	openAIOptions `json:",inline"`
 
-	ToolDefs          toolDefs `json:"toolDefs,inline"`
-	SubTool           string   `json:"subTool"`
-	Input             string   `json:"input"`
-	ChatState         string   `json:"chatState"`
-	Workspace         string   `json:"workspace"`
-	Env               []string `json:"env"`
-	CredentialContext string   `json:"credentialContext"`
-	Confirm           bool     `json:"confirm"`
+	ToolDefs           toolDefs `json:"toolDefs,inline"`
+	SubTool            string   `json:"subTool"`
+	Input              string   `json:"input"`
+	ChatState          string   `json:"chatState"`
+	Workspace          string   `json:"workspace"`
+	Env                []string `json:"env"`
+	CredentialContext  string   `json:"credentialContext"`
+	CredentialOverride string   `json:"credentialOverride"`
+	Confirm            bool     `json:"confirm"`
 }
 
 type content struct {
