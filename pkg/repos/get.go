@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -129,6 +130,10 @@ func (m *Manager) deferredSetUpCredentialHelpers(ctx context.Context, cliCfg *co
 	// Load the credential helpers repo information.
 	_, repo, _, err := github.Load(ctx, nil, credentialHelpersRepo)
 	if err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(path.Dir(m.credHelperDirs.LastCheckedFile), 0755); err != nil {
 		return err
 	}
 
