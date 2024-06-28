@@ -179,7 +179,7 @@ To override more than one credential, use `;` as a separator. For example, `tool
 
 `toolA:ENV_VAR_1,ENV_VAR_2`
 
-In this example, `toolA` provides the variables `ENV_VAR_1` and `ENV_VAR_2`, and `toolB` provides the variables `ENV_VAR_3` and `ENV_VAR_4`.
-This will read the values of `ENV_VAR_1` through `ENV_VAR_4` from the current environment and set them for each tool.
+In this example, `toolA` provides the variables `ENV_VAR_1` and `ENV_VAR_2`,
+This will read the values of `ENV_VAR_1` through `ENV_VAR_4` from the current environment and set them for the credential.
 This is a direct mapping of environment variable names. **This is not recommended when overriding credentials for
 multiple tools that use the same environment variable names.**
