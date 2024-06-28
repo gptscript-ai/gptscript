@@ -112,7 +112,12 @@ func (e *Engine) runOpenAPI(tool types.Tool, input string) (*Return, error) {
 	instructions.Path = handlePathParameters(instructions.Path, instructions.PathParameters, input)
 
 	// Parse the URL
-	u, err := url.Parse(instructions.Server + instructions.Path)
+	path, err := url.JoinPath(instructions.Server, instructions.Path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to join server and path: %w", err)
+	}
+
+	u, err := url.Parse(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse server URL %s: %w", instructions.Server+instructions.Path, err)
 	}
