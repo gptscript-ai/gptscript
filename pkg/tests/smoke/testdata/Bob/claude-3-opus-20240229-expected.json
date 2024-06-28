@@ -1,15 +1,15 @@
 [
     {
-        "time": "2024-06-20T17:10:23.193337-04:00",
+        "time": "2024-06-28T10:48:16.036954-04:00",
         "type": "runStart",
         "usage": {}
     },
     {
-        "time": "2024-06-20T17:10:23.19359-04:00",
+        "time": "2024-06-28T10:48:16.037294-04:00",
         "callContext": {
-            "id": "1718917824",
+            "id": "1719586097",
             "tool": {
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -34,55 +34,57 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null
         },
         "type": "callStart",
         "usage": {}
     },
     {
-        "time": "2024-06-20T17:10:24.059514-04:00",
+        "time": "2024-06-28T10:48:17.325263-04:00",
         "type": "runStart",
         "usage": {}
     },
     {
-        "time": "2024-06-20T17:10:24.059807-04:00",
+        "time": "2024-06-28T10:48:17.325584-04:00",
         "callContext": {
-            "id": "1718917825",
+            "id": "1719586098",
             "tool": {
                 "name": "Anthropic Claude3 Model Provider",
                 "description": "Model provider for Anthropic hosted Claude3 models",
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "modelProvider": true,
                 "internalPrompt": null,
                 "credentials": [
-                    "github.com/gptscript-ai/claude3-anthropic-provider/credential"
+                    "github.com/gptscript-ai/credential as github.com/gptscript-ai/claude3-anthropic-provider/credential with \"Please enter your Anthropic API Key\" as message and token as field and \"ANTHROPIC_API_KEY\" as env"
                 ],
                 "instructions": "#!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py",
-                "id": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/d47b232371d18e0254cf7cc5e15a813e7e24a8ad/tool.gpt:Anthropic Claude3 Model Provider",
+                "id": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/dfd21adc6be9fbda34b79a71e661ac0cfb725548/tool.gpt:Anthropic Claude3 Model Provider",
                 "toolMapping": {
-                    "github.com/gptscript-ai/claude3-anthropic-provider/credential": [
+                    "github.com/gptscript-ai/credential as github.com/gptscript-ai/claude3-anthropic-provider/credential with \"Please enter your Anthropic API Key\" as message and token as field and \"ANTHROPIC_API_KEY\" as env": [
                         {
-                            "reference": "github.com/gptscript-ai/claude3-anthropic-provider/credential",
-                            "toolID": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/3b9b9365d469c4c702291f1764537ab5c226c2e0/credential/tool.gpt:claude3-anthropic-credential"
+                            "reference": "github.com/gptscript-ai/credential as github.com/gptscript-ai/claude3-anthropic-provider/credential with \"Please enter your Anthropic API Key\" as message and token as field and \"ANTHROPIC_API_KEY\" as env",
+                            "toolID": "https://raw.githubusercontent.com/gptscript-ai/credential/651dfad6e7cf3a385ef408afa93ce522c10f8508/tool.gpt:token"
                         }
                     ]
                 },
                 "localTools": {
-                    "anthropic claude3 model provider": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/d47b232371d18e0254cf7cc5e15a813e7e24a8ad/tool.gpt:Anthropic Claude3 Model Provider"
+                    "anthropic claude3 model provider": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/dfd21adc6be9fbda34b79a71e661ac0cfb725548/tool.gpt:Anthropic Claude3 Model Provider"
                 },
                 "source": {
-                    "location": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/d47b232371d18e0254cf7cc5e15a813e7e24a8ad/tool.gpt",
+                    "location": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/dfd21adc6be9fbda34b79a71e661ac0cfb725548/tool.gpt",
                     "lineNo": 1,
                     "repo": {
                         "VCS": "git",
                         "Root": "https://github.com/gptscript-ai/claude3-anthropic-provider.git",
                         "Path": "/",
                         "Name": "tool.gpt",
-                        "Revision": "d47b232371d18e0254cf7cc5e15a813e7e24a8ad"
+                        "Revision": "dfd21adc6be9fbda34b79a71e661ac0cfb725548"
                     }
                 },
-                "workingDir": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/d47b232371d18e0254cf7cc5e15a813e7e24a8ad"
+                "workingDir": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/dfd21adc6be9fbda34b79a71e661ac0cfb725548"
             },
+            "currentAgent": {},
             "inputContext": null,
             "toolCategory": "provider",
             "displayText": "Running sys.daemon"
@@ -91,63 +93,64 @@
         "usage": {}
     },
     {
-        "time": "2024-06-20T17:10:25.074481-04:00",
+        "time": "2024-06-28T10:48:18.342475-04:00",
         "callContext": {
-            "id": "1718917825",
+            "id": "1719586098",
             "tool": {
                 "name": "Anthropic Claude3 Model Provider",
                 "description": "Model provider for Anthropic hosted Claude3 models",
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "modelProvider": true,
                 "internalPrompt": null,
                 "credentials": [
-                    "github.com/gptscript-ai/claude3-anthropic-provider/credential"
+                    "github.com/gptscript-ai/credential as github.com/gptscript-ai/claude3-anthropic-provider/credential with \"Please enter your Anthropic API Key\" as message and token as field and \"ANTHROPIC_API_KEY\" as env"
                 ],
                 "instructions": "#!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py",
-                "id": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/d47b232371d18e0254cf7cc5e15a813e7e24a8ad/tool.gpt:Anthropic Claude3 Model Provider",
+                "id": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/dfd21adc6be9fbda34b79a71e661ac0cfb725548/tool.gpt:Anthropic Claude3 Model Provider",
                 "toolMapping": {
-                    "github.com/gptscript-ai/claude3-anthropic-provider/credential": [
+                    "github.com/gptscript-ai/credential as github.com/gptscript-ai/claude3-anthropic-provider/credential with \"Please enter your Anthropic API Key\" as message and token as field and \"ANTHROPIC_API_KEY\" as env": [
                         {
-                            "reference": "github.com/gptscript-ai/claude3-anthropic-provider/credential",
-                            "toolID": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/3b9b9365d469c4c702291f1764537ab5c226c2e0/credential/tool.gpt:claude3-anthropic-credential"
+                            "reference": "github.com/gptscript-ai/credential as github.com/gptscript-ai/claude3-anthropic-provider/credential with \"Please enter your Anthropic API Key\" as message and token as field and \"ANTHROPIC_API_KEY\" as env",
+                            "toolID": "https://raw.githubusercontent.com/gptscript-ai/credential/651dfad6e7cf3a385ef408afa93ce522c10f8508/tool.gpt:token"
                         }
                     ]
                 },
                 "localTools": {
-                    "anthropic claude3 model provider": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/d47b232371d18e0254cf7cc5e15a813e7e24a8ad/tool.gpt:Anthropic Claude3 Model Provider"
+                    "anthropic claude3 model provider": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/dfd21adc6be9fbda34b79a71e661ac0cfb725548/tool.gpt:Anthropic Claude3 Model Provider"
                 },
                 "source": {
-                    "location": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/d47b232371d18e0254cf7cc5e15a813e7e24a8ad/tool.gpt",
+                    "location": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/dfd21adc6be9fbda34b79a71e661ac0cfb725548/tool.gpt",
                     "lineNo": 1,
                     "repo": {
                         "VCS": "git",
                         "Root": "https://github.com/gptscript-ai/claude3-anthropic-provider.git",
                         "Path": "/",
                         "Name": "tool.gpt",
-                        "Revision": "d47b232371d18e0254cf7cc5e15a813e7e24a8ad"
+                        "Revision": "dfd21adc6be9fbda34b79a71e661ac0cfb725548"
                     }
                 },
-                "workingDir": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/d47b232371d18e0254cf7cc5e15a813e7e24a8ad"
+                "workingDir": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/dfd21adc6be9fbda34b79a71e661ac0cfb725548"
             },
+            "currentAgent": {},
             "inputContext": null,
             "toolCategory": "provider",
             "displayText": "Running sys.daemon"
         },
         "type": "callFinish",
         "usage": {},
-        "content": "http://127.0.0.1:11060"
+        "content": "http://127.0.0.1:10961"
     },
     {
-        "time": "2024-06-20T17:10:25.074606-04:00",
+        "time": "2024-06-28T10:48:18.342649-04:00",
         "type": "runFinish",
         "usage": {}
     },
     {
-        "time": "2024-06-20T17:10:25.074685-04:00",
+        "time": "2024-06-28T10:48:18.342718-04:00",
         "callContext": {
-            "id": "1718917824",
+            "id": "1719586097",
             "tool": {
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -172,10 +175,11 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1718917826",
+        "chatCompletionId": "1719586099",
         "usage": {},
         "chatRequest": {
             "model": "claude-3-opus-20240229",
@@ -207,11 +211,11 @@
         }
     },
     {
-        "time": "2024-06-20T17:10:25.075088-04:00",
+        "time": "2024-06-28T10:48:18.343115-04:00",
         "callContext": {
-            "id": "1718917824",
+            "id": "1719586097",
             "tool": {
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -236,19 +240,20 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1718917826",
+        "chatCompletionId": "1719586099",
         "usage": {},
         "content": "Waiting for model response..."
     },
     {
-        "time": "2024-06-20T17:10:33.389627-04:00",
+        "time": "2024-06-28T10:48:21.291497-04:00",
         "callContext": {
-            "id": "1718917824",
+            "id": "1719586097",
             "tool": {
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -273,19 +278,20 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1718917826",
+        "chatCompletionId": "1719586099",
         "usage": {},
         "content": "\u003ctool call\u003e bob -\u003e {\"question\": \"how are you doing\"}"
     },
     {
-        "time": "2024-06-20T17:10:33.389848-04:00",
+        "time": "2024-06-28T10:48:21.291864-04:00",
         "callContext": {
-            "id": "1718917824",
+            "id": "1719586097",
             "tool": {
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -310,10 +316,11 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1718917826",
+        "chatCompletionId": "1719586099",
         "usage": {},
         "chatResponse": {
             "role": "assistant",
@@ -321,7 +328,7 @@
                 {
                     "toolCall": {
                         "index": 0,
-                        "id": "toolu_01EEcv7qDLHDmGAzm15vobxM",
+                        "id": "bob",
                         "function": {
                             "name": "bob",
                             "arguments": "{\"question\": \"how are you doing\"}"
@@ -333,11 +340,11 @@
         }
     },
     {
-        "time": "2024-06-20T17:10:33.389967-04:00",
+        "time": "2024-06-28T10:48:21.291966-04:00",
         "callContext": {
-            "id": "1718917824",
+            "id": "1719586097",
             "tool": {
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -362,10 +369,11 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null
         },
         "toolSubCalls": {
-            "toolu_01EEcv7qDLHDmGAzm15vobxM": {
+            "bob": {
                 "toolID": "testdata/Bob/test.gpt:bob",
                 "input": "{\"question\": \"how are you doing\"}"
             }
@@ -374,13 +382,13 @@
         "usage": {}
     },
     {
-        "time": "2024-06-20T17:10:33.389997-04:00",
+        "time": "2024-06-28T10:48:21.291997-04:00",
         "callContext": {
-            "id": "toolu_01EEcv7qDLHDmGAzm15vobxM",
+            "id": "bob",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -403,22 +411,23 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1718917824"
+            "parentID": "1719586097"
         },
         "type": "callStart",
         "usage": {},
         "content": "{\"question\": \"how are you doing\"}"
     },
     {
-        "time": "2024-06-20T17:10:33.584228-04:00",
+        "time": "2024-06-28T10:48:21.50264-04:00",
         "callContext": {
-            "id": "toolu_01EEcv7qDLHDmGAzm15vobxM",
+            "id": "bob",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -441,12 +450,13 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1718917824"
+            "parentID": "1719586097"
         },
         "type": "callChat",
-        "chatCompletionId": "1718917827",
+        "chatCompletionId": "1719586100",
         "usage": {},
         "chatRequest": {
             "model": "claude-3-opus-20240229",
@@ -464,13 +474,13 @@
         }
     },
     {
-        "time": "2024-06-20T17:10:33.584507-04:00",
+        "time": "2024-06-28T10:48:21.503008-04:00",
         "callContext": {
-            "id": "toolu_01EEcv7qDLHDmGAzm15vobxM",
+            "id": "bob",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -493,23 +503,24 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1718917824"
+            "parentID": "1719586097"
         },
         "type": "callProgress",
-        "chatCompletionId": "1718917827",
+        "chatCompletionId": "1719586100",
         "usage": {},
         "content": "Waiting for model response..."
     },
     {
-        "time": "2024-06-20T17:10:35.540664-04:00",
+        "time": "2024-06-28T10:48:22.875617-04:00",
         "callContext": {
-            "id": "toolu_01EEcv7qDLHDmGAzm15vobxM",
+            "id": "bob",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -532,23 +543,24 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1718917824"
+            "parentID": "1719586097"
         },
         "type": "callProgress",
-        "chatCompletionId": "1718917827",
+        "chatCompletionId": "1719586100",
         "usage": {},
         "content": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-06-20T17:10:35.540967-04:00",
+        "time": "2024-06-28T10:48:22.875964-04:00",
         "callContext": {
-            "id": "toolu_01EEcv7qDLHDmGAzm15vobxM",
+            "id": "bob",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -571,12 +583,13 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1718917824"
+            "parentID": "1719586097"
         },
         "type": "callChat",
-        "chatCompletionId": "1718917827",
+        "chatCompletionId": "1719586100",
         "usage": {},
         "chatResponse": {
             "role": "assistant",
@@ -589,13 +602,13 @@
         }
     },
     {
-        "time": "2024-06-20T17:10:35.541005-04:00",
+        "time": "2024-06-28T10:48:22.876034-04:00",
         "callContext": {
-            "id": "toolu_01EEcv7qDLHDmGAzm15vobxM",
+            "id": "bob",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -618,20 +631,21 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1718917824"
+            "parentID": "1719586097"
         },
         "type": "callFinish",
         "usage": {},
         "content": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-06-20T17:10:35.541033-04:00",
+        "time": "2024-06-28T10:48:22.876064-04:00",
         "callContext": {
-            "id": "1718917824",
+            "id": "1719586097",
             "tool": {
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -656,6 +670,7 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null
         },
         "toolResults": 1,
@@ -663,11 +678,11 @@
         "usage": {}
     },
     {
-        "time": "2024-06-20T17:10:35.71784-04:00",
+        "time": "2024-06-28T10:48:23.086894-04:00",
         "callContext": {
-            "id": "1718917824",
+            "id": "1719586097",
             "tool": {
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -692,10 +707,11 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1718917828",
+        "chatCompletionId": "1719586101",
         "usage": {},
         "chatRequest": {
             "model": "claude-3-opus-20240229",
@@ -709,7 +725,7 @@
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "toolu_01EEcv7qDLHDmGAzm15vobxM",
+                            "id": "bob",
                             "type": "function",
                             "function": {
                                 "name": "bob",
@@ -722,7 +738,7 @@
                     "role": "tool",
                     "content": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!",
                     "name": "bob",
-                    "tool_call_id": "toolu_01EEcv7qDLHDmGAzm15vobxM"
+                    "tool_call_id": "bob"
                 }
             ],
             "temperature": 0,
@@ -747,11 +763,11 @@
         }
     },
     {
-        "time": "2024-06-20T17:10:35.718216-04:00",
+        "time": "2024-06-28T10:48:23.087303-04:00",
         "callContext": {
-            "id": "1718917824",
+            "id": "1719586097",
             "tool": {
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -776,19 +792,20 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1718917828",
+        "chatCompletionId": "1719586101",
         "usage": {},
         "content": "Waiting for model response..."
     },
     {
-        "time": "2024-06-20T17:10:39.50448-04:00",
+        "time": "2024-06-28T10:48:25.243408-04:00",
         "callContext": {
-            "id": "1718917824",
+            "id": "1719586097",
             "tool": {
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -813,19 +830,20 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null
         },
         "type": "callProgress",
-        "chatCompletionId": "1718917828",
+        "chatCompletionId": "1719586101",
         "usage": {},
-        "content": "Bob replied: \"Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!\""
+        "content": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-06-20T17:10:39.504769-04:00",
+        "time": "2024-06-28T10:48:25.243765-04:00",
         "callContext": {
-            "id": "1718917824",
+            "id": "1719586097",
             "tool": {
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -850,27 +868,28 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1718917828",
+        "chatCompletionId": "1719586101",
         "usage": {},
         "chatResponse": {
             "role": "assistant",
             "content": [
                 {
-                    "text": "Bob replied: \"Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!\""
+                    "text": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!"
                 }
             ],
             "usage": {}
         }
     },
     {
-        "time": "2024-06-20T17:10:39.504807-04:00",
+        "time": "2024-06-28T10:48:25.243793-04:00",
         "callContext": {
-            "id": "1718917824",
+            "id": "1719586097",
             "tool": {
-                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider@tool-beta",
+                "modelName": "claude-3-opus-20240229 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -895,14 +914,15 @@
                 },
                 "workingDir": "testdata/Bob"
             },
+            "currentAgent": {},
             "inputContext": null
         },
         "type": "callFinish",
         "usage": {},
-        "content": "Bob replied: \"Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!\""
+        "content": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-06-20T17:10:39.504821-04:00",
+        "time": "2024-06-28T10:48:25.243836-04:00",
         "type": "runFinish",
         "usage": {}
     }
