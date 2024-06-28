@@ -148,10 +148,6 @@ This is useful when working with credential overrides.
 
 ## Credential Overrides (Advanced)
 
-:::note
-The syntax for this will change at some point in the future.
-:::
-
 You can bypass credential tools and stored credentials by setting the `--credential-override` argument (or the
 `GPTSCRIPT_CREDENTIAL_OVERRIDE` environment variable) when running GPTScript. To set up a credential override, you
 need to be aware of which environment variables the credential tool sets. You can find this out by running the
@@ -166,41 +162,24 @@ This can be overridden with a credential alias, i.e. `credential: my-cred-tool.g
 If the credential has an alias, use it instead of the tool name when you specify an override.
 :::
 
-The `--credential-override` argument must be formatted in one of the following three ways:
+The `--credential-override` argument must be formatted in one of the following two ways:
 
 #### 1. Key-Value Pairs
 
-`toolA:ENV_VAR_1=value1,ENV_VAR_2=value2;toolB:ENV_VAR_1=value3,ENV_VAR_2=value4`
+`toolA:ENV_VAR_1=value1,ENV_VAR_2=value2`
 
-In this example, both `toolA` and `toolB` provide the variables `ENV_VAR_1` and `ENV_VAR_2`.
-This will set the environment variables `ENV_VAR_1` and `ENV_VAR_2` to the specific values provided for each tool.
+In this example, both `toolA` provides the variables `ENV_VAR_1` and `ENV_VAR_2`.
+This will set the environment variables `ENV_VAR_1` and `ENV_VAR_2` to the specific values `value1` and `value2`.
+
+:::info
+To override more than one credential, use `;` as a separator. For example, `toolA:ENV_VAR_1=value1;toolB:ENV_VAR_2=value2`.
+:::
 
 #### 2. Environment Variables
 
-`toolA:ENV_VAR_1,ENV_VAR_2;toolB:ENV_VAR_3,ENV_VAR_4`
+`toolA:ENV_VAR_1,ENV_VAR_2`
 
-In this example, `toolA` provides the variables `ENV_VAR_1` and `ENV_VAR_2`, and `toolB` provides the variables `ENV_VAR_3` and `ENV_VAR_4`.
-This will read the values of `ENV_VAR_1` through `ENV_VAR_4` from the current environment and set them for each tool.
+In this example, `toolA` provides the variables `ENV_VAR_1` and `ENV_VAR_2`,
+This will read the values of `ENV_VAR_1` through `ENV_VAR_4` from the current environment and set them for the credential.
 This is a direct mapping of environment variable names. **This is not recommended when overriding credentials for
 multiple tools that use the same environment variable names.**
-
-#### 3. Environment Variable Mapping
-
-`toolA:ENV_VAR_1->TOOL_A_ENV_VAR_1,ENV_VAR_2->TOOL_A_ENV_VAR_2;toolB:ENV_VAR_1->TOOL_B_ENV_VAR_1,ENV_VAR_2->TOOL_B_ENV_VAR_2`
-
-In this example, `toolA` and `toolB` both provide the variables `ENV_VAR_1` and `ENV_VAR_2`.
-This will set the environment variables `ENV_VAR_1` and `ENV_VAR_2` to the values of `TOOL_A_ENV_VAR_1` and
-`TOOL_A_ENV_VAR_2` from the current environment for `toolA`. The same applies for `toolB`, but with the values of
-`TOOL_B_ENV_VAR_1` and `TOOL_B_ENV_VAR_2`. This is a mapping of one environment variable name to another.
-
-### Real-World Example
-
-Here is an example of how you can use a credential override to skip running the credential tool for the Brave Search tool:
-
-```bash
-gptscript --credential-override "github.com/gptscript-ai/search/brave-credential:GPTSCRIPT_BRAVE_SEARCH_TOKEN->MY_BRAVE_SEARCH_TOKEN" github.com/gptscript-ai/search/brave '{"q": "cute cats"}'
-```
-
-If you run this command, rather than being prompted by the credential tool for your token, GPTScript will read the contents
-of the environment variable `MY_BRAVE_SEARCH_TOKEN` and set that as the variable `GPTSCRIPT_BRAVE_SEARCH_TOKEN` when it runs
-the script.
