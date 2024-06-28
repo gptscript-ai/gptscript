@@ -175,10 +175,10 @@ func (g *GPTScript) getEnv(env []string) ([]string, error) {
 	if err := os.MkdirAll(g.WorkspacePath, 0700); err != nil {
 		return nil, err
 	}
-	return slices.Concat(g.ExtraEnv, []string{
+	return slices.Concat(g.ExtraEnv, env, []string{
 		fmt.Sprintf("GPTSCRIPT_WORKSPACE_DIR=%s", g.WorkspacePath),
 		fmt.Sprintf("GPTSCRIPT_WORKSPACE_ID=%s", hash.ID(g.WorkspacePath)),
-	}, env), nil
+	}), nil
 }
 
 func (g *GPTScript) Chat(ctx context.Context, prevState runner.ChatState, prg types.Program, envs []string, input string) (runner.ChatResponse, error) {
