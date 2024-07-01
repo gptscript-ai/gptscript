@@ -109,6 +109,7 @@ func New() *cobra.Command {
 					newFlag := pflag.Flag{
 						Name:  f.Name,
 						Usage: f.Usage,
+						Value: f.Value,
 					}
 
 					if f.Name != "credential-context" {
