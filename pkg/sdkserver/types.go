@@ -59,7 +59,7 @@ type toolOrFileRequest struct {
 	Workspace           string   `json:"workspace"`
 	Env                 []string `json:"env"`
 	CredentialContext   string   `json:"credentialContext"`
-	CredentialOverrides []string `json:"credentialOverride"`
+	CredentialOverrides []string `json:"credentialOverrides"`
 	Confirm             bool     `json:"confirm"`
 }
 
