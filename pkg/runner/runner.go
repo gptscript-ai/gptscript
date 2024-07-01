@@ -30,13 +30,13 @@ type Monitor interface {
 }
 
 type Options struct {
-	MonitorFactory     MonitorFactory        `usage:"-"`
-	RuntimeManager     engine.RuntimeManager `usage:"-"`
-	StartPort          int64                 `usage:"-"`
-	EndPort            int64                 `usage:"-"`
-	CredentialOverride string                `usage:"-"`
-	Sequential         bool                  `usage:"-"`
-	Authorizer         AuthorizerFunc        `usage:"-"`
+	MonitorFactory      MonitorFactory        `usage:"-"`
+	RuntimeManager      engine.RuntimeManager `usage:"-"`
+	StartPort           int64                 `usage:"-"`
+	EndPort             int64                 `usage:"-"`
+	CredentialOverrides []string              `usage:"-"`
+	Sequential          bool                  `usage:"-"`
+	Authorizer          AuthorizerFunc        `usage:"-"`
 }
 
 type AuthorizerResponse struct {
@@ -58,10 +58,12 @@ func Complete(opts ...Options) (result Options) {
 		result.RuntimeManager = types.FirstSet(opt.RuntimeManager, result.RuntimeManager)
 		result.StartPort = types.FirstSet(opt.StartPort, result.StartPort)
 		result.EndPort = types.FirstSet(opt.EndPort, result.EndPort)
-		result.CredentialOverride = types.FirstSet(opt.CredentialOverride, result.CredentialOverride)
 		result.Sequential = types.FirstSet(opt.Sequential, result.Sequential)
 		if opt.Authorizer != nil {
 			result.Authorizer = opt.Authorizer
+		}
+		if opt.CredentialOverrides != nil {
+			result.CredentialOverrides = append(result.CredentialOverrides, opt.CredentialOverrides...)
 		}
 	}
 	return
@@ -90,7 +92,7 @@ type Runner struct {
 	factory        MonitorFactory
 	runtimeManager engine.RuntimeManager
 	credMutex      sync.Mutex
-	credOverrides  string
+	credOverrides  []string
 	credStore      credentials.CredentialStore
 	sequential     bool
 }
@@ -103,7 +105,7 @@ func New(client engine.Model, credStore credentials.CredentialStore, opts ...Opt
 		factory:        opt.MonitorFactory,
 		runtimeManager: opt.RuntimeManager,
 		credMutex:      sync.Mutex{},
-		credOverrides:  opt.CredentialOverride,
+		credOverrides:  opt.CredentialOverrides,
 		credStore:      credStore,
 		sequential:     opt.Sequential,
 		auth:           opt.Authorizer,
@@ -836,7 +838,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 		credOverrides map[string]map[string]string
 		err           error
 	)
-	if r.credOverrides != "" {
+	if r.credOverrides != nil {
 		credOverrides, err = parseCredentialOverrides(r.credOverrides)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse credential overrides: %w", err)

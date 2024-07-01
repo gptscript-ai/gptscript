@@ -200,8 +200,8 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 		CredentialContext: reqObject.CredentialContext,
 		Runner: runner.Options{
 			// Set the monitor factory so that we can get events from the server.
-			MonitorFactory:     NewSessionFactory(s.events),
-			CredentialOverride: reqObject.CredentialOverride,
+			MonitorFactory:      NewSessionFactory(s.events),
+			CredentialOverrides: reqObject.CredentialOverrides,
 		},
 	}
 
