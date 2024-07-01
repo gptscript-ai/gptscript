@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/user"
 	"path/filepath"
 	"slices"
+	"strings"
 
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
@@ -167,7 +169,7 @@ func (g *GPTScript) getEnv(env []string) ([]string, error) {
 		}
 	} else if !filepath.IsAbs(g.WorkspacePath) {
 		var err error
-		g.WorkspacePath, err = filepath.Abs(g.WorkspacePath)
+		g.WorkspacePath, err = makeAbsolute(g.WorkspacePath)
 		if err != nil {
 			return nil, err
 		}
@@ -179,6 +181,18 @@ func (g *GPTScript) getEnv(env []string) ([]string, error) {
 		fmt.Sprintf("GPTSCRIPT_WORKSPACE_DIR=%s", g.WorkspacePath),
 		fmt.Sprintf("GPTSCRIPT_WORKSPACE_ID=%s", hash.ID(g.WorkspacePath)),
 	}), nil
+}
+
+func makeAbsolute(path string) (string, error) {
+	if strings.HasPrefix(path, "~"+string(filepath.Separator)) {
+		usr, err := user.Current()
+		if err != nil {
+			return "", err
+		}
+
+		return filepath.Join(usr.HomeDir, path[2:]), nil
+	}
+	return filepath.Abs(path)
 }
 
 func (g *GPTScript) Chat(ctx context.Context, prevState runner.ChatState, prg types.Program, envs []string, input string) (runner.ChatResponse, error) {
