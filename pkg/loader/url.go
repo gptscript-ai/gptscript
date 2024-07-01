@@ -14,7 +14,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
-type VCSLookup func(context.Context, *cache.Client, string) (string, *types.Repo, bool, error)
+type VCSLookup func(context.Context, *cache.Client, string) (string, string, *types.Repo, bool, error)
 
 var vcsLookups []VCSLookup
 
@@ -35,10 +35,11 @@ type cacheValue struct {
 
 func loadURL(ctx context.Context, cache *cache.Client, base *source, name string) (*source, bool, error) {
 	var (
-		repo      *types.Repo
-		url       = name
-		relative  = strings.HasPrefix(name, ".") || !strings.Contains(name, "/")
-		cachedKey = cacheKey{
+		repo        *types.Repo
+		url         = name
+		bearerToken = ""
+		relative    = strings.HasPrefix(name, ".") || !strings.Contains(name, "/")
+		cachedKey   = cacheKey{
 			Name: name,
 			Path: base.Path,
 			Repo: base.Repo,
@@ -67,12 +68,13 @@ func loadURL(ctx context.Context, cache *cache.Client, base *source, name string
 
 	if repo == nil || !relative {
 		for _, vcs := range vcsLookups {
-			newURL, newRepo, ok, err := vcs(ctx, cache, name)
+			newURL, newBearer, newRepo, ok, err := vcs(ctx, cache, name)
 			if err != nil {
 				return nil, false, err
 			} else if ok {
 				repo = newRepo
 				url = newURL
+				bearerToken = newBearer
 				break
 			}
 		}
@@ -103,6 +105,10 @@ func loadURL(ctx context.Context, cache *cache.Client, base *source, name string
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, false, err
+	}
+
+	if bearerToken != "" {
+		req.Header.Set("Authorization", "Bearer "+bearerToken)
 	}
 
 	data, err := getWithDefaults(req)

@@ -88,9 +88,9 @@ func getCommit(ctx context.Context, account, repo, ref string) (string, error) {
 	return commit.SHA, nil
 }
 
-func Load(ctx context.Context, _ *cache.Client, urlName string) (string, *types.Repo, bool, error) {
+func Load(ctx context.Context, _ *cache.Client, urlName string) (string, string, *types.Repo, bool, error) {
 	if !strings.HasPrefix(urlName, GithubPrefix) {
-		return "", nil, false, nil
+		return "", "", nil, false, nil
 	}
 
 	url, ref, _ := strings.Cut(urlName, "@")
@@ -101,7 +101,7 @@ func Load(ctx context.Context, _ *cache.Client, urlName string) (string, *types.
 	parts := strings.Split(url, "/")
 	// Must be at least 3 parts github.com/ACCOUNT/REPO[/FILE]
 	if len(parts) < 3 {
-		return "", nil, false, nil
+		return "", "", nil, false, nil
 	}
 
 	account, repo := parts[1], parts[2]
@@ -109,7 +109,7 @@ func Load(ctx context.Context, _ *cache.Client, urlName string) (string, *types.
 
 	ref, err := getCommit(ctx, account, repo, ref)
 	if err != nil {
-		return "", nil, false, err
+		return "", "", nil, false, err
 	}
 
 	downloadURL := fmt.Sprintf(githubDownloadURL, account, repo, ref, path)
@@ -141,7 +141,7 @@ func Load(ctx context.Context, _ *cache.Client, urlName string) (string, *types.
 		path = testPath
 	}
 
-	return downloadURL, &types.Repo{
+	return downloadURL, githubAuthToken, &types.Repo{
 		VCS:      "git",
 		Root:     fmt.Sprintf(githubRepoURL, account, repo),
 		Path:     gpath.Dir(path),
