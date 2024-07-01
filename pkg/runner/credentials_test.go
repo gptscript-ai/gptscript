@@ -11,13 +11,18 @@ func TestParseCredentialOverrides(t *testing.T) {
 	cases := []struct {
 		name      string
 		envs      map[string]string
-		in        string
+		in        []string
 		out       map[string]map[string]string
 		expectErr bool
 	}{
 		{
+			name: "nil",
+			in:   nil,
+			out:  map[string]map[string]string{},
+		},
+		{
 			name:      "empty",
-			in:        "",
+			in:        []string{""},
 			expectErr: true,
 		},
 		{
@@ -25,7 +30,7 @@ func TestParseCredentialOverrides(t *testing.T) {
 			envs: map[string]string{
 				"ENV1": "VALUE1",
 			},
-			in: "cred1:ENV1",
+			in: []string{"cred1:ENV1"},
 			out: map[string]map[string]string{
 				"cred1": {
 					"ENV1": "VALUE1",
@@ -38,7 +43,7 @@ func TestParseCredentialOverrides(t *testing.T) {
 				"ENV1": "VALUE1",
 				"ENV2": "VALUE2",
 			},
-			in: "cred1:ENV1,ENV2",
+			in: []string{"cred1:ENV1,ENV2"},
 			out: map[string]map[string]string{
 				"cred1": {
 					"ENV1": "VALUE1",
@@ -52,7 +57,7 @@ func TestParseCredentialOverrides(t *testing.T) {
 				"ENV1": "VALUE1",
 				"ENV2": "VALUE2",
 			},
-			in: "cred1:ENV1=OTHERVALUE1,ENV2=OTHERVALUE2",
+			in: []string{"cred1:ENV1=OTHERVALUE1,ENV2=OTHERVALUE2"},
 			out: map[string]map[string]string{
 				"cred1": {
 					"ENV1": "OTHERVALUE1",
@@ -66,7 +71,7 @@ func TestParseCredentialOverrides(t *testing.T) {
 				"ENV1": "VALUE1",
 				"ENV2": "VALUE2",
 			},
-			in: "cred1:ENV1,ENV2;cred2:ENV1,ENV2",
+			in: []string{"cred1:ENV1,ENV2", "cred2:ENV1,ENV2"},
 			out: map[string]map[string]string{
 				"cred1": {
 					"ENV1": "VALUE1",
@@ -84,7 +89,7 @@ func TestParseCredentialOverrides(t *testing.T) {
 				"ENV1": "VALUE1",
 				"ENV2": "VALUE2",
 			},
-			in: "cred1:ENV1=OTHERVALUE1,ENV2=OTHERVALUE2;cred2:ENV1=OTHERVALUE3,ENV2=OTHERVALUE4",
+			in: []string{"cred1:ENV1=OTHERVALUE1,ENV2=OTHERVALUE2", "cred2:ENV1=OTHERVALUE3,ENV2=OTHERVALUE4"},
 			out: map[string]map[string]string{
 				"cred1": {
 					"ENV1": "OTHERVALUE1",
@@ -98,7 +103,7 @@ func TestParseCredentialOverrides(t *testing.T) {
 		},
 		{
 			name:      "invalid format",
-			in:        "cred1=ENV1,ENV2",
+			in:        []string{"cred1=ENV1,ENV2"},
 			expectErr: true,
 		},
 	}

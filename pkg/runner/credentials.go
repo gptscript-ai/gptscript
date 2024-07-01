@@ -8,8 +8,8 @@ import (
 
 // parseCredentialOverrides parses a string of credential overrides that the user provided as a command line arg.
 // The format of credential overrides can be one of two things:
-// cred1:ENV1,ENV2;cred2:ENV1,ENV2 (direct mapping of environment variables)
-// cred1:ENV1=VALUE1,ENV2=VALUE2;cred2:ENV1=VALUE1,ENV2=VALUE2 (key-value pairs)
+// cred1:ENV1,ENV2 (direct mapping of environment variables)
+// cred1:ENV1=VALUE1,ENV2=VALUE2 (key-value pairs)
 //
 // This function turns it into a map[string]map[string]string like this:
 //
@@ -17,16 +17,12 @@ import (
 //	  "cred1": {
 //	    "ENV1": "VALUE1",
 //	    "ENV2": "VALUE2",
-//	  },
-//	  "cred2": {
-//	    "ENV1": "VALUE1",
-//	    "ENV2": "VALUE2",
-//	  },
+//	  }
 //	}
-func parseCredentialOverrides(override string) (map[string]map[string]string, error) {
+func parseCredentialOverrides(overrides []string) (map[string]map[string]string, error) {
 	credentialOverrides := make(map[string]map[string]string)
 
-	for _, o := range strings.Split(override, ";") {
+	for _, o := range overrides {
 		credName, envs, found := strings.Cut(o, ":")
 		if !found {
 			return nil, fmt.Errorf("invalid credential override: %s", o)

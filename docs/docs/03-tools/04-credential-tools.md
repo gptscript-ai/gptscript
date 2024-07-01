@@ -153,6 +153,8 @@ You can bypass credential tools and stored credentials by setting the `--credent
 need to be aware of which environment variables the credential tool sets. You can find this out by running the
 `gptscript credential --show-env-vars` command.
 
+To override multiple credentials, specify the `--credential-override` argument multiple times.
+
 ### Format
 
 :::info
@@ -170,10 +172,6 @@ The `--credential-override` argument must be formatted in one of the following t
 
 In this example, both `toolA` provides the variables `ENV_VAR_1` and `ENV_VAR_2`.
 This will set the environment variables `ENV_VAR_1` and `ENV_VAR_2` to the specific values `value1` and `value2`.
-
-:::info
-To override more than one credential, use `;` as a separator. For example, `toolA:ENV_VAR_1=value1;toolB:ENV_VAR_2=value2`.
-:::
 
 #### 2. Environment Variables
 
