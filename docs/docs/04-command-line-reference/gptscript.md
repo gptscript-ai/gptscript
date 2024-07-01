@@ -19,7 +19,7 @@ gptscript [flags] PROGRAM_FILE [INPUT...]
       --config string                 Path to GPTScript config file ($GPTSCRIPT_CONFIG)
       --confirm                       Prompt before running potentially dangerous commands ($GPTSCRIPT_CONFIRM)
       --credential-context string     Context name in which to store credentials ($GPTSCRIPT_CREDENTIAL_CONTEXT) (default "default")
-      --credential-override string    Credentials to override (ex: --credential-override github.com/example/cred-tool:API_TOKEN=1234) ($GPTSCRIPT_CREDENTIAL_OVERRIDE)
+      --credential-override strings   Credentials to override (ex: --credential-override github.com/example/cred-tool:API_TOKEN=1234) ($GPTSCRIPT_CREDENTIAL_OVERRIDE)
       --debug                         Enable debug logging ($GPTSCRIPT_DEBUG)
       --debug-messages                Enable logging of chat completion calls ($GPTSCRIPT_DEBUG_MESSAGES)
       --default-model string          Default LLM model to use ($GPTSCRIPT_DEFAULT_MODEL) (default "gpt-4o")
