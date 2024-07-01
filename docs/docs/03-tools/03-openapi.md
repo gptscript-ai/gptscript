@@ -54,12 +54,8 @@ OAuth and OIDC schemes will be ignored.
 GPTScript will look at the `security` defined on the operation (or defined globally, if it is not defined on the operation) before it makes the request.
 It will set the necessary headers, cookies, or query parameters based on the corresponding security scheme.
 
-Environment variables must be set for each security scheme that will be used by the operation.
-`<HOSTNAME>` is the hostname of the server, but all caps, and with dashes (`-`) and dots (`.`) replaced with underscores (`_`).
-`<SCHEME NAME>` is the name of the security scheme, but all caps, and with dashes (`-`) and dots (`.`) replaced with underscores (`_`).
-
-- For `apiKey`-type and `http`-type with `bearer` scheme, the environment variable is `GPTSCRIPT_<HOSTNAME>_<SCHEME NAME>`
-- For `http`-type with `basic` scheme, the environment variables are `GPTSCRIPT_<HOSTNAME>_<SCHEME NAME>_USERNAME` and `GPTSCRIPT_<HOSTNAME>_<SCHEME NAME>_PASSWORD`
+When internally generating the tool for the operation with a supported security scheme, GPTScript will include a credential tool.
+This tool will prompt the user to enter their credentials. This will make the key available to GPTScript during the tool's execution.
 
 #### Example
 
@@ -85,10 +81,10 @@ security:
 ```
 
 In this example, we have two security schemes, and both are defined as the defaults on the global level.
-They are separate entries in the global `security` array, so they are treated as a logical OR, and GPTScript will only
-need the environment variable for one or the other to make the request.
+They are separate entries in the global `security` array, so they are treated as a logical OR, and GPTScript will prompt
+the user to enter the credential for the first one (basic auth).
 
-When put into the same entry, they would be a logical AND, and the environment variables for both would be required.
+When put into the same entry, they would be a logical AND, and both would be required.
 It would look like this:
 
 ```yaml
@@ -97,10 +93,7 @@ security:
     MyAPIKey: []
 ```
 
-The environment variable names are as follows:
-
-- `GPTSCRIPT_API_EXAMPLE_COM_MYBASIC_USERNAME` and `GPTSCRIPT_API_EXAMPLE_COM_MYBASIC_PASSWORD` for basic auth
-- `GPTSCRIPT_API_EXAMPLE_COM_MYAPIKEY` for the API key
+In this case, GPTScript will prompt the user for both the basic auth credentials and the API key.
 
 ### 2. Bearer token for server
 
