@@ -53,3 +53,8 @@ This tells the LLM (by way of a [system message](https://platform.openai.com/doc
 
 This context also automatically shares the `sys.ls`, `sys.read`, and `sys.write` tools with the tool that is using it as a context. This is because if a tool intends to interact with the workspace, it minimally needs these tools.
 
+### What do I need to get GPTScript working on windows?
+
+If you encounter an error message `exit status 0xc0000135` when executing scripts in Windows environment, it is because of VCRUNTIME140.DLL not being installed.
+ 
+Once you have VCRUNTIME140.DLL installed from - https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170, GPTScript execution should succeed.   
