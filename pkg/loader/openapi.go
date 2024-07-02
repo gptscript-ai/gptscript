@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"regexp"
 	"slices"
 	"sort"
 	"strings"
@@ -13,6 +14,8 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
+
+var toolNameRegex = regexp.MustCompile(`[^a-zA-Z0-9_-]+`)
 
 // getOpenAPITools parses an OpenAPI definition and generates a set of tools from it.
 // Each operation will become a tool definition.
@@ -115,6 +118,13 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 				toolDesc = toolDesc[:1024]
 			}
 
+			toolName := operation.OperationID
+			if toolName == "" {
+				// When there is no operation ID, we use the method + path as the tool name and remove all characters
+				// except letters, numbers, underscores, and hyphens.
+				toolName = toolNameRegex.ReplaceAllString(strings.ToLower(method)+strings.ReplaceAll(pathString, "/", "_"), "")
+			}
+
 			var (
 				// auths are represented as a list of maps, where each map contains the names of the required security schemes.
 				// Items within the same map are a logical AND. The maps themselves are a logical OR. For example:
@@ -133,7 +143,7 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 			tool := types.Tool{
 				ToolDef: types.ToolDef{
 					Parameters: types.Parameters{
-						Name:        operation.OperationID,
+						Name:        toolName,
 						Description: toolDesc,
 						Arguments: &openapi3.Schema{
 							Type:       &openapi3.Types{"object"},
