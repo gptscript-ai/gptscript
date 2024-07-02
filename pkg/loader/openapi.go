@@ -15,6 +15,8 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
+var toolNameRegex = regexp.MustCompile(`[^a-zA-Z0-9_-]+`)
+
 // getOpenAPITools parses an OpenAPI definition and generates a set of tools from it.
 // Each operation will become a tool definition.
 // The tool's Instructions will be in the format "#!sys.openapi '{JSON Instructions}'",
@@ -120,7 +122,7 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 			if toolName == "" {
 				// When there is no operation ID, we use the method + path as the tool name and remove all characters
 				// except letters, numbers, underscores, and hyphens.
-				toolName = regexp.MustCompile(`[^a-zA-Z0-9_-]+`).ReplaceAllString(strings.ToLower(method)+strings.ReplaceAll(pathString, "/", "_"), "")
+				toolName = toolNameRegex.ReplaceAllString(strings.ToLower(method)+strings.ReplaceAll(pathString, "/", "_"), "")
 			}
 
 			var (
