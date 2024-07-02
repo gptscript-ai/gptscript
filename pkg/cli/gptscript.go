@@ -472,6 +472,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 				DefaultModel:        r.DefaultModel,
 				TrustedRepoPrefixes: []string{"github.com/gptscript-ai"},
 				DisableCache:        r.DisableCache,
+				CredentialOverrides: r.CredentialOverride,
 				Input:               toolInput,
 				CacheDir:            r.CacheDir,
 				SubTool:             r.SubTool,
