@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -133,7 +132,7 @@ func (m *Manager) deferredSetUpCredentialHelpers(ctx context.Context, cliCfg *co
 		return err
 	}
 
-	if err := os.MkdirAll(path.Dir(m.credHelperDirs.LastCheckedFile), 0755); err != nil {
+	if err := os.MkdirAll(m.credHelperDirs.HelperDir, 0755); err != nil {
 		return err
 	}
 
