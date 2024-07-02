@@ -363,9 +363,12 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 				gptOpt.Env = append(gptOpt.Env, system.BinEnvVar+"="+system.Bin())
 			}
 
-			// If the DefaultModel is set, then pass the correct environment variable.
+			// Pass the corrected environment variables for SDK server options
 			if r.DefaultModel != "" {
 				gptOpt.Env = append(gptOpt.Env, "GPTSCRIPT_SDKSERVER_DEFAULT_MODEL="+r.DefaultModel)
+			}
+			if len(r.CredentialOverride) > 0 {
+				gptOpt.Env = append(gptOpt.Env, "GPTSCRIPT_SDKSERVER_CREDENTIAL_OVERRIDE="+strings.Join(r.CredentialOverride, ","))
 			}
 
 			args = append([]string{args[0]}, "--file="+file)
