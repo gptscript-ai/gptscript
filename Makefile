@@ -12,7 +12,11 @@ tidy:
 	go mod tidy
 
 test:
-	go test -v ./...
+	go test -v ./pkg/...
+
+.PHONY: integration
+integration:
+	go test -v ./integration/...
 
 smoke: build
 smoke:
