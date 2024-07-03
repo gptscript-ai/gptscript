@@ -170,8 +170,9 @@ jobs:
           go-version: "1.21"
       - env:
           OPENAI_API_KEY: ${{ secrets.SMOKE_OPENAI_API_KEY }}
-          GPTSCRIPT_DEFAULT_MODEL: mistral-large-2402 from https://api.mistral.ai/v1
-          GPTSCRIPT_PROVIDER_API_MISTRAL_AI_API_KEY: ${{ secrets.SMOKE_GPTSCRIPT_PROVIDER_API_MISTRAL_AI_API_KEY }}
+          GPTSCRIPT_DEFAULT_MODEL: mistral-large-2402 from github.com/gptscript-ai/mistral-laplateforme-provider
+          MISTRAL_API_KEY: ${{ secrets.SMOKE_MISTRAL_API_KEY }}
+          GPTSCRIPT_CREDENTIAL_OVERRIDE: "github.com/gptscript-ai/mistral-laplateforme-provider/credential:MISTRAL_API_KEY"
         name: Run smoke test for mistral-large-2402
         run: |
           echo "Running smoke test for model mistral-large-2402"
