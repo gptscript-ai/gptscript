@@ -26,7 +26,9 @@ jobs:
         uses: actions/setup-go@v5
         with:
           cache: false
-          go-version: "1.22"
+          # This can't be upgraded until the issue with sys.daemon on Windows is resolved
+          # After the issue is resolved, this can be set to 1.22
+          go-version: "1.22.4"
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         with:
