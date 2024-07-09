@@ -14,7 +14,7 @@ Here are some sample use cases of GPTScript:
 ### Getting started
 MacOS and Linux (Homebrew):
 ```
-brew install gptscript-ai/tap/gptscript 
+brew install gptscript 
 gptscript github.com/gptscript-ai/llm-basics-demo
 ```
 
