@@ -22,7 +22,7 @@ Here are some sample use cases of GPTScript:
 <Tabs>
     <TabItem value="MacOS and Linux (Homebrew)">
     ```shell
-    brew install gptscript-ai/tap/gptscript 
+    brew install gptscript 
     gptscript github.com/gptscript-ai/llm-basics-demo
     ```
     </TabItem>

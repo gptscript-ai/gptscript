@@ -50,16 +50,3 @@ release:
     owner: gptscript-ai
     name: gptscript
   prerelease: auto
-
-brews:
-  - description: "GPTScript CLI"
-    install: |
-      bin.install "gptscript"
-      generate_completions_from_executable(bin/"gptscript", "completion", shells: [:bash, :zsh, :fish])
-    homepage: "https://github.com/gptscript-ai/gptscript"
-    skip_upload: false
-    folder: "Formula"
-    repository:
-      owner: gptscript-ai
-      name: homebrew-tap
-      token: "{{ .Env.GH_PROJECT_TOKEN }}"
