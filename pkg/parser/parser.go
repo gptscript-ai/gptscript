@@ -199,6 +199,7 @@ func (c *context) finish(tools *[]Node) {
 		len(c.tool.GlobalTools) > 0 ||
 		len(c.tool.ExportInputFilters) > 0 ||
 		len(c.tool.ExportOutputFilters) > 0 ||
+		len(c.tool.Agents) > 0 ||
 		c.tool.Chat {
 		*tools = append(*tools, Node{
 			ToolNode: &ToolNode{

@@ -3,10 +3,12 @@ package input
 import (
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/gptscript-ai/gptscript/internal"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
@@ -33,7 +35,7 @@ func FromFile(file string) (string, error) {
 		}
 		return string(data), nil
 	} else if file != "" {
-		if s, err := os.Stat(file); err == nil && s.IsDir() {
+		if s, err := fs.Stat(internal.FS, file); err == nil && s.IsDir() {
 			for _, ext := range types.DefaultFiles {
 				if _, err := os.Stat(filepath.Join(file, ext)); err == nil {
 					file = filepath.Join(file, ext)
@@ -42,7 +44,7 @@ func FromFile(file string) (string, error) {
 			}
 		}
 		log.Debugf("reading file %s", file)
-		data, err := os.ReadFile(file)
+		data, err := fs.ReadFile(internal.FS, file)
 		if err != nil {
 			return "", fmt.Errorf("reading %s: %w", file, err)
 		}

@@ -1,0 +1,57 @@
+`{
+  "model": "gpt-4o",
+  "internalSystemPrompt": false,
+  "tools": [
+    {
+      "function": {
+        "toolID": "testdata/TestAgentOnly/test.gpt:agent1",
+        "name": "agent1",
+        "parameters": {
+          "properties": {
+            "defaultPromptParameter": {
+              "description": "Prompt to send to the assistant. This may be an instruction or question.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      }
+    },
+    {
+      "function": {
+        "toolID": "testdata/TestAgentOnly/test.gpt:agent3",
+        "name": "agent3",
+        "parameters": {
+          "properties": {
+            "defaultPromptParameter": {
+              "description": "Prompt to send to the assistant. This may be an instruction or question.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      }
+    }
+  ],
+  "messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "I am agent2"
+        }
+      ],
+      "usage": {}
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "Agent 2 input"
+        }
+      ],
+      "usage": {}
+    }
+  ],
+  "chat": true
+}`

@@ -207,6 +207,11 @@ func NewContext(ctx context.Context, prg *types.Program, input string) (Context,
 	}
 
 	callCtx.AgentGroup = agentGroup
+
+	if callCtx.Tool.IsAgentsOnly() && len(callCtx.AgentGroup) > 0 {
+		callCtx.Tool = callCtx.Program.ToolSet[callCtx.AgentGroup[0].ToolID]
+	}
+
 	return callCtx, nil
 }
 
