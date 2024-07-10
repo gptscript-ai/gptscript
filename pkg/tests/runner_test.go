@@ -800,6 +800,26 @@ func TestExport(t *testing.T) {
 	assert.Equal(t, "TEST RESULT CALL: 3", x)
 }
 
+func TestAgentOnly(t *testing.T) {
+	r := tester.NewRunner(t)
+
+	prg, err := r.Load("")
+	require.NoError(t, err)
+
+	r.RespondWith(tester.Result{
+		Func: types.CompletionFunctionCall{
+			Name:      "agent2",
+			Arguments: "Agent 2 input",
+		},
+	})
+
+	resp, err := r.Chat(context.Background(), nil, prg, nil, "Input 1")
+	require.NoError(t, err)
+	r.AssertResponded(t)
+	assert.False(t, resp.Done)
+	autogold.Expect("TEST RESULT CALL: 2").Equal(t, resp.Content)
+	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step1"))
+}
 func TestAgents(t *testing.T) {
 	r := tester.NewRunner(t)
 

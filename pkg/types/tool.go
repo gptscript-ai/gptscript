@@ -763,6 +763,10 @@ func (t Tool) IsOpenAPI() bool {
 	return strings.HasPrefix(t.Instructions, OpenAPIPrefix)
 }
 
+func (t Tool) IsAgentsOnly() bool {
+	return t.IsNoop() && len(t.Context) == 0
+}
+
 func (t Tool) IsEcho() bool {
 	return strings.HasPrefix(t.Instructions, EchoPrefix)
 }
