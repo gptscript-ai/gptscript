@@ -52,13 +52,14 @@ release:
   prerelease: auto
 
 brews:
-  - description: "GPTScript CLI"
+  - name: gptscript
+    description: "GPTScript CLI"
     install: |
       bin.install "gptscript"
-      generate_completions_from_executable(bin/"gptscript", "completion", shells: [:bash, :zsh, :fish])
+      generate_completions_from_executable(bin/"gptscript", "completion")
     homepage: "https://github.com/gptscript-ai/gptscript"
     skip_upload: false
-    folder: "Formula"
+    directory: "Formula"
     repository:
       owner: gptscript-ai
       name: homebrew-tap

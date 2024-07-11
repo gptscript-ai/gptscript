@@ -1,0 +1,42 @@
+`{
+  "model": "gpt-4o",
+  "internalSystemPrompt": false,
+  "tools": [
+    {
+      "function": {
+        "toolID": "testdata/TestAgentOnly/test.gpt:agent2",
+        "name": "agent2",
+        "parameters": {
+          "properties": {
+            "defaultPromptParameter": {
+              "description": "Prompt to send to the assistant. This may be an instruction or question.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      }
+    }
+  ],
+  "messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "I am agent1"
+        }
+      ],
+      "usage": {}
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "Input 1"
+        }
+      ],
+      "usage": {}
+    }
+  ],
+  "chat": true
+}`

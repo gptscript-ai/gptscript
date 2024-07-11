@@ -1,0 +1,168 @@
+`{
+  "done": false,
+  "content": "TEST RESULT CALL: 2",
+  "toolID": "testdata/TestAgentOnly/test.gpt:agent2",
+  "state": {
+    "continuation": {
+      "state": {
+        "input": "Input 1",
+        "completion": {
+          "model": "gpt-4o",
+          "internalSystemPrompt": false,
+          "tools": [
+            {
+              "function": {
+                "toolID": "testdata/TestAgentOnly/test.gpt:agent2",
+                "name": "agent2",
+                "parameters": {
+                  "properties": {
+                    "defaultPromptParameter": {
+                      "description": "Prompt to send to the assistant. This may be an instruction or question.",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          ],
+          "messages": [
+            {
+              "role": "system",
+              "content": [
+                {
+                  "text": "I am agent1"
+                }
+              ],
+              "usage": {}
+            },
+            {
+              "role": "user",
+              "content": [
+                {
+                  "text": "Input 1"
+                }
+              ],
+              "usage": {}
+            },
+            {
+              "role": "assistant",
+              "content": [
+                {
+                  "toolCall": {
+                    "index": 0,
+                    "id": "call_1",
+                    "function": {
+                      "name": "agent2",
+                      "arguments": "Agent 2 input"
+                    }
+                  }
+                }
+              ],
+              "usage": {}
+            }
+          ],
+          "chat": true
+        },
+        "pending": {
+          "call_1": {
+            "index": 0,
+            "id": "call_1",
+            "function": {
+              "name": "agent2",
+              "arguments": "Agent 2 input"
+            }
+          }
+        }
+      },
+      "calls": {
+        "call_1": {
+          "toolID": "testdata/TestAgentOnly/test.gpt:agent2",
+          "input": "Agent 2 input"
+        }
+      }
+    },
+    "subCalls": [
+      {
+        "toolId": "testdata/TestAgentOnly/test.gpt:agent2",
+        "callId": "call_1",
+        "state": {
+          "continuation": {
+            "state": {
+              "input": "Agent 2 input",
+              "completion": {
+                "model": "gpt-4o",
+                "internalSystemPrompt": false,
+                "tools": [
+                  {
+                    "function": {
+                      "toolID": "testdata/TestAgentOnly/test.gpt:agent1",
+                      "name": "agent1",
+                      "parameters": {
+                        "properties": {
+                          "defaultPromptParameter": {
+                            "description": "Prompt to send to the assistant. This may be an instruction or question.",
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      }
+                    }
+                  },
+                  {
+                    "function": {
+                      "toolID": "testdata/TestAgentOnly/test.gpt:agent3",
+                      "name": "agent3",
+                      "parameters": {
+                        "properties": {
+                          "defaultPromptParameter": {
+                            "description": "Prompt to send to the assistant. This may be an instruction or question.",
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      }
+                    }
+                  }
+                ],
+                "messages": [
+                  {
+                    "role": "system",
+                    "content": [
+                      {
+                        "text": "I am agent2"
+                      }
+                    ],
+                    "usage": {}
+                  },
+                  {
+                    "role": "user",
+                    "content": [
+                      {
+                        "text": "Agent 2 input"
+                      }
+                    ],
+                    "usage": {}
+                  },
+                  {
+                    "role": "assistant",
+                    "content": [
+                      {
+                        "text": "TEST RESULT CALL: 2"
+                      }
+                    ],
+                    "usage": {}
+                  }
+                ],
+                "chat": true
+              }
+            },
+            "result": "TEST RESULT CALL: 2"
+          },
+          "continuationToolID": "testdata/TestAgentOnly/test.gpt:agent2"
+        }
+      }
+    ],
+    "subCallID": "call_1"
+  }
+}`

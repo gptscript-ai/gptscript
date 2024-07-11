@@ -40,6 +40,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_PROJECT_TOKEN: ${{ secrets.GH_PROJECT_TOKEN }}
           GORELEASER_CURRENT_TAG: ${{ github.ref_name }}
+  homebrew-release:
+    needs: release-tag
+    if: "! contains(github.ref_name, '-rc')"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Homebrew formula
+        uses: dawidd6/action-homebrew-bump-formula@v3
+        with:
+          token: ${{secrets.BREW_GH_TOKEN}}
+          formula: gptscript
   winget-release:
     needs: release-tag
     if: "! contains(github.ref_name, '-rc')"
