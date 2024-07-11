@@ -21,8 +21,19 @@ Here are some sample use cases of GPTScript:
 
 <Tabs>
     <TabItem value="MacOS and Linux (Homebrew)">
+    ## Homebrew Tap
+___
     ```shell
     brew install gptscript 
+    gptscript github.com/gptscript-ai/llm-basics-demo
+    ```
+    ## Homebrew
+___
+:::warning
+The [formula in homebrew-core](https://github.com/Homebrew/homebrew-core/blob/master/Formula/g/gptscript.rb) might be slightly outdated. Use our homebrew tap to always get the latest updates.
+:::
+    ```
+    brew install gptscript
     gptscript github.com/gptscript-ai/llm-basics-demo
     ```
     </TabItem>

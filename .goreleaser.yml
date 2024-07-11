@@ -1,3 +1,4 @@
+version: 2
 dist: releases
 snapshot:
   name_template: '{{ trimprefix .Summary "v" }}'
@@ -50,3 +51,17 @@ release:
     owner: gptscript-ai
     name: gptscript
   prerelease: auto
+
+brews:
+  - name: gptscript
+    description: "GPTScript CLI"
+    install: |
+      bin.install "gptscript"
+      generate_completions_from_executable(bin/"gptscript", "completion")
+    homepage: "https://github.com/gptscript-ai/gptscript"
+    skip_upload: false
+    directory: "Formula"
+    repository:
+      owner: gptscript-ai
+      name: homebrew-tap
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
