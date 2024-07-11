@@ -1,3 +1,4 @@
+version: 2
 dist: releases
 snapshot:
   name_template: '{{ trimprefix .Summary "v" }}'
