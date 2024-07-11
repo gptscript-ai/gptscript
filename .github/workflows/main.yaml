@@ -30,10 +30,10 @@ jobs:
           # After the issue is resolved, this can be set to 1.22
           go-version: "1.22.4"
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4
+        uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: v1.23.0
+          version: "~> v2"
           args: release --clean --snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
