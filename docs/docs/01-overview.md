@@ -24,7 +24,7 @@ Here are some sample use cases of GPTScript:
     ## Homebrew Tap
 ___
     ```shell
-    brew install gptscript-ai/tap/gptscript 
+    brew install gptscript 
     gptscript github.com/gptscript-ai/llm-basics-demo
     ```
     ## Homebrew
