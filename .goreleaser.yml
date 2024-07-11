@@ -64,4 +64,4 @@ brews:
     repository:
       owner: gptscript-ai
       name: homebrew-tap
-      token: "{{ .Env.GH_PROJECT_TOKEN }}"
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
