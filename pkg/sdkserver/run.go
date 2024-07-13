@@ -16,6 +16,14 @@ import (
 
 type loaderFunc func(context.Context, string, string, ...loader.Options) (types.Program, error)
 
+func loaderWithLocation(f loaderFunc, loc string) loaderFunc {
+	return func(ctx context.Context, s string, s2 string, options ...loader.Options) (types.Program, error) {
+		return f(ctx, s, s2, append(options, loader.Options{
+			Location: loc,
+		})...)
+	}
+}
+
 func (s *server) execAndStream(ctx context.Context, programLoader loaderFunc, logger mvl.Logger, w http.ResponseWriter, opts gptscript.Options, chatState, input, subTool string, toolDef fmt.Stringer) {
 	g, err := gptscript.New(ctx, s.gptscriptOpts, opts)
 	if err != nil {

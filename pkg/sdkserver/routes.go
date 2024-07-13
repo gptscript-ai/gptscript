@@ -183,7 +183,7 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 	logger.Debugf("executing tool: %+v", reqObject)
 	var (
 		def           fmt.Stringer = &reqObject.ToolDefs
-		programLoader loaderFunc   = loader.ProgramFromSource
+		programLoader              = loaderWithLocation(loader.ProgramFromSource, reqObject.Location)
 	)
 	if reqObject.Content != "" {
 		def = &reqObject.content

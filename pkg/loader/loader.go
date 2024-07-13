@@ -373,12 +373,20 @@ func ProgramFromSource(ctx context.Context, content, subToolName string, opts ..
 	}
 	opt := complete(opts...)
 
+	var locationPath, locationName string
+	if opt.Location != "" {
+		locationPath = path.Dir(opt.Location)
+		locationName = path.Base(opt.Location)
+	}
+
 	prg := types.Program{
 		ToolSet: types.ToolSet{},
 	}
 	tools, err := readTool(ctx, opt.Cache, &prg, &source{
 		Content:  []byte(content),
-		Location: "inline",
+		Path:     locationPath,
+		Name:     locationName,
+		Location: opt.Location,
 	}, subToolName)
 	if err != nil {
 		return types.Program{}, err
@@ -388,12 +396,18 @@ func ProgramFromSource(ctx context.Context, content, subToolName string, opts ..
 }
 
 type Options struct {
-	Cache *cache.Client
+	Cache    *cache.Client
+	Location string
 }
 
 func complete(opts ...Options) (result Options) {
 	for _, opt := range opts {
 		result.Cache = types.FirstSet(opt.Cache, result.Cache)
+		result.Location = types.FirstSet(opt.Location, result.Location)
+	}
+
+	if result.Location == "" {
+		result.Location = "inline"
 	}
 
 	return

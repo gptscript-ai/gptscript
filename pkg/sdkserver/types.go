@@ -61,6 +61,7 @@ type toolOrFileRequest struct {
 	CredentialContext   string   `json:"credentialContext"`
 	CredentialOverrides []string `json:"credentialOverrides"`
 	Confirm             bool     `json:"confirm"`
+	Location            string   `json:"location,omitempty"`
 }
 
 type content struct {
