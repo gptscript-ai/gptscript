@@ -111,9 +111,18 @@ func loadURL(ctx context.Context, cache *cache.Client, base *source, name string
 		req.Header.Set("Authorization", "Bearer "+bearerToken)
 	}
 
-	data, err := getWithDefaults(req)
+	data, defaulted, err := getWithDefaults(req)
 	if err != nil {
 		return nil, false, fmt.Errorf("error loading %s: %v", url, err)
+	}
+
+	if defaulted != "" {
+		pathString = url
+		name = defaulted
+		if repo != nil {
+			repo.Path = path.Join(repo.Path, repo.Name)
+			repo.Name = defaulted
+		}
 	}
 
 	log.Debugf("opened %s", url)
@@ -137,31 +146,32 @@ func loadURL(ctx context.Context, cache *cache.Client, base *source, name string
 	return result, true, nil
 }
 
-func getWithDefaults(req *http.Request) ([]byte, error) {
+func getWithDefaults(req *http.Request) ([]byte, string, error) {
 	originalPath := req.URL.Path
 
 	// First, try to get the original path as is. It might be an OpenAPI definition.
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusOK {
-		if toolBytes, err := io.ReadAll(resp.Body); err == nil && isOpenAPI(toolBytes) != 0 {
-			return toolBytes, nil
-		}
+		toolBytes, err := io.ReadAll(resp.Body)
+		return toolBytes, "", err
+	}
+
+	base := path.Base(originalPath)
+	if strings.Contains(base, ".") {
+		return nil, "", fmt.Errorf("error loading %s: %s", req.URL.String(), resp.Status)
 	}
 
 	for i, def := range types.DefaultFiles {
-		base := path.Base(originalPath)
-		if !strings.Contains(base, ".") {
-			req.URL.Path = path.Join(originalPath, def)
-		}
+		req.URL.Path = path.Join(originalPath, def)
 
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 		defer resp.Body.Close()
 
@@ -170,11 +180,13 @@ func getWithDefaults(req *http.Request) ([]byte, error) {
 		}
 
 		if resp.StatusCode != http.StatusOK {
-			return nil, fmt.Errorf("error loading %s: %s", req.URL.String(), resp.Status)
+			return nil, "", fmt.Errorf("error loading %s: %s", req.URL.String(), resp.Status)
 		}
 
-		return io.ReadAll(resp.Body)
+		data, err := io.ReadAll(resp.Body)
+		return data, def, err
 	}
+
 	panic("unreachable")
 }
 
