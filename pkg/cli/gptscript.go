@@ -332,15 +332,24 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 
 	// If the user is trying to launch the chat-builder UI, then set up the tool and options here.
 	if r.UI {
-		args = append([]string{uiTool()}, args...)
+		if os.Getenv(system.BinEnvVar) == "" {
+			gptOpt.Env = append(gptOpt.Env, system.BinEnvVar+"="+system.Bin())
+		}
+
+		// Pass the corrected environment variables for SDK server options
+		if r.DefaultModel != "" {
+			gptOpt.Env = append(gptOpt.Env, "GPTSCRIPT_SDKSERVER_DEFAULT_MODEL="+r.DefaultModel)
+		}
+		if len(r.CredentialOverride) > 0 {
+			gptOpt.Env = append(gptOpt.Env, "GPTSCRIPT_SDKSERVER_CREDENTIAL_OVERRIDE="+strings.Join(r.CredentialOverride, ","))
+		}
 
 		// If args has more than one element, then the user has provided a file.
-		if len(args) > 1 {
-			if args[1] == "-" {
+		if len(args) > 0 {
+			file := args[0]
+			if file == "-" {
 				return fmt.Errorf("chat UI only supports files, cannot read from stdin")
 			}
-
-			file := args[1]
 
 			// If the file is external, then set the SCRIPTS_PATH to the current working directory. Otherwise,
 			// set it to the directory of the script and set the file to the base.
@@ -359,23 +368,9 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 				gptOpt.Env = append(gptOpt.Env, "SCRIPTS_PATH="+cwd)
 			}
 
-			if os.Getenv(system.BinEnvVar) == "" {
-				gptOpt.Env = append(gptOpt.Env, system.BinEnvVar+"="+system.Bin())
-			}
-
-			// Pass the corrected environment variables for SDK server options
-			if r.DefaultModel != "" {
-				gptOpt.Env = append(gptOpt.Env, "GPTSCRIPT_SDKSERVER_DEFAULT_MODEL="+r.DefaultModel)
-			}
-			if len(r.CredentialOverride) > 0 {
-				gptOpt.Env = append(gptOpt.Env, "GPTSCRIPT_SDKSERVER_CREDENTIAL_OVERRIDE="+strings.Join(r.CredentialOverride, ","))
-			}
-
 			gptOpt.Env = append(gptOpt.Env, "UI_RUN_FILE="+file)
-
-			if len(args) > 2 {
-				args = append(args, args[2:]...)
-			}
+			// Remove the file from args because the above line will pass it to the UI tool.
+			args = args[1:]
 		} else {
 			cwd, err := os.Getwd()
 			if err != nil {
@@ -386,6 +381,8 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 
 		// The UI must run in daemon mode.
 		r.Daemon = true
+		// Use the UI tool as the first argument.
+		args = append([]string{uiTool()}, args...)
 	}
 
 	ctx := cmd.Context()
