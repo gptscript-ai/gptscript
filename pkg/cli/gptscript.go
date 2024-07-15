@@ -371,7 +371,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 				gptOpt.Env = append(gptOpt.Env, "GPTSCRIPT_SDKSERVER_CREDENTIAL_OVERRIDE="+strings.Join(r.CredentialOverride, ","))
 			}
 
-			args = append([]string{args[0]}, "--file="+file)
+			gptOpt.Env = append(gptOpt.Env, "UI_RUN_FILE="+file)
 
 			if len(args) > 2 {
 				args = append(args, args[2:]...)
