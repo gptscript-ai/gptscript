@@ -148,7 +148,7 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		}
 	case "credentials", "creds", "credential", "cred":
 		tool.Parameters.Credentials = append(tool.Parameters.Credentials, value)
-	case "exportcredentials", "exportcreds", "exportcredential", "exportcred", "sharecredentials", "sharecreds", "sharecredential", "sharecred":
+	case "sharecredentials", "sharecreds", "sharecredential", "sharecred":
 		tool.Parameters.ExportCredentials = append(tool.Parameters.ExportCredentials, value)
 	default:
 		return false, nil

@@ -48,7 +48,7 @@ print('good')
 ---
 name: twoOne
 tools: threeOne, threeTwo
-exportcred: getcred with twoOne as var and 21 as val
+sharecred: getcred with twoOne as var and 21 as val
 
 #!python3
 
@@ -90,7 +90,7 @@ print('good')
 ---
 name: twoTwo
 tools: threeTwo, threeThree
-exportcred: getcred with twoTwo as var and 22 as val
+sharecred: getcred with twoTwo as var and 22 as val
 
 #!python3
 
@@ -131,15 +131,15 @@ print('good')
 
 ---
 name: threeOne
-exportcred: getcred with threeOne as var and 31 as val
+sharecred: getcred with threeOne as var and 31 as val
 
 ---
 name: threeTwo
-exportcred: getcred with threeTwo as var and 32 as val
+sharecred: getcred with threeTwo as var and 32 as val
 
 ---
 name: threeThree
-exportcred: getcred with threeThree as var and 33 as val
+sharecred: getcred with threeThree as var and 33 as val
 
 ---
 name: getcred
