@@ -1,0 +1,26 @@
+Name: Code Reviewer
+Description: A tool to help you perform code review of open PRs
+Context: learn-gh
+Tools: sys.exec, sys.http.html2text?, sys.find, sys.read, sys.write
+Args: PR_URL: The GitHub PR_URL
+
+You have the gh cli available to you. Use it to perform code review for a pr from the $(repo) provided.
+
+Perform the following steps in order:
+1. Identify the files changed in the pull request ($PR_URL) using the pr number and perform a diff.
+    1. Analyze the complete code of each identified file and perform a detailed line by line code review.
+    2. Repeat the process for each changed file in the pr.
+2. Share your review comments separately for each file.
+3. In a new line write "Code: Approved" or "Code: Require Changes" based on the review comments.
+---
+Name: learn-gh
+Description: A tool to help you learn gh cli
+
+#!/usr/bin/env bash
+
+echo "The following is the help text for the gh cli and some of its sub-commands. Use these when figuring out how to construct new commands.  Note that the --search flag is used for filtering and sorting as well; there is no dedicate --sort flag."
+gh --help
+gh repo --help
+gh pr --help
+gh pr checkout --help
+gh pr diff --help
