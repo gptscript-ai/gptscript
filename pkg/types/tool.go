@@ -139,6 +139,7 @@ type Parameters struct {
 	Export              []string         `json:"export,omitempty"`
 	Agents              []string         `json:"agents,omitempty"`
 	Credentials         []string         `json:"credentials,omitempty"`
+	ExportCredentials   []string         `json:"exportCredentials,omitempty"`
 	InputFilters        []string         `json:"inputFilters,omitempty"`
 	ExportInputFilters  []string         `json:"exportInputFilters,omitempty"`
 	OutputFilters       []string         `json:"outputFilters,omitempty"`
@@ -154,6 +155,7 @@ func (p Parameters) ToolRefNames() []string {
 		p.ExportContext,
 		p.Context,
 		p.Credentials,
+		p.ExportCredentials,
 		p.InputFilters,
 		p.ExportInputFilters,
 		p.OutputFilters,
@@ -466,6 +468,11 @@ func (t ToolDef) String() string {
 			_, _ = fmt.Fprintf(buf, "Credential: %s\n", cred)
 		}
 	}
+	if len(t.Parameters.ExportCredentials) > 0 {
+		for _, exportCred := range t.Parameters.ExportCredentials {
+			_, _ = fmt.Fprintf(buf, "Share Credential: %s\n", exportCred)
+		}
+	}
 	if t.Parameters.Chat {
 		_, _ = fmt.Fprintf(buf, "Chat: true\n")
 	}
@@ -670,6 +677,23 @@ func (t Tool) getCompletionToolRefs(prg Program, agentGroup []ToolReference) ([]
 
 	if err := t.addAgents(prg, &result); err != nil {
 		return nil, err
+	}
+
+	return result.List()
+}
+
+func (t Tool) GetCredentialTools(prg Program, agentGroup []ToolReference) ([]ToolReference, error) {
+	result := toolRefSet{}
+
+	result.AddAll(t.GetToolRefsFromNames(t.Credentials))
+
+	toolRefs, err := t.getCompletionToolRefs(prg, agentGroup)
+	if err != nil {
+		return nil, err
+	}
+	for _, toolRef := range toolRefs {
+		referencedTool := prg.ToolSet[toolRef.ToolID]
+		result.AddAll(referencedTool.GetToolRefsFromNames(referencedTool.ExportCredentials))
 	}
 
 	return result.List()
