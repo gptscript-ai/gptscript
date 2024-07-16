@@ -72,7 +72,11 @@ func openFile(path string) (io.ReadCloser, bool, error) {
 
 func loadLocal(base *source, name string) (*source, bool, error) {
 	// We want to keep all strings in / format, and only convert to platform specific when reading
-	filePath := path.Join(base.Path, name)
+	// This is why we use path instead of filepath.
+	filePath := name
+	if !path.IsAbs(name) {
+		filePath = path.Join(base.Path, name)
+	}
 
 	if s, err := fs.Stat(internal.FS, filepath.Clean(filePath)); err == nil && s.IsDir() {
 		for _, def := range types.DefaultFiles {
