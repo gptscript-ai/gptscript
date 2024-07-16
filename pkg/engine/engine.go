@@ -389,7 +389,7 @@ func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 		if content.ToolCall != nil {
 			var toolID string
 			for _, tool := range state.Completion.Tools {
-				if tool.Function.Name == content.ToolCall.Function.Name {
+				if strings.EqualFold(tool.Function.Name, content.ToolCall.Function.Name) {
 					toolID = tool.Function.ToolID
 				}
 			}
