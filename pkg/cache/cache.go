@@ -9,7 +9,9 @@ import (
 	"errors"
 	"io/fs"
 	"os"
+	"os/user"
 	"path/filepath"
+	"strings"
 
 	"github.com/adrg/xdg"
 	"github.com/getkin/kin-openapi/openapi3"
@@ -40,8 +42,26 @@ func Complete(opts ...Options) (result Options) {
 	}
 	if result.CacheDir == "" {
 		result.CacheDir = filepath.Join(xdg.CacheHome, version.ProgramName)
+	} else if !filepath.IsAbs(result.CacheDir) {
+		var err error
+		result.CacheDir, err = makeAbsolute(result.CacheDir)
+		if err != nil {
+			result.CacheDir = filepath.Join(xdg.CacheHome, version.ProgramName)
+		}
 	}
 	return
+}
+
+func makeAbsolute(path string) (string, error) {
+	if strings.HasPrefix(path, "~"+string(filepath.Separator)) {
+		usr, err := user.Current()
+		if err != nil {
+			return "", err
+		}
+
+		return filepath.Join(usr.HomeDir, path[2:]), nil
+	}
+	return filepath.Abs(path)
 }
 
 type noCacheKey struct{}
