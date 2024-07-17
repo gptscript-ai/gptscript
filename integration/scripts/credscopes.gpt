@@ -1,0 +1,160 @@
+# This script sets up a chain of tools in a tree structure.
+# The root is oneOne, with children twoOne and twoTwo, with children threeOne, threeTwo, and threeThree, with only
+# threeTwo shared between them.
+# Each tool should only have access to any credentials it defines and any credentials exported/shared by its
+# immediate children (but not grandchildren).
+# This script checks to make sure that this is working properly.
+name: oneOne
+tools: twoOne, twoTwo
+cred: getcred with oneOne as var and 11 as val
+
+#!python3
+
+import os
+
+oneOne = os.getenv('oneOne')
+twoOne = os.getenv('twoOne')
+twoTwo = os.getenv('twoTwo')
+threeOne = os.getenv('threeOne')
+threeTwo = os.getenv('threeTwo')
+threeThree = os.getenv('threeThree')
+
+if oneOne != '11':
+  print('error: oneOne is not 11')
+  exit(1)
+
+if twoOne != '21':
+  print('error: twoOne is not 21')
+  exit(1)
+
+if twoTwo != '22':
+  print('error: twoTwo is not 22')
+  exit(1)
+
+if threeOne is not None:
+  print('error: threeOne is not None')
+  exit(1)
+
+if threeTwo is not None:
+  print('error: threeTwo is not None')
+  exit(1)
+
+if threeThree is not None:
+  print('error: threeThree is not None')
+  exit(1)
+
+print('good')
+
+---
+name: twoOne
+tools: threeOne, threeTwo
+sharecred: getcred with twoOne as var and 21 as val
+
+#!python3
+
+import os
+
+oneOne = os.getenv('oneOne')
+twoOne = os.getenv('twoOne')
+twoTwo = os.getenv('twoTwo')
+threeOne = os.getenv('threeOne')
+threeTwo = os.getenv('threeTwo')
+threeThree = os.getenv('threeThree')
+
+if oneOne is not None:
+  print('error: oneOne is not None')
+  exit(1)
+
+if twoOne is not None:
+  print('error: twoOne is not None')
+  exit(1)
+
+if twoTwo is not None:
+  print('error: twoTwo is not None')
+  exit(1)
+
+if threeOne != '31':
+  print('error: threeOne is not 31')
+  exit(1)
+
+if threeTwo != '32':
+  print('error: threeTwo is not 32')
+  exit(1)
+
+if threeThree is not None:
+  print('error: threeThree is not None')
+  exit(1)
+
+print('good')
+
+---
+name: twoTwo
+tools: threeTwo, threeThree
+sharecred: getcred with twoTwo as var and 22 as val
+
+#!python3
+
+import os
+
+oneOne = os.getenv('oneOne')
+twoOne = os.getenv('twoOne')
+twoTwo = os.getenv('twoTwo')
+threeOne = os.getenv('threeOne')
+threeTwo = os.getenv('threeTwo')
+threeThree = os.getenv('threeThree')
+
+if oneOne is not None:
+  print('error: oneOne is not None')
+  exit(1)
+
+if twoOne is not None:
+  print('error: twoOne is not None')
+  exit(1)
+
+if twoTwo is not None:
+  print('error: twoTwo is not None')
+  exit(1)
+
+if threeOne is not None:
+  print('error: threeOne is not None')
+  exit(1)
+
+if threeTwo != '32':
+  print('error: threeTwo is not 32')
+  exit(1)
+
+if threeThree != '33':
+  print('error: threeThree is not 33')
+  exit(1)
+
+print('good')
+
+---
+name: threeOne
+sharecred: getcred with threeOne as var and 31 as val
+
+---
+name: threeTwo
+sharecred: getcred with threeTwo as var and 32 as val
+
+---
+name: threeThree
+sharecred: getcred with threeThree as var and 33 as val
+
+---
+name: getcred
+
+#!python3
+
+import os
+import json
+
+var = os.getenv('var')
+val = os.getenv('val')
+
+output = {
+    "env": {
+        var: val
+    }
+}
+print(json.dumps(output))

@@ -14,3 +14,7 @@ func GPTScriptExec(args ...string) (string, error) {
 	out, err := cmd.CombinedOutput()
 	return string(out), err
 }
+
+func RunScript(script string, options ...string) (string, error) {
+	return GPTScriptExec(append(options, "--quiet", script)...)
+}

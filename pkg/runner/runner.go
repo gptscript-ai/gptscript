@@ -419,9 +419,13 @@ func (r *Runner) start(callCtx engine.Context, state *State, monitor Monitor, en
 		return nil, err
 	}
 
-	if len(callCtx.Tool.Credentials) > 0 {
+	credTools, err := callCtx.Tool.GetCredentialTools(*callCtx.Program, callCtx.AgentGroup)
+	if err != nil {
+		return nil, err
+	}
+	if len(credTools) > 0 {
 		var err error
-		env, err = r.handleCredentials(callCtx, monitor, env)
+		env, err = r.handleCredentials(callCtx, monitor, env, credTools)
 		if err != nil {
 			return nil, err
 		}
@@ -552,9 +556,13 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 	progress, progressClose := streamProgress(&callCtx, monitor)
 	defer progressClose()
 
-	if len(callCtx.Tool.Credentials) > 0 {
+	credTools, err := callCtx.Tool.GetCredentialTools(*callCtx.Program, callCtx.AgentGroup)
+	if err != nil {
+		return nil, err
+	}
+	if len(credTools) > 0 {
 		var err error
-		env, err = r.handleCredentials(callCtx, monitor, env)
+		env, err = r.handleCredentials(callCtx, monitor, env, credTools)
 		if err != nil {
 			return nil, err
 		}
@@ -828,7 +836,7 @@ func getEventContent(content string, callCtx engine.Context) string {
 	return content
 }
 
-func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env []string) ([]string, error) {
+func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env []string, credToolRefs []types.ToolReference) ([]string, error) {
 	// Since credential tools (usually) prompt the user, we want to only run one at a time.
 	r.credMutex.Lock()
 	defer r.credMutex.Unlock()
@@ -845,10 +853,10 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 		}
 	}
 
-	for _, credToolName := range callCtx.Tool.Credentials {
-		toolName, credentialAlias, args, err := types.ParseCredentialArgs(credToolName, callCtx.Input)
+	for _, ref := range credToolRefs {
+		toolName, credentialAlias, args, err := types.ParseCredentialArgs(ref.Reference, callCtx.Input)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse credential tool %q: %w", credToolName, err)
+			return nil, fmt.Errorf("failed to parse credential tool %q: %w", ref.Reference, err)
 		}
 
 		credName := toolName
@@ -895,11 +903,6 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 		// If the credential doesn't already exist in the store, run the credential tool in order to get the value,
 		// and save it in the store.
 		if !exists || c.IsExpired() {
-			credToolRefs, ok := callCtx.Tool.ToolMapping[credToolName]
-			if !ok || len(credToolRefs) != 1 {
-				return nil, fmt.Errorf("failed to find ID for tool %s", credToolName)
-			}
-
 			// If the existing credential is expired, we need to provide it to the cred tool through the environment.
 			if exists && c.IsExpired() {
 				credJSON, err := json.Marshal(c)
@@ -914,22 +917,22 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			if args != nil {
 				inputBytes, err := json.Marshal(args)
 				if err != nil {
-					return nil, fmt.Errorf("failed to marshal args for tool %s: %w", credToolName, err)
+					return nil, fmt.Errorf("failed to marshal args for tool %s: %w", ref.Reference, err)
 				}
 				input = string(inputBytes)
 			}
 
-			res, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, credToolRefs[0].ToolID, input, "", engine.CredentialToolCategory)
+			res, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, ref.ToolID, input, "", engine.CredentialToolCategory)
 			if err != nil {
-				return nil, fmt.Errorf("failed to run credential tool %s: %w", credToolName, err)
+				return nil, fmt.Errorf("failed to run credential tool %s: %w", ref.Reference, err)
 			}
 
 			if res.Result == nil {
-				return nil, fmt.Errorf("invalid state: credential tool [%s] can not result in a continuation", credToolName)
+				return nil, fmt.Errorf("invalid state: credential tool [%s] can not result in a continuation", ref.Reference)
 			}
 
 			if err := json.Unmarshal([]byte(*res.Result), &c); err != nil {
-				return nil, fmt.Errorf("failed to unmarshal credential tool %s response: %w", credToolName, err)
+				return nil, fmt.Errorf("failed to unmarshal credential tool %s response: %w", ref.Reference, err)
 			}
 			c.ToolName = credName
 			c.Type = credentials.CredentialTypeTool
@@ -943,7 +946,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			}
 
 			// Only store the credential if the tool is on GitHub or has an alias, and the credential is non-empty.
-			if (isGitHubTool(toolName) && callCtx.Program.ToolSet[credToolRefs[0].ToolID].Source.Repo != nil) || credentialAlias != "" {
+			if (isGitHubTool(toolName) && callCtx.Program.ToolSet[ref.ToolID].Source.Repo != nil) || credentialAlias != "" {
 				if isEmpty {
 					log.Warnf("Not saving empty credential for tool %s", toolName)
 				} else if err := r.credStore.Add(callCtx.Ctx, *c); err != nil {
