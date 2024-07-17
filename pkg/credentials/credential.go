@@ -35,6 +35,9 @@ func (c Credential) IsExpired() bool {
 }
 
 func (c Credential) toDockerAuthConfig() (types.AuthConfig, error) {
+	for k, v := range c.Env {
+		c.Env[k] = strings.TrimSpace(v)
+	}
 	cred, err := json.Marshal(c)
 	if err != nil {
 		return types.AuthConfig{}, err
