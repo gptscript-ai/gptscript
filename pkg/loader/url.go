@@ -7,6 +7,7 @@ import (
 	"net/http"
 	url2 "net/url"
 	"path"
+	"regexp"
 	"strings"
 	"time"
 
@@ -33,6 +34,14 @@ type cacheValue struct {
 	Time   time.Time
 }
 
+func (c *cacheKey) isStatic() bool {
+	return c.Repo != nil &&
+		c.Repo.Revision != "" &&
+		stableRef.MatchString(c.Repo.Revision)
+}
+
+var stableRef = regexp.MustCompile("^([a-f0-9]{7,40}$|v[0-9]|[0-9])")
+
 func loadURL(ctx context.Context, cache *cache.Client, base *source, name string) (*source, bool, error) {
 	var (
 		repo        *types.Repo
@@ -47,9 +56,17 @@ func loadURL(ctx context.Context, cache *cache.Client, base *source, name string
 		cachedValue cacheValue
 	)
 
+	if cachedKey.Repo == nil {
+		if _, rev, ok := strings.Cut(name, "@"); ok && stableRef.MatchString(rev) {
+			cachedKey.Repo = &types.Repo{
+				Revision: rev,
+			}
+		}
+	}
+
 	if ok, err := cache.Get(ctx, cachedKey, &cachedValue); err != nil {
 		return nil, false, err
-	} else if ok && time.Since(cachedValue.Time) < CacheTimeout {
+	} else if ok && (cachedKey.isStatic() || time.Since(cachedValue.Time) < CacheTimeout) {
 		return cachedValue.Source, true, nil
 	}
 

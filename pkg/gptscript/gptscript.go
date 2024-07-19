@@ -75,6 +75,9 @@ func complete(opts ...Options) Options {
 	if result.CredentialContext == "" {
 		result.CredentialContext = "default"
 	}
+	if result.OpenAI.DefaultModel == "" {
+		result.OpenAI.DefaultModel = builtin.GetDefaultModel()
+	}
 
 	return result
 }

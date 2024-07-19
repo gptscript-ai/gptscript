@@ -138,6 +138,10 @@ func (c *Client) ValidAuth() error {
 }
 
 func (c *Client) Supports(ctx context.Context, modelName string) (bool, error) {
+	if c.defaultModel != "" && c.defaultModel == modelName {
+		return true, nil
+	}
+
 	models, err := c.ListModels(ctx)
 	if err != nil {
 		return false, err
