@@ -96,7 +96,7 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 		instructions = append(instructions, inputContext.Content)
 	}
 	var extraEnv = []string{
-		strings.TrimSpace(fmt.Sprintf("GPTSCRIPT_CONTEXT=%s", strings.Join(instructions, "\n"))),
+		strings.TrimSpace("GPTSCRIPT_CONTEXT=" + strings.Join(instructions, "\n")),
 	}
 
 	cmd, stop, err := e.newCommand(ctx.Ctx, extraEnv, tool, input)

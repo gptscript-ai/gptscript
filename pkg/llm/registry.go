@@ -7,6 +7,7 @@ import (
 	"sort"
 
 	"github.com/gptscript-ai/gptscript/pkg/openai"
+	"github.com/gptscript-ai/gptscript/pkg/remote"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
@@ -41,9 +42,37 @@ func (r *Registry) ListModels(ctx context.Context, providers ...string) (result 
 	return result, nil
 }
 
+func (r *Registry) fastPath(modelName string) Client {
+	// This is optimization hack to avoid doing List Models
+	if len(r.clients) != 2 {
+		return nil
+	}
+
+	_, modelFromProvider := types.SplitToolRef(modelName)
+	if modelFromProvider != "" {
+		return nil
+	}
+
+	_, ok := r.clients[0].(*openai.Client)
+	if !ok {
+		return nil
+	}
+
+	_, ok = r.clients[1].(*remote.Client)
+	if !ok {
+		return nil
+	}
+
+	return r.clients[0]
+}
+
 func (r *Registry) Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error) {
 	if messageRequest.Model == "" {
 		return nil, fmt.Errorf("model is required")
+	}
+
+	if c := r.fastPath(messageRequest.Model); c != nil {
+		return c.Call(ctx, messageRequest, status)
 	}
 
 	var errs []error
