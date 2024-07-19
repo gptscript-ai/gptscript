@@ -802,6 +802,18 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 
 	for _, id := range ids {
 		call := state.Continuation.Calls[id]
+		if call.Missing {
+			resultLock.Lock()
+			callResults = append(callResults, SubCallResult{
+				ToolID: call.ToolID,
+				CallID: id,
+				State: &State{
+					Result: &[]string{fmt.Sprintf("ERROR: can not call unknown tool named [%s]", call.ToolID)}[0],
+				},
+			})
+			resultLock.Unlock()
+			continue
+		}
 		d.Run(func(ctx context.Context) error {
 			result, err := r.subCall(ctx, callCtx, monitor, env, call.ToolID, call.Input, id, toolCategory)
 			if err != nil {

@@ -104,7 +104,20 @@ func (c *Client) Call(_ context.Context, messageRequest types.CompletionRequest,
 	}
 
 	if result.Func.Name != "" {
-		c.t.Fatalf("failed to find tool %s", result.Func.Name)
+		return &types.CompletionMessage{
+			Role: types.CompletionMessageRoleTypeAssistant,
+			Content: []types.ContentPart{
+				{
+					ToolCall: &types.CompletionToolCall{
+						ID: fmt.Sprintf("call_%d", c.id),
+						Function: types.CompletionFunctionCall{
+							Name:      result.Func.Name,
+							Arguments: result.Func.Arguments,
+						},
+					},
+				},
+			},
+		}, nil
 	}
 
 	return &types.CompletionMessage{

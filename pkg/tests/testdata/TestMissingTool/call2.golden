@@ -1,0 +1,61 @@
+`{
+  "model": "gpt-4o",
+  "tools": [
+    {
+      "function": {
+        "toolID": "testdata/TestMissingTool/test.gpt:Bob",
+        "name": "Bob",
+        "parameters": null
+      }
+    }
+  ],
+  "messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "Call tool Bob"
+        }
+      ],
+      "usage": {}
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "Input 1"
+        }
+      ],
+      "usage": {}
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "toolCall": {
+            "id": "call_1",
+            "function": {
+              "name": "not bob"
+            }
+          }
+        }
+      ],
+      "usage": {}
+    },
+    {
+      "role": "tool",
+      "content": [
+        {
+          "text": "ERROR: can not call unknown tool named [not bob]"
+        }
+      ],
+      "toolCall": {
+        "id": "call_1",
+        "function": {
+          "name": "not bob"
+        }
+      },
+      "usage": {}
+    }
+  ]
+}`
