@@ -948,3 +948,18 @@ func TestSysContext(t *testing.T) {
 	require.Len(t, context.Call.AgentGroup, 1)
 	assert.Equal(t, context.Call.AgentGroup[0].Named, "iAmSuperman")
 }
+
+func TestMissingTool(t *testing.T) {
+	r := tester.NewRunner(t)
+
+	r.RespondWith(tester.Result{
+		Func: types.CompletionFunctionCall{
+			Name: "not bob",
+		},
+	})
+
+	resp, err := r.Run("", "Input 1")
+	require.NoError(t, err)
+	r.AssertResponded(t)
+	autogold.Expect("TEST RESULT CALL: 2").Equal(t, resp)
+}

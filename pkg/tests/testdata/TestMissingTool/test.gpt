@@ -1,0 +1,10 @@
+tools: Bob
+
+Call tool Bob
+
+---
+name: Bob
+
+#!sys.echo
+
+You called?
