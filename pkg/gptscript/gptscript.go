@@ -51,7 +51,7 @@ type Options struct {
 	Env                 []string
 }
 
-func complete(opts ...Options) Options {
+func Complete(opts ...Options) Options {
 	var result Options
 	for _, opt := range opts {
 		result.Cache = cache.Complete(result.Cache, opt.Cache)
@@ -80,7 +80,7 @@ func complete(opts ...Options) Options {
 }
 
 func New(ctx context.Context, o ...Options) (*GPTScript, error) {
-	opts := complete(o...)
+	opts := Complete(o...)
 	registry := llm.NewRegistry()
 
 	cacheClient, err := cache.New(opts.Cache)
