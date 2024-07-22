@@ -29,11 +29,11 @@ func (c *SDKServer) Run(cmd *cobra.Command, _ []string) error {
 	// Don't use cmd.Context() as we don't want to die on ctrl+c
 	ctx := context.Background()
 	if term.IsTerminal(int(os.Stdin.Fd())) {
-		// Only support CTRL+C if stdin is the terminal. When ran as a SDK it will be a pipe
+		// Only support CTRL+C if stdin is the terminal. When ran as an SDK it will be a pipe
 		ctx = cmd.Context()
 	}
 
-	return sdkserver.Start(ctx, sdkserver.Options{
+	return sdkserver.Run(ctx, sdkserver.Options{
 		Options:       opts,
 		ListenAddress: c.ListenAddress,
 		Debug:         c.Debug,
