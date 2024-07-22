@@ -1,0 +1,57 @@
+name: PR Review with GPTScript
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr_review:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Get PR Details
+      id: pr_details
+      run: |
+        PR_URL=$(jq -r '.pull_request.html_url' $GITHUB_EVENT_PATH)
+        PR_NUMBER=$(jq -r '.pull_request.number' $GITHUB_EVENT_PATH)
+        PR_FILES=$(jq -r '.pull_request.changed_files' $GITHUB_EVENT_PATH)
+        echo "PR_URL=${PR_URL}" >> $GITHUB_ENV
+        echo "PR_NUMBER=${PR_NUMBER}" >> $GITHUB_ENV
+        echo "PR_FILES=${PR_FILES}" >> $GITHUB_ENV
+
+    - name: Install GPTScript
+      run: curl https://get.gptscript.ai/install.sh | sh
+
+    - name: Run GPTScript for Code Review
+      id: run_gptscript
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      run: |
+        {
+        echo 'REVIEW<<EOF'
+        gptscript codereview.gpt --PR_URL=${{ env.PR_URL }}
+        echo EOF
+        } >> "$GITHUB_ENV"
+
+        
+    - name: Post Review Comment
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      run: |
+        gh pr comment ${{ github.event.pull_request.number }} --body "$REVIEW"
+
+    - name: Set PR Status Fail
+      if: contains(env.REVIEW, 'Require Changes')
+      run: |
+       echo "Code Requires Changes"
+       exit 1
+
+    - name: Set PR Status Pass
+      if: contains(env.REVIEW, 'Approved')
+      run: |
+       echo "Code Approved"
+      
