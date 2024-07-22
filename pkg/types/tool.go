@@ -660,10 +660,12 @@ func (t Tool) addContextExportedTools(prg Program, result *toolRefSet) error {
 func (t Tool) getCompletionToolRefs(prg Program, agentGroup []ToolReference) ([]ToolReference, error) {
 	result := toolRefSet{}
 
-	for _, agent := range agentGroup {
-		// don't add yourself
-		if agent.ToolID != t.ID {
-			result.Add(agent)
+	if t.Chat {
+		for _, agent := range agentGroup {
+			// don't add yourself
+			if agent.ToolID != t.ID {
+				result.Add(agent)
+			}
 		}
 	}
 
