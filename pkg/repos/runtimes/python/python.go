@@ -22,7 +22,7 @@ import (
 //go:embed python.json
 var releasesData []byte
 
-const uvVersion = "uv==0.2.3"
+const uvVersion = "uv==0.2.27"
 
 type Release struct {
 	OS      string `json:"os,omitempty"`
@@ -185,6 +185,7 @@ func (r *Runtime) runPip(ctx context.Context, toolSource, binDir string, env []s
 }
 
 func (r *Runtime) setupUV(ctx context.Context, tmp string) error {
+	log.InfofCtx(ctx, "Install uv %s", uvVersion)
 	cmd := debugcmd.New(ctx, pythonCmd(tmp), "-m", "pip", "install", uvVersion)
 	return cmd.Run()
 }
