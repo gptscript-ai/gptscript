@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -24,8 +25,9 @@ import (
 type Options struct {
 	gptscript.Options
 
-	ListenAddress string
-	Debug         bool
+	ListenAddress             string
+	Debug                     bool
+	DisableServerErrorLogging bool
 }
 
 // Run will start the server and block until the server is shut down.
@@ -119,6 +121,10 @@ func run(ctx context.Context, listener net.Listener, opts Options) error {
 			logRequest,
 			cors.Default().Handler,
 		),
+	}
+
+	if opts.DisableServerErrorLogging {
+		httpServer.ErrorLog = log.New(io.Discard, "", 0)
 	}
 
 	logger := mvl.Package()
