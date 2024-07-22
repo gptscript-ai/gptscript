@@ -55,7 +55,9 @@ func Run(ctx context.Context, opts Options) error {
 
 // EmbeddedStart allows running the server as an embedded process that may use Stdin for input.
 // It returns the address the server is listening on.
-func EmbeddedStart(ctx context.Context, opts Options) (string, error) {
+func EmbeddedStart(ctx context.Context, options ...Options) (string, error) {
+	opts := complete(options...)
+
 	listener, err := newListener(opts)
 	if err != nil {
 		return "", err
@@ -137,4 +139,20 @@ func run(ctx context.Context, listener net.Listener, opts Options) error {
 
 	<-done
 	return nil
+}
+
+func complete(opts ...Options) Options {
+	var result Options
+
+	for _, opt := range opts {
+		result.Options = gptscript.Complete(result.Options, opt.Options)
+		result.ListenAddress = types.FirstSet(opt.ListenAddress, result.ListenAddress)
+		result.Debug = types.FirstSet(opt.Debug, result.Debug)
+	}
+
+	if result.ListenAddress == "" {
+		result.ListenAddress = "127.0.0.1:0"
+	}
+
+	return result
 }
