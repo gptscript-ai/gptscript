@@ -60,6 +60,10 @@ func AppendPath(env []string, binPath string) []string {
 // Lookup will try to find bin in the PATH in env. It will refer to PATHEXT for Windows support.
 // If bin can not be resolved to anything the original bin string is returned.
 func Lookup(env []string, bin string) string {
+	if strings.Contains(bin, string(filepath.Separator)) {
+		return bin
+	}
+
 	for _, env := range env {
 		for _, prefix := range []string{"PATH=", "Path="} {
 			suffix, ok := strings.CutPrefix(env, prefix)
