@@ -378,7 +378,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	id := counter.Next()
 	status <- types.CompletionStatus{
 		CompletionID: id,
-		Request:      request,
+		Request:      messageRequest.Messages,
 	}
 
 	var cacheResponse bool
