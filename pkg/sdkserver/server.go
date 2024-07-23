@@ -154,6 +154,7 @@ func complete(opts ...Options) Options {
 		result.Options = gptscript.Complete(result.Options, opt.Options)
 		result.ListenAddress = types.FirstSet(opt.ListenAddress, result.ListenAddress)
 		result.Debug = types.FirstSet(opt.Debug, result.Debug)
+		result.DisableServerErrorLogging = types.FirstSet(opt.DisableServerErrorLogging, result.DisableServerErrorLogging)
 	}
 
 	if result.ListenAddress == "" {
