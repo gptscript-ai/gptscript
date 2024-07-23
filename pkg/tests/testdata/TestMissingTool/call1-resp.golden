@@ -5,7 +5,7 @@
       "toolCall": {
         "id": "call_1",
         "function": {
-          "name": "not bob"
+          "name": "not.bob"
         }
       }
     }

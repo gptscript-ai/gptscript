@@ -35,7 +35,7 @@
           "toolCall": {
             "id": "call_1",
             "function": {
-              "name": "not bob"
+              "name": "not.bob"
             }
           }
         }
@@ -46,13 +46,13 @@
       "role": "tool",
       "content": [
         {
-          "text": "ERROR: can not call unknown tool named [not bob]"
+          "text": "ERROR: can not call unknown tool named [notBob]"
         }
       ],
       "toolCall": {
         "id": "call_1",
         "function": {
-          "name": "not bob"
+          "name": "not.bob"
         }
       },
       "usage": {}
