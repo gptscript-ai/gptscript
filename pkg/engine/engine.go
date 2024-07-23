@@ -396,7 +396,7 @@ func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 			}
 			if toolID == "" {
 				log.Debugf("failed to find tool id for tool %s in tool_call result", content.ToolCall.Function.Name)
-				toolID = content.ToolCall.Function.Name
+				toolID = types.ToolNormalizer(content.ToolCall.Function.Name)
 				missing = true
 			}
 			state.Pending[content.ToolCall.ID] = *content.ToolCall

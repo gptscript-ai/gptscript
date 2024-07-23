@@ -954,7 +954,7 @@ func TestMissingTool(t *testing.T) {
 
 	r.RespondWith(tester.Result{
 		Func: types.CompletionFunctionCall{
-			Name: "not bob",
+			Name: "not.bob",
 		},
 	})
 
