@@ -86,3 +86,42 @@ func TestOpenAPIv2(t *testing.T) {
 
 	autogold.ExpectFile(t, prgv2.ToolSet, autogold.Dir("testdata/openapi"))
 }
+
+func TestOpenAPIv3Revamp(t *testing.T) {
+	os.Setenv("GPTSCRIPT_OPENAPI_REVAMP", "true")
+	prgv3 := types.Program{
+		ToolSet: types.ToolSet{},
+	}
+	datav3, err := os.ReadFile("testdata/openapi_v3.yaml")
+	require.NoError(t, err)
+	_, err = readTool(context.Background(), nil, &prgv3, &source{Content: datav3}, "")
+	require.NoError(t, err)
+
+	autogold.ExpectFile(t, prgv3.ToolSet, autogold.Dir("testdata/openapi"))
+}
+
+func TestOpenAPIv3NoOperationIDsRevamp(t *testing.T) {
+	os.Setenv("GPTSCRIPT_OPENAPI_REVAMP", "true")
+	prgv3 := types.Program{
+		ToolSet: types.ToolSet{},
+	}
+	datav3, err := os.ReadFile("testdata/openapi_v3_no_operation_ids.yaml")
+	require.NoError(t, err)
+	_, err = readTool(context.Background(), nil, &prgv3, &source{Content: datav3}, "")
+	require.NoError(t, err)
+
+	autogold.ExpectFile(t, prgv3.ToolSet, autogold.Dir("testdata/openapi"))
+}
+
+func TestOpenAPIv2Revamp(t *testing.T) {
+	os.Setenv("GPTSCRIPT_OPENAPI_REVAMP", "true")
+	prgv2 := types.Program{
+		ToolSet: types.ToolSet{},
+	}
+	datav2, err := os.ReadFile("testdata/openapi_v2.yaml")
+	require.NoError(t, err)
+	_, err = readTool(context.Background(), nil, &prgv2, &source{Content: datav2}, "")
+	require.NoError(t, err)
+
+	autogold.ExpectFile(t, prgv2.ToolSet, autogold.Dir("testdata/openapi"))
+}

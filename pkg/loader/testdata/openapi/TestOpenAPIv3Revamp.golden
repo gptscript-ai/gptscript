@@ -1,0 +1,116 @@
+types.ToolSet{
+	":": types.Tool{
+		ToolDef: types.ToolDef{Parameters: types.Parameters{
+			ModelName: "gpt-4o",
+			Export: []string{
+				"listOperationsSwaggerPetstore",
+				"getSchemaSwaggerPetstore",
+				"runOperationSwaggerPetstore",
+			},
+		}},
+		ID: ":",
+		ToolMapping: map[string][]types.ToolReference{
+			"getSchemaSwaggerPetstore": {{
+				Reference: "getSchemaSwaggerPetstore",
+				ToolID:    ":getSchemaSwaggerPetstore",
+			}},
+			"listOperationsSwaggerPetstore": {{
+				Reference: "listOperationsSwaggerPetstore",
+				ToolID:    ":listOperationsSwaggerPetstore",
+			}},
+			"runOperationSwaggerPetstore": {{
+				Reference: "runOperationSwaggerPetstore",
+				ToolID:    ":runOperationSwaggerPetstore",
+			}},
+		},
+		LocalTools: map[string]string{
+			"":                              ":",
+			"getschemaswaggerpetstore":      ":getSchemaSwaggerPetstore",
+			"listoperationsswaggerpetstore": ":listOperationsSwaggerPetstore",
+			"runoperationswaggerpetstore":   ":runOperationSwaggerPetstore",
+		},
+	},
+	":getSchemaSwaggerPetstore": types.Tool{
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Name:        "getSchemaSwaggerPetstore",
+				Description: "Get the JSONSchema for the arguments for an operation for Swagger Petstore. You must do this before you run the operation.",
+				ModelName:   "gpt-4o",
+				Arguments: &openapi3.Schema{
+					Type: &openapi3.Types{
+						"object",
+					},
+					Properties: openapi3.Schemas{"operation": &openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type:        &openapi3.Types{"string"},
+						Title:       "operation",
+						Description: "the name of the operation to get the schema for",
+						Required:    []string{"operation"},
+					}}},
+				},
+			},
+			Instructions: "#!sys.openapi get-schema  <none>",
+		},
+		ID:          ":getSchemaSwaggerPetstore",
+		ToolMapping: map[string][]types.ToolReference{},
+		LocalTools: map[string]string{
+			"":                              ":",
+			"getschemaswaggerpetstore":      ":getSchemaSwaggerPetstore",
+			"listoperationsswaggerpetstore": ":listOperationsSwaggerPetstore",
+			"runoperationswaggerpetstore":   ":runOperationSwaggerPetstore",
+		},
+		Source: types.ToolSource{LineNo: 1},
+	},
+	":listOperationsSwaggerPetstore": types.Tool{
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Name:        "listOperationsSwaggerPetstore",
+				Description: "List available operations for Swagger Petstore. Each of these operations is an OpenAPI operation. Run this tool before you do anything else.",
+				ModelName:   "gpt-4o",
+			},
+			Instructions: "#!sys.openapi list  <none>",
+		},
+		ID:          ":listOperationsSwaggerPetstore",
+		ToolMapping: map[string][]types.ToolReference{},
+		LocalTools: map[string]string{
+			"":                              ":",
+			"getschemaswaggerpetstore":      ":getSchemaSwaggerPetstore",
+			"listoperationsswaggerpetstore": ":listOperationsSwaggerPetstore",
+			"runoperationswaggerpetstore":   ":runOperationSwaggerPetstore",
+		},
+	},
+	":runOperationSwaggerPetstore": types.Tool{
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Name:        "runOperationSwaggerPetstore",
+				Description: "Run an operation for Swagger Petstore. You MUST call get-schema for the operation before you use this tool.",
+				ModelName:   "gpt-4o",
+				Arguments: &openapi3.Schema{
+					Type: &openapi3.Types{"object"},
+					Properties: openapi3.Schemas{
+						"args": &openapi3.SchemaRef{Value: &openapi3.Schema{
+							Type:        &openapi3.Types{"string"},
+							Title:       "args",
+							Description: "the JSON string containing arguments; must match the JSONSchema for the operation",
+							Required:    []string{"args"},
+						}},
+						"operation": &openapi3.SchemaRef{Value: &openapi3.Schema{
+							Type:        &openapi3.Types{"string"},
+							Title:       "operation",
+							Description: "the name of the operation to run",
+							Required:    []string{"operation"},
+						}},
+					},
+				},
+			},
+			Instructions: "#!sys.openapi run  <none>",
+		},
+		ID:          ":runOperationSwaggerPetstore",
+		ToolMapping: map[string][]types.ToolReference{},
+		LocalTools: map[string]string{
+			"":                              ":",
+			"getschemaswaggerpetstore":      ":getSchemaSwaggerPetstore",
+			"listoperationsswaggerpetstore": ":listOperationsSwaggerPetstore",
+			"runoperationswaggerpetstore":   ":runOperationSwaggerPetstore",
+		},
+	},
+}

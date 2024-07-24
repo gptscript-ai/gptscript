@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/gptscript-ai/gptscript/pkg/openapi"
 	"github.com/stretchr/testify/require"
 )
 
@@ -89,7 +90,7 @@ func TestPathParameterSerialization(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			path := path
 			params := getParameters(test.style, test.explode)
-			path = handlePathParameters(path, params, string(inputStr))
+			path = openapi.HandlePathParameters(path, params, string(inputStr))
 			require.Contains(t, test.expectedPaths, path)
 		})
 	}
@@ -111,13 +112,13 @@ func TestQueryParameterSerialization(t *testing.T) {
 	tests := []struct {
 		name            string
 		input           string
-		param           Parameter
+		param           openapi.Parameter
 		expectedQueries []string // We use multiple expected queries due to randomness in map iteration
 	}{
 		{
 			name:  "value",
 			input: string(inputStr),
-			param: Parameter{
+			param: openapi.Parameter{
 				Name: "v",
 			},
 			expectedQueries: []string{"v=42"},
@@ -125,7 +126,7 @@ func TestQueryParameterSerialization(t *testing.T) {
 		{
 			name:  "array form + explode",
 			input: string(inputStr),
-			param: Parameter{
+			param: openapi.Parameter{
 				Name:    "a",
 				Style:   "form",
 				Explode: boolPointer(true),
@@ -135,7 +136,7 @@ func TestQueryParameterSerialization(t *testing.T) {
 		{
 			name:  "array form + no explode",
 			input: string(inputStr),
-			param: Parameter{
+			param: openapi.Parameter{
 				Name:    "a",
 				Style:   "form",
 				Explode: boolPointer(false),
@@ -145,7 +146,7 @@ func TestQueryParameterSerialization(t *testing.T) {
 		{
 			name:  "array spaceDelimited + explode",
 			input: string(inputStr),
-			param: Parameter{
+			param: openapi.Parameter{
 				Name:    "a",
 				Style:   "spaceDelimited",
 				Explode: boolPointer(true),
@@ -155,7 +156,7 @@ func TestQueryParameterSerialization(t *testing.T) {
 		{
 			name:  "array spaceDelimited + no explode",
 			input: string(inputStr),
-			param: Parameter{
+			param: openapi.Parameter{
 				Name:    "a",
 				Style:   "spaceDelimited",
 				Explode: boolPointer(false),
@@ -165,7 +166,7 @@ func TestQueryParameterSerialization(t *testing.T) {
 		{
 			name:  "array pipeDelimited + explode",
 			input: string(inputStr),
-			param: Parameter{
+			param: openapi.Parameter{
 				Name:    "a",
 				Style:   "pipeDelimited",
 				Explode: boolPointer(true),
@@ -175,7 +176,7 @@ func TestQueryParameterSerialization(t *testing.T) {
 		{
 			name:  "array pipeDelimited + no explode",
 			input: string(inputStr),
-			param: Parameter{
+			param: openapi.Parameter{
 				Name:    "a",
 				Style:   "pipeDelimited",
 				Explode: boolPointer(false),
@@ -185,7 +186,7 @@ func TestQueryParameterSerialization(t *testing.T) {
 		{
 			name:  "object form + explode",
 			input: string(inputStr),
-			param: Parameter{
+			param: openapi.Parameter{
 				Name:    "o",
 				Style:   "form",
 				Explode: boolPointer(true),
@@ -198,7 +199,7 @@ func TestQueryParameterSerialization(t *testing.T) {
 		{
 			name:  "object form + no explode",
 			input: string(inputStr),
-			param: Parameter{
+			param: openapi.Parameter{
 				Name:    "o",
 				Style:   "form",
 				Explode: boolPointer(false),
@@ -211,7 +212,7 @@ func TestQueryParameterSerialization(t *testing.T) {
 		{
 			name:  "object deepObject",
 			input: string(inputStr),
-			param: Parameter{
+			param: openapi.Parameter{
 				Name:  "o",
 				Style: "deepObject",
 			},
@@ -224,14 +225,14 @@ func TestQueryParameterSerialization(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			q := handleQueryParameters(url.Values{}, []Parameter{test.param}, test.input)
+			q := openapi.HandleQueryParameters(url.Values{}, []openapi.Parameter{test.param}, test.input)
 			require.Contains(t, test.expectedQueries, q.Encode())
 		})
 	}
 }
 
-func getParameters(style string, explode bool) []Parameter {
-	return []Parameter{
+func getParameters(style string, explode bool) []openapi.Parameter {
+	return []openapi.Parameter{
 		{
 			Name:    "v",
 			Style:   style,

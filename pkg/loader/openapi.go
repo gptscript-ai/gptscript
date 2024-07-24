@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"os"
 	"regexp"
 	"slices"
 	"sort"
@@ -11,7 +12,7 @@ import (
 	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/gptscript-ai/gptscript/pkg/engine"
+	"github.com/gptscript-ai/gptscript/pkg/openapi"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
@@ -20,8 +21,12 @@ var toolNameRegex = regexp.MustCompile(`[^a-zA-Z0-9_-]+`)
 // getOpenAPITools parses an OpenAPI definition and generates a set of tools from it.
 // Each operation will become a tool definition.
 // The tool's Instructions will be in the format "#!sys.openapi '{JSON Instructions}'",
-// where the JSON Instructions are a JSON-serialized engine.OpenAPIInstructions struct.
-func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
+// where the JSON Instructions are a JSON-serialized openapi.OperationInfo struct.
+func getOpenAPITools(t *openapi3.T, defaultHost, source, targetToolName string) ([]types.Tool, error) {
+	if os.Getenv("GPTSCRIPT_OPENAPI_REVAMP") == "true" {
+		return getOpenAPIToolsRevamp(t, source, targetToolName)
+	}
+
 	if log.IsDebug() {
 		start := time.Now()
 		defer func() {
@@ -51,7 +56,7 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 		for _, item := range t.Security {
 			current := map[string]struct{}{}
 			for name := range item {
-				if scheme, ok := t.Components.SecuritySchemes[name]; ok && slices.Contains(engine.SupportedSecurityTypes, scheme.Value.Type) {
+				if scheme, ok := t.Components.SecuritySchemes[name]; ok && slices.Contains(openapi.SupportedSecurityTypes, scheme.Value.Type) {
 					current[name] = struct{}{}
 				}
 			}
@@ -134,10 +139,10 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 				//   - C
 				//     D
 				auths            []map[string]struct{}
-				queryParameters  []engine.Parameter
-				pathParameters   []engine.Parameter
-				headerParameters []engine.Parameter
-				cookieParameters []engine.Parameter
+				queryParameters  []openapi.Parameter
+				pathParameters   []openapi.Parameter
+				headerParameters []openapi.Parameter
+				cookieParameters []openapi.Parameter
 				bodyMIME         string
 			)
 			tool := types.Tool{
@@ -177,7 +182,7 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 				}
 
 				// Add the parameter to the appropriate list for the tool's instructions
-				p := engine.Parameter{
+				p := openapi.Parameter{
 					Name:    param.Value.Name,
 					Style:   param.Value.Style,
 					Explode: param.Value.Explode,
@@ -199,7 +204,7 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 				for mime, content := range operation.RequestBody.Value.Content {
 					// Each MIME type needs to be handled individually, so we
 					// keep a list of the ones we support.
-					if !slices.Contains(engine.SupportedMIMETypes, mime) {
+					if !slices.Contains(openapi.SupportedMIMETypes, mime) {
 						continue
 					}
 					bodyMIME = mime
@@ -250,18 +255,18 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 			}
 
 			// For each set of auths, turn them into SecurityInfos, and drop ones that contain unsupported types.
-			var infos [][]engine.SecurityInfo
+			var infos [][]openapi.SecurityInfo
 		outer:
 			for _, auth := range auths {
-				var current []engine.SecurityInfo
+				var current []openapi.SecurityInfo
 				for name := range auth {
 					if scheme, ok := t.Components.SecuritySchemes[name]; ok {
-						if !slices.Contains(engine.SupportedSecurityTypes, scheme.Value.Type) {
+						if !slices.Contains(openapi.SupportedSecurityTypes, scheme.Value.Type) {
 							// There is an unsupported type in this auth, so move on to the next one.
 							continue outer
 						}
 
-						current = append(current, engine.SecurityInfo{
+						current = append(current, openapi.SecurityInfo{
 							Type:       scheme.Value.Type,
 							Name:       name,
 							In:         scheme.Value.In,
@@ -324,17 +329,17 @@ func getOpenAPITools(t *openapi3.T, defaultHost string) ([]types.Tool, error) {
 	return tools, nil
 }
 
-func instructionString(server, method, path, bodyMIME string, queryParameters, pathParameters, headerParameters, cookieParameters []engine.Parameter, infos [][]engine.SecurityInfo) (string, error) {
-	inst := engine.OpenAPIInstructions{
-		Server:           server,
-		Path:             path,
-		Method:           method,
-		BodyContentMIME:  bodyMIME,
-		SecurityInfos:    infos,
-		QueryParameters:  queryParameters,
-		PathParameters:   pathParameters,
-		HeaderParameters: headerParameters,
-		CookieParameters: cookieParameters,
+func instructionString(server, method, path, bodyMIME string, queryParameters, pathParameters, headerParameters, cookieParameters []openapi.Parameter, infos [][]openapi.SecurityInfo) (string, error) {
+	inst := openapi.OperationInfo{
+		Server:          server,
+		Path:            path,
+		Method:          method,
+		BodyContentMIME: bodyMIME,
+		SecurityInfos:   infos,
+		QueryParams:     queryParameters,
+		PathParams:      pathParameters,
+		HeaderParams:    headerParameters,
+		CookieParams:    cookieParameters,
 	}
 	instBytes, err := json.Marshal(inst)
 	if err != nil {
@@ -361,4 +366,96 @@ func parseServer(server *openapi3.Server) (string, error) {
 		return "", fmt.Errorf("invalid server URL: %s (must use HTTP or HTTPS; relative URLs not supported)", s)
 	}
 	return s, nil
+}
+
+func getOpenAPIToolsRevamp(t *openapi3.T, source, targetToolName string) ([]types.Tool, error) {
+	if t == nil {
+		return nil, fmt.Errorf("OpenAPI spec is nil")
+	} else if t.Info == nil {
+		return nil, fmt.Errorf("OpenAPI spec is missing info field")
+	}
+
+	if targetToolName == "" {
+		targetToolName = openapi.NoFilter
+	}
+
+	list := types.Tool{
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Name:        types.ToolNormalizer("list-operations-" + t.Info.Title),
+				Description: fmt.Sprintf("List available operations for %s. Each of these operations is an OpenAPI operation. Run this tool before you do anything else.", t.Info.Title),
+			},
+			Instructions: fmt.Sprintf("%s list %s %s", types.OpenAPIPrefix, source, targetToolName),
+		},
+		Source: types.ToolSource{
+			LineNo: 0,
+		},
+	}
+
+	getSchema := types.Tool{
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Name:        types.ToolNormalizer("get-schema-" + t.Info.Title),
+				Description: fmt.Sprintf("Get the JSONSchema for the arguments for an operation for %s. You must do this before you run the operation.", t.Info.Title),
+				Arguments: &openapi3.Schema{
+					Type: &openapi3.Types{openapi3.TypeObject},
+					Properties: openapi3.Schemas{
+						"operation": {
+							Value: &openapi3.Schema{
+								Type:        &openapi3.Types{openapi3.TypeString},
+								Title:       "operation",
+								Description: "the name of the operation to get the schema for",
+								Required:    []string{"operation"},
+							},
+						},
+					},
+				},
+			},
+			Instructions: fmt.Sprintf("%s get-schema %s %s", types.OpenAPIPrefix, source, targetToolName),
+		},
+		Source: types.ToolSource{
+			LineNo: 1,
+		},
+	}
+
+	run := types.Tool{
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Name:        types.ToolNormalizer("run-operation-" + t.Info.Title),
+				Description: fmt.Sprintf("Run an operation for %s. You MUST call get-schema for the operation before you use this tool.", t.Info.Title),
+				Arguments: &openapi3.Schema{
+					Type: &openapi3.Types{openapi3.TypeObject},
+					Properties: openapi3.Schemas{
+						"operation": {
+							Value: &openapi3.Schema{
+								Type:        &openapi3.Types{openapi3.TypeString},
+								Title:       "operation",
+								Description: "the name of the operation to run",
+								Required:    []string{"operation"},
+							},
+						},
+						"args": {
+							Value: &openapi3.Schema{
+								Type:        &openapi3.Types{openapi3.TypeString},
+								Title:       "args",
+								Description: "the JSON string containing arguments; must match the JSONSchema for the operation",
+								Required:    []string{"args"},
+							},
+						},
+					},
+				},
+			},
+			Instructions: fmt.Sprintf("%s run %s %s", types.OpenAPIPrefix, source, targetToolName),
+		},
+	}
+
+	exportTool := types.Tool{
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Export: []string{list.Parameters.Name, getSchema.Parameters.Name, run.Parameters.Name},
+			},
+		},
+	}
+
+	return []types.Tool{exportTool, list, getSchema, run}, nil
 }
