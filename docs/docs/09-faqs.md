@@ -53,3 +53,11 @@ This tells the LLM (by way of a [system message](https://platform.openai.com/doc
 
 This context also automatically shares the `sys.ls`, `sys.read`, and `sys.write` tools with the tool that is using it as a context. This is because if a tool intends to interact with the workspace, it minimally needs these tools.
 
+### I'm hitting GitHub's rate limit for unauthenticated requests when using GPTScript.
+
+By default, GPTScript makes unauthenticated requests to GitHub when pulling tools. Since GitHub's rate limits for unauthenticated requests are fairly low, running into them when developing with GPTScript is a common issue. To avoid this, you can get GPTScript to make authenticated requests -- which have higher rate limits -- by setting the `GITHUB_AUTH_TOKEN` environment variable to your github account's PAT (Personal Access Token).
+If you're already authenticated with the `gh` CLI, you can use its token by running:
+
+```bash
+export GITHUB_AUTH_TOKEN="$(gh auth token)"
+```
