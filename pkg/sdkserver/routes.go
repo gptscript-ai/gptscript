@@ -202,6 +202,7 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 			// Set the monitor factory so that we can get events from the server.
 			MonitorFactory:      NewSessionFactory(s.events),
 			CredentialOverrides: reqObject.CredentialOverrides,
+			Sequential:          reqObject.ForceSequential,
 		},
 	}
 
