@@ -17,7 +17,8 @@ require (
 	github.com/gptscript-ai/broadcaster v0.0.0-20240625175512-c43682019b86
 	github.com/gptscript-ai/chat-completion-client v0.0.0-20240531200700-af8e7ecf0379
 	github.com/gptscript-ai/cmd v0.0.0-20240625175447-4250b42feb7d
-	github.com/gptscript-ai/tui v0.0.0-20240722014329-d50b5ac5db74
+	github.com/gptscript-ai/go-gptscript v0.9.3-0.20240728044543-20d868b5baa6
+	github.com/gptscript-ai/tui v0.0.0-20240728045051-19ba83cd96c1
 	github.com/hexops/autogold/v2 v2.2.1
 	github.com/hexops/valast v1.4.4
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
@@ -63,7 +64,6 @@ require (
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/gookit/color v1.5.4 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
-	github.com/gptscript-ai/go-gptscript v0.9.3-0.20240722014125-d757d09f606b // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hexops/autogold v1.3.1 // indirect
