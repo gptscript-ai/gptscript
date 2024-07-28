@@ -171,10 +171,10 @@ github.com/gptscript-ai/chat-completion-client v0.0.0-20240531200700-af8e7ecf037
 github.com/gptscript-ai/chat-completion-client v0.0.0-20240531200700-af8e7ecf0379/go.mod h1:7P/o6/IWa1KqsntVf68hSnLKuu3+xuqm6lYhch1w4jo=
 github.com/gptscript-ai/cmd v0.0.0-20240625175447-4250b42feb7d h1:sKf7T7twhGXs6AVbvD9pKDVewykkwSAPwEpmIEQIR/4=
 github.com/gptscript-ai/cmd v0.0.0-20240625175447-4250b42feb7d/go.mod h1:DJAo1xTht1LDkNYFNydVjTHd576TC7MlpsVRl3oloVw=
-github.com/gptscript-ai/go-gptscript v0.9.3-0.20240722014125-d757d09f606b h1:Hxu8oPE43uQ2sZ7P+9yGSX9bXh0RoJfOgvY/SlCwFlM=
-github.com/gptscript-ai/go-gptscript v0.9.3-0.20240722014125-d757d09f606b/go.mod h1:Dh6vYRAiVcyC3ElZIGzTvNF1FxtYwA07BHfSiFKQY7s=
-github.com/gptscript-ai/tui v0.0.0-20240722014329-d50b5ac5db74 h1:69BENZCN2y4BCxmPjMRp+ZQ47ay4i5gRgREKZatu5oE=
-github.com/gptscript-ai/tui v0.0.0-20240722014329-d50b5ac5db74/go.mod h1:sP/9g7+nLq65aGef5F30AEG+Cuu4BwlglUYv1Pzps4Y=
+github.com/gptscript-ai/go-gptscript v0.9.3-0.20240728044543-20d868b5baa6 h1:hF9Q8KdQhuoXSGKVh4ywRvwn5RJt9rbPraigpXqbGYU=
+github.com/gptscript-ai/go-gptscript v0.9.3-0.20240728044543-20d868b5baa6/go.mod h1:Dh6vYRAiVcyC3ElZIGzTvNF1FxtYwA07BHfSiFKQY7s=
+github.com/gptscript-ai/tui v0.0.0-20240728045051-19ba83cd96c1 h1:gJXswjjwoiWdOS+s73mliWbN9dyJpiUkb3T+EiV7EFc=
+github.com/gptscript-ai/tui v0.0.0-20240728045051-19ba83cd96c1/go.mod h1:Llh3vi87gyry6j/sgJxhkHHvgv9uQRzEiMWuQtmpW1w=
 github.com/hashicorp/errwrap v1.0.0 h1:hLrqtEDnRye3+sgx6z4qVLNuviH3MR5aQ0ykNJa/UYA=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+lD48awMYo=

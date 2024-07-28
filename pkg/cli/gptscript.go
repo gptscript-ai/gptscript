@@ -13,6 +13,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/gptscript-ai/cmd"
+	gptscript2 "github.com/gptscript-ai/go-gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/auth"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
@@ -464,9 +465,11 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 		if !r.DisableTUI && !r.Debug && !r.DebugMessages && !r.NoTrunc {
 			// Don't use cmd.Context() because then sigint will cancel everything
 			return tui.Run(context.Background(), args[0], tui.RunOptions{
-				OpenAIAPIKey:        r.OpenAIOptions.APIKey,
-				OpenAIBaseURL:       r.OpenAIOptions.BaseURL,
-				DefaultModel:        r.DefaultModel,
+				ClientOpts: &gptscript2.GlobalOptions{
+					OpenAIAPIKey:  r.OpenAIOptions.APIKey,
+					OpenAIBaseURL: r.OpenAIOptions.BaseURL,
+					DefaultModel:  r.DefaultModel,
+				},
 				TrustedRepoPrefixes: []string{"github.com/gptscript-ai"},
 				DisableCache:        r.DisableCache,
 				CredentialOverrides: r.CredentialOverride,
