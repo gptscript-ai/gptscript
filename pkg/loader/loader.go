@@ -15,8 +15,6 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/getkin/kin-openapi/openapi2"
-	"github.com/getkin/kin-openapi/openapi2conv"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gptscript-ai/gptscript/internal"
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
@@ -27,7 +25,6 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/parser"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
-	kyaml "sigs.k8s.io/yaml"
 )
 
 const CacheTimeout = time.Hour
@@ -157,33 +154,8 @@ func loadOpenAPI(prg *types.Program, data []byte) *openapi3.T {
 		prg.OpenAPICache = map[string]any{}
 	}
 
-	switch openapi.IsOpenAPI(data) {
-	case 2:
-		// Convert OpenAPI v2 to v3
-		jsondata := data
-		if !json.Valid(data) {
-			jsondata, err = kyaml.YAMLToJSON(data)
-			if err != nil {
-				return nil
-			}
-		}
-
-		doc := &openapi2.T{}
-		if err := doc.UnmarshalJSON(jsondata); err != nil {
-			return nil
-		}
-
-		openAPIDocument, err = openapi2conv.ToV3(doc)
-		if err != nil {
-			return nil
-		}
-	case 3:
-		// Use OpenAPI v3 as is
-		openAPIDocument, err = openapi3.NewLoader().LoadFromData(data)
-		if err != nil {
-			return nil
-		}
-	default:
+	openAPIDocument, err = openapi.LoadFromBytes(data)
+	if err != nil {
 		return nil
 	}
 

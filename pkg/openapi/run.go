@@ -18,6 +18,8 @@ import (
 	"golang.org/x/exp/maps"
 )
 
+const RunTool = "run"
+
 func Run(operationID, defaultHost, args string, t *openapi3.T, envs []string) (string, bool, error) {
 	envMap := map[string]string{}
 	for _, e := range envs {
@@ -145,11 +147,15 @@ func Run(operationID, defaultHost, args string, t *openapi3.T, envs []string) (s
 	if err != nil {
 		return "", false, fmt.Errorf("failed to make request: %w", err)
 	}
-	defer resp.Body.Close()
 
-	result, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", false, fmt.Errorf("failed to read response: %w", err)
+	var result []byte
+	if resp.Body != nil {
+		defer resp.Body.Close()
+
+		result, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return "", false, fmt.Errorf("failed to read response: %w", err)
+		}
 	}
 
 	return string(result), true, nil

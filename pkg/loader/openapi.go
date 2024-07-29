@@ -385,7 +385,7 @@ func getOpenAPIToolsRevamp(t *openapi3.T, source, targetToolName string) ([]type
 				Name:        types.ToolNormalizer("list-operations-" + t.Info.Title),
 				Description: fmt.Sprintf("List available operations for %s. Each of these operations is an OpenAPI operation. Run this tool before you do anything else.", t.Info.Title),
 			},
-			Instructions: fmt.Sprintf("%s list %s %s", types.OpenAPIPrefix, source, targetToolName),
+			Instructions: fmt.Sprintf("%s %s %s %s", types.OpenAPIPrefix, openapi.ListTool, source, targetToolName),
 		},
 		Source: types.ToolSource{
 			LineNo: 0,
@@ -411,7 +411,7 @@ func getOpenAPIToolsRevamp(t *openapi3.T, source, targetToolName string) ([]type
 					},
 				},
 			},
-			Instructions: fmt.Sprintf("%s get-schema %s %s", types.OpenAPIPrefix, source, targetToolName),
+			Instructions: fmt.Sprintf("%s %s %s %s", types.OpenAPIPrefix, openapi.GetSchemaTool, source, targetToolName),
 		},
 		Source: types.ToolSource{
 			LineNo: 1,
@@ -422,7 +422,7 @@ func getOpenAPIToolsRevamp(t *openapi3.T, source, targetToolName string) ([]type
 		ToolDef: types.ToolDef{
 			Parameters: types.Parameters{
 				Name:        types.ToolNormalizer("run-operation-" + t.Info.Title),
-				Description: fmt.Sprintf("Run an operation for %s. You MUST call get-schema for the operation before you use this tool.", t.Info.Title),
+				Description: fmt.Sprintf("Run an operation for %s. You MUST call %s for the operation before you use this tool.", t.Info.Title, openapi.GetSchemaTool),
 				Arguments: &openapi3.Schema{
 					Type: &openapi3.Types{openapi3.TypeObject},
 					Properties: openapi3.Schemas{
@@ -445,7 +445,7 @@ func getOpenAPIToolsRevamp(t *openapi3.T, source, targetToolName string) ([]type
 					},
 				},
 			},
-			Instructions: fmt.Sprintf("%s run %s %s", types.OpenAPIPrefix, source, targetToolName),
+			Instructions: fmt.Sprintf("%s %s %s %s", types.OpenAPIPrefix, openapi.RunTool, source, targetToolName),
 		},
 	}
 

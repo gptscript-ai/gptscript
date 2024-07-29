@@ -35,7 +35,7 @@ func loadFromURL(source string) (*openapi3.T, error) {
 		return nil, err
 	}
 
-	return loadFromBytes(contents)
+	return LoadFromBytes(contents)
 }
 
 func loadFromFile(source string) (*openapi3.T, error) {
@@ -44,10 +44,10 @@ func loadFromFile(source string) (*openapi3.T, error) {
 		return nil, err
 	}
 
-	return loadFromBytes(contents)
+	return LoadFromBytes(contents)
 }
 
-func loadFromBytes(content []byte) (*openapi3.T, error) {
+func LoadFromBytes(content []byte) (*openapi3.T, error) {
 	var (
 		openAPIDocument *openapi3.T
 		err             error

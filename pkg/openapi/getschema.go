@@ -32,6 +32,8 @@ var (
 	SupportedSecurityTypes = []string{"apiKey", "http"}
 )
 
+const GetSchemaTool = "get-schema"
+
 // GetSchema returns the JSONSchema and OperationInfo for a particular OpenAPI operation.
 // Return values in order: JSONSchema (string), OperationInfo, found (bool), error.
 func GetSchema(operationID, defaultHost string, t *openapi3.T) (string, OperationInfo, bool, error) {

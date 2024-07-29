@@ -37,7 +37,7 @@ func (e *Engine) runOpenAPIRevamp(tool types.Tool, input string) (*Return, error
 
 	var res *Return
 	switch command {
-	case "list":
+	case openapi.ListTool:
 		t, err := openapi.Load(source)
 		if err != nil {
 			return nil, fmt.Errorf("failed to load OpenAPI file %s: %w", source, err)
@@ -56,7 +56,7 @@ func (e *Engine) runOpenAPIRevamp(tool types.Tool, input string) (*Return, error
 		res = &Return{
 			Result: ptr(string(opListJSON)),
 		}
-	case "get-schema":
+	case openapi.GetSchemaTool:
 		operation := gjson.Get(input, "operation").String()
 
 		if filter != "" && filter != openapi.NoFilter {
@@ -104,7 +104,7 @@ func (e *Engine) runOpenAPIRevamp(tool types.Tool, input string) (*Return, error
 		res = &Return{
 			Result: ptr(string(schemaJSON)),
 		}
-	case "run":
+	case openapi.RunTool:
 		operation := gjson.Get(input, "operation").String()
 		args := gjson.Get(input, "args").String()
 

@@ -16,7 +16,10 @@ type Operation struct {
 	Summary     string `json:"summary,omitempty"`
 }
 
-const NoFilter = "<none>"
+const (
+	ListTool = "list"
+	NoFilter = "<none>"
+)
 
 func List(t *openapi3.T, filter string) (OperationList, error) {
 	operations := make(map[string]Operation)
@@ -28,14 +31,7 @@ func List(t *openapi3.T, filter string) (OperationList, error) {
 			)
 			if filter != "" && filter != NoFilter {
 				if strings.Contains(filter, "*") {
-					var filters []string
-					if strings.Contains(filter, "|") {
-						filters = strings.Split(filter, "|")
-					} else {
-						filters = []string{filter}
-					}
-
-					match, err = MatchFilters(filters, operation.OperationID)
+					match, err = MatchFilters(strings.Split(filter, "|"), operation.OperationID)
 					if err != nil {
 						return OperationList{}, err
 					}
