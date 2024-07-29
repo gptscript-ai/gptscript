@@ -35,8 +35,6 @@ var (
 // GetSchema returns the JSONSchema and OperationInfo for a particular OpenAPI operation.
 // Return values in order: JSONSchema (string), OperationInfo, found (bool), error.
 func GetSchema(operationID, defaultHost string, t *openapi3.T) (string, OperationInfo, bool, error) {
-	// We basically want to extract all the information that we need for the HTTP request,
-	// like we do in GPTScript.
 	arguments := &openapi3.Schema{
 		Type:       &openapi3.Types{"object"},
 		Properties: openapi3.Schemas{},
