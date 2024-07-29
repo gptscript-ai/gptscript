@@ -204,6 +204,7 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 			CredentialOverrides: reqObject.CredentialOverrides,
 			Sequential:          reqObject.ForceSequential,
 		},
+		DefaultModelProvider: reqObject.DefaultModelProvider,
 	}
 
 	if reqObject.Confirm {
