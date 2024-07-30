@@ -40,15 +40,16 @@ type GPTScript struct {
 }
 
 type Options struct {
-	Cache               cache.Options
-	OpenAI              openai.Options
-	Monitor             monitor.Options
-	Runner              runner.Options
-	CredentialContext   string
-	Quiet               *bool
-	Workspace           string
-	DisablePromptServer bool
-	Env                 []string
+	Cache                cache.Options
+	OpenAI               openai.Options
+	Monitor              monitor.Options
+	Runner               runner.Options
+	DefaultModelProvider string
+	CredentialContext    string
+	Quiet                *bool
+	Workspace            string
+	DisablePromptServer  bool
+	Env                  []string
 }
 
 func Complete(opts ...Options) Options {
@@ -64,6 +65,7 @@ func Complete(opts ...Options) Options {
 		result.Workspace = types.FirstSet(opt.Workspace, result.Workspace)
 		result.Env = append(result.Env, opt.Env...)
 		result.DisablePromptServer = types.FirstSet(opt.DisablePromptServer, result.DisablePromptServer)
+		result.DefaultModelProvider = types.FirstSet(opt.DefaultModelProvider, result.DefaultModelProvider)
 	}
 
 	if result.Quiet == nil {
@@ -106,16 +108,18 @@ func New(ctx context.Context, o ...Options) (*GPTScript, error) {
 		return nil, err
 	}
 
-	oaiClient, err := openai.NewClient(ctx, credStore, opts.OpenAI, openai.Options{
-		Cache:   cacheClient,
-		SetSeed: true,
-	})
-	if err != nil {
-		return nil, err
-	}
+	if opts.DefaultModelProvider == "" {
+		oaiClient, err := openai.NewClient(ctx, credStore, opts.OpenAI, openai.Options{
+			Cache:   cacheClient,
+			SetSeed: true,
+		})
+		if err != nil {
+			return nil, err
+		}
 
-	if err := registry.AddClient(oaiClient); err != nil {
-		return nil, err
+		if err := registry.AddClient(oaiClient); err != nil {
+			return nil, err
+		}
 	}
 
 	if opts.Runner.MonitorFactory == nil {
@@ -143,7 +147,7 @@ func New(ctx context.Context, o ...Options) (*GPTScript, error) {
 
 	fullEnv := append(opts.Env, extraEnv...)
 
-	remoteClient := remote.New(runner, fullEnv, cacheClient, credStore)
+	remoteClient := remote.New(runner, fullEnv, cacheClient, credStore, opts.DefaultModelProvider)
 	if err := registry.AddClient(remoteClient); err != nil {
 		closeServer()
 		return nil, err

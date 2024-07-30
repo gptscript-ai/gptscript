@@ -22,21 +22,23 @@ import (
 )
 
 type Client struct {
-	clientsLock sync.Mutex
-	cache       *cache.Client
-	clients     map[string]*openai.Client
-	models      map[string]*openai.Client
-	runner      *runner.Runner
-	envs        []string
-	credStore   credentials.CredentialStore
+	clientsLock     sync.Mutex
+	cache           *cache.Client
+	clients         map[string]*openai.Client
+	models          map[string]*openai.Client
+	runner          *runner.Runner
+	envs            []string
+	credStore       credentials.CredentialStore
+	defaultProvider string
 }
 
-func New(r *runner.Runner, envs []string, cache *cache.Client, credStore credentials.CredentialStore) *Client {
+func New(r *runner.Runner, envs []string, cache *cache.Client, credStore credentials.CredentialStore, defaultProvider string) *Client {
 	return &Client{
-		cache:     cache,
-		runner:    r,
-		envs:      envs,
-		credStore: credStore,
+		cache:           cache,
+		runner:          r,
+		envs:            envs,
+		credStore:       credStore,
+		defaultProvider: defaultProvider,
 	}
 }
 
@@ -73,13 +75,23 @@ func (c *Client) ListModels(ctx context.Context, providers ...string) (result []
 	return
 }
 
-func (c *Client) Supports(ctx context.Context, modelName string) (bool, error) {
-	toolName, modelNameSuffix := types.SplitToolRef(modelName)
-	if modelNameSuffix == "" {
+func (c *Client) parseModel(modelString string) (modelName, providerName string) {
+	toolName, subTool := types.SplitToolRef(modelString)
+	if subTool == "" {
+		// This is just a plain model string "gpt4o"
+		return toolName, c.defaultProvider
+	}
+	// This is a provider string "modelName from provider"
+	return subTool, toolName
+}
+
+func (c *Client) Supports(ctx context.Context, modelString string) (bool, error) {
+	_, providerName := c.parseModel(modelString)
+	if providerName == "" {
 		return false, nil
 	}
 
-	client, err := c.load(ctx, toolName)
+	client, err := c.load(ctx, providerName)
 	if err != nil {
 		return false, err
 	}
@@ -91,7 +103,7 @@ func (c *Client) Supports(ctx context.Context, modelName string) (bool, error) {
 		c.models = map[string]*openai.Client{}
 	}
 
-	c.models[modelName] = client
+	c.models[modelString] = client
 	return true, nil
 }
 
