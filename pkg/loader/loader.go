@@ -8,26 +8,23 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"os"
 	"path"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
 
-	"github.com/getkin/kin-openapi/openapi2"
-	"github.com/getkin/kin-openapi/openapi2conv"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gptscript-ai/gptscript/internal"
 	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
+	"github.com/gptscript-ai/gptscript/pkg/openapi"
 	"github.com/gptscript-ai/gptscript/pkg/parser"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
-	"gopkg.in/yaml.v3"
-	kyaml "sigs.k8s.io/yaml"
 )
 
 const CacheTimeout = time.Hour
@@ -157,33 +154,8 @@ func loadOpenAPI(prg *types.Program, data []byte) *openapi3.T {
 		prg.OpenAPICache = map[string]any{}
 	}
 
-	switch isOpenAPI(data) {
-	case 2:
-		// Convert OpenAPI v2 to v3
-		jsondata := data
-		if !json.Valid(data) {
-			jsondata, err = kyaml.YAMLToJSON(data)
-			if err != nil {
-				return nil
-			}
-		}
-
-		doc := &openapi2.T{}
-		if err := doc.UnmarshalJSON(jsondata); err != nil {
-			return nil
-		}
-
-		openAPIDocument, err = openapi2conv.ToV3(doc)
-		if err != nil {
-			return nil
-		}
-	case 3:
-		// Use OpenAPI v3 as is
-		openAPIDocument, err = openapi3.NewLoader().LoadFromData(data)
-		if err != nil {
-			return nil
-		}
-	default:
+	openAPIDocument, err = openapi.LoadFromBytes(data)
+	if err != nil {
 		return nil
 	}
 
@@ -202,14 +174,18 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 		return []types.Tool{tool}, nil
 	}
 
-	var tools []types.Tool
+	var (
+		tools     []types.Tool
+		isOpenAPI bool
+	)
 
 	if openAPIDocument := loadOpenAPI(prg, data); openAPIDocument != nil {
+		isOpenAPI = true
 		var err error
 		if base.Remote {
-			tools, err = getOpenAPITools(openAPIDocument, base.Location)
+			tools, err = getOpenAPITools(openAPIDocument, base.Location, base.Location, targetToolName)
 		} else {
-			tools, err = getOpenAPITools(openAPIDocument, "")
+			tools, err = getOpenAPITools(openAPIDocument, "", base.Name, targetToolName)
 		}
 		if err != nil {
 			return nil, fmt.Errorf("error parsing OpenAPI definition: %w", err)
@@ -257,10 +233,6 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 		// Probably a better way to come up with an ID
 		tool.ID = tool.Source.Location + ":" + tool.Name
 
-		if i == 0 && targetToolName == "" {
-			targetTools = append(targetTools, tool)
-		}
-
 		if i != 0 && tool.Parameters.Name == "" {
 			return nil, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have no name"))
 		}
@@ -273,16 +245,35 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 			return nil, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have global tools"))
 		}
 
-		if targetToolName != "" && tool.Parameters.Name != "" {
-			if strings.EqualFold(tool.Parameters.Name, targetToolName) {
+		// Determine targetTools
+		if isOpenAPI && os.Getenv("GPTSCRIPT_OPENAPI_REVAMP") == "true" {
+			targetTools = append(targetTools, tool)
+		} else {
+			if i == 0 && targetToolName == "" {
 				targetTools = append(targetTools, tool)
-			} else if strings.Contains(targetToolName, "*") {
-				match, err := filepath.Match(strings.ToLower(targetToolName), strings.ToLower(tool.Parameters.Name))
-				if err != nil {
-					return nil, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, err)
-				}
-				if match {
+			}
+
+			if targetToolName != "" && tool.Parameters.Name != "" {
+				if strings.EqualFold(tool.Parameters.Name, targetToolName) {
 					targetTools = append(targetTools, tool)
+				} else if strings.Contains(targetToolName, "*") {
+					var patterns []string
+					if strings.Contains(targetToolName, "|") {
+						patterns = strings.Split(targetToolName, "|")
+					} else {
+						patterns = []string{targetToolName}
+					}
+
+					for _, pattern := range patterns {
+						match, err := filepath.Match(strings.ToLower(pattern), strings.ToLower(tool.Parameters.Name))
+						if err != nil {
+							return nil, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, err)
+						}
+						if match {
+							targetTools = append(targetTools, tool)
+							break
+						}
+					}
 				}
 			}
 		}
@@ -490,43 +481,4 @@ func input(ctx context.Context, cache *cache.Client, base *source, name string) 
 	}
 
 	return nil, fmt.Errorf("can not load tools path=%s name=%s", base.Path, name)
-}
-
-// isOpenAPI checks if the data is an OpenAPI definition and returns the version if it is.
-func isOpenAPI(data []byte) int {
-	var fragment struct {
-		Paths   map[string]any `json:"paths,omitempty"`
-		Swagger string         `json:"swagger,omitempty"`
-		OpenAPI string         `json:"openapi,omitempty"`
-	}
-
-	if err := json.Unmarshal(data, &fragment); err != nil {
-		if err := yaml.Unmarshal(data, &fragment); err != nil {
-			return 0
-		}
-	}
-	if len(fragment.Paths) == 0 {
-		return 0
-	}
-
-	if v, _, _ := strings.Cut(fragment.OpenAPI, "."); v != "" {
-		ver, err := strconv.Atoi(v)
-		if err != nil {
-			log.Debugf("invalid OpenAPI version: openapi=%q", fragment.OpenAPI)
-			return 0
-		}
-		return ver
-	}
-
-	if v, _, _ := strings.Cut(fragment.Swagger, "."); v != "" {
-		ver, err := strconv.Atoi(v)
-		if err != nil {
-			log.Debugf("invalid Swagger version: swagger=%q", fragment.Swagger)
-			return 0
-		}
-		return ver
-	}
-
-	log.Debugf("no OpenAPI version found in input data: openapi=%q, swagger=%q", fragment.OpenAPI, fragment.Swagger)
-	return 0
 }

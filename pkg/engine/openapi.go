@@ -8,83 +8,148 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/gptscript-ai/gptscript/pkg/env"
+	"github.com/gptscript-ai/gptscript/pkg/openapi"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/tidwall/gjson"
-	"golang.org/x/exp/maps"
 )
 
-var (
-	SupportedMIMETypes     = []string{"application/json", "text/plain", "multipart/form-data"}
-	SupportedSecurityTypes = []string{"apiKey", "http"}
-)
+func (e *Engine) runOpenAPIRevamp(tool types.Tool, input string) (*Return, error) {
+	envMap := make(map[string]string, len(e.Env))
+	for _, env := range e.Env {
+		k, v, _ := strings.Cut(env, "=")
+		envMap[k] = v
+	}
 
-type Parameter struct {
-	Name    string `json:"name"`
-	Style   string `json:"style"`
-	Explode *bool  `json:"explode"`
-}
+	_, inst, _ := strings.Cut(tool.Instructions, types.OpenAPIPrefix+" ")
+	args := strings.Fields(inst)
 
-// A SecurityInfo represents a security scheme in OpenAPI.
-type SecurityInfo struct {
-	Name       string `json:"name"`       // name as defined in the security schemes
-	Type       string `json:"type"`       // http or apiKey
-	Scheme     string `json:"scheme"`     // bearer or basic, for type==http
-	APIKeyName string `json:"apiKeyName"` // name of the API key, for type==apiKey
-	In         string `json:"in"`         // header, query, or cookie, for type==apiKey
-}
+	if len(args) != 3 {
+		return nil, fmt.Errorf("expected 3 arguments to %s", types.OpenAPIPrefix)
+	}
 
-func (i SecurityInfo) GetCredentialToolStrings(hostname string) []string {
-	vars := i.getCredentialNamesAndEnvVars(hostname)
-	var tools []string
+	command := args[0]
+	source := args[1]
+	filter := args[2]
 
-	for cred, v := range vars {
-		field := "value"
-		switch i.Type {
-		case "apiKey":
-			field = i.APIKeyName
-		case "http":
-			if i.Scheme == "bearer" {
-				field = "bearer token"
-			} else {
-				if strings.Contains(v, "PASSWORD") {
-					field = "password"
-				} else {
-					field = "username"
-				}
+	var res *Return
+	switch command {
+	case openapi.ListTool:
+		t, err := openapi.Load(source)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load OpenAPI file %s: %w", source, err)
+		}
+
+		opList, err := openapi.List(t, filter)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list operations: %w", err)
+		}
+
+		opListJSON, err := json.MarshalIndent(opList, "", "    ")
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal operation list: %w", err)
+		}
+
+		res = &Return{
+			Result: ptr(string(opListJSON)),
+		}
+	case openapi.GetSchemaTool:
+		operation := gjson.Get(input, "operation").String()
+
+		if filter != "" && filter != openapi.NoFilter {
+			match, err := openapi.MatchFilters(strings.Split(filter, "|"), operation)
+			if err != nil {
+				return nil, err
+			} else if !match {
+				// Report to the LLM that the operation was not found
+				return &Return{
+					Result: ptr(fmt.Sprintf("operation %s not found", operation)),
+				}, nil
 			}
 		}
 
-		tools = append(tools, fmt.Sprintf("github.com/gptscript-ai/credential as %s with %s as env and %q as message and %q as field",
-			cred, v, "Please provide a value for the "+v+" environment variable", field))
-	}
-	return tools
-}
+		t, err := openapi.Load(source)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load OpenAPI file %s: %w", source, err)
+		}
 
-func (i SecurityInfo) getCredentialNamesAndEnvVars(hostname string) map[string]string {
-	if i.Type == "http" && i.Scheme == "basic" {
-		return map[string]string{
-			hostname + i.Name + "Username": "GPTSCRIPT_" + env.ToEnvLike(hostname) + "_" + env.ToEnvLike(i.Name) + "_USERNAME",
-			hostname + i.Name + "Password": "GPTSCRIPT_" + env.ToEnvLike(hostname) + "_" + env.ToEnvLike(i.Name) + "_PASSWORD",
+		var defaultHost string
+		if strings.HasPrefix(source, "http://") || strings.HasPrefix(source, "https://") {
+			u, err := url.Parse(source)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse server URL %s: %w", source, err)
+			}
+			defaultHost = u.Scheme + "://" + u.Hostname()
+		}
+
+		schema, _, found, err := openapi.GetSchema(operation, defaultHost, t)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get schema: %w", err)
+		}
+		if !found {
+			// Report to the LLM that the operation was not found
+			return &Return{
+				Result: ptr(fmt.Sprintf("operation %s not found", operation)),
+			}, nil
+		}
+
+		schemaJSON, err := json.MarshalIndent(schema, "", "    ")
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal schema: %w", err)
+		}
+
+		res = &Return{
+			Result: ptr(string(schemaJSON)),
+		}
+	case openapi.RunTool:
+		operation := gjson.Get(input, "operation").String()
+		args := gjson.Get(input, "args").String()
+
+		if filter != "" && filter != openapi.NoFilter {
+			match, err := openapi.MatchFilters(strings.Split(filter, "|"), operation)
+			if err != nil {
+				return nil, err
+			} else if !match {
+				// Report to the LLM that the operation was not found
+				return &Return{
+					Result: ptr(fmt.Sprintf("operation %s not found", operation)),
+				}, nil
+			}
+		}
+
+		t, err := openapi.Load(source)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load OpenAPI file %s: %w", source, err)
+		}
+
+		var defaultHost string
+		if strings.HasPrefix(source, "http://") || strings.HasPrefix(source, "https://") {
+			u, err := url.Parse(source)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse server URL %s: %w", source, err)
+			}
+			defaultHost = u.Scheme + "://" + u.Hostname()
+		}
+
+		result, found, err := openapi.Run(operation, defaultHost, args, t, e.Env)
+		if err != nil {
+			return nil, fmt.Errorf("failed to run operation %s: %w", operation, err)
+		} else if !found {
+			// Report to the LLM that the operation was not found
+			return &Return{
+				Result: ptr(fmt.Sprintf("operation %s not found", operation)),
+			}, nil
+		}
+
+		res = &Return{
+			Result: ptr(result),
 		}
 	}
-	return map[string]string{
-		hostname + i.Name: "GPTSCRIPT_" + env.ToEnvLike(hostname) + "_" + env.ToEnvLike(i.Name),
-	}
-}
 
-type OpenAPIInstructions struct {
-	Server           string           `json:"server"`
-	Path             string           `json:"path"`
-	Method           string           `json:"method"`
-	BodyContentMIME  string           `json:"bodyContentMIME"`
-	SecurityInfos    [][]SecurityInfo `json:"apiKeyInfos"`
-	QueryParameters  []Parameter      `json:"queryParameters"`
-	PathParameters   []Parameter      `json:"pathParameters"`
-	HeaderParameters []Parameter      `json:"headerParameters"`
-	CookieParameters []Parameter      `json:"cookieParameters"`
+	return res, nil
 }
 
 // runOpenAPI runs a tool that was generated from an OpenAPI definition.
@@ -92,6 +157,10 @@ type OpenAPIInstructions struct {
 // The tools Instructions field will be in the format "#!sys.openapi '{Instructions JSON}'",
 // where {Instructions JSON} is a JSON string of type OpenAPIInstructions.
 func (e *Engine) runOpenAPI(tool types.Tool, input string) (*Return, error) {
+	if os.Getenv("GPTSCRIPT_OPENAPI_REVAMP") == "true" {
+		return e.runOpenAPIRevamp(tool, input)
+	}
+
 	envMap := map[string]string{}
 
 	for _, env := range e.Env {
@@ -100,7 +169,7 @@ func (e *Engine) runOpenAPI(tool types.Tool, input string) (*Return, error) {
 	}
 
 	// Extract the instructions from the tool to determine server, path, method, etc.
-	var instructions OpenAPIInstructions
+	var instructions openapi.OperationInfo
 	_, inst, _ := strings.Cut(tool.Instructions, types.OpenAPIPrefix+" ")
 	inst = strings.TrimPrefix(inst, "'")
 	inst = strings.TrimSuffix(inst, "'")
@@ -109,7 +178,7 @@ func (e *Engine) runOpenAPI(tool types.Tool, input string) (*Return, error) {
 	}
 
 	// Handle path parameters
-	instructions.Path = handlePathParameters(instructions.Path, instructions.PathParameters, input)
+	instructions.Path = openapi.HandlePathParameters(instructions.Path, instructions.PathParams, input)
 
 	// Parse the URL
 	path, err := url.JoinPath(instructions.Server, instructions.Path)
@@ -131,7 +200,7 @@ func (e *Engine) runOpenAPI(tool types.Tool, input string) (*Return, error) {
 	// Check for authentication (only if using HTTPS or localhost)
 	if u.Scheme == "https" || u.Hostname() == "localhost" || u.Hostname() == "127.0.0.1" {
 		if len(instructions.SecurityInfos) > 0 {
-			if err := handleAuths(req, envMap, instructions.SecurityInfos); err != nil {
+			if err := openapi.HandleAuths(req, envMap, instructions.SecurityInfos); err != nil {
 				return nil, fmt.Errorf("error setting up authentication: %w", err)
 			}
 		}
@@ -145,11 +214,11 @@ func (e *Engine) runOpenAPI(tool types.Tool, input string) (*Return, error) {
 	}
 
 	// Handle query parameters
-	req.URL.RawQuery = handleQueryParameters(req.URL.Query(), instructions.QueryParameters, input).Encode()
+	req.URL.RawQuery = openapi.HandleQueryParameters(req.URL.Query(), instructions.QueryParams, input).Encode()
 
 	// Handle header and cookie parameters
-	handleHeaderParameters(req, instructions.HeaderParameters, input)
-	handleCookieParameters(req, instructions.CookieParameters, input)
+	openapi.HandleHeaderParameters(req, instructions.HeaderParams, input)
+	openapi.HandleCookieParameters(req, instructions.CookieParams, input)
 
 	// Handle request body
 	if instructions.BodyContentMIME != "" {
@@ -217,299 +286,6 @@ func (e *Engine) runOpenAPI(tool types.Tool, input string) (*Return, error) {
 	}, nil
 }
 
-// handleAuths will set up the request with the necessary authentication information.
-// A set of sets of SecurityInfo is passed in, where each represents a possible set of security options.
-func handleAuths(req *http.Request, envMap map[string]string, infoSets [][]SecurityInfo) error {
-	var missingVariables [][]string
-
-	// We need to find a set of infos where we have all the needed environment variables.
-	for _, infoSet := range infoSets {
-		var missing []string // Keep track of any missing environment variables
-		for _, info := range infoSet {
-			vars := info.getCredentialNamesAndEnvVars(req.URL.Hostname())
-
-			for _, envName := range vars {
-				if _, ok := envMap[envName]; !ok {
-					missing = append(missing, envName)
-				}
-			}
-		}
-		if len(missing) > 0 {
-			missingVariables = append(missingVariables, missing)
-			continue
-		}
-
-		// We're using this info set, because no environment variables were missing.
-		// Set up the request as needed.
-		for _, info := range infoSet {
-			envNames := maps.Values(info.getCredentialNamesAndEnvVars(req.URL.Hostname()))
-			switch info.Type {
-			case "apiKey":
-				switch info.In {
-				case "header":
-					req.Header.Set(info.APIKeyName, envMap[envNames[0]])
-				case "query":
-					v := url.Values{}
-					v.Add(info.APIKeyName, envMap[envNames[0]])
-					req.URL.RawQuery = v.Encode()
-				case "cookie":
-					req.AddCookie(&http.Cookie{
-						Name:  info.APIKeyName,
-						Value: envMap[envNames[0]],
-					})
-				}
-			case "http":
-				switch info.Scheme {
-				case "bearer":
-					req.Header.Set("Authorization", "Bearer "+envMap[envNames[0]])
-				case "basic":
-					req.SetBasicAuth(envMap[envNames[0]], envMap[envNames[1]])
-				}
-			}
-		}
-		return nil
-	}
-
-	return fmt.Errorf("did not find the needed environment variables for any of the security options. "+
-		"At least one of these sets of environment variables must be provided: %v", missingVariables)
-}
-
-// handleQueryParameters extracts each query parameter from the input JSON and adds it to the URL query.
-func handleQueryParameters(q url.Values, params []Parameter, input string) url.Values {
-	for _, param := range params {
-		res := gjson.Get(input, param.Name)
-		if res.Exists() {
-			// If it's an array or object, handle the serialization style
-			if res.IsArray() {
-				switch param.Style {
-				case "form", "": // form is the default style for query parameters
-					if param.Explode == nil || *param.Explode { // default is to explode
-						for _, item := range res.Array() {
-							q.Add(param.Name, item.String())
-						}
-					} else {
-						var strs []string
-						for _, item := range res.Array() {
-							strs = append(strs, item.String())
-						}
-						q.Add(param.Name, strings.Join(strs, ","))
-					}
-				case "spaceDelimited":
-					if param.Explode == nil || *param.Explode {
-						for _, item := range res.Array() {
-							q.Add(param.Name, item.String())
-						}
-					} else {
-						var strs []string
-						for _, item := range res.Array() {
-							strs = append(strs, item.String())
-						}
-						q.Add(param.Name, strings.Join(strs, " "))
-					}
-				case "pipeDelimited":
-					if param.Explode == nil || *param.Explode {
-						for _, item := range res.Array() {
-							q.Add(param.Name, item.String())
-						}
-					} else {
-						var strs []string
-						for _, item := range res.Array() {
-							strs = append(strs, item.String())
-						}
-						q.Add(param.Name, strings.Join(strs, "|"))
-					}
-				}
-			} else if res.IsObject() {
-				switch param.Style {
-				case "form", "": // form is the default style for query parameters
-					if param.Explode == nil || *param.Explode { // default is to explode
-						for k, v := range res.Map() {
-							q.Add(k, v.String())
-						}
-					} else {
-						var strs []string
-						for k, v := range res.Map() {
-							strs = append(strs, k, v.String())
-						}
-						q.Add(param.Name, strings.Join(strs, ","))
-					}
-				case "deepObject":
-					for k, v := range res.Map() {
-						q.Add(param.Name+"["+k+"]", v.String())
-					}
-				}
-			} else {
-				q.Add(param.Name, res.String())
-			}
-		}
-	}
-	return q
-}
-
-// handlePathParameters extracts each path parameter from the input JSON and replaces its placeholder in the URL path.
-func handlePathParameters(path string, params []Parameter, input string) string {
-	for _, param := range params {
-		res := gjson.Get(input, param.Name)
-		if res.Exists() {
-			// If it's an array or object, handle the serialization style
-			if res.IsArray() {
-				switch param.Style {
-				case "simple", "": // simple is the default style for path parameters
-					// simple looks the same regardless of whether explode is true
-					strs := make([]string, len(res.Array()))
-					for i, item := range res.Array() {
-						strs[i] = item.String()
-					}
-					path = strings.Replace(path, "{"+param.Name+"}", strings.Join(strs, ","), 1)
-				case "label":
-					strs := make([]string, len(res.Array()))
-					for i, item := range res.Array() {
-						strs[i] = item.String()
-					}
-
-					if param.Explode == nil || !*param.Explode { // default is to not explode
-						path = strings.Replace(path, "{"+param.Name+"}", "."+strings.Join(strs, ","), 1)
-					} else {
-						path = strings.Replace(path, "{"+param.Name+"}", "."+strings.Join(strs, "."), 1)
-					}
-				case "matrix":
-					strs := make([]string, len(res.Array()))
-					for i, item := range res.Array() {
-						strs[i] = item.String()
-					}
-
-					if param.Explode == nil || !*param.Explode { // default is to not explode
-						path = strings.Replace(path, "{"+param.Name+"}", ";"+param.Name+"="+strings.Join(strs, ","), 1)
-					} else {
-						s := ""
-						for _, str := range strs {
-							s += ";" + param.Name + "=" + str
-						}
-						path = strings.Replace(path, "{"+param.Name+"}", s, 1)
-					}
-				}
-			} else if res.IsObject() {
-				switch param.Style {
-				case "simple", "":
-					if param.Explode == nil || !*param.Explode { // default is to not explode
-						var strs []string
-						for k, v := range res.Map() {
-							strs = append(strs, k, v.String())
-						}
-						path = strings.Replace(path, "{"+param.Name+"}", strings.Join(strs, ","), 1)
-					} else {
-						var strs []string
-						for k, v := range res.Map() {
-							strs = append(strs, k+"="+v.String())
-						}
-						path = strings.Replace(path, "{"+param.Name+"}", strings.Join(strs, ","), 1)
-					}
-				case "label":
-					if param.Explode == nil || !*param.Explode { // default is to not explode
-						var strs []string
-						for k, v := range res.Map() {
-							strs = append(strs, k, v.String())
-						}
-						path = strings.Replace(path, "{"+param.Name+"}", "."+strings.Join(strs, ","), 1)
-					} else {
-						s := ""
-						for k, v := range res.Map() {
-							s += "." + k + "=" + v.String()
-						}
-						path = strings.Replace(path, "{"+param.Name+"}", s, 1)
-					}
-				case "matrix":
-					if param.Explode == nil || !*param.Explode { // default is to not explode
-						var strs []string
-						for k, v := range res.Map() {
-							strs = append(strs, k, v.String())
-						}
-						path = strings.Replace(path, "{"+param.Name+"}", ";"+param.Name+"="+strings.Join(strs, ","), 1)
-					} else {
-						s := ""
-						for k, v := range res.Map() {
-							s += ";" + k + "=" + v.String()
-						}
-						path = strings.Replace(path, "{"+param.Name+"}", s, 1)
-					}
-				}
-			} else {
-				// Serialization is handled slightly differently even for basic types.
-				// Explode doesn't do anything though.
-				switch param.Style {
-				case "simple", "":
-					path = strings.Replace(path, "{"+param.Name+"}", res.String(), 1)
-				case "label":
-					path = strings.Replace(path, "{"+param.Name+"}", "."+res.String(), 1)
-				case "matrix":
-					path = strings.Replace(path, "{"+param.Name+"}", ";"+param.Name+"="+res.String(), 1)
-				}
-			}
-		}
-	}
-	return path
-}
-
-// handleHeaderParameters extracts each header parameter from the input JSON and adds it to the request headers.
-func handleHeaderParameters(req *http.Request, params []Parameter, input string) {
-	for _, param := range params {
-		res := gjson.Get(input, param.Name)
-		if res.Exists() {
-			if res.IsArray() {
-				strs := make([]string, len(res.Array()))
-				for i, item := range res.Array() {
-					strs[i] = item.String()
-				}
-				req.Header.Add(param.Name, strings.Join(strs, ","))
-			} else if res.IsObject() {
-				// Handle explosion
-				var strs []string
-				if param.Explode == nil || !*param.Explode { // default is to not explode
-					for k, v := range res.Map() {
-						strs = append(strs, k, v.String())
-					}
-				} else {
-					for k, v := range res.Map() {
-						strs = append(strs, k+"="+v.String())
-					}
-				}
-				req.Header.Add(param.Name, strings.Join(strs, ","))
-			} else { // basic type
-				req.Header.Add(param.Name, res.String())
-			}
-		}
-	}
-}
-
-// handleCookieParameters extracts each cookie parameter from the input JSON and adds it to the request cookies.
-func handleCookieParameters(req *http.Request, params []Parameter, input string) {
-	for _, param := range params {
-		res := gjson.Get(input, param.Name)
-		if res.Exists() {
-			if res.IsArray() {
-				strs := make([]string, len(res.Array()))
-				for i, item := range res.Array() {
-					strs[i] = item.String()
-				}
-				req.AddCookie(&http.Cookie{
-					Name:  param.Name,
-					Value: strings.Join(strs, ","),
-				})
-			} else if res.IsObject() {
-				var strs []string
-				for k, v := range res.Map() {
-					strs = append(strs, k, v.String())
-				}
-				req.AddCookie(&http.Cookie{
-					Name:  param.Name,
-					Value: strings.Join(strs, ","),
-				})
-			} else { // basic type
-				req.AddCookie(&http.Cookie{
-					Name:  param.Name,
-					Value: res.String(),
-				})
-			}
-		}
-	}
+func ptr[T any](t T) *T {
+	return &t
 }

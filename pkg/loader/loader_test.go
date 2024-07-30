@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/gptscript-ai/gptscript/pkg/openapi"
 	"github.com/hexops/autogold/v2"
 	"github.com/stretchr/testify/require"
 )
@@ -53,17 +54,17 @@ Stuff
 func TestIsOpenAPI(t *testing.T) {
 	datav2, err := os.ReadFile("testdata/openapi_v2.yaml")
 	require.NoError(t, err)
-	v := isOpenAPI(datav2)
+	v := openapi.IsOpenAPI(datav2)
 	require.Equal(t, 2, v, "(yaml) expected openapi v2")
 
 	datav2, err = os.ReadFile("testdata/openapi_v2.json")
 	require.NoError(t, err)
-	v = isOpenAPI(datav2)
+	v = openapi.IsOpenAPI(datav2)
 	require.Equal(t, 2, v, "(json) expected openapi v2")
 
 	datav3, err := os.ReadFile("testdata/openapi_v3.yaml")
 	require.NoError(t, err)
-	v = isOpenAPI(datav3)
+	v = openapi.IsOpenAPI(datav3)
 	require.Equal(t, 3, v, "(json) expected openapi v3")
 }
 
