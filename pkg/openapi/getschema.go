@@ -28,11 +28,19 @@ type OperationInfo struct {
 }
 
 var (
-	SupportedMIMETypes     = []string{"application/json", "application/x-www-form-urlencoded", "multipart/form-data"}
-	SupportedSecurityTypes = []string{"apiKey", "http"}
+	supportedMIMETypes     = []string{"application/json", "application/x-www-form-urlencoded", "multipart/form-data"}
+	supportedSecurityTypes = []string{"apiKey", "http"}
 )
 
 const GetSchemaTool = "get-schema"
+
+func GetSupportedMIMETypes() []string {
+	return supportedMIMETypes
+}
+
+func GetSupportedSecurityTypes() []string {
+	return supportedSecurityTypes
+}
 
 // GetSchema returns the JSONSchema and OperationInfo for a particular OpenAPI operation.
 // Return values in order: JSONSchema (string), OperationInfo, found (bool), error.
@@ -62,7 +70,7 @@ func GetSchema(operationID, defaultHost string, t *openapi3.T) (string, Operatio
 		for _, item := range t.Security {
 			current := map[string]struct{}{}
 			for name := range item {
-				if scheme, ok := t.Components.SecuritySchemes[name]; ok && slices.Contains(SupportedSecurityTypes, scheme.Value.Type) {
+				if scheme, ok := t.Components.SecuritySchemes[name]; ok && slices.Contains(supportedSecurityTypes, scheme.Value.Type) {
 					current[name] = struct{}{}
 				}
 			}
@@ -137,7 +145,7 @@ func GetSchema(operationID, defaultHost string, t *openapi3.T) (string, Operatio
 				if operation.RequestBody != nil {
 					for mime, content := range operation.RequestBody.Value.Content {
 						// Each MIME type needs to be handled individually, so we keep a list of the ones we support.
-						if !slices.Contains(SupportedMIMETypes, mime) {
+						if !slices.Contains(supportedMIMETypes, mime) {
 							continue
 						}
 						info.BodyContentMIME = mime
@@ -199,7 +207,7 @@ func GetSchema(operationID, defaultHost string, t *openapi3.T) (string, Operatio
 					var current []SecurityInfo
 					for name := range auth {
 						if scheme, ok := t.Components.SecuritySchemes[name]; ok {
-							if !slices.Contains(SupportedSecurityTypes, scheme.Value.Type) {
+							if !slices.Contains(supportedSecurityTypes, scheme.Value.Type) {
 								// There is an unsupported type in this auth, so move on to the next one.
 								continue outer
 							}

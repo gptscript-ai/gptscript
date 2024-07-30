@@ -18,7 +18,7 @@ import (
 )
 
 func (e *Engine) runOpenAPIRevamp(tool types.Tool, input string) (*Return, error) {
-	envMap := map[string]string{}
+	envMap := make(map[string]string, len(e.Env))
 	for _, env := range e.Env {
 		k, v, _ := strings.Cut(env, "=")
 		envMap[k] = v

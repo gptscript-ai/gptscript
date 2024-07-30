@@ -56,16 +56,15 @@ func LoadFromBytes(content []byte) (*openapi3.T, error) {
 	switch IsOpenAPI(content) {
 	case 2:
 		// Convert OpenAPI v2 to v3
-		jsonContent := content
 		if !json.Valid(content) {
-			jsonContent, err = kyaml.YAMLToJSON(content)
+			content, err = kyaml.YAMLToJSON(content)
 			if err != nil {
 				return nil, err
 			}
 		}
 
 		doc := &openapi2.T{}
-		if err := doc.UnmarshalJSON(jsonContent); err != nil {
+		if err := doc.UnmarshalJSON(content); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal OpenAPI v2 document: %w", err)
 		}
 

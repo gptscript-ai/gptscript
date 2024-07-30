@@ -21,7 +21,7 @@ import (
 const RunTool = "run"
 
 func Run(operationID, defaultHost, args string, t *openapi3.T, envs []string) (string, bool, error) {
-	envMap := map[string]string{}
+	envMap := make(map[string]string, len(envs))
 	for _, e := range envs {
 		k, v, _ := strings.Cut(e, "=")
 		envMap[k] = v
@@ -31,10 +31,8 @@ func Run(operationID, defaultHost, args string, t *openapi3.T, envs []string) (s
 		args = "{}"
 	}
 	schemaJSON, opInfo, found, err := GetSchema(operationID, defaultHost, t)
-	if err != nil {
+	if err != nil || !found {
 		return "", false, err
-	} else if !found {
-		return "", false, nil
 	}
 
 	// Validate args against the schema.
@@ -100,9 +98,7 @@ func Run(operationID, defaultHost, args string, t *openapi3.T, envs []string) (s
 		var body bytes.Buffer
 		switch opInfo.BodyContentMIME {
 		case "application/json":
-			var reqBody interface{}
-
-			reqBody = struct{}{}
+			var reqBody any = struct{}{}
 			if res.Exists() {
 				reqBody = res.Value()
 			}
@@ -147,15 +143,11 @@ func Run(operationID, defaultHost, args string, t *openapi3.T, envs []string) (s
 	if err != nil {
 		return "", false, fmt.Errorf("failed to make request: %w", err)
 	}
+	defer resp.Body.Close()
 
-	var result []byte
-	if resp.Body != nil {
-		defer resp.Body.Close()
-
-		result, err = io.ReadAll(resp.Body)
-		if err != nil {
-			return "", false, fmt.Errorf("failed to read response: %w", err)
-		}
+	result, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", false, fmt.Errorf("failed to read response: %w", err)
 	}
 
 	return string(result), true, nil

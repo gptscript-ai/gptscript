@@ -56,7 +56,7 @@ func getOpenAPITools(t *openapi3.T, defaultHost, source, targetToolName string) 
 		for _, item := range t.Security {
 			current := map[string]struct{}{}
 			for name := range item {
-				if scheme, ok := t.Components.SecuritySchemes[name]; ok && slices.Contains(openapi.SupportedSecurityTypes, scheme.Value.Type) {
+				if scheme, ok := t.Components.SecuritySchemes[name]; ok && slices.Contains(openapi.GetSupportedSecurityTypes(), scheme.Value.Type) {
 					current[name] = struct{}{}
 				}
 			}
@@ -204,7 +204,7 @@ func getOpenAPITools(t *openapi3.T, defaultHost, source, targetToolName string) 
 				for mime, content := range operation.RequestBody.Value.Content {
 					// Each MIME type needs to be handled individually, so we
 					// keep a list of the ones we support.
-					if !slices.Contains(openapi.SupportedMIMETypes, mime) {
+					if !slices.Contains(openapi.GetSupportedMIMETypes(), mime) {
 						continue
 					}
 					bodyMIME = mime
@@ -261,7 +261,7 @@ func getOpenAPITools(t *openapi3.T, defaultHost, source, targetToolName string) 
 				var current []openapi.SecurityInfo
 				for name := range auth {
 					if scheme, ok := t.Components.SecuritySchemes[name]; ok {
-						if !slices.Contains(openapi.SupportedSecurityTypes, scheme.Value.Type) {
+						if !slices.Contains(openapi.GetSupportedSecurityTypes(), scheme.Value.Type) {
 							// There is an unsupported type in this auth, so move on to the next one.
 							continue outer
 						}
