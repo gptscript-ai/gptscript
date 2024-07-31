@@ -51,7 +51,12 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		return nil, fmt.Errorf("failed to find remote model %s", messageRequest.Model)
 	}
 
-	_, modelName := types.SplitToolRef(messageRequest.Model)
+	toolName, modelName := types.SplitToolRef(messageRequest.Model)
+	if modelName == "" {
+		// modelName is empty, then the messageRequest.Model is not of the form 'modelName from provider'
+		// Therefore, the modelName is the toolName
+		modelName = toolName
+	}
 	messageRequest.Model = modelName
 	return client.Call(ctx, messageRequest, status)
 }
