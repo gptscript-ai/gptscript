@@ -1,7 +1,6 @@
 package sdkserver
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,7 +9,6 @@ import (
 	"sort"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/gptscript-ai/broadcaster"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
@@ -25,8 +23,6 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
-
-const toolRunTimeout = 15 * time.Minute
 
 type server struct {
 	gptscriptOpts  gptscript.Options
@@ -158,8 +154,6 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := gserver.ContextWithNewRunID(r.Context())
 	runID := gserver.RunIDFromContext(ctx)
-	ctx, cancel := context.WithTimeout(ctx, toolRunTimeout)
-	defer cancel()
 
 	// Ensure chat state is not empty.
 	if reqObject.ChatState == "" {
