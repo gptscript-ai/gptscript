@@ -49,7 +49,7 @@ The [structured-data-querier](https://github.com/gptscript-ai/structured-data-qu
 
 The [pdf-reader](https://github.com/gptscript-ai/pdf-reader) isn't quite as exciting, but still useful. It parses and reads PDFs and returns the contents to the LLM. This will put the entire contents in your chat context, so it's not appropriate for extremely large PDFs, but it's handy for smaller ones.
 
-**Context: github.com/gptscript-ai/context/workspace** introduces a context tool that makes this assistant "workspace" aware. It's description reads:
+**Context: github.com/gptscript-ai/context/workspace** introduces a context tool that makes this assistant "workspace" aware. Its description reads:
 > Adds the workspace and tools needed to access the workspace to the current context
 
 That translates to telling the LLM what the workspace directory is and instructing it to use that directory for reading and writing files. As we saw above, you can specify a workspace like this:
