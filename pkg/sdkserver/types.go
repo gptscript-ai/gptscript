@@ -63,7 +63,7 @@ type toolOrFileRequest struct {
 	Confirm              bool     `json:"confirm"`
 	Location             string   `json:"location,omitempty"`
 	ForceSequential      bool     `json:"forceSequential"`
-	DefaultModelProvider string   `json:"defaultModelProvider,omitempty"`
+	DefaultModelProvider string   `json:"DefaultModelProvider,omitempty"`
 }
 
 type content struct {
