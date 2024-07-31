@@ -45,7 +45,7 @@ Here is a simple example of a context provider tool that provides additional con
 
 ```yaml
 # my-search-context-tool.gpt
-export: sys.http.html2text?
+share tools: sys.http.html2text?
 
 #!/bin/bash
 echo You are an expert web researcher with access to the Search tool.If the search tool fails to return any information stop execution of the script with message "Sorry! Search did not return any results". Feel free to get the contents of the returned URLs in order to get more information. Provide as much detail as you can. Also return the source of the search results.
@@ -71,7 +71,7 @@ Here is an example of a context provider tool that uses args to decide which sea
 
 ```yaml
 # context_with_arg.gpt
-export: github.com/gptscript-ai/search/duckduckgo, github.com/gptscript-ai/search/brave, sys.http.html2text?
+share tools: github.com/gptscript-ai/search/duckduckgo, github.com/gptscript-ai/search/brave, sys.http.html2text?
 args: search_tool: tool to search with
 
 #!/bin/bash
@@ -84,7 +84,7 @@ Continuing with the above example, this is how you can use it in a script:
 ```yaml
 # my_context_with_arg.gpt
 context: ./context_with_arg.gpt with ${search} as search_tool
-Args: search: Search tool to use
+args: search: Search tool to use
 
 What are some of the most popular tourist destinations in Scotland, and how many people visit them each year?
 

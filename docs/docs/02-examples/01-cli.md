@@ -157,7 +157,7 @@ Agents: k8s-agent, github-agent
 Context: shared-context
 Chat: true
 
-Help the user acomplish their tasks using the tools you have. When the user starts this chat, just say hello and ask what you can help with. You donlt need to start off by guiding them.
+Help the user acomplish their tasks using the tools you have. When the user starts this chat, just say hello and ask what you can help with. You don't need to start off by guiding them.
 ```
 
 By being at the top of the file, this tool will serve as the script's entrypoint. Here are the parts of this tool that are worth additional explanation:
@@ -201,14 +201,14 @@ Context: shared-context
 Agents: k8s-agent, github-agent
 Chat: true
 
-Help the user acomplish their tasks using the tools you have. When the user starts this chat, just say hello and ask what you can help with. You donlt need to start off by guiding them.
+Help the user acomplish their tasks using the tools you have. When the user starts this chat, just say hello and ask what you can help with. You don't need to start off by guiding them.
 
 ---
 Name: k8s-agent
 Description: An agent that can help you with your Kubernetes cluster by executing kubectl commands
 Context: shared-context
 Tools: sys.exec
-Parameter: task: The kubectl releated task to accomplish
+Parameter: task: The kubectl related task to accomplish
 Chat: true
 
 You have the kubectl cli available to you. Use it to accomplish the tasks that the user asks of you.
@@ -268,15 +268,15 @@ By now you should notice a simple pattern emerging that you can follow to add yo
 ```
 Name: {your cli}-agent
 Description: An agent to help you with {your taks} related tasks using the gh cli
-Context: {here's your biggest decsion to make}, shared-context
+Context: {here's your biggest decision to make}, shared-context
 Tools: sys.exec
-Parameter: task: The {your task}The GitHub task to accomplish
+Parameter: task: The {your task} to accomplish
 Chat: true
 
 You have the {your cli} cli available to you. Use it to accomplish the tasks that the user asks of you.
 ```
 
-You can drop in your task and CLI and have a fairly functional CLI-based chat agent. The biggest decision you'll need to make is what and how much context to give your agent. For well-known for CLIs/technologies like kubectl and Kubernetes, you probably won't need a custom context. For custom CLIs, you'll definitely need to help the LLM out. The best approach is to experiment and see what works best.
+You can drop in your task and CLI and have a fairly functional CLI-based chat agent. The biggest decision you'll need to make is what and how much context to give your agent. For well-known CLIs/technologies like kubectl and Kubernetes, you probably won't need a custom context. For custom CLIs, you'll definitely need to help the LLM out. The best approach is to experiment and see what works best.
 
 ## Next steps
 

@@ -60,8 +60,8 @@ Tool parameters are key-value pairs defined at the beginning of a tool block, be
 | `Credential`         | Credential tool to call to set credentials as environment variables before doing anything else. One per line.                                 |
 | `Agents`             | A comma-separated list of agents that are available to the tool.                                                                              | 
 | `Share Tools`        | A comma-separated list of tools that are shared by the tool.                                                                                  |
-| `Context`            | A comma-separated list of context tools available to the tool                                                                                 |
-
+| `Context`            | A comma-separated list of context tools available to the tool.                                                                                |
+| `Share Context`      | A comma-separated list of context tools shared by this tool with any tool including this tool in its context.                                 | 
 
 
 

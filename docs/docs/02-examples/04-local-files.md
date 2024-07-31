@@ -45,11 +45,11 @@ This is actually the entirety of the script. We're packing a lot of power into j
 
 The **Tools: ...** stanza pulls two useful tools into this assistant.
 
-The [structured-data-querier](https://github.com/gptscript-ai/structured-data-querier) makes it possible to query csv, xlsx, and json files as though they SQL databases (using an application called [DuckDB](https://duckdb.org/)). This is extremely powerful when combined with the power of LLMs because it let's you ask natural language questions that the LLM can then translate to SQL.
+The [structured-data-querier](https://github.com/gptscript-ai/structured-data-querier) makes it possible to query csv, xlsx, and json files as though they were SQL databases (using an application called [DuckDB](https://duckdb.org/)). This is extremely powerful when combined with the power of LLMs because it let's you ask natural language questions that the LLM can then translate to SQL.
 
 The [pdf-reader](https://github.com/gptscript-ai/pdf-reader) isn't quite as exciting, but still useful. It parses and reads PDFs and returns the contents to the LLM. This will put the entire contents in your chat context, so it's not appropriate for extremely large PDFs, but it's handy for smaller ones.
 
-**Context: github.com/gptscript-ai/context/workspace** introduces a context tool makes this assistant "workspace" aware. It's description reads:
+**Context: github.com/gptscript-ai/context/workspace** introduces a context tool that makes this assistant "workspace" aware. It's description reads:
 > Adds the workspace and tools needed to access the workspace to the current context
 
 That translates to telling the LLM what the workspace directory is and instructing it to use that directory for reading and writing files. As we saw above, you can specify a workspace like this:
