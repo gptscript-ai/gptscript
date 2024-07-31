@@ -1,6 +1,9 @@
 # Chat with Local Files
 
-With GPTScript interacting with local files is simple and powerful. This can help you streamline repetitive or data-intensive tasks. In this guide, we'll build a script that can query Excel files, CSVs, and PDFs. We'll then use the script to read, transform, and utilize the data in these files.
+With GPTScript, interacting with local files is simple and powerful.
+This can help you streamline repetitive or data-intensive tasks.
+In this guide, we'll build a script that can query Excel files, CSVs, and PDFs.
+We'll then use the script to read, transform, and utilize the data in these files.
 
 ## Too Long; Didn't Read
 
@@ -14,60 +17,79 @@ gptscript --workspace=~/Documents github.com/gptscript-ai/local-files-demo
 ```
 
 ## Getting Started
-The rest of this guide will walk you through building and using a data processing assistant. We'll be explaining the how, what, and why along the way.
+
+The rest of this guide will walk you through building and using a data processing assistant.
 
 First, let's get some sample data to work with. You can clone our repo with our sample data:
+
 ```
 git clone https://github.com/gptscript-ai/local-files-demo.git
 cd local-files-demo
 ```
 
-Next, open up a new gptscript file in your favorite editor. We'll call the file data-assistant.gpt.
+Next, open up a new gptscript file in your favorite editor. We'll call the file `data-assistant.gpt`.
+
 ```
 vim data-assistant.gpt
 ```
+
 All edits below are assumed to be in this file.
 
 ### Create the Assistant
-Put this in the gpt file:
+
+Add this to the file:
+
 ```
-Name: Your Data Processing Assitant
-Description: An asistant to help you with processing data found in files on your workstation. Helpful for querying spreadsheets, CSVs, JSON files, and pdfs.
+Name: Data Processing Assitant
+Description: An assistant to help you with processing data found in files on your workstation. Helpful for querying spreadsheets, CSVs, JSON files, and PDFs.
 Tools: github.com/gptscript-ai/structured-data-querier, github.com/gptscript-ai/pdf-reader
 Context: github.com/gptscript-ai/context/workspace
 Chat: true
 
-You are a helpful data processing assistant. Your goal is to help the user with data processing. Help the user accomplish their tasks using the tools you have. When the user starts this chat, just say hi, introduce yourself, and ask what you can help with.
+You are a helpful data processing assistant. Your goal is to help the user with data processing.
+Help the user accomplish their tasks using the tools you have.
+When the user starts this chat, say hi, introduce yourself, and ask what you can help with.
 ```
-This is actually the entirety of the script. We're packing a lot of power into just a handful of lines here. Let's talk through them.
 
-**Name and Description** help the LLM understand the purpose of this tool. You should always have meaningful names and descriptions.
+This is the entire script. Here's what each part does:
 
-The **Tools: ...** stanza pulls two useful tools into this assistant.
+`Name and Description` help the LLM understand the purpose of this tool. You should always have meaningful names and descriptions.
 
-The [structured-data-querier](https://github.com/gptscript-ai/structured-data-querier) makes it possible to query csv, xlsx, and json files as though they were SQL databases (using an application called [DuckDB](https://duckdb.org/)). This is extremely powerful when combined with the power of LLMs because it let's you ask natural language questions that the LLM can then translate to SQL.
+The `Tools: ...` line provides two useful tools to this assistant.
 
-The [pdf-reader](https://github.com/gptscript-ai/pdf-reader) isn't quite as exciting, but still useful. It parses and reads PDFs and returns the contents to the LLM. This will put the entire contents in your chat context, so it's not appropriate for extremely large PDFs, but it's handy for smaller ones.
+The [structured-data-querier](https://github.com/gptscript-ai/structured-data-querier) makes it possible to query CSV, XLSX, and JSON files as though they were SQL databases (using an application called [DuckDB](https://duckdb.org/)).
+This is extremely powerful when combined with the power of LLMs because it allows you to ask natural language questions that the LLM can then translate to SQL.
 
-**Context: github.com/gptscript-ai/context/workspace** introduces a context tool that makes this assistant "workspace" aware. Its description reads:
+The [pdf-reader](https://github.com/gptscript-ai/pdf-reader) parses and reads PDFs and returns the contents to the LLM.
+This will put the entire contents in your chat context, so it's not appropriate for extremely large PDFs, but it's handy for smaller ones.
+
+`Context: github.com/gptscript-ai/context/workspace` introduces a [context tool](../03-tools/05-context.md) makes this assistant "workspace" aware. Its description reads:
 > Adds the workspace and tools needed to access the workspace to the current context
 
-That translates to telling the LLM what the workspace directory is and instructing it to use that directory for reading and writing files. As we saw above, you can specify a workspace like this:
+Basically, this context tool tells the LLM what the workspace directory is and instructs it to use that directory for reading and writing files.
+As we saw above, you can specify a workspace like this:
+
 ```
 gptscript --workspace=/Your/path/here ...
 ```
+
 If you don't specify one, a temporary directory will be created and used for the workspace.
 
-This context also shares the `sys.read`, `sys.write`, and `sys.ls` built-in tools with the assistant so that it automatically has access to them.
+This context tool also shares the `sys.read`, `sys.write`, and `sys.ls` built-in tools with the assistant.
 
-Next we have **Chat: true**, which you've seen if you looked at any of our other guides. This makes the current tool "chat-able". We refer to chatable tools as agents or assistants.
+Next we have `Chat: true`. This makes the current tool "chat-able". We refer to chat-able tools as agents or assistants.
 
 Finally, we have the prompt:
-> You are a helpful data processing assistant. Your goal is to help the user with data processing tasks. Help the user accomplish their tasks using the tools you have. When the user starts this chat, just say hi, introduce yourself, and ask what you can help with.
 
+> You are a helpful data processing assistant. Your goal is to help the user with data processing.
+> Help the user accomplish their tasks using the tools you have.
+> When the user starts this chat, say hi, introduce yourself, and ask what you can help with.
 
 ## Using the Assistant
-Once again, that's all there is to this assistant. You can start using it by specifying your own workspace or using our sample-data directory as the workspace. Assuming you're using our sample data and have followed these instructions, here's how you launch it:
+
+When you run the assistant, you can specify your own workspace folder or our sample data directory
+Assuming you're using our sample data and have followed these instructions, here's how you run it:
+
 ```
 gptscript --workspace=./sample-data data-assistant.gpt
 ```
@@ -75,6 +97,7 @@ gptscript --workspace=./sample-data data-assistant.gpt
 Here's a few sample interactions with these files.
 
 ### Cleaning up data
+
 ```
 > whats in the key contacts file?
 
@@ -114,6 +137,7 @@ Here's a few sample interactions with these files.
 ```
 
 ### Identifying and fixing data gaps
+
 ```
 > is there any missing data in that csv?
 ...
@@ -126,6 +150,7 @@ Here's a few sample interactions with these files.
 ```
 
 ### Cross-referencing
+
 ```
 > what were sales like for Kevin's location?
 
@@ -149,7 +174,9 @@ Here's a few sample interactions with these files.
 
   Is there anything else you would like to know or do with this data?
 ```
+
 ### Pulling all the info together
+
 ```
 > Let's help Kevin raise sales. What promotions do we have going on?
 ...
@@ -234,11 +261,12 @@ Here's a few sample interactions with these files.
   Feel free to customize this email further to better suit your needs. Let me know if there's anything else I can
   assist you with!
 ```
+
 Try it out yourself and see what you can come up with.
 
 ## Next steps
 
 Hopefully you've found this guide helpful. From here, you have several options:
 
-- You can checkout out some of our other guides available in this section of the docs
+- You can check out some of our other guides available in this section of the docs
 - You can dive deeper into the options available when [writing script](/tools/gpt-file-reference)

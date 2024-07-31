@@ -1,14 +1,13 @@
 # Run an Automated Workflow
 
-Automating a sequence of tasks that integrate with one or more systems is a ubiquitous engineering problem that typically requires some degree of domain-specific knowledge up-front. However, workflows written with GPTScript all but eliminate this prerequisite, enabling developers to build their workflows by describing the high-level steps it should perform.
+Automating a sequence of tasks that integrate with one or more systems is a ubiquitous engineering problem that typically requires some degree of domain-specific knowledge up-front.
+However, workflows written with GPTScript all but eliminate this prerequisite, enabling developers to build their workflows by describing the high-level steps it should perform.
 
 This guide will show you how to build a GPTScript that encapsulates a workflow consisting of the following steps:
-1. Get a selection of twitter posts 
+1. Get a selection of X (Twitter) posts 
 2. Summarize their content 
 3. Summarize the content of any links they directly reference
 4. Write the results to a Markdown document
-
-We'll be explaining the how, what, and why along the way.
 
 ## Too long; didn't read
 
@@ -53,7 +52,7 @@ This tool:
 - imports two other tools
   - `sys.write` is a built-in tool which enables the entrypoint tool to write files to your system.
   - `summarize-tweet` is a custom tool that encapsulates how each tweet gets summarized. We'll define this tool in the next step.
-- ensures tweets are never summarized in parallel to ensure they are summarized in the correct order
+- ensures tweets are never summarized in parallel so that they are summarized in the correct order
 - defines the tweet URLs to summarize and the file to write them to
 
 At a high-level, it's getting the summaries for two tweets and storing them in the `tweets.md` file.
@@ -87,7 +86,7 @@ This tool
 - imports three other tools to solve summarization sub-problems
   - `github.com/gptscript-ai/browser` is an external tool that is used to open the tweet URL in the browser and extract the page content
   - `get-hyperlinks` and `summarize-hyperlinks` are custom helper tools we'll define momentarily that extract hyperlinks from tweet text and summarize them
-- describes the markdown document this tool should produce, leaving it up to the LLM to decide which of the available tools to call to make this happen
+- describes the Markdown document this tool should produce, leaving it up to the LLM to decide which of the available tools to call to make this happen
 
 ## Hyperlink Summarization Tools
 
