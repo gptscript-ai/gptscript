@@ -1,7 +1,7 @@
 # Context
 
-GPTScript provides a mechanism to share prompt information across many tools using the tool directive `context`.
-It is used to provide additional information to the calling tool on when to use a specific tool by prepending the `context` to the instruction of the calling tool.
+GPTScript provides a mechanism to share prompt information across many tools using the tool directive `Context`.
+It is used to provide additional information to the calling tool on when to use a specific tool by prepending the context to the instruction of the calling tool.
 
 - Context can point to a static text or a GPTScript.
 - Context tools are just regular GPTScript tools, and any valid GPTScript fields can be used in them.
