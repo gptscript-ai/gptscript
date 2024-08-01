@@ -98,7 +98,7 @@ In this example, the tool's output would be `{"env":{"MY_ENV_VAR":"my value"}}`
 
 ## Storing Credentials
 
-By default, credentials are automatically stored in the credential store. Read the [main credentials page](../02-credentials.md)
+By default, credentials are automatically stored in the credential store. Read the [main credentials page](../06-credentials.md)
 for more information about the credential store.
 
 :::note
