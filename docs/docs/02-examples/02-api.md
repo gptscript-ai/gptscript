@@ -105,4 +105,4 @@ For a more advanced DigitalOcean chatbot, see our [DigitalOcean Agent](https://g
 
 To read more about OpenAPI tools in GPTScript, see the [OpenAPI Tools](../03-tools/03-openapi.md) article.
 
-To read more about credential storage in GPTScript, see the [Credentials](../02-credentials.md) article.
+To read more about credential storage in GPTScript, see the [Credentials](../06-credentials.md) article.
