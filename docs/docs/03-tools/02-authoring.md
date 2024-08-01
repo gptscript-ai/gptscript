@@ -6,7 +6,7 @@ This file is itself a GPTScript that defines the tool's name, description, and w
 
 ## Quickstart
 
-This is a guide for writing portable tools for GPTScript. The supported languages currently are Python, NodeJS, and Go. This guide uses Python but you can see documentation for the other language below.
+This is a guide for writing portable tools for GPTScript. The supported languages currently are Python, Node.js, and Go. This guide uses Python, but you can see documentation for the other language below.
 
 ### 1. Write the code
 
