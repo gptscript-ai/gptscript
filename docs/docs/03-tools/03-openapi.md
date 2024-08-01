@@ -1,6 +1,6 @@
 # OpenAPI Tools
 
-GPTScript can treat OpenAPI v3 definition files as though they were tool files.
+GPTScript can treat OpenAPI v2 and v3 definition files as though they were tool files.
 Each operation (a path and HTTP method) in the file will become a simple tool that makes an HTTP request.
 GPTScript will automatically and internally generate the necessary code to make the request and parse the response.
 
@@ -44,6 +44,7 @@ Will be resolved as `https://api.example.com/v1`.
 :::warning
 All authentication options will be completely ignored if the server uses HTTP and not HTTPS.
 This is to protect users from accidentally sending credentials in plain text.
+HTTP is only OK, if it's on localhost/127.0.0.1.
 :::
 
 ### 1. Security Schemes

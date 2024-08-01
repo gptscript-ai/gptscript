@@ -12,9 +12,11 @@ model: mistral-large-latest from https://api.mistral.ai/v1
 Say hello world
 ```
 
-#### Note
-Mistral's La Plateforme has an OpenAI compatible API, but the model does not behave identically to gpt-4. For that reason, we also have a provider for it that might get better results in some cases.
+:::note
 
+    Mistral's La Plateforme has an OpenAI compatible API, but the model does not behave identically to gpt-4. For that reason, we also have a provider for it that might get better results in some cases.
+
+:::
 
 ### Using a model that requires a provider
 ```gptscript

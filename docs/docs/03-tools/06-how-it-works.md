@@ -1,7 +1,6 @@
 # How it works
 
-**_GPTScript is composed of tools._** Each tool performs a series of actions similar to a function. Tools have available
-to them other tools that can be invoked similar to a function call. While similar to a function, the tools are
+**_GPTScript is composed of tools._** Each tool performs a series of actions similar to a function. Tools have other tools available to them that can be invoked similar to a function call. While similar to a function, the tools are
 primarily implemented with a natural language prompt. **_The interaction of the tools is determined by the AI model_**,
 the model determines if the tool needs to be invoked and what arguments to pass. Tools are intended to be implemented
 with a natural language prompt but can also be implemented with a command or HTTP call.
