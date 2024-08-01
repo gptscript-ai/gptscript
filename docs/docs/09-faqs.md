@@ -54,26 +54,7 @@ By default, this directory is a one-off temp directory, but you can override thi
 gptscript --workspace . my-script.gpt
 ```
 
-In the above example, the user's current directory (denoted by `.`) will be set as the workspace. Both absolute and relative paths are supported.
-
-Regardless of whether it is set implicitly or explicitly, the workspace is then made available to the script execution as the `GPTSCRIPT_WORKSPACE_DIR` environment variable.
-
-:::info
-GPTScript does not force scripts or tools to write to, read from, or otherwise use the workspace. The tools must decide to make use of the workspace environment variable.
-:::
-
-To make prompt-based tools workspace aware, you can reference our workspace context tool, like so:
-
-```
-Context: github.com/gptscript-ai/context/workspace
-```
-
-This tells the LLM (by way of a [system message](https://platform.openai.com/docs/guides/text-generation/chat-completions-api)) what the workspace directory is, what its initial contents are, and that if it decides to create a file or directory, it should do so in the workspace directory.
-This will not, however, have any impact on code-based tools (ie python, bash, or go tools).
-Such tools will have the `GPTSCRIPT_WORKSPACE_DIR` environment variable available to them, but they must be written in such a way that they make use of it.
-
-This context also automatically shares the `sys.ls`, `sys.read`, and `sys.write` tools with the tool that is using it as a context.
-This is because if a tool intends to interact with the workspace, it minimally needs these tools.
+For more info, see the [Workspace](03-tools/08-workspace.md) page.
 
 ### I'm hitting GitHub's rate limit for unauthenticated requests when using GPTScript.
 
@@ -84,4 +65,18 @@ If you're already authenticated with the `gh` CLI, you can use its token by runn
 
 ```bash
 export GITHUB_AUTH_TOKEN="$(gh auth token)"
+```
+
+### Can I save my chat and resume it later?
+
+Yes! When you run GPTScript, be sure to specify the `--save-chat-state-file` argument like this:
+
+```bash
+gptscript --save-chat-state-file chat-state.json my-script.gpt
+```
+
+Then, when you want to resume your chat, you can use the `--chat-state` argument to specify the file you saved:
+
+```bash
+gptscript --chat-state chat-state.json my-script.gpt
 ```
