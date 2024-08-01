@@ -468,9 +468,10 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 			// Don't use cmd.Context() because then sigint will cancel everything
 			return tui.Run(context.Background(), args[0], tui.RunOptions{
 				ClientOpts: &gptscript2.GlobalOptions{
-					OpenAIAPIKey:  r.OpenAIOptions.APIKey,
-					OpenAIBaseURL: r.OpenAIOptions.BaseURL,
-					DefaultModel:  r.DefaultModel,
+					OpenAIAPIKey:         r.OpenAIOptions.APIKey,
+					OpenAIBaseURL:        r.OpenAIOptions.BaseURL,
+					DefaultModel:         r.DefaultModel,
+					DefaultModelProvider: r.DefaultModelProvider,
 				},
 				TrustedRepoPrefixes: []string{"github.com/gptscript-ai"},
 				DisableCache:        r.DisableCache,
