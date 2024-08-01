@@ -13,7 +13,7 @@ Here is a simple example of a credential provider tool that uses the builtin `sy
 
 ```yaml
 # my-credential-tool.gpt
-name: my-credential-tool
+Name: my-credential-tool
 
 #!/usr/bin/env bash
 
@@ -27,12 +27,16 @@ echo "{\"env\":{\"MY_ENV_VAR\":\"$credential\"}}"
 Continuing with the above example, this is how you can use it in a script:
 
 ```yaml
-credentials: my-credential-tool.gpt
+Credentials: my-credential-tool.gpt as myCred
 
 #!/usr/bin/env bash
 
 echo "The value of MY_ENV_VAR is $MY_ENV_VAR"
 ```
+
+:::note
+GPTScript accepts `Cred:`, `Creds:`, `Credential:`, and `Credentials:` as valid directives.
+:::
 
 When you run the script, GPTScript will call the credential provider tool first, set the environment variables from its
 output, and then run the script body. The credential provider tool is called by GPTScript itself. GPTScript does not ask the
@@ -41,11 +45,13 @@ LLM about it or even tell the LLM about the tool.
 If GPTScript has called the credential provider tool in the same context (more on that later), then it will use the stored
 credential instead of fetching it again.
 
+To delete the credential that just got stored, run `gptscript credential delete myCred`.
+
 You can also specify multiple credential tools for the same script, but they must be on separate lines:
 
 ```yaml
-credentials: credential-tool-1.gpt
-credentials: credential-tool-2.gpt
+Credentials: credential-tool-1.gpt
+Credentials: credential-tool-2.gpt
 
 (tool stuff here)
 ```
@@ -56,7 +62,7 @@ GPTScript also provides a generic credential tool (`github.com/gptscript-ai/cred
 where you only need to set one environment variable. Here is an example of how to use it:
 
 ```yaml
-credentials: github.com/gptscript-ai/credential as myCredentialName with MY_ENV_VAR as env and "this message will be displayed to the user" as message and key as field
+Credentials: github.com/gptscript-ai/credential as myCredentialName with MY_ENV_VAR as env and "this message will be displayed to the user" as message and key as field
 
 (tool stuff here)
 ```
@@ -66,24 +72,24 @@ the environment variable `MY_ENV_VAR` and stored in a credential called `myCrede
 
 See [the repo](https://github.com/gptscript-ai/credential) for more information.
 
-## Credential Tool Arguments
+## Credential Tool Parameters
 
-A credential tool may define arguments. Here is an example:
+A credential tool may define parameters. Here is an example:
 
 ```yaml
-name: my-credential-tool
-args: env: the environment variable to set
-args: val: the value to set it to
+Name: my-credential-tool
+Parameter: env: the environment variable to set
+Parameter: val: the value to set it to
 
 #!/usr/bin/env bash
 
 echo "{\"env\":{\"$ENV\":\"$VAL\"}}"
 ```
 
-When you reference this credential tool in another file, you can use syntax like this to set both arguments:
+When you reference this credential tool in another file, you can use syntax like this to set both parameters:
 
 ```yaml
-credential: my-credential-tool.gpt with MY_ENV_VAR as env and "my value" as val
+Credential: my-credential-tool.gpt with MY_ENV_VAR as env and "my value" as val
 
 (tool stuff here)
 ```
@@ -105,7 +111,7 @@ will not be stored in the credentials store.
 When you reference a credential tool in your script, you can give it an alias using the `as` keyword like this:
 
 ```yaml
-credentials: my-credential-tool.gpt as myAlias
+Credentials: my-credential-tool.gpt as myAlias
 
 (tool stuff here)
 ```
@@ -121,8 +127,7 @@ A credential context is basically a namespace for credentials. If you have multi
 you can switch between them by defining them in different credential contexts. The default context is called `default`,
 and this is used if none is specified.
 
-You can set the credential context to use with the `--credential-context` flag when running GPTScript. For
-example:
+You can set the credential context to use with the `--credential-context` flag when running GPTScript. For example:
 
 ```bash
 gptscript --credential-context my-azure-workspace my-azure-script.gpt
@@ -181,3 +186,21 @@ In this example, `toolA` provides the variables `ENV_VAR_1` and `ENV_VAR_2`,
 This will read the values of `ENV_VAR_1` through `ENV_VAR_4` from the current environment and set them for the credential.
 This is a direct mapping of environment variable names. **This is not recommended when overriding credentials for
 multiple tools that use the same environment variable names.**
+
+## Credential Refresh (Advanced)
+
+Some use cases (such as OAuth) may involve the need to refresh expired credentials.
+To support this, your credential tool can return other fields besides `env` in its JSON output.
+This is the full list of supported fields in the credential tool output:
+
+- `env` (type: object) - The environment variables to set.
+- `expiresAt` (type: string, timestamp in RFC3339 format) - The time when the credential expires.
+- `refreshToken` (type: string) - The refresh token to use to refresh the credential.
+
+When GPTScript tries to use a credential that has a defined `expiresAt` time, it will check if the credential has expired.
+If the credential has expired, it will run the credential tool again, and the current value of the credential will be
+set to the environment variable `GPTSCRIPT_EXISTING_CREDENTIAL` as a JSON string. This way, the credential tool can check for
+that environment variable, and if it is set, get the refresh token from the existing credential and use it to refresh and return a new credential,
+typically without user interaction.
+
+For an example of a tool that uses the refresh feature, see the [Gateway OAuth2 tool](https://github.com/gptscript-ai/gateway-oauth2).

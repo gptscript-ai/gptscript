@@ -1,97 +1,94 @@
 # Context
 
-GPTScript provides a mechanism to share prompt information across many tools using the tool parameter `context`. It is used to provide additional information to the calling tool on when to use a specific tool by prepending the `context` to the instruction of the calling tool.
+GPTScript provides a mechanism to share prompt information across many tools using the tool directive `context`.
+It is used to provide additional information to the calling tool on when to use a specific tool by prepending the `context` to the instruction of the calling tool.
 
 - Context can point to a static text or a GPTScript.
-- Context tools are just regular GPTScript tools, and any valid gptscript field can be used.
-- Exported tools from a context tool are made available to the calling tool.
+- Context tools are just regular GPTScript tools, and any valid GPTScript fields can be used in them.
+- Shared tools from a context tool are made available to the calling tool.
 - When context points to a GPTScript tool, output from the context tool gets prepended to the instruction of the calling tool.
 
 ## Writing a Context Provider Tool as static text
 
 ```yaml
-# my-search-context.txt
+# my-context.txt
 
-You are an expert web researcher with access to the Search tool.If the search tool fails to return any information stop execution of the script with message "Sorry! Search did not return any results". Feel free to get the contents of the returned URLs in order to get more information. Provide as much detail as you can. Also return the source of the search results.
+You have access to run commands on the user's system. Please ask for confirmation from the user before running a command.
 
 ```
 
-## Using a Context Provider Tool
+## Using a Context Tool
 
-Continuing with the above example, this is how you can use the same context in tools that uses different search providers:
+Continuing with the above example, this is how you can use the same context in different tools:
 
 ```yaml
-# my-search-duduckgo.gpt
-context: ./my-search-context.txt
-tools: github.com/gptscript-ai/search/duckduckgo,sys.http.html2text 
+Context: ./my-context.txt
+Tools: sys.exec, sys.write
 
-What are some of the most popular tourist destinations in Scotland, and how many people visit them each year?
-
+Which processes on my system are using the most memory? Write their PIDs to a file called pids.txt.
 ```
 
 ```yaml
-# my-search-brave.gpt
-context: ./my-search-context.txt
-tools: github.com/gptscript-ai/search/brave,sys.http.html2text
+Context: ./my-context.txt
+Tools: sys.exec
 
-List out some of the main actors in the Christopher Nolan movie Inception, as well as the names of the other Christopher Nolan movies they have appeared in.
-
+Which file in my current directory is the largest?
 ```
-
 
 ## Context Provider Tool with exported tools
 
 Here is a simple example of a context provider tool that provides additional context to search tool:
 
 ```yaml
-# my-search-context-tool.gpt
-share tools: sys.http.html2text?
+# my-context-tool.gpt
+Share Tools: sys.exec
 
-#!/bin/bash
-echo You are an expert web researcher with access to the Search tool.If the search tool fails to return any information stop execution of the script with message "Sorry! Search did not return any results". Feel free to get the contents of the returned URLs in order to get more information. Provide as much detail as you can. Also return the source of the search results.
+#!sys.echo
+You have access to run commands on the user's system. Please ask for confirmation from the user before running a command.
 
 ```
+
+The `#!sys.echo` at the start of the tool body tells GPTScript to return everything after it as the output of the tool. 
 
 Continuing with the above example, this is how you can use it in a script:
 
 ```yaml
-context: ./my-search-context-tool.gpt
-tools: github.com/gptscript-ai/search/duckduckgo
+Context: ./my-context-tool.gpt
+Tools: sys.write
 
-What are some of the most popular tourist destinations in Scotland, and how many people visit them each year?
-
+Which processes on my system are using the most memory? Write their PIDs to a file called pids.txt.
 ```
 
 When you run this script, GPTScript will use the output from the context tool and add it to the user message along with the 
 existing prompt in this tool to provide additional context to LLM.
 
-## Context Provider Tool with args
+## Context Provider Tool with Parameters
 
-Here is an example of a context provider tool that uses args to decide which search tool to use when answering the user provided queries:
+Here is an example of a context provider tool that takes a parameter:
 
 ```yaml
-# context_with_arg.gpt
-share tools: github.com/gptscript-ai/search/duckduckgo, github.com/gptscript-ai/search/brave, sys.http.html2text?
-args: search_tool: tool to search with
+# context_with_param.gpt
+Param: tone: the tone to use when responding to the user's request
 
 #!/bin/bash
-echo You are an expert web researcher with access to the ${search_tool} Search tool.If the search tool fails to return any information stop execution of the script with message "Sorry! Search did not return any results". Feel free to get the contents of the returned URLs in order to get more information. Provide as much detail as you can. Also return the source of the search results.
+echo "Respond to the user's request in a ${tone} tone."
 
 ```
 
 Continuing with the above example, this is how you can use it in a script:
 
 ```yaml
-# my_context_with_arg.gpt
-context: ./context_with_arg.gpt with ${search} as search_tool
-args: search: Search tool to use
+# tool.gpt
+Context: ./context_with_param.gpt with ${tone} as tone
+Param: tone: the tone to use when responding to the user's request
+Tools: sys.http.html2text
 
-What are some of the most popular tourist destinations in Scotland, and how many people visit them each year?
+What are the top stories on Hacker News right now?
 
 ```
 
-This script can be used to search with `brave` or `duckduckdb` tools depending on the search parameter passed to the tool.
-Example usage for using brave search tool:
+Here's how you can run the script and define the tone parameter:
+
 ```yaml
-gptscript --disable-cache my_context_with_arg.gpt '{"search": "brave"}'
+gptscript tool.gpt '{"tone": "obnoxious"}'
 ```

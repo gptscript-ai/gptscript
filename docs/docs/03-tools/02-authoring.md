@@ -2,11 +2,12 @@
 
 You can author your own tools for your use or to share with others.
 The process for authoring a tool is as simple as creating a `tool.gpt` file in the root directory of your project.
-This file is itself a GPTScript that defines the tool's name, description, and what it should do.
+This file is a GPTScript that defines the tool's name, description, and what it should do.
 
 ## Quickstart
 
-This is a guide for writing portable tools for GPTScript. The supported languages currently are Python, Node.js, and Go. This guide uses Python, but you can see documentation for the other language below.
+This is a guide for writing portable tools for GPTScript. The supported languages currently are Python, Node.js, and Go.
+This guide uses Python, but you can see documentation for the other languages below.
 
 ### 1. Write the code
 
@@ -65,7 +66,11 @@ gptscript github.com/<user>/<repo name> '{"url": "https://github.com"}'
 
 ## Sharing Tools
 
-GPTScript is designed to easily export and import tools. Doing this is currently based entirely around the use of GitHub repositories. You can export a tool by creating a GitHub repository and ensuring you have the `tool.gpt` file in the root of the repository. You can then import the tool into a GPTScript by specifying the URL of the repository in the `tools` section of the script. For example, we can leverage the `image-generation` tool by adding the following line to a GPTScript:
+GPTScript is designed to easily export and import tools.
+Doing this is currently based entirely around the use of GitHub repositories.
+You can export a tool by creating a GitHub repository and ensuring you have the `tool.gpt` file in the root of the repository.
+You can then import the tool into a GPTScript by specifying the URL of the repository in the `tools` section of the script.
+For example, we can leverage the `image-generation` tool by adding the following line to a GPTScript:
 
 ```yaml
 tools: github.com/gptscript-ai/dalle-image-generation
@@ -73,9 +78,12 @@ tools: github.com/gptscript-ai/dalle-image-generation
 Generate an image of a city skyline at night.
 ```
 
-### Supported Languages
+## Supported Languages
 
-GPTScript can execute any binary that you ask it to. However, it can also manage the installation of a language runtime and dependencies for you. Currently this is only supported for a few languages. Here are the supported languages and examples of tools written in those languages:
+GPTScript can execute any binary that you ask it to.
+However, it can also manage the installation of a language runtime and dependencies for you.
+Currently, this is only supported for a few languages.
+Here are the supported languages and examples of tools written in those languages:
 
 | Language  | Example                                                                                                        |
 |-----------|----------------------------------------------------------------------------------------------------------------|
@@ -84,10 +92,13 @@ GPTScript can execute any binary that you ask it to. However, it can also manage
 | `Golang`  | [Search](https://github.com/gptscript-ai/search) - Use various providers to search the internet                |
 
 
-### Automatic Documentation
+## Automatic Documentation
 
-Each GPTScript tool is self-documented using the `tool.gpt` file. You can automatically generate documentation for your tools by visiting `tools.gptscript.ai/<github repo url>`. This documentation site allows others to easily search and explore the tools that have been created. 
+Each GPTScript tool is self-documented using the `tool.gpt` file.
+You can automatically generate documentation for your tools by visiting `https://tools.gptscript.ai/<github repo url>`.
+This documentation site allows others to easily search and explore the tools that have been created. 
 
-You can add more information about how to use your tool by adding an `examples` directory to your repository and adding a collection of `.gpt` files that demonstrate how to use your tool. These examples will be automatically included in the documentation.
+You can add more information about how to use your tool by adding an `examples` directory to your repository and adding a collection of `.gpt` files that demonstrate how to use your tool.
+These examples will be automatically included in the documentation.
 
 For more information and to explore existing tools, visit [tools.gptscript.ai](https://tools.gptscript.ai).

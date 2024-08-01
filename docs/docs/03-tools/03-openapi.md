@@ -42,7 +42,7 @@ Will be resolved as `https://api.example.com/v1`.
 ## Authentication
 
 :::warning
-All authentication options will be completely ignored if the server uses HTTP and not HTTPS.
+All authentication options will be completely ignored if the server uses HTTP and not HTTPS, unless the request is for `localhost` or 127.0.0.1.
 This is to protect users from accidentally sending credentials in plain text.
 HTTP is only OK, if it's on localhost/127.0.0.1.
 :::

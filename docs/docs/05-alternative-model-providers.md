@@ -2,7 +2,7 @@
 
 ## Usage
 
-GPTScript can be used against alternative models that expose an OpenAI compatible API or have a provider shim available.
+GPTScript can be used against alternative models that expose an OpenAI-compatible API or have a provider available.
 
 ### Using a model with an OpenAI compatible API
 
@@ -13,9 +13,7 @@ Say hello world
 ```
 
 :::note
-
-    Mistral's La Plateforme has an OpenAI compatible API, but the model does not behave identically to gpt-4. For that reason, we also have a provider for it that might get better results in some cases.
-
+Mistral's La Plateforme has an OpenAI-compatible API, but the model does not behave identically to gpt-4. For that reason, we also have a provider for it that might get better results in some cases.
 :::
 
 ### Using a model that requires a provider
@@ -29,15 +27,15 @@ Say hello world
 
 For OpenAI compatible providers, GPTScript will look for an API key to be configured with the
 prefix `GPTSCRIPT_PROVIDER_`, the base domain converted to environment variable format, and a suffix of `_API_KEY`.
-As an example if you are using `mistral-large-latest from https://api.mistral.ai/v1`, the environment variable would
-be `GPTSCRIPT_PROVIDER_API_MISTRAL_AI_API_KEY`
+For example, if you are using `mistral-large-latest from https://api.mistral.ai/v1`, the environment variable would
+be `GPTSCRIPT_PROVIDER_API_MISTRAL_AI_API_KEY`.
 
-Each provider shim has different requirements for authentication. Please check the readme for the provider you are
+Each provider has different requirements for authentication. Please check the readme for the provider you are
 trying to use.
 
 ## Available Model Providers
 
-The following shims are currently available:
+The following providers are currently available:
 
 * [github.com/gptscript-ai/azure-openai-provider](https://github.com/gptscript-ai/azure-openai-provider)
 * [github.com/gptscript-ai/azure-other-provider](https://github.com/gptscript-ai/azure-other-provider)
@@ -52,16 +50,16 @@ The following shims are currently available:
 For any provider that supports listing models, you can use this command:
 
 ```bash
-# With a shim
+# With a provider
 gptscript --list-models github.com/gptscript-ai/claude3-anthropic-provider
 
-# To OpenAI compatible endpoint
+# With an OpenAI-compatible endpoint
 gptscript --list-models https://api.mistral.ai/v1
 ```
 
 ## Compatibility
 
-While the shims provide support for using GPTScript with other models, the effectiveness of using a
+While the providers allow GPTScript to work with other models, the effectiveness of using a
 different model will depend on a combination of prompt engineering and the quality of the model. You may need to change
 wording or add more description if you are not getting the results you want. In some cases, the model might not be
 capable of intelligently handling the complex function calls.

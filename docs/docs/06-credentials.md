@@ -18,7 +18,9 @@ The configuration file is located in the following location based on your operat
 - macOS: `$HOME/Library/Application Support/gptscript/config.json`
 - Linux: `$XDG_CONFIG_HOME/gptscript/config.json`
 
-(Note: if you set the `XDG_CONFIG_HOME` environment variable on macOS, then the same path as Linux will be used.)
+:::note
+If you set the `XDG_CONFIG_HOME` environment variable on macOS, then the same path as Linux will be used.
+:::
 
 The configured credential store will be automatically downloaded and compiled from the [gptscript-ai/gptscript-credential-helpers](https://github.com/gptscript-ai/gptscript-credential-helpers)
 repository, other than the `file` store, which is built-in to GPTScript itself.
