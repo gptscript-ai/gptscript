@@ -1,7 +1,9 @@
 package cli
 
 import (
+	"context"
 	"os"
+	"os/signal"
 
 	"github.com/gptscript-ai/cmd"
 	"github.com/gptscript-ai/gptscript/pkg/daemon"
@@ -18,5 +20,7 @@ func Main() {
 		}
 		os.Exit(0)
 	}
-	cmd.Main(New())
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
+	cmd.MainCtx(ctx, New())
 }

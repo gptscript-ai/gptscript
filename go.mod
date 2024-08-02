@@ -16,7 +16,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gptscript-ai/broadcaster v0.0.0-20240625175512-c43682019b86
 	github.com/gptscript-ai/chat-completion-client v0.0.0-20240531200700-af8e7ecf0379
-	github.com/gptscript-ai/cmd v0.0.0-20240625175447-4250b42feb7d
+	github.com/gptscript-ai/cmd v0.0.0-20240802230653-326b7baf6fcb
 	github.com/gptscript-ai/go-gptscript v0.9.4-0.20240801203434-840b14393b17
 	github.com/gptscript-ai/tui v0.0.0-20240802053758-038d3eed9502
 	github.com/hexops/autogold/v2 v2.2.1
