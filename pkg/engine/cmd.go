@@ -2,7 +2,9 @@ package engine
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -42,6 +44,25 @@ func (o *outputWriter) Write(p []byte) (n int, err error) {
 		},
 	}
 	return len(p), nil
+}
+
+func compressEnv(envs []string) (result []string) {
+	for _, env := range envs {
+		k, v, ok := strings.Cut(env, "=")
+		if !ok || len(v) < 40_000 {
+			result = append(result, env)
+			continue
+		}
+
+		out := bytes.NewBuffer(nil)
+		b64 := base64.NewEncoder(base64.StdEncoding, out)
+		gz := gzip.NewWriter(b64)
+		_, _ = gz.Write([]byte(v))
+		_ = gz.Close()
+		_ = b64.Close()
+		result = append(result, k+`={"_gz":"`+out.String()+`"}`)
+	}
+	return
 }
 
 func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCategory ToolCategory) (cmdOut string, cmdErr error) {
@@ -95,10 +116,10 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 	for _, inputContext := range ctx.InputContext {
 		instructions = append(instructions, inputContext.Content)
 	}
+
 	var extraEnv = []string{
 		strings.TrimSpace("GPTSCRIPT_CONTEXT=" + strings.Join(instructions, "\n")),
 	}
-
 	cmd, stop, err := e.newCommand(ctx.Ctx, extraEnv, tool, input)
 	if err != nil {
 		return "", err
@@ -277,6 +298,6 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 	}
 
 	cmd := exec.CommandContext(ctx, env.Lookup(envvars, args[0]), cmdArgs...)
-	cmd.Env = envvars
+	cmd.Env = compressEnv(envvars)
 	return cmd, stop, nil
 }

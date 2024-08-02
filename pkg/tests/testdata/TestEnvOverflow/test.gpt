@@ -1,0 +1,14 @@
+context: c
+
+#!/bin/bash
+
+echo "${GPTSCRIPT_CONTEXT}"
+echo "${GPTSCRIPT_CONTEXT}" > ${GPTSCRIPT_TOOL_DIR}/context.json
+
+---
+name: c
+
+#!/bin/bash
+
+string=$(printf 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa%.0s' {1..1000})
+echo "$string"
