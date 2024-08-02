@@ -94,6 +94,6 @@ This is exactly what we expected. This is a silly, small example just to demonst
 A real-world situation would involve several different tools sending different HTTP requests to the daemon tool,
 likely with an LLM determining when to call which tool.
 
-### Real-World Example
+## Real-World Example
 
 To see a real-world example of a daemon tool, check out the [GPTScript Browser tool](https://github.com/gptscript-ai/browser).
