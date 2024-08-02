@@ -1,7 +1,7 @@
 # Workspace
 
 One concept in GPTScript is the workspace directory.
-This is a directory meant to be used by tools that need to write their own files.
+This is a directory meant to be used by tools that need to interact with the local file system.
 By default, the workspace directory is a one-off temporary directory.
 The workspace directory can be set with the `--workspace` argument when running GPTScript, like this:
 
