@@ -134,21 +134,28 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 		},
 	}
 
-	result := &bytes.Buffer{}
-	all := io.MultiWriter(result, &outputWriter{
-		id:       id,
-		progress: e.Progress,
-	})
+	var (
+		stdout       = &bytes.Buffer{}
+		stdoutAndErr = &bytes.Buffer{}
+		progressOut  = &outputWriter{
+			id:       id,
+			progress: e.Progress,
+		}
+		result *bytes.Buffer
+	)
 
-	cmd.Stdout = all
-	cmd.Stderr = all
-	if log.IsDebug() {
-		cmd.Stderr = io.MultiWriter(all, os.Stderr)
+	cmd.Stdout = io.MultiWriter(stdout, stdoutAndErr, progressOut)
+	if toolCategory == NoCategory || toolCategory == ContextToolCategory {
+		cmd.Stderr = io.MultiWriter(stdoutAndErr, progressOut)
+		result = stdoutAndErr
+	} else {
+		cmd.Stderr = io.MultiWriter(stdoutAndErr, progressOut, os.Stderr)
+		result = stdout
 	}
 
 	if err := cmd.Run(); err != nil {
 		if toolCategory == NoCategory {
-			return fmt.Sprintf("ERROR: got (%v) while running tool, OUTPUT: %s", err, result), nil
+			return fmt.Sprintf("ERROR: got (%v) while running tool, OUTPUT: %s", err, stdoutAndErr), nil
 		}
 		log.Errorf("failed to run tool [%s] cmd %v: %v", tool.Parameters.Name, cmd.Args, err)
 		return "", fmt.Errorf("ERROR: %s: %w", result, err)
