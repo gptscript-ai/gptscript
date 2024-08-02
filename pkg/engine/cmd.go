@@ -134,24 +134,27 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 		},
 	}
 
-	output := &bytes.Buffer{}
-	all := &bytes.Buffer{}
-	cmd.Stderr = io.MultiWriter(all, os.Stderr)
-	cmd.Stdout = io.MultiWriter(all, output, &outputWriter{
+	result := &bytes.Buffer{}
+	all := io.MultiWriter(result, &outputWriter{
 		id:       id,
 		progress: e.Progress,
 	})
 
-	if err := cmd.Run(); err != nil {
-		if toolCategory == NoCategory {
-			return fmt.Sprintf("ERROR: got (%v) while running tool, OUTPUT: %s", err, all), nil
-		}
-		_, _ = os.Stderr.Write(output.Bytes())
-		log.Errorf("failed to run tool [%s] cmd %v: %v", tool.Parameters.Name, cmd.Args, err)
-		return "", fmt.Errorf("ERROR: %s: %w", all, err)
+	cmd.Stdout = all
+	cmd.Stderr = all
+	if log.IsDebug() {
+		cmd.Stderr = io.MultiWriter(all, os.Stderr)
 	}
 
-	return output.String(), IsChatFinishMessage(output.String())
+	if err := cmd.Run(); err != nil {
+		if toolCategory == NoCategory {
+			return fmt.Sprintf("ERROR: got (%v) while running tool, OUTPUT: %s", err, result), nil
+		}
+		log.Errorf("failed to run tool [%s] cmd %v: %v", tool.Parameters.Name, cmd.Args, err)
+		return "", fmt.Errorf("ERROR: %s: %w", result, err)
+	}
+
+	return result.String(), IsChatFinishMessage(result.String())
 }
 
 func (e *Engine) getRuntimeEnv(ctx context.Context, tool types.Tool, cmd, env []string) ([]string, error) {

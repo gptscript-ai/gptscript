@@ -6,7 +6,7 @@ noop
 name: local
 
 #!/bin/bash
-set -e -x
+set -e
 
 [ "" = "${TOOL_DIR}" ]
 P=$(pwd)
