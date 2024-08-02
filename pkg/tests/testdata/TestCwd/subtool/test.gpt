@@ -1,6 +1,6 @@
 #
 #!/usr/bin/env X=${GPTSCRIPT_TOOL_DIR} /bin/bash
-set -e -x
+set -e
 
 [ ${X} = ${GPTSCRIPT_TOOL_DIR} ]
 cd $X
