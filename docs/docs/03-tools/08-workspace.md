@@ -10,6 +10,7 @@ gptscript --workspace . my-script.gpt
 ```
 
 In the above example, the user’s current directory (denoted by `.`) will be set as the workspace.
+The workspace directory is no longer temporary if it is explicitly set, and everything in it will persist after the script has finished running.
 Both absolute and relative paths are supported.
 
 Regardless of whether it is set implicitly or explicitly, the workspace is then made available to the script execution as the `GPTSCRIPT_WORKSPACE_DIR` environment variable.
@@ -21,7 +22,7 @@ The tools must decide to make use of the workspace environment variable.
 
 ## The Workspace Context Tool
 
-To make prompt-based tools aware of the workspace, you can reference the workspace context tool:
+To make a non-code tool that uses the LLM aware of the workspace, you can reference the workspace context tool:
 
 ```
 Context: github.com/gptscript-ai/context/workspace

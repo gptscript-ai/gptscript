@@ -58,8 +58,17 @@ Let's talk about the daemon tool, called `my-daemon`, first.
 The body of this tool begins with `#!sys.daemon`. This tells GPTScript to take the rest of the body as a command to be
 run in the background that will listen for HTTP requests. GPTScript will run this command (in this case, a Node script).
 GPTScript will assign a port number for the server and set the `PORT` environment variable to that number, so the
-server needs to check that variable and listen on the proper port. The server is required to respond to a GET request at
-`/` with 200 OK, so that GPTScript can make sure it is running properly before continuing execution.
+server needs to check that variable and listen on the proper port.
+
+After GPTScript runs the daemon, it will send it an HTTP GET request to make sure that it is running properly.
+The daemon needs to respond with a 200 OK to this request.
+By default, the request goes to `/`, but this can be configured with the following syntax:
+
+```
+#!sys.daemon (path=/api/ready) node
+
+// (node script here)
+```
 
 ### The Entrypoint Tool
 

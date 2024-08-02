@@ -10,6 +10,7 @@ This guide provides guidelines for setting up GitHub repos for proper tool distr
 ### `tool.gpt` or `agent.gpt` file
 
 Every repo should have a `tool.gpt` or `agent.gpt` file. This is the main logic of the tool.
+If both files exist, GPTScript will use the `agent.gpt` file and ignore the `tool.gpt` file.
 Your repo can have other `.gpt` files that are referenced by the main file, but there must be a `tool.gpt` or `agent.gpt` file present.
 
 Under most circumstances, this file should live in the root of the repo.
@@ -115,6 +116,10 @@ Name: my-go-tool
 
 #!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool
 ```
+
+:::important
+Unlike the Python and Node cases above where you can name the file you are going to run anything you want, Go tools must be `#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool`.
+:::
 
 GPTScript will build the Go program located at `./main.go` to a file called `./bin/gptscript-go-tool` before running the tool.
 All of your dependencies need to be properly specified in a `go.mod` file.
