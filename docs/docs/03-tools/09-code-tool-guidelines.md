@@ -118,7 +118,7 @@ Name: my-go-tool
 ```
 
 :::important
-Unlike the Python and Node cases above where you can name the file you are going to run anything you want, Go tools must be `#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool`.
+Unlike the Python and Node cases above where you can name the file anything you want, Go tools must be `#!${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool`.
 :::
 
 GPTScript will build the Go program located at `./main.go` to a file called `./bin/gptscript-go-tool` before running the tool.
