@@ -85,3 +85,16 @@ If you're already authenticated with the `gh` CLI, you can use its token by runn
 ```bash
 export GITHUB_AUTH_TOKEN="$(gh auth token)"
 ```
+
+### I'm not able to get GPTScript to work with my OpenAI account which is in "Free Trial" 
+
+When executing GPTScript with OpenAI API key of an account in "Free Trial", user will be presented with the following error message: 
+```
+status code: 404, message: The model `gpt-4o` does not exist or you do not have access to it
+``` 
+By default, GPTScript uses `gpt-4o` model which is not available for users in "Free Trial" and this is expected behavior.
+
+User can choose to use other supported models like `gpt-4o-mini`,`gpt-3.5-turbo` by using `--default-model <Model Name>` when executing GPTscripts. But in case of "Free Trial" account with no credits, GPTScript execution will fail with following quota exceeded error messgae which is also the expected behavior since there are no credits available.
+```
+error, status code: 429, message: You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+```
