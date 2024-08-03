@@ -1,34 +1,24 @@
 # Supported Models and Platforms
 
-## Usage
-
 GPTScript can be used against alternative models that expose an OpenAI-compatible API or have a provider available.
+Here is an example using Claude:
 
-### Using a model with an OpenAI compatible API
-
-```gptscript
-model: mistral-large-latest from https://api.mistral.ai/v1
-
-Say hello world
-```
-
-:::note
-Mistral's La Plateforme has an OpenAI-compatible API, but the model does not behave identically to gpt-4. For that reason, we also have a provider for it that might get better results in some cases.
-:::
-
-### Using a model that requires a provider
 ```gptscript
 model: claude-3-haiku-20240307 from github.com/gptscript-ai/claude3-anthropic-provider
 
 Say hello world
 ```
 
-### Authentication
+A note on model compatibility:
 
-For OpenAI compatible providers, GPTScript will look for an API key to be configured with the
-prefix `GPTSCRIPT_PROVIDER_`, the base domain converted to environment variable format, and a suffix of `_API_KEY`.
-For example, if you are using `mistral-large-latest from https://api.mistral.ai/v1`, the environment variable would
-be `GPTSCRIPT_PROVIDER_API_MISTRAL_AI_API_KEY`.
+:::important
+While the providers allow GPTScript to work with other models, the effectiveness of using a
+different model will depend on a combination of prompt engineering and the quality of the model. You may need to change
+wording or add more description if you are not getting the results you want. In some cases, the model might not be
+capable of intelligently handling the complex function calls.
+:::
+
+## Authentication
 
 Each provider has different requirements for authentication. Please check the readme for the provider you are
 trying to use.
@@ -50,16 +40,40 @@ The following providers are currently available:
 For any provider that supports listing models, you can use this command:
 
 ```bash
-# With a provider
 gptscript --list-models github.com/gptscript-ai/claude3-anthropic-provider
-
-# With an OpenAI-compatible endpoint
-gptscript --list-models https://api.mistral.ai/v1
 ```
 
-## Compatibility
+## OpenAI-Compatible APIs (Advanced)
 
-While the providers allow GPTScript to work with other models, the effectiveness of using a
-different model will depend on a combination of prompt engineering and the quality of the model. You may need to change
-wording or add more description if you are not getting the results you want. In some cases, the model might not be
-capable of intelligently handling the complex function calls.
+:::warning
+Even if a non-OpenAI service has an API that claims to be OpenAI-compatible, there are usually subtle differences that cause things to break.
+The approach described in this section often does not work.
+:::
+
+You can use a model from an OpenAI-compatible API like this:
+
+```gptscript
+model: mistral-large-latest from https://api.mistral.ai/v1
+
+Say hello world
+```
+
+:::note
+Mistral's La Plateforme has an OpenAI-compatible API, but the model does not behave identically to gpt-4.
+For that reason, we also have a provider for it that might get better results in some cases.
+:::
+
+### Authentication
+
+For OpenAI-compatible providers, GPTScript will look for an API key to be configured with the
+prefix `GPTSCRIPT_PROVIDER_`, the base domain converted to environment variable format, and a suffix of `_API_KEY`.
+For example, if you are using `mistral-large-latest from https://api.mistral.ai/v1`, the environment variable would
+be `GPTSCRIPT_PROVIDER_API_MISTRAL_AI_API_KEY`.
+
+### Listing available models
+
+You can list models from an OpenAI-compatible API like this:
+
+```bash
+gptscript --list-models https://api.mistral.ai/v1
+```
