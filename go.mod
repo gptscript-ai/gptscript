@@ -18,7 +18,7 @@ require (
 	github.com/gptscript-ai/chat-completion-client v0.0.0-20240531200700-af8e7ecf0379
 	github.com/gptscript-ai/cmd v0.0.0-20240802230653-326b7baf6fcb
 	github.com/gptscript-ai/go-gptscript v0.9.4-0.20240801203434-840b14393b17
-	github.com/gptscript-ai/tui v0.0.0-20240802053758-038d3eed9502
+	github.com/gptscript-ai/tui v0.0.0-20240803053736-0360a5a6339b
 	github.com/hexops/autogold/v2 v2.2.1
 	github.com/hexops/valast v1.4.4
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056

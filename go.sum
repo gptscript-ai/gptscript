@@ -173,8 +173,8 @@ github.com/gptscript-ai/cmd v0.0.0-20240802230653-326b7baf6fcb h1:ky2J2CzBOskC7J
 github.com/gptscript-ai/cmd v0.0.0-20240802230653-326b7baf6fcb/go.mod h1:DJAo1xTht1LDkNYFNydVjTHd576TC7MlpsVRl3oloVw=
 github.com/gptscript-ai/go-gptscript v0.9.4-0.20240801203434-840b14393b17 h1:BTfJ6ls31Roq42lznlZnuPzRf0wrT8jT+tWcvq7wDXY=
 github.com/gptscript-ai/go-gptscript v0.9.4-0.20240801203434-840b14393b17/go.mod h1:Dh6vYRAiVcyC3ElZIGzTvNF1FxtYwA07BHfSiFKQY7s=
-github.com/gptscript-ai/tui v0.0.0-20240802053758-038d3eed9502 h1:172DJthLtMUqXrODC/wGd0Vmj6adn9YiP9KnlrZpD+4=
-github.com/gptscript-ai/tui v0.0.0-20240802053758-038d3eed9502/go.mod h1:KGtCo7cjH6qR6Wp6AyI1dL1R8bln8wVpdDEoopRUckY=
+github.com/gptscript-ai/tui v0.0.0-20240803053736-0360a5a6339b h1:KyjSzximDwyFDAze7UVGlgU8P76mNvtVyPG9dH5Cd/A=
+github.com/gptscript-ai/tui v0.0.0-20240803053736-0360a5a6339b/go.mod h1:KGtCo7cjH6qR6Wp6AyI1dL1R8bln8wVpdDEoopRUckY=
 github.com/hashicorp/errwrap v1.0.0 h1:hLrqtEDnRye3+sgx6z4qVLNuviH3MR5aQ0ykNJa/UYA=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+lD48awMYo=
