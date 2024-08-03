@@ -61,9 +61,13 @@ func SysPrompt(ctx context.Context, envs []string, input string, _ chan<- string
 
 	for _, env := range envs {
 		if url, ok := strings.CutPrefix(env, types.PromptURLEnvVar+"="); ok {
+			var fields []string
+			if params.Fields != "" {
+				fields = strings.Split(params.Fields, ",")
+			}
 			httpPrompt := types.Prompt{
 				Message:   params.Message,
-				Fields:    strings.Split(params.Fields, ","),
+				Fields:    fields,
 				Sensitive: params.Sensitive == "true",
 			}
 			return sysPromptHTTP(ctx, envs, url, httpPrompt)
@@ -76,7 +80,7 @@ func SysPrompt(ctx context.Context, envs []string, input string, _ chan<- string
 func sysPrompt(ctx context.Context, req types.Prompt) (_ string, err error) {
 	defer context2.GetPauseFuncFromCtx(ctx)()()
 
-	if req.Message != "" && len(req.Fields) == 1 && strings.TrimSpace(req.Fields[0]) == "" {
+	if req.Message != "" && len(req.Fields) == 0 {
 		var errs []error
 		_, err := fmt.Fprintln(os.Stderr, req.Message)
 		errs = append(errs, err)
