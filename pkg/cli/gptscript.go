@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -19,7 +18,6 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/chat"
-	"github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/input"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
@@ -69,7 +67,6 @@ type GPTScript struct {
 	ForceChat            bool     `usage:"Force an interactive chat session if even the top level tool is not a chat tool" local:"true"`
 	ForceSequential      bool     `usage:"Force parallel calls to run sequentially" local:"true"`
 	Workspace            string   `usage:"Directory to use for the workspace, if specified it will not be deleted on exit"`
-	UI                   bool     `usage:"Launch the UI" local:"true" name:"ui"`
 	DisableTUI           bool     `usage:"Don't use chat TUI but instead verbose output" local:"true" name:"disable-tui"`
 	SaveChatStateFile    string   `usage:"A file to save the chat state to so that a conversation can be resumed with --chat-state" local:"true"`
 	DefaultModelProvider string   `usage:"Default LLM model provider to use, this will override OpenAI settings"`
@@ -142,7 +139,6 @@ func (r *GPTScript) NewGPTScriptOpts() (gptscript.Options, error) {
 		Env:                  os.Environ(),
 		CredentialContext:    r.CredentialContext,
 		Workspace:            r.Workspace,
-		DisablePromptServer:  r.UI,
 		DefaultModelProvider: r.DefaultModelProvider,
 	}
 
@@ -334,61 +330,6 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 		return err
 	}
 
-	// If the user is trying to launch the chat-builder UI, then set up the tool and options here.
-	if r.UI {
-		if os.Getenv(system.BinEnvVar) == "" {
-			gptOpt.Env = append(gptOpt.Env, system.BinEnvVar+"="+system.Bin())
-		}
-
-		// Pass the corrected environment variables for SDK server options
-		if r.DefaultModel != "" {
-			gptOpt.Env = append(gptOpt.Env, "GPTSCRIPT_SDKSERVER_DEFAULT_MODEL="+r.DefaultModel)
-		}
-		if len(r.CredentialOverride) > 0 {
-			gptOpt.Env = append(gptOpt.Env, "GPTSCRIPT_SDKSERVER_CREDENTIAL_OVERRIDE="+strings.Join(r.CredentialOverride, ","))
-		}
-
-		// If args has more than one element, then the user has provided a file.
-		if len(args) > 0 {
-			file := args[0]
-			if file == "-" {
-				return fmt.Errorf("chat UI only supports files, cannot read from stdin")
-			}
-
-			// If the file is external, then set the SCRIPTS_PATH to the current working directory. Otherwise,
-			// set it to the directory of the script and set the file to the base.
-			if !(strings.HasPrefix(file, "http://") || strings.HasPrefix(file, "https://") || strings.HasPrefix(file, "github.com")) {
-				absPathToScript, err := filepath.Abs(file)
-				if err != nil {
-					return fmt.Errorf("cannot determine absolute path to script %s: %v", file, err)
-				}
-				gptOpt.Env = append(gptOpt.Env, "SCRIPTS_PATH="+filepath.Dir(absPathToScript))
-				file = strings.TrimSuffix(filepath.Base(file), ".gpt")
-			} else {
-				cwd, err := os.Getwd()
-				if err != nil {
-					return fmt.Errorf("could not determine current working directory: %w", err)
-				}
-				gptOpt.Env = append(gptOpt.Env, "SCRIPTS_PATH="+cwd)
-			}
-
-			gptOpt.Env = append(gptOpt.Env, "UI_RUN_FILE="+file)
-			// Remove the file from args because the above line will pass it to the UI tool.
-			args = args[1:]
-		} else {
-			cwd, err := os.Getwd()
-			if err != nil {
-				return fmt.Errorf("could not determine current working directory: %w", err)
-			}
-			gptOpt.Env = append(gptOpt.Env, "SCRIPTS_PATH="+cwd)
-		}
-
-		// The UI must run in daemon mode.
-		r.Daemon = true
-		// Use the UI tool as the first argument.
-		args = append([]string{uiTool()}, args...)
-	}
-
 	ctx := cmd.Context()
 
 	gptScript, err := gptscript.New(ctx, gptOpt)
@@ -490,28 +431,10 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 		}, gptOpt.Env, toolInput, r.SaveChatStateFile)
 	}
 
-	if r.UI {
-		// If the UI is running, then all prompts should go through the SDK and the UI.
-		// Not clearing ExtraEnv here would mean that the prompts would go through the terminal.
-		gptScript.ExtraEnv = nil
-	}
-
 	s, err := gptScript.Run(cmd.Context(), prg, gptOpt.Env, toolInput)
 	if err != nil {
 		return err
 	}
 
 	return r.PrintOutput(toolInput, s)
-}
-
-// uiTool returns the versioned UI tool reference for the current GPTScript version.
-// For release versions, a reference with a matching release tag is returned.
-// For all other versions, a reference to main is returned.
-func uiTool() string {
-	ref := "github.com/gptscript-ai/ui"
-	if tag := version.Tag; !strings.Contains(tag, "v0.0.0-dev") {
-		ref = fmt.Sprintf("%s@%s", ref, tag)
-	}
-
-	return env.VarOrDefault("GPTSCRIPT_CHAT_UI_TOOL", ref)
 }
