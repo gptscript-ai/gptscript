@@ -287,17 +287,12 @@ func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 	}
 
 	completion := types.CompletionRequest{
-		Model:                tool.Parameters.ModelName,
-		MaxTokens:            tool.Parameters.MaxTokens,
-		JSONResponse:         tool.Parameters.JSONResponse,
-		Cache:                tool.Parameters.Cache,
-		Chat:                 tool.Parameters.Chat,
-		Temperature:          tool.Parameters.Temperature,
-		InternalSystemPrompt: tool.Parameters.InternalPrompt,
-	}
-
-	if tool.Chat && completion.InternalSystemPrompt == nil {
-		completion.InternalSystemPrompt = new(bool)
+		Model:        tool.Parameters.ModelName,
+		MaxTokens:    tool.Parameters.MaxTokens,
+		JSONResponse: tool.Parameters.JSONResponse,
+		Cache:        tool.Parameters.Cache,
+		Chat:         tool.Parameters.Chat,
+		Temperature:  tool.Parameters.Temperature,
 	}
 
 	var err error

@@ -134,7 +134,6 @@
               "input": "Input to chatbot2",
               "completion": {
                 "model": "gpt-4o",
-                "internalSystemPrompt": false,
                 "tools": [
                   {
                     "function": {

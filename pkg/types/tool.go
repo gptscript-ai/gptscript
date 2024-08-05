@@ -121,7 +121,6 @@ type Parameters struct {
 	Chat                bool             `json:"chat,omitempty"`
 	Temperature         *float32         `json:"temperature,omitempty"`
 	Cache               *bool            `json:"cache,omitempty"`
-	InternalPrompt      *bool            `json:"internalPrompt"`
 	Arguments           *openapi3.Schema `json:"arguments,omitempty"`
 	Tools               []string         `json:"tools,omitempty"`
 	GlobalTools         []string         `json:"globalTools,omitempty"`
@@ -464,9 +463,6 @@ func (t ToolDef) String() string {
 			prop := t.Parameters.Arguments.Properties[key]
 			_, _ = fmt.Fprintf(buf, "Parameter: %s: %s\n", key, prop.Value.Description)
 		}
-	}
-	if t.Parameters.InternalPrompt != nil {
-		_, _ = fmt.Fprintf(buf, "Internal Prompt: %v\n", *t.Parameters.InternalPrompt)
 	}
 	if len(t.Parameters.Credentials) > 0 {
 		for _, cred := range t.Parameters.Credentials {
