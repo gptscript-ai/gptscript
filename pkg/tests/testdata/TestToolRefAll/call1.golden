@@ -1,0 +1,61 @@
+`{
+  "model": "gpt-4o",
+  "tools": [
+    {
+      "function": {
+        "toolID": "testdata/TestToolRefAll/test.gpt:tool",
+        "name": "tool",
+        "parameters": {
+          "properties": {
+            "toolArg": {
+              "description": "stuff",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      }
+    },
+    {
+      "function": {
+        "toolID": "testdata/TestToolRefAll/test.gpt:none",
+        "name": "none",
+        "parameters": {
+          "properties": {
+            "noneArg": {
+              "description": "stuff",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      }
+    },
+    {
+      "function": {
+        "toolID": "testdata/TestToolRefAll/test.gpt:agentAssistant",
+        "name": "agent",
+        "parameters": {
+          "properties": {
+            "defaultPromptParameter": {
+              "description": "Prompt to send to the tool. This may be an instruction or question.",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      }
+    }
+  ],
+  "messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "\nContext Body\nMain tool"
+        }
+      ],
+      "usage": {}
+    }
+  ]
+}`

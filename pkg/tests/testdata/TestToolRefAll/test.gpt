@@ -1,0 +1,30 @@
+tools: tool, agentAssistant, context, none
+
+Main tool
+
+---
+name: agentAssistant
+type: agent
+
+Agent body
+
+---
+name: context
+type: context
+
+#!sys.echo
+
+Context Body
+
+---
+name: none
+param: noneArg: stuff
+
+Default type
+
+---
+name: tool
+type: Tool
+param: toolArg: stuff
+
+Typed tool

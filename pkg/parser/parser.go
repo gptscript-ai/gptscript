@@ -150,6 +150,8 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		tool.Parameters.Credentials = append(tool.Parameters.Credentials, value)
 	case "sharecredentials", "sharecreds", "sharecredential", "sharecred", "sharedcredentials", "sharedcreds", "sharedcredential", "sharedcred":
 		tool.Parameters.ExportCredentials = append(tool.Parameters.ExportCredentials, value)
+	case "type":
+		tool.Type = types.ToolType(strings.ToLower(value))
 	default:
 		return false, nil
 	}
