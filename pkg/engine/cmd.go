@@ -204,9 +204,8 @@ var ignoreENV = map[string]struct{}{
 }
 
 func appendEnv(envs []string, k, v string) []string {
-	//fmt.Printf("%s=%s\n", k, v)
 	if _, ignore := ignoreENV[k]; !ignore {
-		envs = append(envs, strings.ToUpper(k)+"="+v)
+		envs = append(envs, strings.ToUpper(env.ToEnvLike(k))+"="+v)
 	}
 	return envs
 }
