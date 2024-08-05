@@ -332,7 +332,7 @@ func getToolRefInput(prg *types.Program, ref types.ToolReference, input string) 
 }
 
 func (r *Runner) getContext(callCtx engine.Context, state *State, monitor Monitor, env []string, input string) (result []engine.InputContext, _ *State, _ error) {
-	toolRefs, err := callCtx.Program.GetContextToolRefs(callCtx.Tool.ID)
+	toolRefs, err := callCtx.Tool.GetContextTools(*callCtx.Program)
 	if err != nil {
 		return nil, nil, err
 	}

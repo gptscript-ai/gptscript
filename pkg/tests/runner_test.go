@@ -995,3 +995,8 @@ func TestMissingTool(t *testing.T) {
 	r.AssertResponded(t)
 	autogold.Expect("TEST RESULT CALL: 2").Equal(t, resp)
 }
+
+func TestToolRefAll(t *testing.T) {
+	r := tester.NewRunner(t)
+	r.RunDefault()
+}
