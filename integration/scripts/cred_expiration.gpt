@@ -5,7 +5,7 @@ cred: credentialTool with 1 as hours
 
 import os
 
-print("Expires: " + os.getenv("GPTSCRIPT_CREDENTIAL_EXPIRATION", ""))
+print("Expires: " + os.getenv("GPTSCRIPT_CREDENTIAL_EXPIRATION", ""), end="")
 
 ---
 name: credentialTool
