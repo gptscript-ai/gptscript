@@ -1,0 +1,46 @@
+cred: credentialTool with 2 as hours
+cred: credentialTool with 1 as hours
+
+#!python3
+
+import os
+
+print("Expires: " + os.getenv("GPTSCRIPT_CREDENTIAL_EXPIRATION", ""))
+
+---
+name: credentialTool
+args: hours: the number of hours from now to expire
+
+#!python3
+
+import os
+import json
+from datetime import datetime, timedelta, timezone
+
+class Output:
+    def __init__(self, env, expires_at):
+        self.env = env
+        self.expiresAt = expires_at
+
+    def to_dict(self):
+        return {
+            "env": self.env,
+            "expiresAt": self.expiresAt.isoformat()
+        }
+
+hours_str = os.getenv("HOURS")
+if hours_str is None:
+	print("HOURS environment variable is not set")
+	os._exit(1)
+
+try:
+	hours = int(hours_str)
+except ValueError:
+	print("failed to parse HOURS")
+	os._exit(1)
+
+expires_at = datetime.now(timezone.utc) + timedelta(hours=hours)
+out = Output(env={"yeet": "yote"}, expires_at=expires_at)
+out_json = json.dumps(out.to_dict())
+
+print(out_json)
