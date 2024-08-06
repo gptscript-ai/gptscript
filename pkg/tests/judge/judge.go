@@ -84,10 +84,10 @@ func New[T any](client *openai.Client) (*Judge[T], error) {
 }
 
 func (j *Judge[T]) Equal(ctx context.Context, expected, actual T, criteria string) (equal bool, reasoning string, err error) {
-	comparisonJSON, err := json.MarshalIndent(&comparison[T]{
+	comparisonJSON, err := json.Marshal(&comparison[T]{
 		Expected: expected,
 		Actual:   actual,
-	}, "", "    ")
+	})
 	if err != nil {
 		return false, "", fmt.Errorf("failed to marshal judge testcase JSON: %w", err)
 	}
