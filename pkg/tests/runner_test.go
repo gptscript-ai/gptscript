@@ -36,7 +36,6 @@ func TestAsterick(t *testing.T) {
     "testdata/TestAsterick/other.gpt:a": {
       "name": "a",
       "modelName": "gpt-4o",
-      "internalPrompt": null,
       "instructions": "a",
       "id": "testdata/TestAsterick/other.gpt:a",
       "localTools": {
@@ -55,7 +54,6 @@ func TestAsterick(t *testing.T) {
     "testdata/TestAsterick/other.gpt:afoo": {
       "name": "afoo",
       "modelName": "gpt-4o",
-      "internalPrompt": null,
       "instructions": "afoo",
       "id": "testdata/TestAsterick/other.gpt:afoo",
       "localTools": {
@@ -73,7 +71,6 @@ func TestAsterick(t *testing.T) {
     },
     "testdata/TestAsterick/test.gpt:": {
       "modelName": "gpt-4o",
-      "internalPrompt": null,
       "tools": [
         "a* from ./other.gpt"
       ],
@@ -396,7 +393,6 @@ func TestSubChat(t *testing.T) {
             "state": {
               "completion": {
                 "model": "gpt-4o",
-                "internalSystemPrompt": false,
                 "messages": [
                   {
                     "role": "system",
@@ -521,7 +517,6 @@ func TestSubChat(t *testing.T) {
             "state": {
               "completion": {
                 "model": "gpt-4o",
-                "internalSystemPrompt": false,
                 "messages": [
                   {
                     "role": "system",
@@ -598,7 +593,6 @@ func TestChat(t *testing.T) {
         "input": "Hello",
         "completion": {
           "model": "gpt-4o",
-          "internalSystemPrompt": false,
           "messages": [
             {
               "role": "system",
@@ -650,7 +644,6 @@ func TestChat(t *testing.T) {
         "input": "Hello",
         "completion": {
           "model": "gpt-4o",
-          "internalSystemPrompt": false,
           "messages": [
             {
               "role": "system",

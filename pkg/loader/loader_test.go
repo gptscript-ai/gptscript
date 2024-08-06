@@ -79,7 +79,6 @@ func TestHelloWorld(t *testing.T) {
   "toolSet": {
     "https://raw.githubusercontent.com/ibuildthecloud/test/bafe5a62174e8a0ea162277dcfe3a2ddb7eea928/example/bob.gpt:": {
       "modelName": "gpt-4o",
-      "internalPrompt": null,
       "instructions": "Say hello world",
       "id": "https://raw.githubusercontent.com/ibuildthecloud/test/bafe5a62174e8a0ea162277dcfe3a2ddb7eea928/example/bob.gpt:",
       "localTools": {
@@ -93,7 +92,6 @@ func TestHelloWorld(t *testing.T) {
     },
     "https://raw.githubusercontent.com/ibuildthecloud/test/bafe5a62174e8a0ea162277dcfe3a2ddb7eea928/example/sub/tool.gpt:": {
       "modelName": "gpt-4o",
-      "internalPrompt": null,
       "tools": [
         "../bob.gpt"
       ],
@@ -129,7 +127,6 @@ func TestHelloWorld(t *testing.T) {
     "https://get.gptscript.ai/echo.gpt:": {
       "description": "Returns back the input of the script",
       "modelName": "gpt-4o",
-      "internalPrompt": null,
       "arguments": {
         "properties": {
           "input": {
@@ -164,7 +161,6 @@ func TestDefault(t *testing.T) {
     "testdata/tool/tool.gpt:tool": {
       "name": "tool",
       "modelName": "gpt-4o",
-      "internalPrompt": null,
       "instructions": "a tool",
       "id": "testdata/tool/tool.gpt:tool",
       "localTools": {
@@ -188,7 +184,6 @@ func TestDefault(t *testing.T) {
     "testdata/agent/agent.gpt:agent": {
       "name": "agent",
       "modelName": "gpt-4o",
-      "internalPrompt": null,
       "instructions": "an agent",
       "id": "testdata/agent/agent.gpt:agent",
       "localTools": {
@@ -212,7 +207,6 @@ func TestDefault(t *testing.T) {
     "testdata/bothtoolagent/agent.gpt:agent": {
       "name": "agent",
       "modelName": "gpt-4o",
-      "internalPrompt": null,
       "instructions": "an agent",
       "id": "testdata/bothtoolagent/agent.gpt:agent",
       "localTools": {

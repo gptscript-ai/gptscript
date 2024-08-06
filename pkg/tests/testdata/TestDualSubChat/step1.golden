@@ -127,7 +127,6 @@
               "input": "Input to chatbot1",
               "completion": {
                 "model": "gpt-4o",
-                "internalSystemPrompt": false,
                 "tools": [
                   {
                     "function": {
@@ -192,7 +191,6 @@
               "input": "Input to chatbot2",
               "completion": {
                 "model": "gpt-4o",
-                "internalSystemPrompt": false,
                 "tools": [
                   {
                     "function": {

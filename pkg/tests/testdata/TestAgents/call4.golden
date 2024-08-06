@@ -1,6 +1,5 @@
 `{
   "model": "gpt-4o",
-  "internalSystemPrompt": false,
   "messages": [
     {
       "role": "system",

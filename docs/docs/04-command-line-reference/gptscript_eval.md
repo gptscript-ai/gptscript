@@ -14,7 +14,6 @@ gptscript eval [flags]
 ```
       --chat                 Enable chat ($GPTSCRIPT_EVAL_CHAT)
   -h, --help                 help for eval
-      --internal-prompt      ($GPTSCRIPT_EVAL_INTERNAL_PROMPT)
       --json                 Output JSON ($GPTSCRIPT_EVAL_JSON)
       --max-tokens int       Maximum number of tokens to output ($GPTSCRIPT_EVAL_MAX_TOKENS)
       --model string         The model to use ($GPTSCRIPT_EVAL_MODEL)

@@ -8,7 +8,6 @@
         "input": "Input 1",
         "completion": {
           "model": "gpt-4o",
-          "internalSystemPrompt": false,
           "messages": [
             {
               "role": "system",

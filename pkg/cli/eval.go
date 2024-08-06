@@ -15,13 +15,12 @@ import (
 )
 
 type Eval struct {
-	Tools          []string `usage:"Tools available to call"`
-	Chat           bool     `usage:"Enable chat"`
-	MaxTokens      int      `usage:"Maximum number of tokens to output"`
-	Model          string   `usage:"The model to use"`
-	JSON           bool     `usage:"Output JSON"`
-	Temperature    string   `usage:"Set the temperature, \"creativity\""`
-	InternalPrompt *bool    `Usage:"Set to false to disable the internal prompt"`
+	Tools       []string `usage:"Tools available to call"`
+	Chat        bool     `usage:"Enable chat"`
+	MaxTokens   int      `usage:"Maximum number of tokens to output"`
+	Model       string   `usage:"The model to use"`
+	JSON        bool     `usage:"Output JSON"`
+	Temperature string   `usage:"Set the temperature, \"creativity\""`
 
 	gptscript *GPTScript
 }
@@ -30,13 +29,12 @@ func (e *Eval) Run(cmd *cobra.Command, args []string) error {
 	tool := types.Tool{
 		ToolDef: types.ToolDef{
 			Parameters: types.Parameters{
-				Description:    "inline script",
-				Tools:          e.Tools,
-				MaxTokens:      e.MaxTokens,
-				ModelName:      e.Model,
-				JSONResponse:   e.JSON,
-				InternalPrompt: e.InternalPrompt,
-				Chat:           e.Chat,
+				Description:  "inline script",
+				Tools:        e.Tools,
+				MaxTokens:    e.MaxTokens,
+				ModelName:    e.Model,
+				JSONResponse: e.JSON,
+				Chat:         e.Chat,
 			},
 			Instructions: strings.Join(args, " "),
 		},

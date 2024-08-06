@@ -90,11 +90,7 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 	case "description":
 		tool.Parameters.Description = value
 	case "internalprompt":
-		v, err := toBool(value)
-		if err != nil {
-			return false, err
-		}
-		tool.Parameters.InternalPrompt = &v
+		// deprecated and ignored
 	case "chat":
 		v, err := toBool(value)
 		if err != nil {
