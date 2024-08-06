@@ -16,6 +16,7 @@ const (
 	CredentialTypeTool          CredentialType = "tool"
 	CredentialTypeModelProvider CredentialType = "modelProvider"
 	ExistingCredential                         = "GPTSCRIPT_EXISTING_CREDENTIAL"
+	CredentialExpiration                       = "GPTSCRIPT_CREDENTIAL_EXPIRATION"
 )
 
 type Credential struct {

@@ -204,3 +204,21 @@ that environment variable, and if it is set, get the refresh token from the exis
 typically without user interaction.
 
 For an example of a tool that uses the refresh feature, see the [Gateway OAuth2 tool](https://github.com/gptscript-ai/gateway-oauth2).
+
+### GPTSCRIPT_CREDENTIAL_EXPIRATION environment variable
+
+When a tool references a credential tool, GPTScript will add the environment variables from the credential to the tool's
+environment before executing the tool. If at least one of the credentials has an `expiresAt` field, GPTScript will also
+set the environment variable `GPTSCRIPT_CREDENTIAL_EXPIRATION`, which contains the nearest expiration time out of all
+credentials referenced by the tool, in RFC 3339 format. That way, it can be referenced in the tool body if needed.
+Here is an example:
+
+```
+Credential: my-credential-tool.gpt as myCred
+
+#!python3
+
+import os
+
+print("myCred expires at " + os.getenv("GPTSCRIPT_CREDENTIAL_EXPIRATION", ""))
+```
