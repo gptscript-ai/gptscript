@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"runtime"
 	"sort"
@@ -203,10 +204,8 @@ var ignoreENV = map[string]struct{}{
 }
 
 func appendEnv(envs []string, k, v string) []string {
-	for _, k := range []string{k, env.ToEnvLike(k)} {
-		if _, ignore := ignoreENV[k]; !ignore {
-			envs = append(envs, k+"="+v)
-		}
+	if _, ignore := ignoreENV[k]; !ignore {
+		envs = append(envs, strings.ToUpper(env.ToEnvLike(k))+"="+v)
 	}
 	return envs
 }
@@ -269,6 +268,10 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 		})
 	}
 
+	if runtime.GOOS == "windows" && (args[0] == "/bin/bash" || args[0] == "/bin/sh") {
+		args[0] = path.Base(args[0])
+	}
+
 	if runtime.GOOS == "windows" && (args[0] == "/usr/bin/env" || args[0] == "/bin/env") {
 		args = args[1:]
 	}
@@ -279,7 +282,7 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 	)
 
 	if strings.TrimSpace(rest) != "" {
-		f, err := os.CreateTemp("", version.ProgramName+requiredFileExtensions[args[0]])
+		f, err := os.CreateTemp(env.Getenv("GPTSCRIPT_TMPDIR", envvars), version.ProgramName+requiredFileExtensions[args[0]])
 		if err != nil {
 			return nil, nil, err
 		}

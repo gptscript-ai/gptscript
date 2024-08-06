@@ -18,6 +18,7 @@ import (
 	runtimeEnv "github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/repos/download"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 //go:embed digests.txt
@@ -34,11 +35,12 @@ func (r *Runtime) ID() string {
 	return "go" + r.Version
 }
 
-func (r *Runtime) Supports(cmd []string) bool {
-	return len(cmd) > 0 && cmd[0] == "${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool"
+func (r *Runtime) Supports(tool types.Tool, cmd []string) bool {
+	return tool.Source.IsGit() &&
+		len(cmd) > 0 && cmd[0] == "${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool"
 }
 
-func (r *Runtime) Setup(ctx context.Context, dataRoot, toolSource string, env []string) ([]string, error) {
+func (r *Runtime) Setup(ctx context.Context, _ types.Tool, dataRoot, toolSource string, env []string) ([]string, error) {
 	binPath, err := r.getRuntime(ctx, dataRoot)
 	if err != nil {
 		return nil, err

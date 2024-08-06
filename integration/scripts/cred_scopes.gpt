@@ -149,8 +149,8 @@ name: getcred
 import os
 import json
 
-var = os.getenv('var')
-val = os.getenv('val')
+var = os.getenv('VAR')
+val = os.getenv('VAL')
 
 output = {
     "env": {

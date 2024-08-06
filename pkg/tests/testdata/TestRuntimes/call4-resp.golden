@@ -1,0 +1,9 @@
+`{
+  "role": "assistant",
+  "content": [
+    {
+      "text": "TEST RESULT CALL: 4"
+    }
+  ],
+  "usage": {}
+}`

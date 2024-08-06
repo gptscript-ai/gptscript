@@ -26,6 +26,15 @@ func ToEnvLike(v string) string {
 	return strings.ToUpper(v)
 }
 
+func Getenv(key string, envs []string) string {
+	for i := len(envs) - 1; i >= 0; i-- {
+		if k, v, ok := strings.Cut(envs[i], "="); ok && k == key {
+			return v
+		}
+	}
+	return ""
+}
+
 func Matches(cmd []string, bin string) bool {
 	switch len(cmd) {
 	case 0:

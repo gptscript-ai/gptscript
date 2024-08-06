@@ -1,4 +1,4 @@
-package node
+package busybox
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -25,29 +26,17 @@ func firstPath(s []string) string {
 }
 
 func TestRuntime(t *testing.T) {
-	r := Runtime{
-		Version: "20",
+	if runtime.GOOS != "windows" {
+		t.Skip()
 	}
+
+	r := Runtime{}
 
 	s, err := r.Setup(context.Background(), types.Tool{}, testCacheHome, "testdata", os.Environ())
 	require.NoError(t, err)
-	_, err = os.Stat(filepath.Join(firstPath(s), "node.exe"))
+	_, err = os.Stat(filepath.Join(firstPath(s), "busybox.exe"))
 	if errors.Is(err, fs.ErrNotExist) {
-		_, err = os.Stat(filepath.Join(firstPath(s), "node"))
-	}
-	require.NoError(t, err)
-}
-
-func TestRuntime21(t *testing.T) {
-	r := Runtime{
-		Version: "21",
-	}
-
-	s, err := r.Setup(context.Background(), types.Tool{}, testCacheHome, "testdata", os.Environ())
-	require.NoError(t, err)
-	_, err = os.Stat(filepath.Join(firstPath(s), "node.exe"))
-	if errors.Is(err, fs.ErrNotExist) {
-		_, err = os.Stat(filepath.Join(firstPath(s), "node"))
+		_, err = os.Stat(filepath.Join(firstPath(s), "busybox"))
 	}
 	require.NoError(t, err)
 }

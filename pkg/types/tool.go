@@ -166,6 +166,7 @@ type Tool struct {
 
 	ID          string                     `json:"id,omitempty"`
 	ToolMapping map[string][]ToolReference `json:"toolMapping,omitempty"`
+	MetaData    map[string]string          `json:"metaData,omitempty"`
 	LocalTools  map[string]string          `json:"localTools,omitempty"`
 	Source      ToolSource                 `json:"source,omitempty"`
 	WorkingDir  string                     `json:"workingDir,omitempty"`
@@ -791,6 +792,10 @@ type ToolSource struct {
 	Location string `json:"location,omitempty"`
 	LineNo   int    `json:"lineNo,omitempty"`
 	Repo     *Repo  `json:"repo,omitempty"`
+}
+
+func (t ToolSource) IsGit() bool {
+	return t.Repo != nil && t.Repo.VCS == "git"
 }
 
 func (t ToolSource) String() string {

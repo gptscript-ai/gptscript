@@ -15,6 +15,7 @@ import (
 	"github.com/BurntSushi/locker"
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
+	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/loader/github"
 	"github.com/gptscript-ai/gptscript/pkg/repos/git"
 	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes/golang"
@@ -25,8 +26,8 @@ const credentialHelpersRepo = "github.com/gptscript-ai/gptscript-credential-help
 
 type Runtime interface {
 	ID() string
-	Supports(cmd []string) bool
-	Setup(ctx context.Context, dataRoot, toolSource string, env []string) ([]string, error)
+	Supports(tool types.Tool, cmd []string) bool
+	Setup(ctx context.Context, tool types.Tool, dataRoot, toolSource string, env []string) ([]string, error)
 }
 
 type noopRuntime struct {
@@ -36,11 +37,11 @@ func (n noopRuntime) ID() string {
 	return "none"
 }
 
-func (n noopRuntime) Supports(_ []string) bool {
+func (n noopRuntime) Supports(_ types.Tool, _ []string) bool {
 	return false
 }
 
-func (n noopRuntime) Setup(_ context.Context, _, _ string, _ []string) ([]string, error) {
+func (n noopRuntime) Setup(_ context.Context, _ types.Tool, _, _ string, _ []string) ([]string, error) {
 	return nil, nil
 }
 
@@ -200,11 +201,17 @@ func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, e
 	_ = os.RemoveAll(doneFile)
 	_ = os.RemoveAll(target)
 
-	if err := git.Checkout(ctx, m.gitDir, tool.Source.Repo.Root, tool.Source.Repo.Revision, target); err != nil {
-		return "", nil, err
+	if tool.Source.Repo.VCS == "git" {
+		if err := git.Checkout(ctx, m.gitDir, tool.Source.Repo.Root, tool.Source.Repo.Revision, target); err != nil {
+			return "", nil, err
+		}
+	} else {
+		if err := os.MkdirAll(target, 0755); err != nil {
+			return "", nil, err
+		}
 	}
 
-	newEnv, err := runtime.Setup(ctx, m.runtimeDir, targetFinal, env)
+	newEnv, err := runtime.Setup(ctx, tool, m.runtimeDir, targetFinal, env)
 	if err != nil {
 		return "", nil, err
 	}
@@ -227,19 +234,29 @@ func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, e
 }
 
 func (m *Manager) GetContext(ctx context.Context, tool types.Tool, cmd, env []string) (string, []string, error) {
+	var isLocal bool
 	if tool.Source.Repo == nil {
-		return tool.WorkingDir, env, nil
-	}
-
-	if tool.Source.Repo.VCS != "git" {
-		return "", nil, fmt.Errorf("only git is supported, found VCS %s for %s", tool.Source.Repo.VCS, tool.ID)
+		isLocal = true
+		d, _ := json.Marshal(tool)
+		id := hash.Digest(d)[:12]
+		tool.Source.Repo = &types.Repo{
+			VCS:      "<local>",
+			Root:     id,
+			Path:     "/",
+			Name:     id,
+			Revision: id,
+		}
 	}
 
 	for _, runtime := range m.runtimes {
-		if runtime.Supports(cmd) {
+		if runtime.Supports(tool, cmd) {
 			log.Debugf("Runtime %s supports %v", runtime.ID(), cmd)
 			return m.setup(ctx, runtime, tool, env)
 		}
+	}
+
+	if isLocal {
+		return tool.WorkingDir, env, nil
 	}
 
 	return m.setup(ctx, &noopRuntime{}, tool, env)

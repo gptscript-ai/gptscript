@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/adrg/xdg"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -27,7 +28,7 @@ func TestRuntime(t *testing.T) {
 		Version: "1.22.1",
 	}
 
-	s, err := r.Setup(context.Background(), testCacheHome, "testdata", os.Environ())
+	s, err := r.Setup(context.Background(), types.Tool{}, testCacheHome, "testdata", os.Environ())
 	require.NoError(t, err)
 	p, v, _ := strings.Cut(s[0], "=")
 	v, _, _ = strings.Cut(v, string(filepath.ListSeparator))

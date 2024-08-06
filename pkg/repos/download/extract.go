@@ -9,7 +9,9 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/mholt/archiver/v4"
@@ -57,6 +59,18 @@ func Extract(ctx context.Context, downloadURL, digest, targetDir string) error {
 	}
 
 	if _, err := tmpFile.Seek(0, 0); err != nil {
+		return err
+	}
+
+	bin := path.Base(parsedURL.Path)
+	if strings.HasSuffix(bin, ".exe") {
+		dst, err := os.Create(filepath.Join(targetDir, bin))
+		if err != nil {
+			return err
+		}
+		defer dst.Close()
+
+		_, err = io.Copy(dst, tmpFile)
 		return err
 	}
 

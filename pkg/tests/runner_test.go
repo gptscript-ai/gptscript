@@ -751,9 +751,6 @@ func TestGlobalErr(t *testing.T) {
 }
 
 func TestContextArg(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip()
-	}
 	runner := tester.NewRunner(t)
 	x, err := runner.Run("", `{
 "file": "foo.db"
@@ -998,5 +995,26 @@ func TestMissingTool(t *testing.T) {
 
 func TestToolRefAll(t *testing.T) {
 	r := tester.NewRunner(t)
+	r.RunDefault()
+}
+
+func TestRuntimes(t *testing.T) {
+	r := tester.NewRunner(t)
+	r.RespondWith(tester.Result{
+		Func: types.CompletionFunctionCall{
+			Name:      "py",
+			Arguments: "{}",
+		},
+	}, tester.Result{
+		Func: types.CompletionFunctionCall{
+			Name:      "node",
+			Arguments: "{}",
+		},
+	}, tester.Result{
+		Func: types.CompletionFunctionCall{
+			Name:      "bash",
+			Arguments: "{}",
+		},
+	})
 	r.RunDefault()
 }
