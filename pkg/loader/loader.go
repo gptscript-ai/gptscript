@@ -70,6 +70,8 @@ func openFile(path string) (io.ReadCloser, bool, error) {
 func loadLocal(base *source, name string) (*source, bool, error) {
 	filePath := name
 	if !filepath.IsAbs(name) {
+		// We want to keep all strings in / format, and only convert to platform specific when reading
+		// This is why we use path instead of filepath.
 		filePath = path.Join(base.Path, name)
 	}
 
