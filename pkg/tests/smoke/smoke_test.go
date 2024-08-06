@@ -175,6 +175,11 @@ func getActualEvents(t *testing.T, eventsFile string) []event {
 
 		var e event
 		require.NoError(t, json.Unmarshal([]byte(line), &e))
+
+		if e.Type == runner.EventTypeCallProgress {
+			continue
+		}
+
 		events = append(events, e)
 	}
 

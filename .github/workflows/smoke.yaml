@@ -59,7 +59,7 @@ jobs:
 
           echo "run_smoke_tests=false" >> $GITHUB_OUTPUT
 
-  gpt-4o-2024-05-13:
+  gpt-4o-2024-08-06:
     needs: check-label
     if: ${{ needs.check-label.outputs.run_smoke_tests == 'true' }}
     runs-on: ubuntu-22.04
@@ -81,14 +81,14 @@ jobs:
           go-version: "1.21"
       - env:
           OPENAI_API_KEY: ${{ secrets.SMOKE_OPENAI_API_KEY }}
-          GPTSCRIPT_DEFAULT_MODEL: gpt-4o-2024-05-13
-        name: Run smoke test for gpt-4o-2024-05-13
+          GPTSCRIPT_DEFAULT_MODEL: gpt-4o-2024-08-06
+        name: Run smoke test for gpt-4o-2024-08-06
         run: |
-          echo "Running smoke test for model gpt-4o-2024-05-13"
+          echo "Running smoke test for model gpt-4o-2024-08-06"
           export PATH="$(pwd)/bin:${PATH}"
           make smoke
 
-  gpt-4-turbo-2024-04-09:
+  gpt-4o-mini-2024-07-18:
     needs: check-label
     if: ${{ needs.check-label.outputs.run_smoke_tests == 'true' }}
     runs-on: ubuntu-22.04
@@ -110,10 +110,10 @@ jobs:
           go-version: "1.21"
       - env:
           OPENAI_API_KEY: ${{ secrets.SMOKE_OPENAI_API_KEY }}
-          GPTSCRIPT_DEFAULT_MODEL: gpt-4-turbo-2024-04-09
-        name: Run smoke test for gpt-4-turbo-2024-04-09
+          GPTSCRIPT_DEFAULT_MODEL: gpt-4o-mini-2024-07-18
+        name: Run smoke test for gpt-4o-mini-2024-07-18
         run: |
-          echo "Running smoke test for model gpt-4-turbo-2024-04-09"
+          echo "Running smoke test for model gpt-4o-mini-2024-07-18"
           export PATH="$(pwd)/bin:${PATH}"
           make smoke
 
