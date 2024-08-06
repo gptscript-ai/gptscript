@@ -11,7 +11,6 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
-	"github.com/gptscript-ai/gptscript/pkg/repos"
 	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -178,7 +177,6 @@ func NewRunner(t *testing.T) *Runner {
 	require.NoError(t, err)
 
 	rm := runtimes.Default(cacheDir)
-	rm.(*repos.Manager).SetSupportLocal()
 
 	run, err := runner.New(c, credentials.NoopStore{}, runner.Options{
 		Sequential:     true,

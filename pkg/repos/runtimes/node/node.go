@@ -17,12 +17,16 @@ import (
 	runtimeEnv "github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/repos/download"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 //go:embed SHASUMS256.txt.asc
 var releasesData []byte
 
-const downloadURL = "https://nodejs.org/dist/%s/"
+const (
+	downloadURL = "https://nodejs.org/dist/%s/"
+	packageJSON = "package.json"
+)
 
 type Runtime struct {
 	// version something like "3.12"
@@ -35,7 +39,10 @@ func (r *Runtime) ID() string {
 	return "node" + r.Version
 }
 
-func (r *Runtime) Supports(cmd []string) bool {
+func (r *Runtime) Supports(tool types.Tool, cmd []string) bool {
+	if _, hasPackageJSON := tool.MetaData[packageJSON]; !hasPackageJSON && !tool.Source.IsGit() {
+		return false
+	}
 	for _, testCmd := range []string{"node", "npx", "npm"} {
 		if r.supports(testCmd, cmd) {
 			return true
@@ -54,15 +61,19 @@ func (r *Runtime) supports(testCmd string, cmd []string) bool {
 	return runtimeEnv.Matches(cmd, testCmd)
 }
 
-func (r *Runtime) Setup(ctx context.Context, dataRoot, toolSource string, env []string) ([]string, error) {
+func (r *Runtime) Setup(ctx context.Context, tool types.Tool, dataRoot, toolSource string, env []string) ([]string, error) {
 	binPath, err := r.getRuntime(ctx, dataRoot)
 	if err != nil {
 		return nil, err
 	}
 
 	newEnv := runtimeEnv.AppendPath(env, binPath)
-	if err := r.runNPM(ctx, toolSource, binPath, append(env, newEnv...)); err != nil {
+	if err := r.runNPM(ctx, tool, toolSource, binPath, append(env, newEnv...)); err != nil {
 		return nil, err
+	}
+
+	if _, ok := tool.MetaData[packageJSON]; ok {
+		newEnv = append(newEnv, "GPTSCRIPT_TMPDIR="+toolSource)
 	}
 
 	return newEnv, nil
@@ -100,11 +111,16 @@ func (r *Runtime) getReleaseAndDigest() (string, string, error) {
 	return "", "", fmt.Errorf("failed to find %s release for os=%s arch=%s", r.ID(), osName(), arch())
 }
 
-func (r *Runtime) runNPM(ctx context.Context, toolSource, binDir string, env []string) error {
+func (r *Runtime) runNPM(ctx context.Context, tool types.Tool, toolSource, binDir string, env []string) error {
 	log.InfofCtx(ctx, "Running npm in %s", toolSource)
 	cmd := debugcmd.New(ctx, filepath.Join(binDir, "npm"), "install")
 	cmd.Env = env
 	cmd.Dir = toolSource
+	if contents, ok := tool.MetaData[packageJSON]; ok {
+		if err := os.WriteFile(filepath.Join(toolSource, packageJSON), []byte(contents+"\n"), 0644); err != nil {
+			return err
+		}
+	}
 	return cmd.Run()
 }
 

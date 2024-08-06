@@ -1,0 +1,58 @@
+name: first
+tools: py, node, bash
+
+Dummy
+
+---
+name: py
+
+#!/usr/bin/env python3
+
+import requests
+import platform
+
+# this is dumb hack to get the line endings to always be \r\n so the golden files match
+# on both linux and windows
+if platform.system() == 'Windows':
+    print('py worked')
+else:
+    print('py worked\r')
+
+---
+!metadata:py:requirements.txt
+
+requests
+
+---
+name: node
+
+#!/usr/bin/env node
+
+import chalk from 'chalk';
+console.log("node worked")
+
+---
+!metadata:node:package.json
+
+{
+      "name": "chalk-example",
+      "version": "1.0.0",
+      "type": "module",
+      "description": "A simple example project to demonstrate the use of chalk",
+      "main": "example.js",
+      "scripts": {
+        "start": "node example.js"
+      },
+      "author": "Your Name",
+      "license": "MIT",
+      "dependencies": {
+        "chalk": "^5.0.0"
+      }
+    }
+
+---
+name: bash
+
+#!/bin/bash
+
+echo bash works

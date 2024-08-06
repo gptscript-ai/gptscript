@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/adrg/xdg"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 )
@@ -28,7 +29,7 @@ func TestRuntime(t *testing.T) {
 		Version: "20",
 	}
 
-	s, err := r.Setup(context.Background(), testCacheHome, "testdata", os.Environ())
+	s, err := r.Setup(context.Background(), types.Tool{}, testCacheHome, "testdata", os.Environ())
 	require.NoError(t, err)
 	_, err = os.Stat(filepath.Join(firstPath(s), "node.exe"))
 	if errors.Is(err, fs.ErrNotExist) {
@@ -42,7 +43,7 @@ func TestRuntime21(t *testing.T) {
 		Version: "21",
 	}
 
-	s, err := r.Setup(context.Background(), testCacheHome, "testdata", os.Environ())
+	s, err := r.Setup(context.Background(), types.Tool{}, testCacheHome, "testdata", os.Environ())
 	require.NoError(t, err)
 	_, err = os.Stat(filepath.Join(firstPath(s), "node.exe"))
 	if errors.Is(err, fs.ErrNotExist) {
