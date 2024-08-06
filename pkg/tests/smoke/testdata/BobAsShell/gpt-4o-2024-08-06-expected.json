@@ -1,15 +1,15 @@
 [
     {
-        "time": "2024-08-23T12:02:17.549859-04:00",
+        "time": "2024-08-23T10:47:06.912223-04:00",
         "type": "runStart",
         "usage": {}
     },
     {
-        "time": "2024-08-23T12:02:17.55023-04:00",
+        "time": "2024-08-23T10:47:06.912642-04:00",
         "callContext": {
-            "id": "1724428938",
+            "id": "1724424427",
             "tool": {
-                "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -41,116 +41,11 @@
         "usage": {}
     },
     {
-        "time": "2024-08-23T12:02:18.283201-04:00",
-        "type": "runStart",
-        "usage": {}
-    },
-    {
-        "time": "2024-08-23T12:02:18.28339-04:00",
+        "time": "2024-08-23T10:47:06.912689-04:00",
         "callContext": {
-            "id": "1724428939",
+            "id": "1724424427",
             "tool": {
-                "name": "Anthropic Claude3 Model Provider",
-                "description": "Model provider for Anthropic hosted Claude3 models",
-                "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "modelProvider": true,
-                "internalPrompt": null,
-                "credentials": [
-                    "github.com/gptscript-ai/credential as github.com/gptscript-ai/claude3-anthropic-provider/credential with \"Please enter your Anthropic API Key\" as message and token as field and \"ANTHROPIC_API_KEY\" as env"
-                ],
-                "instructions": "#!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py",
-                "id": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/ee5c02a9aeca5a1cbffcf569751e37432bfe0344/tool.gpt:Anthropic Claude3 Model Provider",
-                "toolMapping": {
-                    "github.com/gptscript-ai/credential as github.com/gptscript-ai/claude3-anthropic-provider/credential with \"Please enter your Anthropic API Key\" as message and token as field and \"ANTHROPIC_API_KEY\" as env": [
-                        {
-                            "reference": "github.com/gptscript-ai/credential as github.com/gptscript-ai/claude3-anthropic-provider/credential with \"Please enter your Anthropic API Key\" as message and token as field and \"ANTHROPIC_API_KEY\" as env",
-                            "toolID": "https://raw.githubusercontent.com/gptscript-ai/credential/37e5f870e195b896438c0bc35867403a42f82e89/tool.gpt:token"
-                        }
-                    ]
-                },
-                "localTools": {
-                    "anthropic claude3 model provider": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/ee5c02a9aeca5a1cbffcf569751e37432bfe0344/tool.gpt:Anthropic Claude3 Model Provider"
-                },
-                "source": {
-                    "location": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/ee5c02a9aeca5a1cbffcf569751e37432bfe0344/tool.gpt",
-                    "lineNo": 1,
-                    "repo": {
-                        "VCS": "git",
-                        "Root": "https://github.com/gptscript-ai/claude3-anthropic-provider.git",
-                        "Path": "/",
-                        "Name": "tool.gpt",
-                        "Revision": "ee5c02a9aeca5a1cbffcf569751e37432bfe0344"
-                    }
-                },
-                "workingDir": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/ee5c02a9aeca5a1cbffcf569751e37432bfe0344"
-            },
-            "currentAgent": {},
-            "inputContext": null,
-            "toolCategory": "provider",
-            "displayText": "Running sys.daemon"
-        },
-        "type": "callStart",
-        "usage": {}
-    },
-    {
-        "time": "2024-08-23T12:02:19.295369-04:00",
-        "callContext": {
-            "id": "1724428939",
-            "tool": {
-                "name": "Anthropic Claude3 Model Provider",
-                "description": "Model provider for Anthropic hosted Claude3 models",
-                "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "modelProvider": true,
-                "internalPrompt": null,
-                "credentials": [
-                    "github.com/gptscript-ai/credential as github.com/gptscript-ai/claude3-anthropic-provider/credential with \"Please enter your Anthropic API Key\" as message and token as field and \"ANTHROPIC_API_KEY\" as env"
-                ],
-                "instructions": "#!sys.daemon /usr/bin/env python3 ${GPTSCRIPT_TOOL_DIR}/main.py",
-                "id": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/ee5c02a9aeca5a1cbffcf569751e37432bfe0344/tool.gpt:Anthropic Claude3 Model Provider",
-                "toolMapping": {
-                    "github.com/gptscript-ai/credential as github.com/gptscript-ai/claude3-anthropic-provider/credential with \"Please enter your Anthropic API Key\" as message and token as field and \"ANTHROPIC_API_KEY\" as env": [
-                        {
-                            "reference": "github.com/gptscript-ai/credential as github.com/gptscript-ai/claude3-anthropic-provider/credential with \"Please enter your Anthropic API Key\" as message and token as field and \"ANTHROPIC_API_KEY\" as env",
-                            "toolID": "https://raw.githubusercontent.com/gptscript-ai/credential/37e5f870e195b896438c0bc35867403a42f82e89/tool.gpt:token"
-                        }
-                    ]
-                },
-                "localTools": {
-                    "anthropic claude3 model provider": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/ee5c02a9aeca5a1cbffcf569751e37432bfe0344/tool.gpt:Anthropic Claude3 Model Provider"
-                },
-                "source": {
-                    "location": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/ee5c02a9aeca5a1cbffcf569751e37432bfe0344/tool.gpt",
-                    "lineNo": 1,
-                    "repo": {
-                        "VCS": "git",
-                        "Root": "https://github.com/gptscript-ai/claude3-anthropic-provider.git",
-                        "Path": "/",
-                        "Name": "tool.gpt",
-                        "Revision": "ee5c02a9aeca5a1cbffcf569751e37432bfe0344"
-                    }
-                },
-                "workingDir": "https://raw.githubusercontent.com/gptscript-ai/claude3-anthropic-provider/ee5c02a9aeca5a1cbffcf569751e37432bfe0344"
-            },
-            "currentAgent": {},
-            "inputContext": null,
-            "toolCategory": "provider",
-            "displayText": "Running sys.daemon"
-        },
-        "type": "callFinish",
-        "usage": {},
-        "content": "http://127.0.0.1:10739"
-    },
-    {
-        "time": "2024-08-23T12:02:19.295542-04:00",
-        "type": "runFinish",
-        "usage": {}
-    },
-    {
-        "time": "2024-08-23T12:02:19.295604-04:00",
-        "callContext": {
-            "id": "1724428938",
-            "tool": {
-                "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -179,14 +74,14 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1724428940",
+        "chatCompletionId": "1724424428",
         "usage": {},
         "chatRequest": {
-            "model": "claude-3-5-sonnet-20240620",
+            "model": "gpt-4o-2024-08-06",
             "messages": [
                 {
                     "role": "system",
-                    "content": "Ask Bob \"how are you doing\" and repeat his reply exactly."
+                    "content": "\nYou are task oriented system.\nYou receive input from a user, process the input from the given instructions, and then output the result.\nYour objective is to provide consistent and correct results.\nYou do not need to explain the steps taken, only provide the result to the given instructions.\nYou are referred to as a tool.\nYou don't move to the next step until you have a result.\n\nAsk Bob \"how are you doing\" and repeat his reply exactly."
                 }
             ],
             "temperature": 0,
@@ -211,11 +106,11 @@
         }
     },
     {
-        "time": "2024-08-23T12:02:21.136785-04:00",
+        "time": "2024-08-23T10:47:07.441483-04:00",
         "callContext": {
-            "id": "1724428938",
+            "id": "1724424427",
             "tool": {
-                "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -244,31 +139,39 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1724428940",
-        "usage": {},
+        "chatCompletionId": "1724424428",
+        "usage": {
+            "promptTokens": 138,
+            "completionTokens": 17,
+            "totalTokens": 155
+        },
         "chatResponse": {
             "role": "assistant",
             "content": [
                 {
                     "toolCall": {
                         "index": 0,
-                        "id": "toolu_01XzHFJpwHD8hzowvAqGgfSz",
+                        "id": "call_NjCLsJjY7PegUkXOqx5DA0o0",
                         "function": {
                             "name": "bob",
-                            "arguments": "{\"question\": \"how are you doing\"}"
+                            "arguments": "{\"question\":\"how are you doing\"}"
                         }
                     }
                 }
             ],
-            "usage": {}
+            "usage": {
+                "promptTokens": 138,
+                "completionTokens": 17,
+                "totalTokens": 155
+            }
         }
     },
     {
-        "time": "2024-08-23T12:02:21.136848-04:00",
+        "time": "2024-08-23T10:47:07.441781-04:00",
         "callContext": {
-            "id": "1724428938",
+            "id": "1724424427",
             "tool": {
-                "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -297,22 +200,22 @@
             "inputContext": null
         },
         "toolSubCalls": {
-            "toolu_01XzHFJpwHD8hzowvAqGgfSz": {
+            "call_NjCLsJjY7PegUkXOqx5DA0o0": {
                 "toolID": "testdata/BobAsShell/test.gpt:bob",
-                "input": "{\"question\": \"how are you doing\"}"
+                "input": "{\"question\":\"how are you doing\"}"
             }
         },
         "type": "callSubCalls",
         "usage": {}
     },
     {
-        "time": "2024-08-23T12:02:21.136877-04:00",
+        "time": "2024-08-23T10:47:07.441904-04:00",
         "callContext": {
-            "id": "toolu_01XzHFJpwHD8hzowvAqGgfSz",
+            "id": "call_NjCLsJjY7PegUkXOqx5DA0o0",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
-                "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -338,21 +241,21 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1724428938",
+            "parentID": "1724424427",
             "displayText": "Running bob from testdata/BobAsShell/test.gpt"
         },
         "type": "callStart",
         "usage": {},
-        "content": "{\"question\": \"how are you doing\"}"
+        "content": "{\"question\":\"how are you doing\"}"
     },
     {
-        "time": "2024-08-23T12:02:21.137223-04:00",
+        "time": "2024-08-23T10:47:07.443055-04:00",
         "callContext": {
-            "id": "toolu_01XzHFJpwHD8hzowvAqGgfSz",
+            "id": "call_NjCLsJjY7PegUkXOqx5DA0o0",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
-                "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -378,11 +281,11 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1724428938",
+            "parentID": "1724424427",
             "displayText": "Running bob from testdata/BobAsShell/test.gpt"
         },
         "type": "callChat",
-        "chatCompletionId": "1724428941",
+        "chatCompletionId": "1724424429",
         "usage": {},
         "chatRequest": {
             "model": "",
@@ -390,13 +293,13 @@
         }
     },
     {
-        "time": "2024-08-23T12:02:21.142624-04:00",
+        "time": "2024-08-23T10:47:07.453557-04:00",
         "callContext": {
-            "id": "toolu_01XzHFJpwHD8hzowvAqGgfSz",
+            "id": "call_NjCLsJjY7PegUkXOqx5DA0o0",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
-                "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -422,24 +325,24 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1724428938",
+            "parentID": "1724424427",
             "displayText": "Running bob from testdata/BobAsShell/test.gpt"
         },
         "type": "callChat",
-        "chatCompletionId": "1724428941",
+        "chatCompletionId": "1724424429",
         "usage": {},
         "chatResponse": {
             "usage": {}
         }
     },
     {
-        "time": "2024-08-23T12:02:21.142691-04:00",
+        "time": "2024-08-23T10:47:07.453768-04:00",
         "callContext": {
-            "id": "toolu_01XzHFJpwHD8hzowvAqGgfSz",
+            "id": "call_NjCLsJjY7PegUkXOqx5DA0o0",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
-                "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -465,7 +368,7 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1724428938",
+            "parentID": "1724424427",
             "displayText": "Running bob from testdata/BobAsShell/test.gpt"
         },
         "type": "callFinish",
@@ -473,11 +376,11 @@
         "content": "Thanks for asking how are you doing, I'm doing great fellow friendly AI tool!\n"
     },
     {
-        "time": "2024-08-23T12:02:21.142723-04:00",
+        "time": "2024-08-23T10:47:07.453868-04:00",
         "callContext": {
-            "id": "1724428938",
+            "id": "1724424427",
             "tool": {
-                "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -510,11 +413,11 @@
         "usage": {}
     },
     {
-        "time": "2024-08-23T12:02:21.371211-04:00",
+        "time": "2024-08-23T10:47:07.453942-04:00",
         "callContext": {
-            "id": "1724428938",
+            "id": "1724424427",
             "tool": {
-                "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -543,25 +446,25 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1724428942",
+        "chatCompletionId": "1724424430",
         "usage": {},
         "chatRequest": {
-            "model": "claude-3-5-sonnet-20240620",
+            "model": "gpt-4o-2024-08-06",
             "messages": [
                 {
                     "role": "system",
-                    "content": "Ask Bob \"how are you doing\" and repeat his reply exactly."
+                    "content": "\nYou are task oriented system.\nYou receive input from a user, process the input from the given instructions, and then output the result.\nYour objective is to provide consistent and correct results.\nYou do not need to explain the steps taken, only provide the result to the given instructions.\nYou are referred to as a tool.\nYou don't move to the next step until you have a result.\n\nAsk Bob \"how are you doing\" and repeat his reply exactly."
                 },
                 {
                     "role": "assistant",
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "toolu_01XzHFJpwHD8hzowvAqGgfSz",
+                            "id": "call_NjCLsJjY7PegUkXOqx5DA0o0",
                             "type": "function",
                             "function": {
                                 "name": "bob",
-                                "arguments": "{\"question\": \"how are you doing\"}"
+                                "arguments": "{\"question\":\"how are you doing\"}"
                             }
                         }
                     ]
@@ -570,7 +473,7 @@
                     "role": "tool",
                     "content": "Thanks for asking how are you doing, I'm doing great fellow friendly AI tool!\n",
                     "name": "bob",
-                    "tool_call_id": "toolu_01XzHFJpwHD8hzowvAqGgfSz"
+                    "tool_call_id": "call_NjCLsJjY7PegUkXOqx5DA0o0"
                 }
             ],
             "temperature": 0,
@@ -595,11 +498,11 @@
         }
     },
     {
-        "time": "2024-08-23T12:02:23.102371-04:00",
+        "time": "2024-08-23T10:47:07.950943-04:00",
         "callContext": {
-            "id": "1724428938",
+            "id": "1724424427",
             "tool": {
-                "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -628,24 +531,32 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1724428942",
-        "usage": {},
+        "chatCompletionId": "1724424430",
+        "usage": {
+            "promptTokens": 178,
+            "completionTokens": 17,
+            "totalTokens": 195
+        },
         "chatResponse": {
             "role": "assistant",
             "content": [
                 {
-                    "text": "Bob's reply was: \"Thanks for asking how are you doing, I'm doing great fellow friendly AI tool!\""
+                    "text": "Thanks for asking how are you doing, I'm doing great fellow friendly AI tool!"
                 }
             ],
-            "usage": {}
+            "usage": {
+                "promptTokens": 178,
+                "completionTokens": 17,
+                "totalTokens": 195
+            }
         }
     },
     {
-        "time": "2024-08-23T12:02:23.102422-04:00",
+        "time": "2024-08-23T10:47:07.951019-04:00",
         "callContext": {
-            "id": "1724428938",
+            "id": "1724424427",
             "tool": {
-                "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -675,10 +586,10 @@
         },
         "type": "callFinish",
         "usage": {},
-        "content": "Bob's reply was: \"Thanks for asking how are you doing, I'm doing great fellow friendly AI tool!\""
+        "content": "Thanks for asking how are you doing, I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-08-23T12:02:23.102441-04:00",
+        "time": "2024-08-23T10:47:07.951093-04:00",
         "type": "runFinish",
         "usage": {}
     }
