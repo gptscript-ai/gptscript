@@ -6,6 +6,7 @@ import (
 
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/hexops/autogold/v2"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -238,4 +239,32 @@ share output filters: shared
 			},
 		}},
 	}}).Equal(t, out)
+}
+
+func TestParseMetaData(t *testing.T) {
+	input := `
+name: first
+
+body
+---
+!metadata:first:package.json
+foo=base
+f
+
+---
+!metadata:first2:requirements.txt
+asdf2
+
+---
+!metadata:first:requirements.txt
+asdf
+`
+	tools, err := ParseTools(strings.NewReader(input))
+	require.NoError(t, err)
+
+	assert.Len(t, tools, 1)
+	autogold.Expect(map[string]string{
+		"package.json":     "foo=base\nf",
+		"requirements.txt": "asdf",
+	}).Equal(t, tools[0].MetaData)
 }

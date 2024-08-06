@@ -18,6 +18,7 @@ import (
 	runtimeEnv "github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/repos/download"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 //go:embed SHASUMS256.txt
@@ -32,7 +33,7 @@ func (r *Runtime) ID() string {
 	return "busybox"
 }
 
-func (r *Runtime) Supports(cmd []string) bool {
+func (r *Runtime) Supports(_ types.Tool, cmd []string) bool {
 	if runtime.GOOS != "windows" {
 		return false
 	}
@@ -44,7 +45,7 @@ func (r *Runtime) Supports(cmd []string) bool {
 	return false
 }
 
-func (r *Runtime) Setup(ctx context.Context, dataRoot, _ string, env []string) ([]string, error) {
+func (r *Runtime) Setup(ctx context.Context, _ types.Tool, dataRoot, _ string, env []string) ([]string, error) {
 	binPath, err := r.getRuntime(ctx, dataRoot)
 	if err != nil {
 		return nil, err

@@ -1,0 +1,16 @@
+`{
+  "role": "assistant",
+  "content": [
+    {
+      "toolCall": {
+        "index": 1,
+        "id": "call_2",
+        "function": {
+          "name": "node",
+          "arguments": "{}"
+        }
+      }
+    }
+  ],
+  "usage": {}
+}`

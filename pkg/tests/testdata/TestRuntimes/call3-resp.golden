@@ -1,0 +1,16 @@
+`{
+  "role": "assistant",
+  "content": [
+    {
+      "toolCall": {
+        "index": 2,
+        "id": "call_3",
+        "function": {
+          "name": "bash",
+          "arguments": "{}"
+        }
+      }
+    }
+  ],
+  "usage": {}
+}`

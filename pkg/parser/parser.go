@@ -16,7 +16,7 @@ import (
 var (
 	sepRegex       = regexp.MustCompile(`^\s*---+\s*$`)
 	strictSepRegex = regexp.MustCompile(`^---\n$`)
-	skipRegex      = regexp.MustCompile(`^![-\w]+\s*$`)
+	skipRegex      = regexp.MustCompile(`^![-.:\w]+\s*$`)
 )
 
 func normalize(key string) string {
@@ -308,6 +308,8 @@ func Parse(input io.Reader, opts ...Options) (Document, error) {
 		}
 	}
 
+	nodes = assignMetadata(nodes)
+
 	if !opt.AssignGlobals {
 		return Document{
 			Nodes: nodes,
@@ -357,6 +359,42 @@ func Parse(input io.Reader, opts ...Options) (Document, error) {
 	return Document{
 		Nodes: nodes,
 	}, nil
+}
+
+func assignMetadata(nodes []Node) (result []Node) {
+	metadata := map[string]map[string]string{}
+	result = make([]Node, 0, len(nodes))
+	for _, node := range nodes {
+		if node.TextNode != nil {
+			body, ok := strings.CutPrefix(node.TextNode.Text, "!metadata:")
+			if ok {
+				line, rest, ok := strings.Cut(body, "\n")
+				if ok {
+					toolName, metaKey, ok := strings.Cut(strings.TrimSpace(line), ":")
+					if ok {
+						d, ok := metadata[toolName]
+						if !ok {
+							d = map[string]string{}
+							metadata[toolName] = d
+						}
+						d[metaKey] = strings.TrimSpace(rest)
+					}
+				}
+			}
+		}
+	}
+	if len(metadata) == 0 {
+		return nodes
+	}
+
+	for _, node := range nodes {
+		if node.ToolNode != nil {
+			node.ToolNode.Tool.MetaData = metadata[node.ToolNode.Tool.Name]
+		}
+		result = append(result, node)
+	}
+
+	return
 }
 
 func isGPTScriptHashBang(line string) bool {
