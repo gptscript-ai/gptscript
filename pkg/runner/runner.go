@@ -968,19 +968,19 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			} else {
 				log.Warnf("Not saving credential for tool %s - credentials will only be saved for tools from GitHub, or tools that use aliases.", toolName)
 			}
+		}
 
-			if c.ExpiresAt != nil && (nearestExpiration == nil || nearestExpiration.After(*c.ExpiresAt)) {
-				nearestExpiration = c.ExpiresAt
-			}
+		if c.ExpiresAt != nil && (nearestExpiration == nil || nearestExpiration.After(*c.ExpiresAt)) {
+			nearestExpiration = c.ExpiresAt
 		}
 
 		for k, v := range c.Env {
 			env = append(env, fmt.Sprintf("%s=%s", k, v))
 		}
+	}
 
-		if nearestExpiration != nil {
-			env = append(env, fmt.Sprintf("%s=%s", credentials.CredentialExpiration, nearestExpiration.Format(time.RFC3339)))
-		}
+	if nearestExpiration != nil {
+		env = append(env, fmt.Sprintf("%s=%s", credentials.CredentialExpiration, nearestExpiration.Format(time.RFC3339)))
 	}
 
 	return env, nil
