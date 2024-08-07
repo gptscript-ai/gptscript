@@ -12,13 +12,6 @@ jobs:
   release-tag:
     runs-on: ubuntu-22.04
     steps:
-      - name: trigger ui repo tag workflow
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.DISPATCH_PAT }}
-          repository: gptscript-ai/ui
-          event-type: release
-          client-payload: '{"tag": "${{ github.ref_name }}"}'
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -47,11 +40,11 @@ jobs:
     steps:
       - name: Install winget-create
         run: |
-            Invoke-WebRequest -Uri 'https://aka.ms/wingetcreate/latest' -OutFile 'wingetcreate.exe'      
+          Invoke-WebRequest -Uri 'https://aka.ms/wingetcreate/latest' -OutFile 'wingetcreate.exe'
       - name: Create WinGet Package Update Pull Request
         run: |
-            $url = "${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}/gptscript-${{ github.ref_name }}-windows-amd64.zip"
-            ./wingetcreate.exe update --submit --token "${{ secrets.WINGET_GH_TOKEN }}" --urls $url --version "${{ github.ref_name }}" gptscript-ai.gptscript
+          $url = "${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}/gptscript-${{ github.ref_name }}-windows-amd64.zip"
+          ./wingetcreate.exe update --submit --token "${{ secrets.WINGET_GH_TOKEN }}" --urls $url --version "${{ github.ref_name }}" gptscript-ai.gptscript
   node-release:
     needs: release-tag
     runs-on: ubuntu-latest
@@ -85,3 +78,4 @@ jobs:
           repository: gptscript-ai/go-gptscript
           event-type: release
           client-payload: '{"tag": "${{ github.ref_name }}"}'
+
