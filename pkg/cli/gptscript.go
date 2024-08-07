@@ -83,7 +83,7 @@ func New() *cobra.Command {
 		root,
 		&Eval{gptscript: root},
 		&Credential{root: root},
-		&Parse{},
+		&Parse{gptscript: root},
 		&Fmt{},
 		&Getenv{},
 		&SDKServer{

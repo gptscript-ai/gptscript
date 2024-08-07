@@ -227,7 +227,7 @@ func (s *server) parse(w http.ResponseWriter, r *http.Request) {
 	if reqObject.Content != "" {
 		out, err = parser.Parse(strings.NewReader(reqObject.Content), reqObject.Options)
 	} else {
-		content, loadErr := input.FromLocation(reqObject.File)
+		content, loadErr := input.FromLocation(reqObject.File, reqObject.DisableCache)
 		if loadErr != nil {
 			logger.Errorf(loadErr.Error())
 			writeError(logger, w, http.StatusInternalServerError, loadErr)

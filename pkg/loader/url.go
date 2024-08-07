@@ -207,8 +207,10 @@ func getWithDefaults(req *http.Request) ([]byte, string, error) {
 	panic("unreachable")
 }
 
-func ContentFromURL(url string) (string, error) {
-	cache, err := cache.New()
+func ContentFromURL(url string, disableCache bool) (string, error) {
+	cache, err := cache.New(cache.Options{
+		DisableCache: disableCache,
+	})
 	if err != nil {
 		return "", fmt.Errorf("failed to create cache: %w", err)
 	}
