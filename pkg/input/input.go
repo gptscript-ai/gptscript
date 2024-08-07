@@ -55,13 +55,13 @@ func FromFile(file string) (string, error) {
 }
 
 // FromLocation takes a string that can be a file path or a URL to a file and returns the content of that file.
-func FromLocation(s string) (string, error) {
+func FromLocation(s string, disableCache bool) (string, error) {
 	// Attempt to read the file first, if that fails, try to load the URL. Finally,
 	// return an error if both fail.
 	content, err := FromFile(s)
 	if err != nil {
 		log.Debugf("failed to read file %s (due to %v) attempting to load the URL...", s, err)
-		content, err = loader.ContentFromURL(s)
+		content, err = loader.ContentFromURL(s, disableCache)
 		if err != nil {
 			return "", err
 		}

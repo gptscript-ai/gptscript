@@ -12,6 +12,7 @@ import (
 
 type Parse struct {
 	PrettyPrint bool `usage:"Indent the json output" short:"p"`
+	gptscript   *GPTScript
 }
 
 func (e *Parse) Customize(cmd *cobra.Command) {
@@ -26,7 +27,7 @@ func locationName(l string) string {
 }
 
 func (e *Parse) Run(_ *cobra.Command, args []string) error {
-	content, err := input.FromLocation(args[0])
+	content, err := input.FromLocation(args[0], e.gptscript.DisableCache)
 	if err != nil {
 		return err
 	}

@@ -86,7 +86,8 @@ type parseRequest struct {
 	parser.Options `json:",inline"`
 	content        `json:",inline"`
 
-	File string `json:"file"`
+	DisableCache bool   `json:"disableCache"`
+	File         string `json:"file"`
 }
 
 type modelsRequest struct {
