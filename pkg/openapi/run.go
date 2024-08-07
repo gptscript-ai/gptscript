@@ -177,6 +177,7 @@ func HandleAuths(req *http.Request, envMap map[string]string, infoSets [][]Secur
 
 		// We're using this info set, because no environment variables were missing.
 		// Set up the request as needed.
+		v := url.Values{}
 		for _, info := range infoSet {
 			envNames := maps.Values(info.getCredentialNamesAndEnvVars(req.URL.Hostname()))
 			switch info.Type {
@@ -185,9 +186,7 @@ func HandleAuths(req *http.Request, envMap map[string]string, infoSets [][]Secur
 				case "header":
 					req.Header.Set(info.APIKeyName, envMap[envNames[0]])
 				case "query":
-					v := url.Values{}
 					v.Add(info.APIKeyName, envMap[envNames[0]])
-					req.URL.RawQuery = v.Encode()
 				case "cookie":
 					req.AddCookie(&http.Cookie{
 						Name:  info.APIKeyName,
@@ -202,6 +201,9 @@ func HandleAuths(req *http.Request, envMap map[string]string, infoSets [][]Secur
 					req.SetBasicAuth(envMap[envNames[0]], envMap[envNames[1]])
 				}
 			}
+		}
+		if len(v) > 0 {
+			req.URL.RawQuery = v.Encode()
 		}
 		return nil
 	}
