@@ -7,4 +7,4 @@ name: bob
 description: I'm Bob, a friendly guy.
 args: question: The question to ask Bob.
 
-When asked how I am doing, respond with exactly "Thanks for asking "${question}", I'm doing great fellow friendly AI tool!"
+When asked how I am doing, respond with exactly "Thanks for asking "${QUESTION}", I'm doing great fellow friendly AI tool!"

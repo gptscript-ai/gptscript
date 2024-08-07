@@ -10,4 +10,4 @@ args: question: The question to ask Bob.
 
 #!/bin/bash
 
-echo "Thanks for asking ${question}, I'm doing great fellow friendly AI tool!"
+echo "Thanks for asking ${QUESTION}, I'm doing great fellow friendly AI tool!"
