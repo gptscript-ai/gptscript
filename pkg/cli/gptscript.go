@@ -386,7 +386,9 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 		// The UI must run in daemon mode.
 		r.Daemon = true
 		// Use the UI tool as the first argument.
-		args = append([]string{uiTool()}, args...)
+		args = append([]string{
+			env.VarOrDefault("GPTSCRIPT_CHAT_UI_TOOL", "github.com/gptscript-ai/ui@v0.9.4"),
+		}, args...)
 	}
 
 	ctx := cmd.Context()
@@ -502,16 +504,4 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 	}
 
 	return r.PrintOutput(toolInput, s)
-}
-
-// uiTool returns the versioned UI tool reference for the current GPTScript version.
-// For release versions, a reference with a matching release tag is returned.
-// For all other versions, a reference to main is returned.
-func uiTool() string {
-	ref := "github.com/gptscript-ai/ui"
-	if tag := version.Tag; !strings.Contains(tag, "v0.0.0-dev") {
-		ref = fmt.Sprintf("%s@%s", ref, tag)
-	}
-
-	return env.VarOrDefault("GPTSCRIPT_CHAT_UI_TOOL", ref)
 }
