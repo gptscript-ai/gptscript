@@ -36,6 +36,13 @@ func TestToolDef_String(t *testing.T) {
 			ExportCredentials:   []string{"ExportCredential1", "ExportCredential2"},
 			Type:                ToolTypeContext,
 		},
+		MetaData: map[string]string{
+			"package.json": `{
+// blah blah some ugly JSON
+}
+`,
+			"requirements.txt": `requests=5`,
+		},
 		Instructions: "This is a sample instruction",
 	}
 
@@ -68,6 +75,15 @@ Share Credential: ExportCredential2
 Chat: true
 
 This is a sample instruction
+---
+!metadata:Tool Sample:package.json
+{
+// blah blah some ugly JSON
+}
+
+---
+!metadata:Tool Sample:requirements.txt
+requests=5
 `).Equal(t, tool.String())
 }
 

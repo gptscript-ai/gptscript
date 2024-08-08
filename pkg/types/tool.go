@@ -157,8 +157,9 @@ func (p Parameters) ToolRefNames() []string {
 
 type ToolDef struct {
 	Parameters   `json:",inline"`
-	Instructions string      `json:"instructions,omitempty"`
-	BuiltinFunc  BuiltinFunc `json:"-"`
+	Instructions string            `json:"instructions,omitempty"`
+	BuiltinFunc  BuiltinFunc       `json:"-"`
+	MetaData     map[string]string `json:"metaData,omitempty"`
 }
 
 type Tool struct {
@@ -166,7 +167,6 @@ type Tool struct {
 
 	ID          string                     `json:"id,omitempty"`
 	ToolMapping map[string][]ToolReference `json:"toolMapping,omitempty"`
-	MetaData    map[string]string          `json:"metaData,omitempty"`
 	LocalTools  map[string]string          `json:"localTools,omitempty"`
 	Source      ToolSource                 `json:"source,omitempty"`
 	WorkingDir  string                     `json:"workingDir,omitempty"`
@@ -487,6 +487,21 @@ func (t ToolDef) String() string {
 	if t.Instructions != "" && t.BuiltinFunc == nil {
 		_, _ = fmt.Fprintln(buf)
 		_, _ = fmt.Fprintln(buf, t.Instructions)
+	}
+
+	if t.Name != "" {
+		keys := maps.Keys(t.MetaData)
+		sort.Strings(keys)
+		for _, key := range keys {
+			buf.WriteString("---\n")
+			buf.WriteString("!metadata:")
+			buf.WriteString(t.Name)
+			buf.WriteString(":")
+			buf.WriteString(key)
+			buf.WriteString("\n")
+			buf.WriteString(t.MetaData[key])
+			buf.WriteString("\n")
+		}
 	}
 
 	return buf.String()
