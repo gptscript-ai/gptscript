@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"sort"
 	"strings"
 
+	"github.com/anmitsu/go-shlex"
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/google/shlex"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"golang.org/x/exp/maps"
 )
@@ -257,7 +258,7 @@ func ParseCredentialArgs(toolName string, input string) (string, string, map[str
 		_ = json.Unmarshal([]byte(input), &inputMap)
 	}
 
-	fields, err := shlex.Split(toolName)
+	fields, err := shlex.Split(toolName, runtime.GOOS != "windows")
 	if err != nil {
 		return "", "", nil, err
 	}

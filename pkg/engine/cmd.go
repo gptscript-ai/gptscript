@@ -17,7 +17,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/google/shlex"
+	"github.com/anmitsu/go-shlex"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -254,7 +254,7 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 	interpreter, rest, _ := strings.Cut(tool.Instructions, "\n")
 	interpreter = strings.TrimSpace(interpreter)[2:]
 
-	args, err := shlex.Split(interpreter)
+	args, err := shlex.Split(interpreter, runtime.GOOS != "windows")
 	if err != nil {
 		return nil, nil, err
 	}
@@ -340,7 +340,7 @@ func replaceVariablesForInterpreter(interpreter string, envMap map[string]string
 		parts = append(parts, part)
 	}
 
-	parts, err := shlex.Split(strings.Join(parts, ""))
+	parts, err := shlex.Split(strings.Join(parts, ""), runtime.GOOS != "windows")
 	if err != nil {
 		return nil, err
 	}

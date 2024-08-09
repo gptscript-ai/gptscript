@@ -7,12 +7,12 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/BurntSushi/locker v0.0.0-20171006230638-a6e239ea1c69
 	github.com/adrg/xdg v0.4.0
+	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be
 	github.com/chzyer/readline v1.5.1
 	github.com/docker/cli v26.0.0+incompatible
 	github.com/docker/docker-credential-helpers v0.8.1
 	github.com/fatih/color v1.17.0
 	github.com/getkin/kin-openapi v0.124.0
-	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/google/uuid v1.6.0
 	github.com/gptscript-ai/broadcaster v0.0.0-20240625175512-c43682019b86
 	github.com/gptscript-ai/chat-completion-client v0.0.0-20240531200700-af8e7ecf0379
