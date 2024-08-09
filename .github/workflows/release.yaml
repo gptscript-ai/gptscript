@@ -12,13 +12,6 @@ jobs:
   release-tag:
     runs-on: ubuntu-22.04
     steps:
-      - name: trigger ui repo tag workflow
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.DISPATCH_PAT }}
-          repository: gptscript-ai/ui
-          event-type: release
-          client-payload: '{"tag": "${{ github.ref_name }}"}'
       - name: Checkout
         uses: actions/checkout@v4
         with:
