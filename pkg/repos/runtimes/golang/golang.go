@@ -35,6 +35,10 @@ func (r *Runtime) ID() string {
 	return "go" + r.Version
 }
 
+func (r *Runtime) GetHash(_ types.Tool) (string, error) {
+	return "", nil
+}
+
 func (r *Runtime) Supports(tool types.Tool, cmd []string) bool {
 	return tool.Source.IsGit() &&
 		len(cmd) > 0 && cmd[0] == "${GPTSCRIPT_TOOL_DIR}/bin/gptscript-go-tool"

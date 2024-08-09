@@ -1018,3 +1018,26 @@ func TestRuntimes(t *testing.T) {
 	})
 	r.RunDefault()
 }
+
+func TestRuntimesLocalDev(t *testing.T) {
+	r := tester.NewRunner(t)
+	r.RespondWith(tester.Result{
+		Func: types.CompletionFunctionCall{
+			Name:      "py",
+			Arguments: "{}",
+		},
+	}, tester.Result{
+		Func: types.CompletionFunctionCall{
+			Name:      "node",
+			Arguments: "{}",
+		},
+	}, tester.Result{
+		Func: types.CompletionFunctionCall{
+			Name:      "bash",
+			Arguments: "{}",
+		},
+	})
+	r.RunDefault()
+	_ = os.RemoveAll("testdata/TestRuntimesLocalDev/node_modules")
+	_ = os.RemoveAll("testdata/TestRuntimesLocalDev/package-lock.json")
+}

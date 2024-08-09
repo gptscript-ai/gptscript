@@ -39,10 +39,7 @@ func (r *Runtime) ID() string {
 	return "node" + r.Version
 }
 
-func (r *Runtime) Supports(tool types.Tool, cmd []string) bool {
-	if _, hasPackageJSON := tool.MetaData[packageJSON]; !hasPackageJSON && !tool.Source.IsGit() {
-		return false
-	}
+func (r *Runtime) Supports(_ types.Tool, cmd []string) bool {
 	for _, testCmd := range []string{"node", "npx", "npm"} {
 		if r.supports(testCmd, cmd) {
 			return true
@@ -61,6 +58,15 @@ func (r *Runtime) supports(testCmd string, cmd []string) bool {
 	return runtimeEnv.Matches(cmd, testCmd)
 }
 
+func (r *Runtime) GetHash(tool types.Tool) (string, error) {
+	if !tool.Source.IsGit() && tool.WorkingDir != "" {
+		if s, err := os.Stat(filepath.Join(tool.WorkingDir, packageJSON)); err == nil {
+			return hash.Digest(tool.WorkingDir + s.ModTime().String())[:7], nil
+		}
+	}
+	return "", nil
+}
+
 func (r *Runtime) Setup(ctx context.Context, tool types.Tool, dataRoot, toolSource string, env []string) ([]string, error) {
 	binPath, err := r.getRuntime(ctx, dataRoot)
 	if err != nil {
@@ -74,6 +80,8 @@ func (r *Runtime) Setup(ctx context.Context, tool types.Tool, dataRoot, toolSour
 
 	if _, ok := tool.MetaData[packageJSON]; ok {
 		newEnv = append(newEnv, "GPTSCRIPT_TMPDIR="+toolSource)
+	} else if !tool.Source.IsGit() && tool.WorkingDir != "" {
+		newEnv = append(newEnv, "GPTSCRIPT_TMPDIR="+tool.WorkingDir, "GPTSCRIPT_RUNTIME_DEV=true")
 	}
 
 	return newEnv, nil
@@ -120,6 +128,16 @@ func (r *Runtime) runNPM(ctx context.Context, tool types.Tool, toolSource, binDi
 		if err := os.WriteFile(filepath.Join(toolSource, packageJSON), []byte(contents+"\n"), 0644); err != nil {
 			return err
 		}
+	} else if !tool.Source.IsGit() {
+		if tool.WorkingDir == "" {
+			return nil
+		}
+		if _, err := os.Stat(filepath.Join(tool.WorkingDir, packageJSON)); errors.Is(fs.ErrNotExist, err) {
+			return nil
+		} else if err != nil {
+			return err
+		}
+		cmd.Dir = tool.WorkingDir
 	}
 	return cmd.Run()
 }

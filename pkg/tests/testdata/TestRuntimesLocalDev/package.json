@@ -1,0 +1,15 @@
+{
+  "name": "chalk-example",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A simple example project to demonstrate the use of chalk",
+  "main": "example.js",
+  "scripts": {
+    "start": "node example.js"
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.0.0"
+  }
+}

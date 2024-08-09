@@ -24,8 +24,9 @@ import (
 var releasesData []byte
 
 const (
-	uvVersion       = "uv==0.2.33"
-	requirementsTxt = "requirements.txt"
+	uvVersion                = "uv==0.2.33"
+	requirementsTxt          = "requirements.txt"
+	gptscriptRequirementsTxt = "requirements-gptscript.txt"
 )
 
 type Release struct {
@@ -47,10 +48,7 @@ func (r *Runtime) ID() string {
 	return "python" + r.Version
 }
 
-func (r *Runtime) Supports(tool types.Tool, cmd []string) bool {
-	if _, hasRequirements := tool.MetaData[requirementsTxt]; !hasRequirements && !tool.Source.IsGit() {
-		return false
-	}
+func (r *Runtime) Supports(_ types.Tool, cmd []string) bool {
 	if runtimeEnv.Matches(cmd, r.ID()) {
 		return true
 	}
@@ -177,6 +175,22 @@ func (r *Runtime) getReleaseAndDigest() (string, string, error) {
 	return "", "", fmt.Errorf("failed to find an python runtime for %s", r.Version)
 }
 
+func (r *Runtime) GetHash(tool types.Tool) (string, error) {
+	if !tool.Source.IsGit() && tool.WorkingDir != "" {
+		if _, ok := tool.MetaData[requirementsTxt]; ok {
+			return "", nil
+		}
+		for _, req := range []string{gptscriptRequirementsTxt, requirementsTxt} {
+			reqFile := filepath.Join(tool.WorkingDir, req)
+			if s, err := os.Stat(reqFile); err == nil && !s.IsDir() {
+				return hash.Digest(tool.WorkingDir + s.ModTime().String())[:7], nil
+			}
+		}
+	}
+
+	return "", nil
+}
+
 func (r *Runtime) runPip(ctx context.Context, tool types.Tool, toolSource, binDir string, env []string) error {
 	log.InfofCtx(ctx, "Running pip in %s", toolSource)
 	if content, ok := tool.MetaData[requirementsTxt]; ok {
@@ -189,8 +203,16 @@ func (r *Runtime) runPip(ctx context.Context, tool types.Tool, toolSource, binDi
 		return cmd.Run()
 	}
 
-	for _, req := range []string{"requirements-gptscript.txt", requirementsTxt} {
-		reqFile := filepath.Join(toolSource, req)
+	reqPath := toolSource
+	if !tool.Source.IsGit() {
+		if tool.WorkingDir == "" {
+			return nil
+		}
+		reqPath = tool.WorkingDir
+	}
+
+	for _, req := range []string{gptscriptRequirementsTxt, requirementsTxt} {
+		reqFile := filepath.Join(reqPath, req)
 		if s, err := os.Stat(reqFile); err == nil && !s.IsDir() {
 			cmd := debugcmd.New(ctx, uvBin(binDir), "pip", "install", "-r", reqFile)
 			cmd.Env = env

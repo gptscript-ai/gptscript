@@ -1,0 +1,103 @@
+`{
+  "model": "gpt-4o",
+  "tools": [
+    {
+      "function": {
+        "toolID": "testdata/TestRuntimesLocalDev/test.gpt:py",
+        "name": "py",
+        "parameters": null
+      }
+    },
+    {
+      "function": {
+        "toolID": "testdata/TestRuntimesLocalDev/test.gpt:node",
+        "name": "node",
+        "parameters": null
+      }
+    },
+    {
+      "function": {
+        "toolID": "testdata/TestRuntimesLocalDev/test.gpt:bash",
+        "name": "bash",
+        "parameters": null
+      }
+    }
+  ],
+  "messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "Dummy"
+        }
+      ],
+      "usage": {}
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "toolCall": {
+            "index": 0,
+            "id": "call_1",
+            "function": {
+              "name": "py",
+              "arguments": "{}"
+            }
+          }
+        }
+      ],
+      "usage": {}
+    },
+    {
+      "role": "tool",
+      "content": [
+        {
+          "text": "py worked\r\n"
+        }
+      ],
+      "toolCall": {
+        "index": 0,
+        "id": "call_1",
+        "function": {
+          "name": "py",
+          "arguments": "{}"
+        }
+      },
+      "usage": {}
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "toolCall": {
+            "index": 1,
+            "id": "call_2",
+            "function": {
+              "name": "node",
+              "arguments": "{}"
+            }
+          }
+        }
+      ],
+      "usage": {}
+    },
+    {
+      "role": "tool",
+      "content": [
+        {
+          "text": "node worked\n"
+        }
+      ],
+      "toolCall": {
+        "index": 1,
+        "id": "call_2",
+        "function": {
+          "name": "node",
+          "arguments": "{}"
+        }
+      },
+      "usage": {}
+    }
+  ]
+}`

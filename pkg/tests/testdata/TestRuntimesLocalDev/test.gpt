@@ -1,0 +1,34 @@
+name: first
+tools: py, node, bash
+
+Dummy
+
+---
+name: py
+
+#!/usr/bin/env python3
+
+import requests
+import platform
+
+# this is dumb hack to get the line endings to always be \r\n so the golden files match
+# on both linux and windows
+if platform.system() == 'Windows':
+    print('py worked')
+else:
+    print('py worked\r')
+
+---
+name: node
+
+#!/usr/bin/env node
+
+import chalk from 'chalk';
+console.log("node worked")
+
+---
+name: bash
+
+#!/bin/bash
+
+echo bash works

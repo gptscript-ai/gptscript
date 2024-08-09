@@ -1,0 +1,37 @@
+`{
+  "model": "gpt-4o",
+  "tools": [
+    {
+      "function": {
+        "toolID": "testdata/TestRuntimesLocalDev/test.gpt:py",
+        "name": "py",
+        "parameters": null
+      }
+    },
+    {
+      "function": {
+        "toolID": "testdata/TestRuntimesLocalDev/test.gpt:node",
+        "name": "node",
+        "parameters": null
+      }
+    },
+    {
+      "function": {
+        "toolID": "testdata/TestRuntimesLocalDev/test.gpt:bash",
+        "name": "bash",
+        "parameters": null
+      }
+    }
+  ],
+  "messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "Dummy"
+        }
+      ],
+      "usage": {}
+    }
+  ]
+}`

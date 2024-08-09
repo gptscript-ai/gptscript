@@ -33,6 +33,10 @@ func (r *Runtime) ID() string {
 	return "busybox"
 }
 
+func (r *Runtime) GetHash(_ types.Tool) (string, error) {
+	return "", nil
+}
+
 func (r *Runtime) Supports(_ types.Tool, cmd []string) bool {
 	if runtime.GOOS != "windows" {
 		return false

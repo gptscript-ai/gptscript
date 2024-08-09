@@ -28,6 +28,7 @@ type Runtime interface {
 	ID() string
 	Supports(tool types.Tool, cmd []string) bool
 	Setup(ctx context.Context, tool types.Tool, dataRoot, toolSource string, env []string) ([]string, error)
+	GetHash(tool types.Tool) (string, error)
 }
 
 type noopRuntime struct {
@@ -35,6 +36,10 @@ type noopRuntime struct {
 
 func (n noopRuntime) ID() string {
 	return "none"
+}
+
+func (n noopRuntime) GetHash(_ types.Tool) (string, error) {
+	return "", nil
 }
 
 func (n noopRuntime) Supports(_ types.Tool, _ []string) bool {
@@ -183,8 +188,13 @@ func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, e
 	locker.Lock(tool.ID)
 	defer locker.Unlock(tool.ID)
 
+	runtimeHash, err := runtime.GetHash(tool)
+	if err != nil {
+		return "", nil, err
+	}
+
 	target := filepath.Join(m.storageDir, tool.Source.Repo.Revision, tool.Source.Repo.Path, tool.Source.Repo.Name, runtime.ID())
-	targetFinal := filepath.Join(target, tool.Source.Repo.Path)
+	targetFinal := filepath.Join(target, tool.Source.Repo.Path+runtimeHash)
 	doneFile := targetFinal + ".done"
 	envData, err := os.ReadFile(doneFile)
 	if err == nil {
@@ -251,7 +261,11 @@ func (m *Manager) GetContext(ctx context.Context, tool types.Tool, cmd, env []st
 	for _, runtime := range m.runtimes {
 		if runtime.Supports(tool, cmd) {
 			log.Debugf("Runtime %s supports %v", runtime.ID(), cmd)
-			return m.setup(ctx, runtime, tool, env)
+			wd, env, err := m.setup(ctx, runtime, tool, env)
+			if isLocal {
+				wd = tool.WorkingDir
+			}
+			return wd, env, err
 		}
 	}
 
