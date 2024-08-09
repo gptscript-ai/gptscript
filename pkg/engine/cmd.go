@@ -17,7 +17,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/google/shlex"
+	"github.com/buildkite/shellwords"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -118,7 +118,7 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 		instructions = append(instructions, inputContext.Content)
 	}
 
-	var extraEnv = []string{
+	extraEnv := []string{
 		strings.TrimSpace("GPTSCRIPT_CONTEXT=" + strings.Join(instructions, "\n")),
 	}
 	cmd, stop, err := e.newCommand(ctx.Ctx, extraEnv, tool, input)
@@ -254,7 +254,7 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 	interpreter, rest, _ := strings.Cut(tool.Instructions, "\n")
 	interpreter = strings.TrimSpace(interpreter)[2:]
 
-	args, err := shlex.Split(interpreter)
+	args, err := shellwords.Split(interpreter)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -332,7 +332,7 @@ func replaceVariablesForInterpreter(interpreter string, envMap map[string]string
 				return envMap[s]
 			})
 			// We protect newly resolved env vars from getting replaced when we do the second Expand
-			// after shlex. Yeah, crazy. I'm guessing this isn't secure, but just trying to avoid a foot gun.
+			// after shellwords. Yeah, crazy. I'm guessing this isn't secure, but just trying to avoid a foot gun.
 			part = os.Expand(part, func(s string) string {
 				return "${__" + s + "}"
 			})
@@ -340,7 +340,7 @@ func replaceVariablesForInterpreter(interpreter string, envMap map[string]string
 		parts = append(parts, part)
 	}
 
-	parts, err := shlex.Split(strings.Join(parts, ""))
+	parts, err := shellwords.Split(strings.Join(parts, ""))
 	if err != nil {
 		return nil, err
 	}
