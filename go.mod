@@ -50,6 +50,7 @@ require (
 	github.com/bodgit/plumbing v1.2.0 // indirect
 	github.com/bodgit/sevenzip v1.3.0 // indirect
 	github.com/bodgit/windows v1.0.0 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/charmbracelet/glamour v0.7.0 // indirect
 	github.com/charmbracelet/lipgloss v0.11.0 // indirect
 	github.com/charmbracelet/x/ansi v0.1.1 // indirect
@@ -57,6 +58,7 @@ require (
 	github.com/containerd/console v1.0.4 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dlclark/regexp2 v1.4.0 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/go-openapi/jsonpointer v0.20.2 // indirect
