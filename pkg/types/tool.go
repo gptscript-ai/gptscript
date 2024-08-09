@@ -9,8 +9,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/buildkite/shellwords"
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/google/shlex"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"golang.org/x/exp/maps"
 )
@@ -22,9 +22,7 @@ const (
 	CommandPrefix = "#!"
 )
 
-var (
-	DefaultFiles = []string{"agent.gpt", "tool.gpt"}
-)
+var DefaultFiles = []string{"agent.gpt", "tool.gpt"}
 
 type ToolType string
 
@@ -257,7 +255,7 @@ func ParseCredentialArgs(toolName string, input string) (string, string, map[str
 		_ = json.Unmarshal([]byte(input), &inputMap)
 	}
 
-	fields, err := shlex.Split(toolName)
+	fields, err := shellwords.Split(toolName)
 	if err != nil {
 		return "", "", nil, err
 	}
