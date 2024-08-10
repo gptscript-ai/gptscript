@@ -133,6 +133,7 @@ func (e *Engine) startDaemon(tool types.Tool) (string, error) {
 	},
 		tool,
 		"{}",
+		false,
 	)
 	if err != nil {
 		return url, err
