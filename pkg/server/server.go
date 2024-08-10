@@ -24,5 +24,6 @@ func ContextWithNewRunID(ctx context.Context) context.Context {
 }
 
 func RunIDFromContext(ctx context.Context) string {
-	return ctx.Value(execKey{}).(string)
+	runID, _ := ctx.Value(execKey{}).(string)
+	return runID
 }

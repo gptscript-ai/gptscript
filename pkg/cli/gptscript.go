@@ -406,6 +406,9 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 	defer gptScript.Close(true)
 
 	if r.ListModels {
+		if r.DefaultModelProvider != "" {
+			args = append(args, r.DefaultModelProvider)
+		}
 		return r.listModels(ctx, gptScript, args)
 	}
 

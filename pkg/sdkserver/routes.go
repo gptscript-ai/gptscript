@@ -127,6 +127,10 @@ func (s *server) listModels(w http.ResponseWriter, r *http.Request) {
 		providers = reqObject.Providers
 	}
 
+	if s.gptscriptOpts.DefaultModelProvider != "" {
+		providers = append(providers, s.gptscriptOpts.DefaultModelProvider)
+	}
+
 	out, err := s.client.ListModels(r.Context(), providers...)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to list models: %w", err))
