@@ -123,9 +123,6 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 	}
 	cmd, stop, err := e.newCommand(ctx.Ctx, extraEnv, tool, input)
 	if err != nil {
-		if toolCategory == NoCategory {
-			return fmt.Sprintf("ERROR: got (%v) while parsing command", err), nil
-		}
 		return "", err
 	}
 	defer stop()
@@ -271,12 +268,6 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 		})
 	}
 
-	// After we determined the interpreter we again interpret the args by env vars
-	args, err = replaceVariablesForInterpreter(interpreter, envMap)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	if runtime.GOOS == "windows" && (args[0] == "/bin/bash" || args[0] == "/bin/sh") {
 		args[0] = path.Base(args[0])
 	}
@@ -322,88 +313,4 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 	cmd := exec.CommandContext(ctx, env.Lookup(envvars, args[0]), cmdArgs...)
 	cmd.Env = compressEnv(envvars)
 	return cmd, stop, nil
-}
-
-func replaceVariablesForInterpreter(interpreter string, envMap map[string]string) ([]string, error) {
-	var parts []string
-	for i, part := range splitByQuotes(interpreter) {
-		if i%2 == 0 {
-			part = os.Expand(part, func(s string) string {
-				return envMap[s]
-			})
-			// We protect newly resolved env vars from getting replaced when we do the second Expand
-			// after shlex. Yeah, crazy. I'm guessing this isn't secure, but just trying to avoid a foot gun.
-			part = os.Expand(part, func(s string) string {
-				return "${__" + s + "}"
-			})
-		}
-		parts = append(parts, part)
-	}
-
-	parts, err := shlex.Split(strings.Join(parts, ""))
-	if err != nil {
-		return nil, err
-	}
-
-	for i, part := range parts {
-		parts[i] = os.Expand(part, func(s string) string {
-			if strings.HasPrefix(s, "__") {
-				return "${" + s[2:] + "}"
-			}
-			return envMap[s]
-		})
-	}
-
-	return parts, nil
-}
-
-// splitByQuotes will split a string by parsing matching double quotes (with \ as the escape character).
-// The return value conforms to the following properties
-//  1. s == strings.Join(result, "")
-//  2. Even indexes are strings that were not in quotes.
-//  3. Odd indexes are strings that were quoted.
-//
-// Example: s = `In a "quoted string" quotes can be escaped with \"`
-//
-//	result = [`In a `, `"quoted string"`, ` quotes can be escaped with \"`]
-func splitByQuotes(s string) (result []string) {
-	var (
-		buf               strings.Builder
-		inEscape, inQuote bool
-	)
-
-	for _, c := range s {
-		if inEscape {
-			buf.WriteRune(c)
-			inEscape = false
-			continue
-		}
-
-		switch c {
-		case '"':
-			if inQuote {
-				buf.WriteRune(c)
-			}
-			result = append(result, buf.String())
-			buf.Reset()
-			if !inQuote {
-				buf.WriteRune(c)
-			}
-			inQuote = !inQuote
-		case '\\':
-			inEscape = true
-			buf.WriteRune(c)
-		default:
-			buf.WriteRune(c)
-		}
-	}
-
-	if buf.Len() > 0 {
-		if inQuote {
-			result = append(result, "")
-		}
-		result = append(result, buf.String())
-	}
-
-	return
 }
