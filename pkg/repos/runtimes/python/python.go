@@ -175,6 +175,10 @@ func (r *Runtime) getReleaseAndDigest() (string, string, error) {
 	return "", "", fmt.Errorf("failed to find an python runtime for %s", r.Version)
 }
 
+func (r *Runtime) Binary(_ context.Context, _ types.Tool, _, _ string, _ []string) (bool, []string, error) {
+	return false, nil, nil
+}
+
 func (r *Runtime) GetHash(tool types.Tool) (string, error) {
 	if !tool.Source.IsGit() && tool.WorkingDir != "" {
 		if _, ok := tool.MetaData[requirementsTxt]; ok {

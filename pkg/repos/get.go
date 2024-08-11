@@ -27,6 +27,7 @@ const credentialHelpersRepo = "github.com/gptscript-ai/gptscript-credential-help
 type Runtime interface {
 	ID() string
 	Supports(tool types.Tool, cmd []string) bool
+	Binary(ctx context.Context, tool types.Tool, dataRoot, toolSource string, env []string) (bool, []string, error)
 	Setup(ctx context.Context, tool types.Tool, dataRoot, toolSource string, env []string) ([]string, error)
 	GetHash(tool types.Tool) (string, error)
 }
@@ -44,6 +45,10 @@ func (n noopRuntime) GetHash(_ types.Tool) (string, error) {
 
 func (n noopRuntime) Supports(_ types.Tool, _ []string) bool {
 	return false
+}
+
+func (n noopRuntime) Binary(_ context.Context, _ types.Tool, _, _ string, _ []string) (bool, []string, error) {
+	return false, nil, nil
 }
 
 func (n noopRuntime) Setup(_ context.Context, _ types.Tool, _, _ string, _ []string) ([]string, error) {
@@ -211,19 +216,28 @@ func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, e
 	_ = os.RemoveAll(doneFile)
 	_ = os.RemoveAll(target)
 
-	if tool.Source.Repo.VCS == "git" {
-		if err := git.Checkout(ctx, m.gitDir, tool.Source.Repo.Root, tool.Source.Repo.Revision, target); err != nil {
-			return "", nil, err
-		}
-	} else {
-		if err := os.MkdirAll(target, 0755); err != nil {
-			return "", nil, err
-		}
-	}
+	var (
+		newEnv   []string
+		isBinary bool
+	)
 
-	newEnv, err := runtime.Setup(ctx, tool, m.runtimeDir, targetFinal, env)
-	if err != nil {
+	if isBinary, newEnv, err = runtime.Binary(ctx, tool, m.runtimeDir, targetFinal, env); err != nil {
 		return "", nil, err
+	} else if !isBinary {
+		if tool.Source.Repo.VCS == "git" {
+			if err := git.Checkout(ctx, m.gitDir, tool.Source.Repo.Root, tool.Source.Repo.Revision, target); err != nil {
+				return "", nil, err
+			}
+		} else {
+			if err := os.MkdirAll(target, 0755); err != nil {
+				return "", nil, err
+			}
+		}
+
+		newEnv, err = runtime.Setup(ctx, tool, m.runtimeDir, targetFinal, env)
+		if err != nil {
+			return "", nil, err
+		}
 	}
 
 	out, err := os.Create(doneFile + ".tmp")
