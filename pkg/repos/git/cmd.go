@@ -17,6 +17,10 @@ func newGitCommand(ctx context.Context, args ...string) *debugcmd.WrappedCmd {
 }
 
 func LsRemote(ctx context.Context, repo, ref string) (string, error) {
+	if usePureGo() {
+		return lsRemotePureGo(ctx, repo, ref)
+	}
+
 	cmd := newGitCommand(ctx, "ls-remote", repo, ref)
 	if err := cmd.Run(); err != nil {
 		return "", err

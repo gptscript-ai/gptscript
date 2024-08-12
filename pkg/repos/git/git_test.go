@@ -17,7 +17,7 @@ var (
 )
 
 func TestFetch(t *testing.T) {
-	err := Fetch(context.Background(), testCacheHome,
+	err := fetch(context.Background(), testCacheHome,
 		"https://github.com/gptscript-ai/dalle-image-generation.git",
 		testCommit)
 	require.NoError(t, err)
