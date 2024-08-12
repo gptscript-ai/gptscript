@@ -752,7 +752,7 @@ func (t Tool) GetCredentialTools(prg Program, agentGroup []ToolReference) ([]Too
 		result.AddAll(referencedTool.GetToolRefsFromNames(referencedTool.ExportCredentials))
 	}
 
-	contextToolRefs, err := t.getDirectContextToolRefs(prg)
+	contextToolRefs, err := t.GetContextTools(prg)
 	if err != nil {
 		return nil, err
 	}
