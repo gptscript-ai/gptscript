@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"runtime"
 	"sync"
 
 	"github.com/go-git/go-git/v5"
@@ -24,8 +25,13 @@ func usePureGo() bool {
 		return true
 	}
 	gitCheck.Do(func() {
-		_, err := exec.LookPath("git")
-		externalGit = err == nil
+		if runtime.GOOS == "darwin" {
+			if exec.Command("xcode-select", "-p").Run() == nil {
+				externalGit = true
+			}
+		} else if _, err := exec.LookPath("git"); err == nil {
+			externalGit = true
+		}
 	})
 	return !externalGit
 }
