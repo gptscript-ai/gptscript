@@ -189,7 +189,7 @@ func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, err
 		client: oClient,
 		url:    url,
 	}
-	return client.client, nil
+	return oClient, nil
 }
 
 func (c *Client) retrieveAPIKey(ctx context.Context, env, url string) (string, error) {
