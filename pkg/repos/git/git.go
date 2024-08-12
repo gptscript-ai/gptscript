@@ -29,7 +29,11 @@ func Checkout(ctx context.Context, base, repo, commit, toDir string) error {
 		return err
 	}
 
-	if err := Fetch(ctx, base, repo, commit); err != nil {
+	if usePureGo() {
+		return checkoutPureGo(ctx, base, repo, commit, toDir)
+	}
+
+	if err := fetch(ctx, base, repo, commit); err != nil {
 		return err
 	}
 
@@ -41,7 +45,7 @@ func gitDir(base, repo string) string {
 	return filepath.Join(base, "repos", hash.Digest(repo))
 }
 
-func Fetch(ctx context.Context, base, repo, commit string) error {
+func fetch(ctx context.Context, base, repo, commit string) error {
 	gitDir := gitDir(base, repo)
 	if found, err := exists(gitDir); err != nil {
 		return err
