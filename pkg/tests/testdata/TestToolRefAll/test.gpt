@@ -11,10 +11,18 @@ Agent body
 ---
 name: context
 type: context
+share context: sharedcontext
 
 #!sys.echo
 
 Context Body
+
+---
+name: sharedcontext
+
+#!sys.echo
+
+Shared context
 
 ---
 name: none

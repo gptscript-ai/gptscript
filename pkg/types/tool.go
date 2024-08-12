@@ -546,7 +546,17 @@ func (t Tool) getExportedTools(prg Program) ([]ToolReference, error) {
 func (t Tool) GetContextTools(prg Program) ([]ToolReference, error) {
 	result := &toolRefSet{}
 	result.AddAll(t.getDirectContextToolRefs(prg))
-	result.AddAll(t.getCompletionToolRefs(prg, nil, ToolTypeContext))
+
+	contextRefs, err := t.getCompletionToolRefs(prg, nil, ToolTypeContext)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, contextRef := range contextRefs {
+		result.AddAll(prg.ToolSet[contextRef.ToolID].getExportedContext(prg))
+		result.Add(contextRef)
+	}
+
 	return result.List()
 }
 

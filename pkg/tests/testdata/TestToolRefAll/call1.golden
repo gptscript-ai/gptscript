@@ -52,7 +52,7 @@
       "role": "system",
       "content": [
         {
-          "text": "\nContext Body\nMain tool"
+          "text": "\nShared context\n\nContext Body\nMain tool"
         }
       ],
       "usage": {}
