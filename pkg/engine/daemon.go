@@ -18,14 +18,22 @@ import (
 var ports Ports
 
 type Ports struct {
-	daemonPorts map[string]int64
-	daemonLock  sync.Mutex
+	daemonPorts    map[string]int64
+	daemonsRunning map[string]struct{}
+	daemonLock     sync.Mutex
 
 	startPort, endPort int64
 	usedPorts          map[int64]struct{}
 	daemonCtx          context.Context
 	daemonClose        func()
 	daemonWG           sync.WaitGroup
+}
+
+func IsDaemonRunning(url string) bool {
+	ports.daemonLock.Lock()
+	defer ports.daemonLock.Unlock()
+	_, ok := ports.daemonsRunning[url]
+	return ok
 }
 
 func SetPorts(start, end int64) {
@@ -164,8 +172,10 @@ func (e *Engine) startDaemon(tool types.Tool) (string, error) {
 
 	if ports.daemonPorts == nil {
 		ports.daemonPorts = map[string]int64{}
+		ports.daemonsRunning = map[string]struct{}{}
 	}
 	ports.daemonPorts[tool.ID] = port
+	ports.daemonsRunning[url] = struct{}{}
 
 	killedCtx, cancel := context.WithCancelCause(ctx)
 	defer cancel(nil)
@@ -185,6 +195,7 @@ func (e *Engine) startDaemon(tool types.Tool) (string, error) {
 		defer ports.daemonLock.Unlock()
 
 		delete(ports.daemonPorts, tool.ID)
+		delete(ports.daemonsRunning, url)
 		ports.daemonWG.Done()
 	}()
 

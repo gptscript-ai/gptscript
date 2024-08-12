@@ -22,8 +22,9 @@ import (
 )
 
 type Client struct {
-	modelsLock      sync.Mutex
+	clientsLock     sync.Mutex
 	cache           *cache.Client
+	clients         map[string]clientInfo
 	modelToProvider map[string]string
 	runner          *runner.Runner
 	envs            []string
@@ -38,13 +39,15 @@ func New(r *runner.Runner, envs []string, cache *cache.Client, credStore credent
 		envs:            envs,
 		credStore:       credStore,
 		defaultProvider: defaultProvider,
+		modelToProvider: make(map[string]string),
+		clients:         make(map[string]clientInfo),
 	}
 }
 
 func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error) {
-	c.modelsLock.Lock()
+	c.clientsLock.Lock()
 	provider, ok := c.modelToProvider[messageRequest.Model]
-	c.modelsLock.Unlock()
+	c.clientsLock.Unlock()
 
 	if !ok {
 		return nil, fmt.Errorf("failed to find remote model %s", messageRequest.Model)
@@ -105,12 +108,8 @@ func (c *Client) Supports(ctx context.Context, modelString string) (bool, error)
 		return false, err
 	}
 
-	c.modelsLock.Lock()
-	defer c.modelsLock.Unlock()
-
-	if c.modelToProvider == nil {
-		c.modelToProvider = map[string]string{}
-	}
+	c.clientsLock.Lock()
+	defer c.clientsLock.Unlock()
 
 	c.modelToProvider[modelString] = providerName
 	return true, nil
@@ -145,10 +144,22 @@ func (c *Client) clientFromURL(ctx context.Context, apiURL string) (*openai.Clie
 }
 
 func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, error) {
+	c.clientsLock.Lock()
+	defer c.clientsLock.Unlock()
+
+	client, ok := c.clients[toolName]
+	if ok && !isHTTPURL(toolName) && engine.IsDaemonRunning(client.url) {
+		return client.client, nil
+	}
+
 	if isHTTPURL(toolName) {
 		remoteClient, err := c.clientFromURL(ctx, toolName)
 		if err != nil {
 			return nil, err
+		}
+		c.clients[toolName] = clientInfo{
+			client: remoteClient,
+			url:    toolName,
 		}
 		return remoteClient, nil
 	}
@@ -165,7 +176,7 @@ func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, err
 		return nil, err
 	}
 
-	client, err := openai.NewClient(ctx, c.credStore, openai.Options{
+	oClient, err := openai.NewClient(ctx, c.credStore, openai.Options{
 		BaseURL:  strings.TrimSuffix(url, "/") + "/v1",
 		Cache:    c.cache,
 		CacheKey: prg.EntryToolID,
@@ -174,7 +185,11 @@ func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, err
 		return nil, err
 	}
 
-	return client, nil
+	c.clients[toolName] = clientInfo{
+		client: oClient,
+		url:    url,
+	}
+	return client.client, nil
 }
 
 func (c *Client) retrieveAPIKey(ctx context.Context, env, url string) (string, error) {
@@ -184,4 +199,9 @@ func (c *Client) retrieveAPIKey(ctx context.Context, env, url string) (string, e
 func isLocalhost(url string) bool {
 	return strings.HasPrefix(url, "http://localhost") || strings.HasPrefix(url, "http://127.0.0.1") ||
 		strings.HasPrefix(url, "https://localhost") || strings.HasPrefix(url, "https://127.0.0.1")
+}
+
+type clientInfo struct {
+	client *openai.Client
+	url    string
 }
