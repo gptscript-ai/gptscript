@@ -39,6 +39,10 @@ func (r *Runtime) ID() string {
 	return "node" + r.Version
 }
 
+func (r *Runtime) Binary(_ context.Context, _ types.Tool, _, _ string, _ []string) (bool, []string, error) {
+	return false, nil, nil
+}
+
 func (r *Runtime) Supports(_ types.Tool, cmd []string) bool {
 	for _, testCmd := range []string{"node", "npx", "npm"} {
 		if r.supports(testCmd, cmd) {

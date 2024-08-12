@@ -49,6 +49,10 @@ func (r *Runtime) Supports(_ types.Tool, cmd []string) bool {
 	return false
 }
 
+func (r *Runtime) Binary(_ context.Context, _ types.Tool, _, _ string, _ []string) (bool, []string, error) {
+	return false, nil, nil
+}
+
 func (r *Runtime) Setup(ctx context.Context, _ types.Tool, dataRoot, _ string, env []string) ([]string, error) {
 	binPath, err := r.getRuntime(ctx, dataRoot)
 	if err != nil {
