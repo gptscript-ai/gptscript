@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	_ "embed"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -89,6 +90,13 @@ func (r release) srcBinName() string {
 		runtime.GOARCH + suffix
 }
 
+type tag struct {
+	Name   string `json:"name,omitempty"`
+	Commit struct {
+		Sha string `json:"sha,omitempty"`
+	} `json:"commit"`
+}
+
 func getLatestRelease(tool types.Tool) (*release, bool) {
 	if tool.Source.Repo == nil || !strings.HasPrefix(tool.Source.Repo.Root, "https://github.com/") {
 		return nil, false
@@ -105,7 +113,30 @@ func getLatestRelease(tool types.Tool) (*release, bool) {
 		},
 	}
 
-	resp, err := client.Get(fmt.Sprintf("https://github.com/%s/%s/releases/latest", parts[1], parts[2]))
+	account, repo := parts[1], parts[2]
+
+	resp, err := client.Get(fmt.Sprintf("https://api.github.com/repos/%s/%s/tags", account, repo))
+	if err != nil || resp.StatusCode != http.StatusOK {
+		// ignore error
+		return nil, false
+	}
+	defer resp.Body.Close()
+
+	var tags []tag
+	if err := json.NewDecoder(resp.Body).Decode(&tags); err != nil {
+		return nil, false
+	}
+	for _, tag := range tags {
+		if tag.Commit.Sha == tool.Source.Repo.Revision {
+			return &release{
+				account: account,
+				repo:    repo,
+				label:   tag.Name,
+			}, true
+		}
+	}
+
+	resp, err = client.Get(fmt.Sprintf("https://github.com/%s/%s/releases/latest", account, repo))
 	if err != nil || resp.StatusCode != http.StatusFound {
 		// ignore error
 		return nil, false
@@ -117,7 +148,6 @@ func getLatestRelease(tool types.Tool) (*release, bool) {
 		return nil, false
 	}
 
-	account, repo := parts[1], parts[2]
 	parts = strings.Split(target, "/")
 	label := parts[len(parts)-1]
 
