@@ -223,10 +223,9 @@ func getChecksum(ctx context.Context, rel *release) string {
 	scan := bufio.NewScanner(resp.Body)
 	for scan.Scan() {
 		fields := strings.Fields(scan.Text())
-		if len(fields) != 2 || fields[1] != rel.srcBinName() {
-			continue
+		if len(fields) == 2 && (fields[1] == rel.srcBinName() || fields[1] == "*"+rel.srcBinName()) {
+			return fields[0]
 		}
-		return fields[0]
 	}
 
 	return ""
