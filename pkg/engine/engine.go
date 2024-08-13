@@ -21,7 +21,7 @@ type Model interface {
 type RuntimeManager interface {
 	GetContext(ctx context.Context, tool types.Tool, cmd, env []string) (string, []string, error)
 	EnsureCredentialHelpers(ctx context.Context) error
-	SetUpCredentialHelpers(ctx context.Context, cliCfg *config.CLIConfig, env []string) error
+	SetUpCredentialHelpers(ctx context.Context, cliCfg *config.CLIConfig) error
 }
 
 type Engine struct {

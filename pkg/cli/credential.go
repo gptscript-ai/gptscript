@@ -58,7 +58,7 @@ func (c *Credential) Run(cmd *cobra.Command, _ []string) error {
 		opts.Runner.RuntimeManager = runtimes.Default(opts.Cache.CacheDir)
 	}
 
-	if err = opts.Runner.RuntimeManager.SetUpCredentialHelpers(cmd.Context(), cfg, opts.Env); err != nil {
+	if err = opts.Runner.RuntimeManager.SetUpCredentialHelpers(cmd.Context(), cfg); err != nil {
 		return err
 	}
 

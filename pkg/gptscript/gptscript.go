@@ -99,7 +99,7 @@ func New(ctx context.Context, o ...Options) (*GPTScript, error) {
 		opts.Runner.RuntimeManager = runtimes.Default(cacheClient.CacheDir())
 	}
 
-	if err := opts.Runner.RuntimeManager.SetUpCredentialHelpers(context.Background(), cliCfg, opts.Env); err != nil {
+	if err := opts.Runner.RuntimeManager.SetUpCredentialHelpers(context.Background(), cliCfg); err != nil {
 		return nil, err
 	}
 

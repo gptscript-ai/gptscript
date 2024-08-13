@@ -5,7 +5,7 @@ import (
 )
 
 type CredentialHelperDirs struct {
-	RevisionFile, LastCheckedFile, BinDir, RepoDir, HelperDir string
+	RevisionFile, LastCheckedFile, BinDir string
 }
 
 func GetCredentialHelperDirs(cacheDir string) CredentialHelperDirs {
@@ -13,7 +13,5 @@ func GetCredentialHelperDirs(cacheDir string) CredentialHelperDirs {
 		RevisionFile:    filepath.Join(cacheDir, "repos", "gptscript-credential-helpers", "revision"),
 		LastCheckedFile: filepath.Join(cacheDir, "repos", "gptscript-credential-helpers", "last-checked"),
 		BinDir:          filepath.Join(cacheDir, "repos", "gptscript-credential-helpers", "bin"),
-		RepoDir:         filepath.Join(cacheDir, "repos", "gptscript-credential-helpers", "repo"),
-		HelperDir:       filepath.Join(cacheDir, "repos", "gptscript-credential-helpers"),
 	}
 }

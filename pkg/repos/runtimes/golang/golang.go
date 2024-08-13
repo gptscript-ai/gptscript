@@ -18,7 +18,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/debugcmd"
 	runtimeEnv "github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
@@ -97,6 +96,14 @@ type tag struct {
 	} `json:"commit"`
 }
 
+func GetLatestTag(tool types.Tool) (string, error) {
+	r, ok := getLatestRelease(tool)
+	if !ok {
+		return "", fmt.Errorf("failed to get latest release for %s", tool.Name)
+	}
+	return r.label, nil
+}
+
 func getLatestRelease(tool types.Tool) (*release, bool) {
 	if tool.Source.Repo == nil || !strings.HasPrefix(tool.Source.Repo.Root, "https://github.com/") {
 		return nil, false
@@ -116,11 +123,14 @@ func getLatestRelease(tool types.Tool) (*release, bool) {
 	account, repo := parts[1], parts[2]
 
 	resp, err := client.Get(fmt.Sprintf("https://api.github.com/repos/%s/%s/tags", account, repo))
-	if err != nil || resp.StatusCode != http.StatusOK {
+	if err != nil {
 		// ignore error
 		return nil, false
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, false
+	}
 
 	var tags []tag
 	if err := json.NewDecoder(resp.Body).Decode(&tags); err != nil {
@@ -137,11 +147,14 @@ func getLatestRelease(tool types.Tool) (*release, bool) {
 	}
 
 	resp, err = client.Get(fmt.Sprintf("https://github.com/%s/%s/releases/latest", account, repo))
-	if err != nil || resp.StatusCode != http.StatusFound {
+	if err != nil {
 		// ignore error
 		return nil, false
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusFound {
+		return nil, false
+	}
 
 	target := resp.Header.Get("Location")
 	if target == "" {
@@ -212,7 +225,7 @@ func downloadBin(ctx context.Context, checksum, src, url, bin string) error {
 	return nil
 }
 
-func getChecksum(ctx context.Context, rel *release) string {
+func getChecksum(ctx context.Context, rel *release, artifactName string) string {
 	resp, err := get(ctx, rel.checksumTxt())
 	if err != nil {
 		// ignore error
@@ -223,7 +236,7 @@ func getChecksum(ctx context.Context, rel *release) string {
 	scan := bufio.NewScanner(resp.Body)
 	for scan.Scan() {
 		fields := strings.Fields(scan.Text())
-		if len(fields) == 2 && (fields[1] == rel.srcBinName() || fields[1] == "*"+rel.srcBinName()) {
+		if len(fields) == 2 && (fields[1] == artifactName || fields[1] == "*"+artifactName) {
 			return fields[0]
 		}
 	}
@@ -241,7 +254,7 @@ func (r *Runtime) Binary(ctx context.Context, tool types.Tool, _, toolSource str
 		return false, nil, nil
 	}
 
-	checksum := getChecksum(ctx, rel)
+	checksum := getChecksum(ctx, rel, rel.srcBinName())
 	if checksum == "" {
 		return false, nil, nil
 	}
@@ -268,30 +281,28 @@ func (r *Runtime) Setup(ctx context.Context, _ types.Tool, dataRoot, toolSource 
 	return newEnv, nil
 }
 
-func (r *Runtime) BuildCredentialHelper(ctx context.Context, helperName string, credHelperDirs credentials.CredentialHelperDirs, dataRoot, revision string, env []string) error {
+func (r *Runtime) DownloadCredentialHelper(ctx context.Context, tool types.Tool, helperName, distInfo, suffix string, binDir string) error {
 	if helperName == "file" {
 		return nil
 	}
 
-	var suffix string
-	if helperName == "wincred" {
-		suffix = ".exe"
+	rel, ok := getLatestRelease(tool)
+	if !ok {
+		return fmt.Errorf("failed to find %s release", r.ID())
+	}
+	binaryName := "gptscript-credential-" + helperName
+	checksum := getChecksum(ctx, rel, binaryName+distInfo+suffix)
+	if checksum == "" {
+		return fmt.Errorf("failed to find %s release checksum for os=%s arch=%s", r.ID(), runtime.GOOS, runtime.GOARCH)
 	}
 
-	binPath, err := r.getRuntime(ctx, dataRoot)
-	if err != nil {
-		return err
+	url, _ := strings.CutSuffix(rel.binURL(), rel.srcBinName())
+	url += binaryName + distInfo + suffix
+	if err := downloadBin(ctx, checksum, strings.TrimSuffix(binDir, "bin"), url, binaryName+suffix); err != nil {
+		return fmt.Errorf("failed to download %s release for os=%s arch=%s: %w", r.ID(), runtime.GOOS, runtime.GOARCH, err)
 	}
-	newEnv := runtimeEnv.AppendPath(env, binPath)
 
-	log.InfofCtx(ctx, "Building credential helper %s", helperName)
-	cmd := debugcmd.New(ctx, filepath.Join(binPath, "go"),
-		"build", "-buildvcs=false", "-o",
-		filepath.Join(credHelperDirs.BinDir, "gptscript-credential-"+helperName+suffix),
-		fmt.Sprintf("./%s/cmd/", helperName))
-	cmd.Env = stripGo(append(env, newEnv...))
-	cmd.Dir = filepath.Join(credHelperDirs.RepoDir, revision)
-	return cmd.Run()
+	return nil
 }
 
 func (r *Runtime) getReleaseAndDigest() (string, string, error) {
