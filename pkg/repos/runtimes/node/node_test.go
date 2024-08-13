@@ -37,17 +37,3 @@ func TestRuntime(t *testing.T) {
 	}
 	require.NoError(t, err)
 }
-
-func TestRuntime21(t *testing.T) {
-	r := Runtime{
-		Version: "21",
-	}
-
-	s, err := r.Setup(context.Background(), types.Tool{}, testCacheHome, "testdata", os.Environ())
-	require.NoError(t, err)
-	_, err = os.Stat(filepath.Join(firstPath(s), "node.exe"))
-	if errors.Is(err, fs.ErrNotExist) {
-		_, err = os.Stat(filepath.Join(firstPath(s), "node"))
-	}
-	require.NoError(t, err)
-}

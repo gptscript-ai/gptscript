@@ -82,6 +82,15 @@ func (f *file) String() string {
 	return f.File
 }
 
+type loadRequest struct {
+	content `json:",inline"`
+
+	ToolDefs     toolDefs `json:"toolDefs,inline"`
+	DisableCache bool     `json:"disableCache"`
+	SubTool      string   `json:"subTool,omitempty"`
+	File         string   `json:"file"`
+}
+
 type parseRequest struct {
 	parser.Options `json:",inline"`
 	content        `json:",inline"`

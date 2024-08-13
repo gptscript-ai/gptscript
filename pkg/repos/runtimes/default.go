@@ -22,7 +22,7 @@ var Runtimes = []repos.Runtime{
 		Version: "3.10",
 	},
 	&node.Runtime{
-		Version: "21",
+		Version: "20",
 		Default: true,
 	},
 	&golang.Runtime{
