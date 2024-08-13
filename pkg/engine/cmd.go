@@ -109,7 +109,7 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 			}
 		}()
 
-		return tool.BuiltinFunc(ctx.WrappedContext(), e.Env, input, progress)
+		return tool.BuiltinFunc(ctx.WrappedContext(e), e.Env, input, progress)
 	}
 
 	var instructions []string

@@ -16,6 +16,7 @@ import (
 
 type Model interface {
 	Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error)
+	ProxyInfo() (string, string, error)
 }
 
 type RuntimeManager interface {
@@ -79,6 +80,7 @@ type Context struct {
 	Parent        *Context
 	LastReturn    *Return
 	CurrentReturn *Return
+	Engine        *Engine
 	Program       *types.Program
 	// Input is saved only so that we can render display text, don't use otherwise
 	Input string
@@ -250,8 +252,10 @@ func FromContext(ctx context.Context) (*Context, bool) {
 	return c, ok
 }
 
-func (c *Context) WrappedContext() context.Context {
-	return context.WithValue(c.Ctx, engineContext{}, c)
+func (c *Context) WrappedContext(e *Engine) context.Context {
+	cp := *c
+	cp.Engine = e
+	return context.WithValue(c.Ctx, engineContext{}, &cp)
 }
 
 func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {

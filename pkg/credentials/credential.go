@@ -24,6 +24,7 @@ type Credential struct {
 	ToolName     string            `json:"toolName"`
 	Type         CredentialType    `json:"type"`
 	Env          map[string]string `json:"env"`
+	Ephemeral    bool              `json:"ephemeral,omitempty"`
 	ExpiresAt    *time.Time        `json:"expiresAt"`
 	RefreshToken string            `json:"refreshToken"`
 }

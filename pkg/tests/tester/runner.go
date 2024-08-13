@@ -31,6 +31,10 @@ type Result struct {
 	Err     error
 }
 
+func (c *Client) ProxyInfo() (string, string, error) {
+	return "test-auth", "test-url", nil
+}
+
 func (c *Client) Call(_ context.Context, messageRequest types.CompletionRequest, _ chan<- types.CompletionStatus) (resp *types.CompletionMessage, respErr error) {
 	msgData, err := json.MarshalIndent(messageRequest, "", "  ")
 	require.NoError(c.t, err)
