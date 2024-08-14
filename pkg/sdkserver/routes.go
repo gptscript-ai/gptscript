@@ -50,6 +50,8 @@ func (s *server) addRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /run", s.execHandler)
 	mux.HandleFunc("POST /evaluate", s.execHandler)
 
+	mux.HandleFunc("POST /load", s.load)
+
 	mux.HandleFunc("POST /parse", s.parse)
 	mux.HandleFunc("POST /fmt", s.fmtDocument)
 
@@ -210,6 +212,42 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.execAndStream(ctx, programLoader, logger, w, opts, reqObject.ChatState, reqObject.Input, reqObject.SubTool, def)
+}
+
+// load will load the file and return the corresponding Program.
+func (s *server) load(w http.ResponseWriter, r *http.Request) {
+	logger := gcontext.GetLogger(r.Context())
+	reqObject := new(loadRequest)
+	if err := json.NewDecoder(r.Body).Decode(reqObject); err != nil {
+		writeError(logger, w, http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
+		return
+	}
+
+	logger.Debugf("parsing file: file=%s, content=%s", reqObject.File, reqObject.Content)
+
+	var (
+		prg   types.Program
+		err   error
+		cache = s.client.Cache
+	)
+
+	if reqObject.DisableCache {
+		cache = nil
+	}
+
+	if reqObject.Content != "" {
+		prg, err = loader.ProgramFromSource(r.Context(), reqObject.Content, reqObject.SubTool, loader.Options{Cache: cache})
+	} else if reqObject.File != "" {
+		prg, err = loader.Program(r.Context(), reqObject.File, reqObject.SubTool, loader.Options{Cache: cache})
+	} else {
+		prg, err = loader.ProgramFromSource(r.Context(), reqObject.ToolDefs.String(), reqObject.SubTool, loader.Options{Cache: cache})
+	}
+	if err != nil {
+		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to load program: %w", err))
+		return
+	}
+
+	writeResponse(logger, w, map[string]any{"stdout": map[string]any{"program": prg}})
 }
 
 // parse will parse the file and return the corresponding Document.
