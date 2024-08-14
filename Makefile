@@ -22,7 +22,7 @@ smoke: build
 smoke:
 	go test -v -tags='smoke' ./pkg/tests/smoke/...
 
-GOLANGCI_LINT_VERSION ?= v1.59.0
+GOLANGCI_LINT_VERSION ?= v1.60.1
 lint:
 	if ! command -v golangci-lint &> /dev/null; then \
   		echo "Could not find golangci-lint, installing version $(GOLANGCI_LINT_VERSION)."; \
