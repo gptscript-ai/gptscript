@@ -258,6 +258,11 @@ asdf2
 ---
 !metadata:first:requirements.txt
 asdf
+
+---
+!metadata:f*r*:other
+
+foo bar
 `
 	tools, err := ParseTools(strings.NewReader(input))
 	require.NoError(t, err)
@@ -266,5 +271,6 @@ asdf
 	autogold.Expect(map[string]string{
 		"package.json":     "foo=base\nf",
 		"requirements.txt": "asdf",
+		"other":            "foo bar",
 	}).Equal(t, tools[0].MetaData)
 }
