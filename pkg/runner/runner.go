@@ -872,6 +872,11 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			return nil, fmt.Errorf("failed to parse credential tool %q: %w", ref.Reference, err)
 		}
 
+		if callCtx.Program.ToolSet[ref.ToolID].IsNoop() {
+			// ignore empty tools
+			continue
+		}
+
 		credName := toolName
 		if credentialAlias != "" {
 			credName = credentialAlias
@@ -944,6 +949,10 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 				return nil, fmt.Errorf("invalid state: credential tool [%s] can not result in a continuation", ref.Reference)
 			}
 
+			if *res.Result == "" {
+				continue
+			}
+
 			if err := json.Unmarshal([]byte(*res.Result), &c); err != nil {
 				return nil, fmt.Errorf("failed to unmarshal credential tool %s response: %w", ref.Reference, err)
 			}
@@ -958,15 +967,17 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 				}
 			}
 
-			// Only store the credential if the tool is on GitHub or has an alias, and the credential is non-empty.
-			if (isGitHubTool(toolName) && callCtx.Program.ToolSet[ref.ToolID].Source.Repo != nil) || credentialAlias != "" {
-				if isEmpty {
-					log.Warnf("Not saving empty credential for tool %s", toolName)
-				} else if err := r.credStore.Add(callCtx.Ctx, *c); err != nil {
-					return nil, fmt.Errorf("failed to add credential for tool %s: %w", toolName, err)
+			if !c.Ephemeral {
+				// Only store the credential if the tool is on GitHub or has an alias, and the credential is non-empty.
+				if (isGitHubTool(toolName) && callCtx.Program.ToolSet[ref.ToolID].Source.Repo != nil) || credentialAlias != "" {
+					if isEmpty {
+						log.Warnf("Not saving empty credential for tool %s", toolName)
+					} else if err := r.credStore.Add(callCtx.Ctx, *c); err != nil {
+						return nil, fmt.Errorf("failed to add credential for tool %s: %w", toolName, err)
+					}
+				} else {
+					log.Warnf("Not saving credential for tool %s - credentials will only be saved for tools from GitHub, or tools that use aliases.", toolName)
 				}
-			} else {
-				log.Warnf("Not saving credential for tool %s - credentials will only be saved for tools from GitHub, or tools that use aliases.", toolName)
 			}
 		}
 

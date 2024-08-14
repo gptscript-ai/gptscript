@@ -753,7 +753,16 @@ func (t Tool) GetCredentialTools(prg Program, agentGroup []ToolReference) ([]Too
 
 	result.AddAll(t.getCompletionToolRefs(prg, nil, ToolTypeCredential))
 
-	toolRefs, err := t.getCompletionToolRefs(prg, agentGroup)
+	toolRefs, err := result.List()
+	if err != nil {
+		return nil, err
+	}
+	for _, toolRef := range toolRefs {
+		referencedTool := prg.ToolSet[toolRef.ToolID]
+		result.AddAll(referencedTool.GetToolRefsFromNames(referencedTool.ExportCredentials))
+	}
+
+	toolRefs, err = t.getCompletionToolRefs(prg, agentGroup)
 	if err != nil {
 		return nil, err
 	}

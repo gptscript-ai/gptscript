@@ -26,14 +26,15 @@ import (
 )
 
 var SafeTools = map[string]struct{}{
-	"sys.abort":        {},
-	"sys.chat.finish":  {},
-	"sys.chat.history": {},
-	"sys.chat.current": {},
-	"sys.echo":         {},
-	"sys.prompt":       {},
-	"sys.time.now":     {},
-	"sys.context":      {},
+	"sys.abort":                     {},
+	"sys.chat.finish":               {},
+	"sys.chat.history":              {},
+	"sys.chat.current":              {},
+	"sys.echo":                      {},
+	"sys.prompt":                    {},
+	"sys.time.now":                  {},
+	"sys.context":                   {},
+	"sys.model.provider.credential": {},
 }
 
 var tools = map[string]types.Tool{
@@ -246,6 +247,15 @@ var tools = map[string]types.Tool{
 				Arguments:   types.ObjectSchema(),
 			},
 			BuiltinFunc: SysContext,
+		},
+	},
+	"sys.model.provider.credential": {
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Description: "A credential tool to set the OPENAI_API_KEY and OPENAI_BASE_URL to give access to the default model provider",
+				Arguments:   types.ObjectSchema(),
+			},
+			BuiltinFunc: SysModelProviderCredential,
 		},
 	},
 }
@@ -676,6 +686,22 @@ func SysGetenv(_ context.Context, env []string, input string, _ chan<- string) (
 
 func invalidArgument(input string, err error) string {
 	return fmt.Sprintf("Failed to parse arguments %s: %v", input, err)
+}
+
+func SysModelProviderCredential(ctx context.Context, _ []string, _ string, _ chan<- string) (string, error) {
+	engineContext, _ := engine.FromContext(ctx)
+	auth, url, err := engineContext.Engine.Model.ProxyInfo()
+	if err != nil {
+		return "", err
+	}
+	data, err := json.Marshal(map[string]any{
+		"env": map[string]string{
+			"OPENAI_API_KEY":  auth,
+			"OPENAI_BASE_URL": url,
+		},
+		"ephemeral": true,
+	})
+	return string(data), err
 }
 
 func SysContext(ctx context.Context, _ []string, _ string, _ chan<- string) (string, error) {
