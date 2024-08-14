@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"maps"
+	"path"
 	"regexp"
 	"slices"
 	"strconv"
@@ -16,7 +18,7 @@ import (
 var (
 	sepRegex       = regexp.MustCompile(`^\s*---+\s*$`)
 	strictSepRegex = regexp.MustCompile(`^---\n$`)
-	skipRegex      = regexp.MustCompile(`^![-.:\w]+\s*$`)
+	skipRegex      = regexp.MustCompile(`^![-.:*\w]+\s*$`)
 )
 
 func normalize(key string) string {
@@ -390,6 +392,16 @@ func assignMetadata(nodes []Node) (result []Node) {
 	for _, node := range nodes {
 		if node.ToolNode != nil {
 			node.ToolNode.Tool.MetaData = metadata[node.ToolNode.Tool.Name]
+			for wildcard := range metadata {
+				if strings.Contains(wildcard, "*") {
+					if m, err := path.Match(wildcard, node.ToolNode.Tool.Name); m && err == nil {
+						if node.ToolNode.Tool.MetaData == nil {
+							node.ToolNode.Tool.MetaData = map[string]string{}
+						}
+						maps.Copy(node.ToolNode.Tool.MetaData, metadata[wildcard])
+					}
+				}
+			}
 		}
 		result = append(result, node)
 	}
