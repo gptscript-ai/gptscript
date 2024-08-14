@@ -209,6 +209,11 @@ func getOpenAPITools(t *openapi3.T, defaultHost, source, targetToolName string) 
 					}
 					bodyMIME = mime
 
+					// requestBody content mime without schema
+					if content == nil || content.Schema == nil {
+						continue
+					}
+
 					arg := content.Schema.Value
 					if arg.Description == "" {
 						arg.Description = content.Schema.Value.Description
