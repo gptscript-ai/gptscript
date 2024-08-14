@@ -25,7 +25,7 @@ func TestRuntime(t *testing.T) {
 		os.RemoveAll("testdata/bin")
 	})
 	r := Runtime{
-		Version: "1.22.1",
+		Version: "1.23.0",
 	}
 
 	s, err := r.Setup(context.Background(), types.Tool{}, testCacheHome, "testdata", os.Environ())

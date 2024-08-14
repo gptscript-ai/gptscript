@@ -86,7 +86,7 @@ func getOpenAPITools(t *openapi3.T, defaultHost, source, targetToolName string) 
 		pathObj := pathMap[pathString]
 		// Handle path-level server override, if one exists
 		pathServer := defaultServer
-		if pathObj.Servers != nil && len(pathObj.Servers) > 0 {
+		if len(pathObj.Servers) > 0 {
 			pathServer, err = parseServer(pathObj.Servers[0])
 			if err != nil {
 				return nil, err

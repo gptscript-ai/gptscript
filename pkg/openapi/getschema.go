@@ -83,7 +83,7 @@ func GetSchema(operationID, defaultHost string, t *openapi3.T) (string, Operatio
 	for path, pathItem := range t.Paths.Map() {
 		// Handle path-level server override, if one exists.
 		pathServer := defaultServer
-		if pathItem.Servers != nil && len(pathItem.Servers) > 0 {
+		if len(pathItem.Servers) > 0 {
 			pathServer, err = parseServer(pathItem.Servers[0])
 			if err != nil {
 				return "", OperationInfo{}, false, err

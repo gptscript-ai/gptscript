@@ -136,7 +136,7 @@ func (r *Runtime) runNPM(ctx context.Context, tool types.Tool, toolSource, binDi
 		if tool.WorkingDir == "" {
 			return nil
 		}
-		if _, err := os.Stat(filepath.Join(tool.WorkingDir, packageJSON)); errors.Is(fs.ErrNotExist, err) {
+		if _, err := os.Stat(filepath.Join(tool.WorkingDir, packageJSON)); errors.Is(err, fs.ErrNotExist) {
 			return nil
 		} else if err != nil {
 			return err

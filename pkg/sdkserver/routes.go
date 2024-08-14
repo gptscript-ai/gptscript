@@ -271,7 +271,7 @@ func (s *server) parse(w http.ResponseWriter, r *http.Request) {
 	} else {
 		content, loadErr := input.FromLocation(reqObject.File, reqObject.DisableCache)
 		if loadErr != nil {
-			logger.Errorf(loadErr.Error())
+			logger.Errorf("failed to load file: %v", loadErr)
 			writeError(logger, w, http.StatusInternalServerError, loadErr)
 			return
 		}
