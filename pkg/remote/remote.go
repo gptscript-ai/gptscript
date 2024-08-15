@@ -50,7 +50,11 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	c.clientsLock.Unlock()
 
 	if !ok {
-		return nil, fmt.Errorf("failed to find remote model %s", messageRequest.Model)
+		if c.defaultProvider == "" {
+			return nil, fmt.Errorf("failed to find remote model %s", messageRequest.Model)
+		}
+
+		provider = c.defaultProvider
 	}
 
 	client, err := c.load(ctx, provider)
