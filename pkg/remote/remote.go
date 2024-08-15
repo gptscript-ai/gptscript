@@ -25,7 +25,6 @@ type Client struct {
 	clientsLock     sync.Mutex
 	cache           *cache.Client
 	clients         map[string]clientInfo
-	modelToProvider map[string]string
 	runner          *runner.Runner
 	envs            []string
 	credStore       credentials.CredentialStore
@@ -39,17 +38,13 @@ func New(r *runner.Runner, envs []string, cache *cache.Client, credStore credent
 		envs:            envs,
 		credStore:       credStore,
 		defaultProvider: defaultProvider,
-		modelToProvider: make(map[string]string),
 		clients:         make(map[string]clientInfo),
 	}
 }
 
 func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error) {
-	c.clientsLock.Lock()
-	provider, ok := c.modelToProvider[messageRequest.Model]
-	c.clientsLock.Unlock()
-
-	if !ok {
+	_, provider := c.parseModel(messageRequest.Model)
+	if provider == "" {
 		return nil, fmt.Errorf("failed to find remote model %s", messageRequest.Model)
 	}
 
@@ -108,10 +103,6 @@ func (c *Client) Supports(ctx context.Context, modelString string) (bool, error)
 		return false, err
 	}
 
-	c.clientsLock.Lock()
-	defer c.clientsLock.Unlock()
-
-	c.modelToProvider[modelString] = providerName
 	return true, nil
 }
 
