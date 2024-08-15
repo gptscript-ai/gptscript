@@ -45,6 +45,6 @@ func (r runtimeManagerLogger) EnsureCredentialHelpers(ctx context.Context) error
 	return r.rm.EnsureCredentialHelpers(mvl.WithInfo(ctx, r))
 }
 
-func (r runtimeManagerLogger) SetUpCredentialHelpers(_ context.Context, _ *config.CLIConfig, _ []string) error {
+func (r runtimeManagerLogger) SetUpCredentialHelpers(_ context.Context, _ *config.CLIConfig) error {
 	panic("not implemented")
 }
