@@ -100,7 +100,9 @@ type parseRequest struct {
 }
 
 type modelsRequest struct {
-	Providers []string `json:"providers"`
+	Providers           []string `json:"providers"`
+	Env                 []string `json:"env"`
+	CredentialOverrides []string `json:"credentialOverrides"`
 }
 
 type runInfo struct {
