@@ -42,7 +42,8 @@ func Run(operationID, defaultHost, args string, t *openapi3.T, envs []string) (s
 	}
 
 	if !validationResult.Valid() {
-		return "", false, fmt.Errorf("invalid arguments for operation %s: %s", operationID, validationResult.Errors())
+		// We don't return an error here because we want the LLM to be able to maintain control and try again.
+		return fmt.Sprintf("invalid arguments for operation %s: %s", operationID, validationResult.Errors()), true, nil
 	}
 
 	// Construct and execute the HTTP request.

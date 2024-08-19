@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -76,6 +77,11 @@ func ToSysDisplayString(id string, args map[string]string) (string, error) {
 		return fmt.Sprintf("Writing `%s`", args["filename"]), nil
 	case "sys.context", "sys.stat", "sys.getenv", "sys.abort", "sys.chat.current", "sys.chat.finish", "sys.chat.history", "sys.echo", "sys.prompt", "sys.time.now", "sys.model.provider.credential":
 		return "", nil
+	case "sys.openapi":
+		if os.Getenv("GPTSCRIPT_OPENAPI_REVAMP") == "true" && args["operation"] != "" {
+			return fmt.Sprintf("Running API operation `%s` with arguments %s", args["operation"], args["args"]), nil
+		}
+		fallthrough
 	default:
 		return "", fmt.Errorf("unknown tool for display string: %s", id)
 	}
