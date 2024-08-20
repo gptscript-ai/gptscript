@@ -80,7 +80,7 @@ func ToSysDisplayString(id string, args map[string]string) (string, error) {
 	case "sys.openapi":
 		if os.Getenv("GPTSCRIPT_OPENAPI_REVAMP") == "true" && args["operation"] != "" {
 			// Pretty print the JSON by unmarshaling and marshaling it
-			var jsonArgs map[string]interface{}
+			var jsonArgs map[string]any
 			if err := json.Unmarshal([]byte(args["args"]), &jsonArgs); err != nil {
 				return "", err
 			}
