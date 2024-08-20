@@ -51,25 +51,29 @@ func sysPromptHTTP(ctx context.Context, envs []string, url string, prompt types.
 
 func SysPrompt(ctx context.Context, envs []string, input string, _ chan<- string) (_ string, err error) {
 	var params struct {
-		Message   string `json:"message,omitempty"`
-		Fields    string `json:"fields,omitempty"`
-		Sensitive string `json:"sensitive,omitempty"`
+		Message   string            `json:"message,omitempty"`
+		Fields    string            `json:"fields,omitempty"`
+		Sensitive string            `json:"sensitive,omitempty"`
+		Metadata  map[string]string `json:"metadata,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
 		return "", err
 	}
 
+	var fields []string
 	for _, env := range envs {
 		if url, ok := strings.CutPrefix(env, types.PromptURLEnvVar+"="); ok {
-			var fields []string
 			if params.Fields != "" {
 				fields = strings.Split(params.Fields, ",")
 			}
+
 			httpPrompt := types.Prompt{
 				Message:   params.Message,
 				Fields:    fields,
 				Sensitive: params.Sensitive == "true",
+				Metadata:  params.Metadata,
 			}
+
 			return sysPromptHTTP(ctx, envs, url, httpPrompt)
 		}
 	}

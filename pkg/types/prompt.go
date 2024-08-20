@@ -6,7 +6,8 @@ const (
 )
 
 type Prompt struct {
-	Message   string   `json:"message,omitempty"`
-	Fields    []string `json:"fields,omitempty"`
-	Sensitive bool     `json:"sensitive,omitempty"`
+	Message   string            `json:"message,omitempty"`
+	Fields    []string          `json:"fields,omitempty"`
+	Sensitive bool              `json:"sensitive,omitempty"`
+	Metadata  map[string]string `json:"metadata,omitempty"`
 }

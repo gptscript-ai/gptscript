@@ -76,11 +76,7 @@ func (s *server) prompt(w http.ResponseWriter, r *http.Request) {
 	}(id)
 
 	s.events.C <- event{
-		Prompt: types.Prompt{
-			Message:   prompt.Message,
-			Fields:    prompt.Fields,
-			Sensitive: prompt.Sensitive,
-		},
+		Prompt: prompt,
 		Event: gserver.Event{
 			RunID: id,
 			Event: runner.Event{
