@@ -79,7 +79,16 @@ func ToSysDisplayString(id string, args map[string]string) (string, error) {
 		return "", nil
 	case "sys.openapi":
 		if os.Getenv("GPTSCRIPT_OPENAPI_REVAMP") == "true" && args["operation"] != "" {
-			return fmt.Sprintf("Running API operation `%s` with arguments %s", args["operation"], args["args"]), nil
+			// Pretty print the JSON by unmarshaling and marshaling it
+			var jsonArgs map[string]interface{}
+			if err := json.Unmarshal([]byte(args["args"]), &jsonArgs); err != nil {
+				return "", err
+			}
+			jsonPretty, err := json.MarshalIndent(jsonArgs, "", "  ")
+			if err != nil {
+				return "", err
+			}
+			return fmt.Sprintf("Running API operation `%s` with arguments %s", args["operation"], string(jsonPretty)), nil
 		}
 		fallthrough
 	default:
