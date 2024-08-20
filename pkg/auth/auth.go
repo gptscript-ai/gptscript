@@ -42,7 +42,7 @@ func IsSafe(ctx engine.Context) bool {
 		return true
 	}
 
-	_, ok := builtin.SafeTools[strings.Split(ctx.Tool.Instructions, "\n")[0][2:]]
+	_, ok := builtin.SafeTools[strings.Fields(strings.Split(ctx.Tool.Instructions, "\n")[0][2:])[0]]
 	return ok
 }
 

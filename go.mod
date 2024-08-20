@@ -30,6 +30,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
 	github.com/tidwall/gjson v1.17.1
+	github.com/traefik/yaegi v0.16.2-0.20240730175404-e686f55767b9
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc
 	golang.org/x/sync v0.7.0

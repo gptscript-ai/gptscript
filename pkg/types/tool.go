@@ -20,6 +20,7 @@ const (
 	OpenAPIPrefix = "#!sys.openapi"
 	EchoPrefix    = "#!sys.echo"
 	CommandPrefix = "#!"
+	YaegiPrefix   = "#!sys.yaegi"
 )
 
 var (
@@ -882,6 +883,10 @@ func (t Tool) IsAgentsOnly() bool {
 
 func (t Tool) IsEcho() bool {
 	return strings.HasPrefix(t.Instructions, EchoPrefix)
+}
+
+func (t Tool) IsYaegi() bool {
+	return strings.HasPrefix(t.Instructions, YaegiPrefix)
 }
 
 func (t Tool) IsHTTP() bool {
