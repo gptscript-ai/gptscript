@@ -217,6 +217,7 @@ var tools = map[string]types.Tool{
 					"message", "The message to display to the user",
 					"fields", "A comma-separated list of fields to prompt for",
 					"sensitive", "(true or false) Whether the input should be hidden",
+					"metadata", "(optional) A JSON object of metadata to attach to the prompt",
 				),
 			},
 			BuiltinFunc: prompt.SysPrompt,
