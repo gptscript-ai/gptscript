@@ -52,14 +52,14 @@ func (a *AuthConfig) UnmarshalJSON(data []byte) error {
 }
 
 type CLIConfig struct {
-	Auths               map[string]AuthConfig `json:"auths,omitempty"`
-	CredentialsStore    string                `json:"credsStore,omitempty"`
-	GPTScriptConfigFile string                `json:"gptscriptConfig,omitempty"`
-	GatewayURL          string                `json:"gatewayURL,omitempty"`
-	Integrations        map[string]string     `json:"integrations,omitempty"`
+	Auths            map[string]AuthConfig `json:"auths,omitempty"`
+	CredentialsStore string                `json:"credsStore,omitempty"`
+	GatewayURL       string                `json:"gatewayURL,omitempty"`
+	Integrations     map[string]string     `json:"integrations,omitempty"`
 
 	auths     map[string]types.AuthConfig
 	authsLock *sync.Mutex
+	location  string
 }
 
 func (c *CLIConfig) Sanitize() *CLIConfig {
@@ -93,7 +93,7 @@ func (c *CLIConfig) Save() error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(c.GPTScriptConfigFile, data, 0655)
+	return os.WriteFile(c.location, data, 0655)
 }
 
 func (c *CLIConfig) GetAuthConfigs() map[string]types.AuthConfig {
@@ -113,7 +113,7 @@ func (c *CLIConfig) GetAuthConfigs() map[string]types.AuthConfig {
 }
 
 func (c *CLIConfig) GetFilename() string {
-	return c.GPTScriptConfigFile
+	return c.location
 }
 
 func ReadCLIConfig(gptscriptConfigFile string) (*CLIConfig, error) {
@@ -133,8 +133,8 @@ func ReadCLIConfig(gptscriptConfigFile string) (*CLIConfig, error) {
 		return nil, err
 	}
 	result := &CLIConfig{
-		authsLock:           &sync.Mutex{},
-		GPTScriptConfigFile: gptscriptConfigFile,
+		authsLock: &sync.Mutex{},
+		location:  gptscriptConfigFile,
 	}
 	if err := json.Unmarshal(data, result); err != nil {
 		return nil, err
@@ -158,7 +158,7 @@ func ReadCLIConfig(gptscriptConfigFile string) (*CLIConfig, error) {
 		default:
 			errMsg += " (use 'file')"
 		}
-		errMsg += fmt.Sprintf("\nPlease edit your config file at %s to fix this.", result.GPTScriptConfigFile)
+		errMsg += fmt.Sprintf("\nPlease edit your config file at %s to fix this.", result.location)
 
 		return nil, errors.New(errMsg)
 	}
