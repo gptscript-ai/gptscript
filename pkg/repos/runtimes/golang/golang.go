@@ -97,21 +97,23 @@ type tag struct {
 }
 
 func GetLatestTag(tool types.Tool) (string, error) {
-	r, ok := getLatestRelease(tool)
-	if !ok {
+	r, ok, err := getLatestRelease(tool)
+	if err != nil {
+		return "", fmt.Errorf("failed to get latest release for %s - %w", tool.Name, err)
+	} else if !ok {
 		return "", fmt.Errorf("failed to get latest release for %s", tool.Name)
 	}
 	return r.label, nil
 }
 
-func getLatestRelease(tool types.Tool) (*release, bool) {
+func getLatestRelease(tool types.Tool) (*release, bool, error) {
 	if tool.Source.Repo == nil || !strings.HasPrefix(tool.Source.Repo.Root, "https://github.com/") {
-		return nil, false
+		return nil, false, nil
 	}
 
 	parts := strings.Split(strings.TrimPrefix(strings.TrimSuffix(tool.Source.Repo.Root, ".git"), "https://"), "/")
 	if len(parts) != 3 {
-		return nil, false
+		return nil, false, nil
 	}
 
 	client := http.Client{
@@ -124,17 +126,16 @@ func getLatestRelease(tool types.Tool) (*release, bool) {
 
 	resp, err := client.Get(fmt.Sprintf("https://api.github.com/repos/%s/%s/tags", account, repo))
 	if err != nil {
-		// ignore error
-		return nil, false
+		return nil, false, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return nil, false
+		return nil, false, fmt.Errorf("got status code %d from GitHub", resp.StatusCode)
 	}
 
 	var tags []tag
 	if err := json.NewDecoder(resp.Body).Decode(&tags); err != nil {
-		return nil, false
+		return nil, false, nil
 	}
 	for _, tag := range tags {
 		if tag.Commit.Sha == tool.Source.Repo.Revision {
@@ -142,23 +143,22 @@ func getLatestRelease(tool types.Tool) (*release, bool) {
 				account: account,
 				repo:    repo,
 				label:   tag.Name,
-			}, true
+			}, true, nil
 		}
 	}
 
 	resp, err = client.Get(fmt.Sprintf("https://github.com/%s/%s/releases/latest", account, repo))
 	if err != nil {
-		// ignore error
-		return nil, false
+		return nil, false, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusFound {
-		return nil, false
+		return nil, false, fmt.Errorf("got status code %d from GitHub", resp.StatusCode)
 	}
 
 	target := resp.Header.Get("Location")
 	if target == "" {
-		return nil, false
+		return nil, false, nil
 	}
 
 	parts = strings.Split(target, "/")
@@ -168,7 +168,7 @@ func getLatestRelease(tool types.Tool) (*release, bool) {
 		account: account,
 		repo:    repo,
 		label:   label,
-	}, true
+	}, true, nil
 }
 
 func get(ctx context.Context, url string) (*http.Response, error) {
@@ -249,9 +249,9 @@ func (r *Runtime) Binary(ctx context.Context, tool types.Tool, _, toolSource str
 		return false, nil, nil
 	}
 
-	rel, ok := getLatestRelease(tool)
+	rel, ok, err := getLatestRelease(tool)
 	if !ok {
-		return false, nil, nil
+		return false, nil, err
 	}
 
 	checksum := getChecksum(ctx, rel, rel.srcBinName())
@@ -286,8 +286,10 @@ func (r *Runtime) DownloadCredentialHelper(ctx context.Context, tool types.Tool,
 		return nil
 	}
 
-	rel, ok := getLatestRelease(tool)
-	if !ok {
+	rel, ok, err := getLatestRelease(tool)
+	if err != nil {
+		return fmt.Errorf("failed to get %s release: %w", r.ID(), err)
+	} else if !ok {
 		return fmt.Errorf("failed to find %s release", r.ID())
 	}
 	binaryName := "gptscript-credential-" + helperName
