@@ -144,6 +144,7 @@ func (r *runInfo) process(e event) map[string]any {
 		r.Start = e.Time
 		r.Program = *e.Program
 		r.State = Running
+		r.Input = e.Input
 	case runner.EventTypeRunFinish:
 		r.End = e.Time
 		r.Output = e.Output
@@ -167,9 +168,11 @@ func (r *runInfo) process(e event) map[string]any {
 	call.Type = e.Type
 
 	switch e.Type {
-	case runner.EventTypeCallStart:
+	case runner.EventTypeCallStart, runner.EventTypeCallContinue:
 		call.Start = e.Time
-		call.Input = e.Content
+		if e.Content != "" {
+			call.Input = e.Content
+		}
 
 	case runner.EventTypeCallSubCalls:
 		call.setSubCalls(e.ToolSubCalls)

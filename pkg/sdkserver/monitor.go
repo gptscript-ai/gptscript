@@ -33,6 +33,7 @@ func (s SessionFactory) Start(ctx context.Context, prg *types.Program, env []str
 					Time: time.Now(),
 					Type: runner.EventTypeRunStart,
 				},
+				Input:   input,
 				RunID:   id,
 				Program: prg,
 			},
@@ -43,7 +44,6 @@ func (s SessionFactory) Start(ctx context.Context, prg *types.Program, env []str
 		id:     id,
 		prj:    prg,
 		env:    env,
-		input:  input,
 		events: s.events,
 	}, nil
 }
@@ -56,7 +56,6 @@ type Session struct {
 	id      string
 	prj     *types.Program
 	env     []string
-	input   string
 	events  *broadcaster.Broadcaster[event]
 	runLock sync.Mutex
 }
@@ -68,7 +67,6 @@ func (s *Session) Event(e runner.Event) {
 		Event: gserver.Event{
 			Event: e,
 			RunID: s.id,
-			Input: s.input,
 		},
 	}
 }
@@ -87,7 +85,6 @@ func (s *Session) Stop(ctx context.Context, output string, err error) {
 				Type: runner.EventTypeRunFinish,
 			},
 			RunID:  s.id,
-			Input:  s.input,
 			Output: output,
 		},
 	}

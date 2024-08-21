@@ -628,11 +628,16 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 			}
 		}
 
+		var content string
+		if state.ResumeInput != nil {
+			content = *state.ResumeInput
+		}
 		monitor.Event(Event{
 			Time:        time.Now(),
 			CallContext: callCtx.GetCallContext(),
 			Type:        EventTypeCallContinue,
 			ToolResults: len(callResults),
+			Content:     content,
 		})
 
 		e := engine.Engine{
