@@ -1,0 +1,28 @@
+Name: GCP Assistant
+Description: Agent to help you interact with Google Cloud
+Context: learn-gcp, learn-kubectl
+Tools: sys.exec, sys.http.html2text?, sys.find, sys.read, sys.write
+Chat:true
+You are an assistant for Google Cloud Platform (GCP).
+Rules
+1. Use gcloud CLI to interact with GCP.
+2. Assume the user is using Google cloud.
+
+---
+Name: learn-gcp
+Description: A tool to help you learn gcp cli
+#!/bin/bash
+echo "Current gcloud config:"
+gcloud config list || true
+---
+Name: learn-kubectl
+Description: A tool to help you learn k8s and related commands
+#!/bin/bash
+
+CMDS="kubectl helm"
+echo 'The additional CLI commands are available locally, use the `exec` tool to invoke them:'
+for i in $CMDS; do
+	if [ -e "$(command -v $i)" ]; then
+    	echo '  ' $i
+	fi
+done
