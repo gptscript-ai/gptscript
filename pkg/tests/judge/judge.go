@@ -40,6 +40,8 @@ After making a determination, respond with a JSON object that conforms to the fo
   ]
 }
 
+If you determine actual and expected are not equivalent, include a diff of the parts of actual and expected that are not equivalent in the reasoning field of your response.
+
 Your responses are concise and include only the json object described above.
 `
 
