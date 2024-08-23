@@ -82,8 +82,8 @@ func TestSmoke(t *testing.T) {
 				expectedEvents,
 				actualEvents,
 				`
-- disregard differences in timestamps, generated IDs, natural language verbiage, and event order
-- omit callProgress events from the comparison
+- disregard differences in event order, timestamps, generated IDs, and natural language verbiage, grammar, and punctuation
+- compare events with matching event types
 - the overall stream of events and set of tools called should roughly match
 - arguments passed in tool calls should be roughly the same
 - the final callFinish event should be semantically similar
