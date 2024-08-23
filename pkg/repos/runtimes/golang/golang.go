@@ -244,7 +244,7 @@ func getChecksum(ctx context.Context, rel *release, artifactName string) string 
 	return ""
 }
 
-func (r *Runtime) Binary(ctx context.Context, tool types.Tool, _, toolSource string, env []string) (bool, []string, error) {
+func (r *Runtime) Binary(ctx context.Context, tool types.Tool, _, toolSource string, _ []string) (bool, []string, error) {
 	if !tool.Source.IsGit() {
 		return false, nil, nil
 	}
@@ -264,7 +264,7 @@ func (r *Runtime) Binary(ctx context.Context, tool types.Tool, _, toolSource str
 		return false, nil, nil
 	}
 
-	return true, env, nil
+	return true, nil, nil
 }
 
 func (r *Runtime) Setup(ctx context.Context, _ types.Tool, dataRoot, toolSource string, env []string) ([]string, error) {
