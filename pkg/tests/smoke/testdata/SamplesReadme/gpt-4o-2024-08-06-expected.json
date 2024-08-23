@@ -1,15 +1,15 @@
 [
     {
-        "time": "2024-08-23T12:02:30.704153-04:00",
+        "time": "2024-08-23T10:47:07.984751-04:00",
         "type": "runStart",
         "usage": {}
     },
     {
-        "time": "2024-08-23T12:02:30.704518-04:00",
+        "time": "2024-08-23T10:47:07.985158-04:00",
         "callContext": {
-            "id": "1724428951",
+            "id": "1724424428",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "sys.find",
@@ -55,11 +55,11 @@
         "usage": {}
     },
     {
-        "time": "2024-08-23T12:02:30.704572-04:00",
+        "time": "2024-08-23T10:47:07.985235-04:00",
         "callContext": {
-            "id": "1724428951",
+            "id": "1724424428",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "sys.find",
@@ -102,10 +102,10 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1724428952",
+        "chatCompletionId": "1724424429",
         "usage": {},
         "chatRequest": {
-            "model": "gpt-4-turbo-2024-04-09",
+            "model": "gpt-4o-2024-08-06",
             "messages": [
                 {
                     "role": "system",
@@ -170,11 +170,11 @@
         }
     },
     {
-        "time": "2024-08-23T12:02:31.630767-04:00",
+        "time": "2024-08-23T10:47:08.496595-04:00",
         "callContext": {
-            "id": "1724428951",
+            "id": "1724424428",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "sys.find",
@@ -217,11 +217,11 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1724428952",
+        "chatCompletionId": "1724424429",
         "usage": {
-            "promptTokens": 279,
-            "completionTokens": 15,
-            "totalTokens": 294
+            "promptTokens": 272,
+            "completionTokens": 20,
+            "totalTokens": 292
         },
         "chatResponse": {
             "role": "assistant",
@@ -229,27 +229,27 @@
                 {
                     "toolCall": {
                         "index": 0,
-                        "id": "call_pV8RVkvcyzi8QbqeXcdCkAZd",
+                        "id": "call_GhPYkhrIge98l3U0CMJramDL",
                         "function": {
                             "name": "find",
-                            "arguments": "{\"pattern\":\"*.gpt\"}"
+                            "arguments": "{\"directory\":\"testdata\",\"pattern\":\"*.gpt\"}"
                         }
                     }
                 }
             ],
             "usage": {
-                "promptTokens": 279,
-                "completionTokens": 15,
-                "totalTokens": 294
+                "promptTokens": 272,
+                "completionTokens": 20,
+                "totalTokens": 292
             }
         }
     },
     {
-        "time": "2024-08-23T12:02:31.630876-04:00",
+        "time": "2024-08-23T10:47:08.496757-04:00",
         "callContext": {
-            "id": "1724428951",
+            "id": "1724424428",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "sys.find",
@@ -292,22 +292,22 @@
             "inputContext": null
         },
         "toolSubCalls": {
-            "call_pV8RVkvcyzi8QbqeXcdCkAZd": {
+            "call_GhPYkhrIge98l3U0CMJramDL": {
                 "toolID": "sys.find",
-                "input": "{\"pattern\":\"*.gpt\"}"
+                "input": "{\"directory\":\"testdata\",\"pattern\":\"*.gpt\"}"
             }
         },
         "type": "callSubCalls",
         "usage": {}
     },
     {
-        "time": "2024-08-23T12:02:31.630937-04:00",
+        "time": "2024-08-23T10:47:08.496945-04:00",
         "callContext": {
-            "id": "call_pV8RVkvcyzi8QbqeXcdCkAZd",
+            "id": "call_GhPYkhrIge98l3U0CMJramDL",
             "tool": {
                 "name": "sys.find",
                 "description": "Traverse a directory looking for files that match a pattern in the style of the unix find command",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -329,21 +329,21 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.find",
-            "parentID": "1724428951",
-            "displayText": "Finding `*.gpt` in `.`"
+            "parentID": "1724424428",
+            "displayText": "Finding `*.gpt` in `testdata`"
         },
         "type": "callStart",
         "usage": {},
-        "content": "{\"pattern\":\"*.gpt\"}"
+        "content": "{\"directory\":\"testdata\",\"pattern\":\"*.gpt\"}"
     },
     {
-        "time": "2024-08-23T12:02:31.631018-04:00",
+        "time": "2024-08-23T10:47:08.497205-04:00",
         "callContext": {
-            "id": "call_pV8RVkvcyzi8QbqeXcdCkAZd",
+            "id": "call_GhPYkhrIge98l3U0CMJramDL",
             "tool": {
                 "name": "sys.find",
                 "description": "Traverse a directory looking for files that match a pattern in the style of the unix find command",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -365,11 +365,11 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.find",
-            "parentID": "1724428951",
-            "displayText": "Finding `*.gpt` in `.`"
+            "parentID": "1724424428",
+            "displayText": "Finding `*.gpt` in `testdata`"
         },
         "type": "callChat",
-        "chatCompletionId": "1724428953",
+        "chatCompletionId": "1724424430",
         "usage": {},
         "chatRequest": {
             "model": "",
@@ -377,13 +377,13 @@
         }
     },
     {
-        "time": "2024-08-23T12:02:31.631307-04:00",
+        "time": "2024-08-23T10:47:08.497917-04:00",
         "callContext": {
-            "id": "call_pV8RVkvcyzi8QbqeXcdCkAZd",
+            "id": "call_GhPYkhrIge98l3U0CMJramDL",
             "tool": {
                 "name": "sys.find",
                 "description": "Traverse a directory looking for files that match a pattern in the style of the unix find command",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -405,24 +405,24 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.find",
-            "parentID": "1724428951",
-            "displayText": "Finding `*.gpt` in `.`"
+            "parentID": "1724424428",
+            "displayText": "Finding `*.gpt` in `testdata`"
         },
         "type": "callChat",
-        "chatCompletionId": "1724428953",
+        "chatCompletionId": "1724424430",
         "usage": {},
         "chatResponse": {
             "usage": {}
         }
     },
     {
-        "time": "2024-08-23T12:02:31.631343-04:00",
+        "time": "2024-08-23T10:47:08.49798-04:00",
         "callContext": {
-            "id": "call_pV8RVkvcyzi8QbqeXcdCkAZd",
+            "id": "call_GhPYkhrIge98l3U0CMJramDL",
             "tool": {
                 "name": "sys.find",
                 "description": "Traverse a directory looking for files that match a pattern in the style of the unix find command",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -444,19 +444,19 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.find",
-            "parentID": "1724428951",
-            "displayText": "Finding `*.gpt` in `.`"
+            "parentID": "1724424428",
+            "displayText": "Finding `*.gpt` in `testdata`"
         },
         "type": "callFinish",
         "usage": {},
         "content": "testdata/Bob/test.gpt\ntestdata/BobAsShell/test.gpt\ntestdata/SamplesReadme/test.gpt"
     },
     {
-        "time": "2024-08-23T12:02:31.631378-04:00",
+        "time": "2024-08-23T10:47:08.49804-04:00",
         "callContext": {
-            "id": "1724428951",
+            "id": "1724424428",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "sys.find",
@@ -503,11 +503,11 @@
         "usage": {}
     },
     {
-        "time": "2024-08-23T12:02:31.63142-04:00",
+        "time": "2024-08-23T10:47:08.498098-04:00",
         "callContext": {
-            "id": "1724428951",
+            "id": "1724424428",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "sys.find",
@@ -550,10 +550,10 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1724428954",
+        "chatCompletionId": "1724424431",
         "usage": {},
         "chatRequest": {
-            "model": "gpt-4-turbo-2024-04-09",
+            "model": "gpt-4o-2024-08-06",
             "messages": [
                 {
                     "role": "system",
@@ -564,11 +564,11 @@
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "call_pV8RVkvcyzi8QbqeXcdCkAZd",
+                            "id": "call_GhPYkhrIge98l3U0CMJramDL",
                             "type": "function",
                             "function": {
                                 "name": "find",
-                                "arguments": "{\"pattern\":\"*.gpt\"}"
+                                "arguments": "{\"directory\":\"testdata\",\"pattern\":\"*.gpt\"}"
                             }
                         }
                     ]
@@ -577,7 +577,7 @@
                     "role": "tool",
                     "content": "testdata/Bob/test.gpt\ntestdata/BobAsShell/test.gpt\ntestdata/SamplesReadme/test.gpt",
                     "name": "find",
-                    "tool_call_id": "call_pV8RVkvcyzi8QbqeXcdCkAZd"
+                    "tool_call_id": "call_GhPYkhrIge98l3U0CMJramDL"
                 }
             ],
             "temperature": 0,
@@ -638,106 +638,11 @@
         }
     },
     {
-        "time": "2024-08-23T12:02:34.373298-04:00",
+        "time": "2024-08-23T10:47:10.013981-04:00",
         "callContext": {
-            "id": "1724428951",
+            "id": "1724424428",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
-                "internalPrompt": null,
-                "tools": [
-                    "sys.find",
-                    "sys.read",
-                    "summary"
-                ],
-                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
-                "id": "testdata/SamplesReadme/test.gpt:",
-                "toolMapping": {
-                    "summary": [
-                        {
-                            "reference": "summary",
-                            "toolID": "testdata/SamplesReadme/test.gpt:summary"
-                        }
-                    ],
-                    "sys.find": [
-                        {
-                            "reference": "sys.find",
-                            "toolID": "sys.find"
-                        }
-                    ],
-                    "sys.read": [
-                        {
-                            "reference": "sys.read",
-                            "toolID": "sys.read"
-                        }
-                    ]
-                },
-                "localTools": {
-                    "": "testdata/SamplesReadme/test.gpt:",
-                    "summary": "testdata/SamplesReadme/test.gpt:summary"
-                },
-                "source": {
-                    "location": "testdata/SamplesReadme/test.gpt",
-                    "lineNo": 1
-                },
-                "workingDir": "testdata/SamplesReadme"
-            },
-            "currentAgent": {},
-            "inputContext": null
-        },
-        "type": "callChat",
-        "chatCompletionId": "1724428954",
-        "usage": {
-            "promptTokens": 325,
-            "completionTokens": 73,
-            "totalTokens": 398
-        },
-        "chatResponse": {
-            "role": "assistant",
-            "content": [
-                {
-                    "toolCall": {
-                        "index": 0,
-                        "id": "call_UJGEKUkaky3cULZKZNu3Cezo",
-                        "function": {
-                            "name": "summary",
-                            "arguments": "{\"file\": \"testdata/Bob/test.gpt\"}"
-                        }
-                    }
-                },
-                {
-                    "toolCall": {
-                        "index": 1,
-                        "id": "call_wpsPQf57CvelJMMqc5pWuzYu",
-                        "function": {
-                            "name": "summary",
-                            "arguments": "{\"file\": \"testdata/BobAsShell/test.gpt\"}"
-                        }
-                    }
-                },
-                {
-                    "toolCall": {
-                        "index": 2,
-                        "id": "call_Lxtq42Kdm8tva08cXF30Bfps",
-                        "function": {
-                            "name": "summary",
-                            "arguments": "{\"file\": \"testdata/SamplesReadme/test.gpt\"}"
-                        }
-                    }
-                }
-            ],
-            "usage": {
-                "promptTokens": 325,
-                "completionTokens": 73,
-                "totalTokens": 398
-            }
-        }
-    },
-    {
-        "time": "2024-08-23T12:02:34.373305-04:00",
-        "callContext": {
-            "id": "1724428951",
-            "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "sys.find",
@@ -780,30 +685,125 @@
             "inputContext": null
         },
         "toolSubCalls": {
-            "call_Lxtq42Kdm8tva08cXF30Bfps": {
+            "call_PZs7uy2Znd3GrN6MRnppZLqu": {
                 "toolID": "testdata/SamplesReadme/test.gpt:summary",
-                "input": "{\"file\": \"testdata/SamplesReadme/test.gpt\"}"
+                "input": "{\"file\": \"testdata/BobAsShell/test.gpt\"}"
             },
-            "call_UJGEKUkaky3cULZKZNu3Cezo": {
+            "call_unZV9WLReLUEuMaU2Oa6huYs": {
                 "toolID": "testdata/SamplesReadme/test.gpt:summary",
                 "input": "{\"file\": \"testdata/Bob/test.gpt\"}"
             },
-            "call_wpsPQf57CvelJMMqc5pWuzYu": {
+            "call_womMx8To9O2qyCxvcDjeNszl": {
                 "toolID": "testdata/SamplesReadme/test.gpt:summary",
-                "input": "{\"file\": \"testdata/BobAsShell/test.gpt\"}"
+                "input": "{\"file\": \"testdata/SamplesReadme/test.gpt\"}"
             }
         },
         "type": "callSubCalls",
         "usage": {}
     },
     {
-        "time": "2024-08-23T12:02:34.373546-04:00",
+        "time": "2024-08-23T10:47:10.013993-04:00",
         "callContext": {
-            "id": "call_Lxtq42Kdm8tva08cXF30Bfps",
+            "id": "1724424428",
+            "tool": {
+                "modelName": "gpt-4o-2024-08-06",
+                "internalPrompt": null,
+                "tools": [
+                    "sys.find",
+                    "sys.read",
+                    "summary"
+                ],
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
+                "id": "testdata/SamplesReadme/test.gpt:",
+                "toolMapping": {
+                    "summary": [
+                        {
+                            "reference": "summary",
+                            "toolID": "testdata/SamplesReadme/test.gpt:summary"
+                        }
+                    ],
+                    "sys.find": [
+                        {
+                            "reference": "sys.find",
+                            "toolID": "sys.find"
+                        }
+                    ],
+                    "sys.read": [
+                        {
+                            "reference": "sys.read",
+                            "toolID": "sys.read"
+                        }
+                    ]
+                },
+                "localTools": {
+                    "": "testdata/SamplesReadme/test.gpt:",
+                    "summary": "testdata/SamplesReadme/test.gpt:summary"
+                },
+                "source": {
+                    "location": "testdata/SamplesReadme/test.gpt",
+                    "lineNo": 1
+                },
+                "workingDir": "testdata/SamplesReadme"
+            },
+            "currentAgent": {},
+            "inputContext": null
+        },
+        "type": "callChat",
+        "chatCompletionId": "1724424431",
+        "usage": {
+            "promptTokens": 326,
+            "completionTokens": 77,
+            "totalTokens": 403
+        },
+        "chatResponse": {
+            "role": "assistant",
+            "content": [
+                {
+                    "toolCall": {
+                        "index": 0,
+                        "id": "call_unZV9WLReLUEuMaU2Oa6huYs",
+                        "function": {
+                            "name": "summary",
+                            "arguments": "{\"file\": \"testdata/Bob/test.gpt\"}"
+                        }
+                    }
+                },
+                {
+                    "toolCall": {
+                        "index": 1,
+                        "id": "call_PZs7uy2Znd3GrN6MRnppZLqu",
+                        "function": {
+                            "name": "summary",
+                            "arguments": "{\"file\": \"testdata/BobAsShell/test.gpt\"}"
+                        }
+                    }
+                },
+                {
+                    "toolCall": {
+                        "index": 2,
+                        "id": "call_womMx8To9O2qyCxvcDjeNszl",
+                        "function": {
+                            "name": "summary",
+                            "arguments": "{\"file\": \"testdata/SamplesReadme/test.gpt\"}"
+                        }
+                    }
+                }
+            ],
+            "usage": {
+                "promptTokens": 326,
+                "completionTokens": 77,
+                "totalTokens": 403
+            }
+        }
+    },
+    {
+        "time": "2024-08-23T10:47:10.014103-04:00",
+        "callContext": {
+            "id": "call_womMx8To9O2qyCxvcDjeNszl",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -840,20 +840,20 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
         },
         "type": "callStart",
         "usage": {},
         "content": "{\"file\": \"testdata/SamplesReadme/test.gpt\"}"
     },
     {
-        "time": "2024-08-23T12:02:34.373547-04:00",
+        "time": "2024-08-23T10:47:10.014127-04:00",
         "callContext": {
-            "id": "call_wpsPQf57CvelJMMqc5pWuzYu",
+            "id": "call_unZV9WLReLUEuMaU2Oa6huYs",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -890,70 +890,20 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
-        },
-        "type": "callStart",
-        "usage": {},
-        "content": "{\"file\": \"testdata/BobAsShell/test.gpt\"}"
-    },
-    {
-        "time": "2024-08-23T12:02:34.373556-04:00",
-        "callContext": {
-            "id": "call_UJGEKUkaky3cULZKZNu3Cezo",
-            "tool": {
-                "name": "summary",
-                "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
-                "internalPrompt": null,
-                "arguments": {
-                    "properties": {
-                        "file": {
-                            "description": "filename to summarize",
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "tools": [
-                    "sys.read"
-                ],
-                "instructions": "Read ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.",
-                "id": "testdata/SamplesReadme/test.gpt:summary",
-                "toolMapping": {
-                    "sys.read": [
-                        {
-                            "reference": "sys.read",
-                            "toolID": "sys.read"
-                        }
-                    ]
-                },
-                "localTools": {
-                    "": "testdata/SamplesReadme/test.gpt:",
-                    "summary": "testdata/SamplesReadme/test.gpt:summary"
-                },
-                "source": {
-                    "location": "testdata/SamplesReadme/test.gpt",
-                    "lineNo": 7
-                },
-                "workingDir": "testdata/SamplesReadme"
-            },
-            "currentAgent": {},
-            "inputContext": null,
-            "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
         },
         "type": "callStart",
         "usage": {},
         "content": "{\"file\": \"testdata/Bob/test.gpt\"}"
     },
     {
-        "time": "2024-08-23T12:02:34.373937-04:00",
+        "time": "2024-08-23T10:47:10.014331-04:00",
         "callContext": {
-            "id": "call_Lxtq42Kdm8tva08cXF30Bfps",
+            "id": "call_womMx8To9O2qyCxvcDjeNszl",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -990,13 +940,13 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
         },
         "type": "callChat",
-        "chatCompletionId": "1724428955",
+        "chatCompletionId": "1724424432",
         "usage": {},
         "chatRequest": {
-            "model": "gpt-4-turbo-2024-04-09",
+            "model": "gpt-4o-2024-08-06",
             "messages": [
                 {
                     "role": "system",
@@ -1029,13 +979,13 @@
         }
     },
     {
-        "time": "2024-08-23T12:02:34.374034-04:00",
+        "time": "2024-08-23T10:47:10.014405-04:00",
         "callContext": {
-            "id": "call_wpsPQf57CvelJMMqc5pWuzYu",
+            "id": "call_unZV9WLReLUEuMaU2Oa6huYs",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -1072,95 +1022,13 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
         },
         "type": "callChat",
-        "chatCompletionId": "1724428956",
+        "chatCompletionId": "1724424433",
         "usage": {},
         "chatRequest": {
-            "model": "gpt-4-turbo-2024-04-09",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "\nYou are task oriented system.\nYou receive input from a user, process the input from the given instructions, and then output the result.\nYour objective is to provide consistent and correct results.\nYou do not need to explain the steps taken, only provide the result to the given instructions.\nYou are referred to as a tool.\nYou don't move to the next step until you have a result.\n\nRead ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate."
-                },
-                {
-                    "role": "user",
-                    "content": "{\"file\": \"testdata/BobAsShell/test.gpt\"}"
-                }
-            ],
-            "temperature": 0,
-            "tools": [
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "read",
-                        "description": "Reads the contents of a file",
-                        "parameters": {
-                            "properties": {
-                                "filename": {
-                                    "description": "The name of the file to read",
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    }
-                }
-            ]
-        }
-    },
-    {
-        "time": "2024-08-23T12:02:34.374245-04:00",
-        "callContext": {
-            "id": "call_UJGEKUkaky3cULZKZNu3Cezo",
-            "tool": {
-                "name": "summary",
-                "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
-                "internalPrompt": null,
-                "arguments": {
-                    "properties": {
-                        "file": {
-                            "description": "filename to summarize",
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "tools": [
-                    "sys.read"
-                ],
-                "instructions": "Read ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.",
-                "id": "testdata/SamplesReadme/test.gpt:summary",
-                "toolMapping": {
-                    "sys.read": [
-                        {
-                            "reference": "sys.read",
-                            "toolID": "sys.read"
-                        }
-                    ]
-                },
-                "localTools": {
-                    "": "testdata/SamplesReadme/test.gpt:",
-                    "summary": "testdata/SamplesReadme/test.gpt:summary"
-                },
-                "source": {
-                    "location": "testdata/SamplesReadme/test.gpt",
-                    "lineNo": 7
-                },
-                "workingDir": "testdata/SamplesReadme"
-            },
-            "currentAgent": {},
-            "inputContext": null,
-            "toolName": "summary",
-            "parentID": "1724428951"
-        },
-        "type": "callChat",
-        "chatCompletionId": "1724428957",
-        "usage": {},
-        "chatRequest": {
-            "model": "gpt-4-turbo-2024-04-09",
+            "model": "gpt-4o-2024-08-06",
             "messages": [
                 {
                     "role": "system",
@@ -1193,13 +1061,13 @@
         }
     },
     {
-        "time": "2024-08-23T12:02:35.39123-04:00",
+        "time": "2024-08-23T10:47:10.014137-04:00",
         "callContext": {
-            "id": "call_UJGEKUkaky3cULZKZNu3Cezo",
+            "id": "call_PZs7uy2Znd3GrN6MRnppZLqu",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -1236,13 +1104,145 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
+        },
+        "type": "callStart",
+        "usage": {},
+        "content": "{\"file\": \"testdata/BobAsShell/test.gpt\"}"
+    },
+    {
+        "time": "2024-08-23T10:47:10.01588-04:00",
+        "callContext": {
+            "id": "call_PZs7uy2Znd3GrN6MRnppZLqu",
+            "tool": {
+                "name": "summary",
+                "description": "Summarize a gpt file",
+                "modelName": "gpt-4o-2024-08-06",
+                "internalPrompt": null,
+                "arguments": {
+                    "properties": {
+                        "file": {
+                            "description": "filename to summarize",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "tools": [
+                    "sys.read"
+                ],
+                "instructions": "Read ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.",
+                "id": "testdata/SamplesReadme/test.gpt:summary",
+                "toolMapping": {
+                    "sys.read": [
+                        {
+                            "reference": "sys.read",
+                            "toolID": "sys.read"
+                        }
+                    ]
+                },
+                "localTools": {
+                    "": "testdata/SamplesReadme/test.gpt:",
+                    "summary": "testdata/SamplesReadme/test.gpt:summary"
+                },
+                "source": {
+                    "location": "testdata/SamplesReadme/test.gpt",
+                    "lineNo": 7
+                },
+                "workingDir": "testdata/SamplesReadme"
+            },
+            "currentAgent": {},
+            "inputContext": null,
+            "toolName": "summary",
+            "parentID": "1724424428"
         },
         "type": "callChat",
-        "chatCompletionId": "1724428957",
+        "chatCompletionId": "1724424434",
+        "usage": {},
+        "chatRequest": {
+            "model": "gpt-4o-2024-08-06",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "\nYou are task oriented system.\nYou receive input from a user, process the input from the given instructions, and then output the result.\nYour objective is to provide consistent and correct results.\nYou do not need to explain the steps taken, only provide the result to the given instructions.\nYou are referred to as a tool.\nYou don't move to the next step until you have a result.\n\nRead ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate."
+                },
+                {
+                    "role": "user",
+                    "content": "{\"file\": \"testdata/BobAsShell/test.gpt\"}"
+                }
+            ],
+            "temperature": 0,
+            "tools": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "read",
+                        "description": "Reads the contents of a file",
+                        "parameters": {
+                            "properties": {
+                                "filename": {
+                                    "description": "The name of the file to read",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "time": "2024-08-23T10:47:10.509446-04:00",
+        "callContext": {
+            "id": "call_PZs7uy2Znd3GrN6MRnppZLqu",
+            "tool": {
+                "name": "summary",
+                "description": "Summarize a gpt file",
+                "modelName": "gpt-4o-2024-08-06",
+                "internalPrompt": null,
+                "arguments": {
+                    "properties": {
+                        "file": {
+                            "description": "filename to summarize",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "tools": [
+                    "sys.read"
+                ],
+                "instructions": "Read ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.",
+                "id": "testdata/SamplesReadme/test.gpt:summary",
+                "toolMapping": {
+                    "sys.read": [
+                        {
+                            "reference": "sys.read",
+                            "toolID": "sys.read"
+                        }
+                    ]
+                },
+                "localTools": {
+                    "": "testdata/SamplesReadme/test.gpt:",
+                    "summary": "testdata/SamplesReadme/test.gpt:summary"
+                },
+                "source": {
+                    "location": "testdata/SamplesReadme/test.gpt",
+                    "lineNo": 7
+                },
+                "workingDir": "testdata/SamplesReadme"
+            },
+            "currentAgent": {},
+            "inputContext": null,
+            "toolName": "summary",
+            "parentID": "1724424428"
+        },
+        "type": "callChat",
+        "chatCompletionId": "1724424434",
         "usage": {
-            "promptTokens": 188,
-            "completionTokens": 18,
+            "promptTokens": 185,
+            "completionTokens": 21,
             "totalTokens": 206
         },
         "chatResponse": {
@@ -1251,423 +1251,7 @@
                 {
                     "toolCall": {
                         "index": 0,
-                        "id": "call_EEOQrwmvVIG3ABCkHYFD0hSn",
-                        "function": {
-                            "name": "read",
-                            "arguments": "{\"filename\":\"testdata/Bob/test.gpt\"}"
-                        }
-                    }
-                }
-            ],
-            "usage": {
-                "promptTokens": 188,
-                "completionTokens": 18,
-                "totalTokens": 206
-            }
-        }
-    },
-    {
-        "time": "2024-08-23T12:02:35.391358-04:00",
-        "callContext": {
-            "id": "call_UJGEKUkaky3cULZKZNu3Cezo",
-            "tool": {
-                "name": "summary",
-                "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
-                "internalPrompt": null,
-                "arguments": {
-                    "properties": {
-                        "file": {
-                            "description": "filename to summarize",
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "tools": [
-                    "sys.read"
-                ],
-                "instructions": "Read ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.",
-                "id": "testdata/SamplesReadme/test.gpt:summary",
-                "toolMapping": {
-                    "sys.read": [
-                        {
-                            "reference": "sys.read",
-                            "toolID": "sys.read"
-                        }
-                    ]
-                },
-                "localTools": {
-                    "": "testdata/SamplesReadme/test.gpt:",
-                    "summary": "testdata/SamplesReadme/test.gpt:summary"
-                },
-                "source": {
-                    "location": "testdata/SamplesReadme/test.gpt",
-                    "lineNo": 7
-                },
-                "workingDir": "testdata/SamplesReadme"
-            },
-            "currentAgent": {},
-            "inputContext": null,
-            "toolName": "summary",
-            "parentID": "1724428951"
-        },
-        "toolSubCalls": {
-            "call_EEOQrwmvVIG3ABCkHYFD0hSn": {
-                "toolID": "sys.read",
-                "input": "{\"filename\":\"testdata/Bob/test.gpt\"}"
-            }
-        },
-        "type": "callSubCalls",
-        "usage": {}
-    },
-    {
-        "time": "2024-08-23T12:02:35.391487-04:00",
-        "callContext": {
-            "id": "call_EEOQrwmvVIG3ABCkHYFD0hSn",
-            "tool": {
-                "name": "sys.read",
-                "description": "Reads the contents of a file",
-                "modelName": "gpt-4-turbo-2024-04-09",
-                "internalPrompt": null,
-                "arguments": {
-                    "properties": {
-                        "filename": {
-                            "description": "The name of the file to read",
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "instructions": "#!sys.read",
-                "id": "sys.read",
-                "source": {}
-            },
-            "currentAgent": {},
-            "inputContext": null,
-            "toolName": "sys.read",
-            "parentID": "call_UJGEKUkaky3cULZKZNu3Cezo",
-            "displayText": "Reading `testdata/Bob/test.gpt`"
-        },
-        "type": "callStart",
-        "usage": {},
-        "content": "{\"filename\":\"testdata/Bob/test.gpt\"}"
-    },
-    {
-        "time": "2024-08-23T12:02:35.391705-04:00",
-        "callContext": {
-            "id": "call_EEOQrwmvVIG3ABCkHYFD0hSn",
-            "tool": {
-                "name": "sys.read",
-                "description": "Reads the contents of a file",
-                "modelName": "gpt-4-turbo-2024-04-09",
-                "internalPrompt": null,
-                "arguments": {
-                    "properties": {
-                        "filename": {
-                            "description": "The name of the file to read",
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "instructions": "#!sys.read",
-                "id": "sys.read",
-                "source": {}
-            },
-            "currentAgent": {},
-            "inputContext": null,
-            "toolName": "sys.read",
-            "parentID": "call_UJGEKUkaky3cULZKZNu3Cezo",
-            "displayText": "Reading `testdata/Bob/test.gpt`"
-        },
-        "type": "callChat",
-        "chatCompletionId": "1724428958",
-        "usage": {},
-        "chatRequest": {
-            "model": "",
-            "messages": null
-        }
-    },
-    {
-        "time": "2024-08-23T12:02:35.391975-04:00",
-        "callContext": {
-            "id": "call_EEOQrwmvVIG3ABCkHYFD0hSn",
-            "tool": {
-                "name": "sys.read",
-                "description": "Reads the contents of a file",
-                "modelName": "gpt-4-turbo-2024-04-09",
-                "internalPrompt": null,
-                "arguments": {
-                    "properties": {
-                        "filename": {
-                            "description": "The name of the file to read",
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "instructions": "#!sys.read",
-                "id": "sys.read",
-                "source": {}
-            },
-            "currentAgent": {},
-            "inputContext": null,
-            "toolName": "sys.read",
-            "parentID": "call_UJGEKUkaky3cULZKZNu3Cezo",
-            "displayText": "Reading `testdata/Bob/test.gpt`"
-        },
-        "type": "callChat",
-        "chatCompletionId": "1724428958",
-        "usage": {},
-        "chatResponse": {
-            "usage": {}
-        }
-    },
-    {
-        "time": "2024-08-23T12:02:35.392097-04:00",
-        "callContext": {
-            "id": "call_EEOQrwmvVIG3ABCkHYFD0hSn",
-            "tool": {
-                "name": "sys.read",
-                "description": "Reads the contents of a file",
-                "modelName": "gpt-4-turbo-2024-04-09",
-                "internalPrompt": null,
-                "arguments": {
-                    "properties": {
-                        "filename": {
-                            "description": "The name of the file to read",
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "instructions": "#!sys.read",
-                "id": "sys.read",
-                "source": {}
-            },
-            "currentAgent": {},
-            "inputContext": null,
-            "toolName": "sys.read",
-            "parentID": "call_UJGEKUkaky3cULZKZNu3Cezo",
-            "displayText": "Reading `testdata/Bob/test.gpt`"
-        },
-        "type": "callFinish",
-        "usage": {},
-        "content": "tools: bob\n\nAsk Bob \"how are you doing\" and repeat his reply exactly.\n\n---\nname: bob\ndescription: I'm Bob, a friendly guy.\nargs: question: The question to ask Bob.\n\nWhen asked how I am doing, respond with exactly \"Thanks for asking \"${QUESTION}\", I'm doing great fellow friendly AI tool!\"\n"
-    },
-    {
-        "time": "2024-08-23T12:02:35.392182-04:00",
-        "callContext": {
-            "id": "call_UJGEKUkaky3cULZKZNu3Cezo",
-            "tool": {
-                "name": "summary",
-                "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
-                "internalPrompt": null,
-                "arguments": {
-                    "properties": {
-                        "file": {
-                            "description": "filename to summarize",
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "tools": [
-                    "sys.read"
-                ],
-                "instructions": "Read ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.",
-                "id": "testdata/SamplesReadme/test.gpt:summary",
-                "toolMapping": {
-                    "sys.read": [
-                        {
-                            "reference": "sys.read",
-                            "toolID": "sys.read"
-                        }
-                    ]
-                },
-                "localTools": {
-                    "": "testdata/SamplesReadme/test.gpt:",
-                    "summary": "testdata/SamplesReadme/test.gpt:summary"
-                },
-                "source": {
-                    "location": "testdata/SamplesReadme/test.gpt",
-                    "lineNo": 7
-                },
-                "workingDir": "testdata/SamplesReadme"
-            },
-            "currentAgent": {},
-            "inputContext": null,
-            "toolName": "summary",
-            "parentID": "1724428951"
-        },
-        "toolResults": 1,
-        "type": "callContinue",
-        "usage": {}
-    },
-    {
-        "time": "2024-08-23T12:02:35.3923-04:00",
-        "callContext": {
-            "id": "call_UJGEKUkaky3cULZKZNu3Cezo",
-            "tool": {
-                "name": "summary",
-                "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
-                "internalPrompt": null,
-                "arguments": {
-                    "properties": {
-                        "file": {
-                            "description": "filename to summarize",
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "tools": [
-                    "sys.read"
-                ],
-                "instructions": "Read ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.",
-                "id": "testdata/SamplesReadme/test.gpt:summary",
-                "toolMapping": {
-                    "sys.read": [
-                        {
-                            "reference": "sys.read",
-                            "toolID": "sys.read"
-                        }
-                    ]
-                },
-                "localTools": {
-                    "": "testdata/SamplesReadme/test.gpt:",
-                    "summary": "testdata/SamplesReadme/test.gpt:summary"
-                },
-                "source": {
-                    "location": "testdata/SamplesReadme/test.gpt",
-                    "lineNo": 7
-                },
-                "workingDir": "testdata/SamplesReadme"
-            },
-            "currentAgent": {},
-            "inputContext": null,
-            "toolName": "summary",
-            "parentID": "1724428951"
-        },
-        "type": "callChat",
-        "chatCompletionId": "1724428959",
-        "usage": {},
-        "chatRequest": {
-            "model": "gpt-4-turbo-2024-04-09",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "\nYou are task oriented system.\nYou receive input from a user, process the input from the given instructions, and then output the result.\nYour objective is to provide consistent and correct results.\nYou do not need to explain the steps taken, only provide the result to the given instructions.\nYou are referred to as a tool.\nYou don't move to the next step until you have a result.\n\nRead ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate."
-                },
-                {
-                    "role": "user",
-                    "content": "{\"file\": \"testdata/Bob/test.gpt\"}"
-                },
-                {
-                    "role": "assistant",
-                    "content": "",
-                    "tool_calls": [
-                        {
-                            "id": "call_EEOQrwmvVIG3ABCkHYFD0hSn",
-                            "type": "function",
-                            "function": {
-                                "name": "read",
-                                "arguments": "{\"filename\":\"testdata/Bob/test.gpt\"}"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "role": "tool",
-                    "content": "tools: bob\n\nAsk Bob \"how are you doing\" and repeat his reply exactly.\n\n---\nname: bob\ndescription: I'm Bob, a friendly guy.\nargs: question: The question to ask Bob.\n\nWhen asked how I am doing, respond with exactly \"Thanks for asking \"${QUESTION}\", I'm doing great fellow friendly AI tool!\"\n",
-                    "name": "read",
-                    "tool_call_id": "call_EEOQrwmvVIG3ABCkHYFD0hSn"
-                }
-            ],
-            "temperature": 0,
-            "tools": [
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "read",
-                        "description": "Reads the contents of a file",
-                        "parameters": {
-                            "properties": {
-                                "filename": {
-                                    "description": "The name of the file to read",
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    }
-                }
-            ]
-        }
-    },
-    {
-        "time": "2024-08-23T12:02:35.524922-04:00",
-        "callContext": {
-            "id": "call_wpsPQf57CvelJMMqc5pWuzYu",
-            "tool": {
-                "name": "summary",
-                "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
-                "internalPrompt": null,
-                "arguments": {
-                    "properties": {
-                        "file": {
-                            "description": "filename to summarize",
-                            "type": "string"
-                        }
-                    },
-                    "type": "object"
-                },
-                "tools": [
-                    "sys.read"
-                ],
-                "instructions": "Read ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.",
-                "id": "testdata/SamplesReadme/test.gpt:summary",
-                "toolMapping": {
-                    "sys.read": [
-                        {
-                            "reference": "sys.read",
-                            "toolID": "sys.read"
-                        }
-                    ]
-                },
-                "localTools": {
-                    "": "testdata/SamplesReadme/test.gpt:",
-                    "summary": "testdata/SamplesReadme/test.gpt:summary"
-                },
-                "source": {
-                    "location": "testdata/SamplesReadme/test.gpt",
-                    "lineNo": 7
-                },
-                "workingDir": "testdata/SamplesReadme"
-            },
-            "currentAgent": {},
-            "inputContext": null,
-            "toolName": "summary",
-            "parentID": "1724428951"
-        },
-        "type": "callChat",
-        "chatCompletionId": "1724428956",
-        "usage": {
-            "promptTokens": 190,
-            "completionTokens": 20,
-            "totalTokens": 210
-        },
-        "chatResponse": {
-            "role": "assistant",
-            "content": [
-                {
-                    "toolCall": {
-                        "index": 0,
-                        "id": "call_UuPbpkR1GSivZ9EgqlN88ZZC",
+                        "id": "call_vD91585uJENSGhqdl2PyMg3c",
                         "function": {
                             "name": "read",
                             "arguments": "{\"filename\":\"testdata/BobAsShell/test.gpt\"}"
@@ -1676,20 +1260,20 @@
                 }
             ],
             "usage": {
-                "promptTokens": 190,
-                "completionTokens": 20,
-                "totalTokens": 210
+                "promptTokens": 185,
+                "completionTokens": 21,
+                "totalTokens": 206
             }
         }
     },
     {
-        "time": "2024-08-23T12:02:35.525037-04:00",
+        "time": "2024-08-23T10:47:10.50956-04:00",
         "callContext": {
-            "id": "call_wpsPQf57CvelJMMqc5pWuzYu",
+            "id": "call_PZs7uy2Znd3GrN6MRnppZLqu",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -1726,10 +1310,10 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
         },
         "toolSubCalls": {
-            "call_UuPbpkR1GSivZ9EgqlN88ZZC": {
+            "call_vD91585uJENSGhqdl2PyMg3c": {
                 "toolID": "sys.read",
                 "input": "{\"filename\":\"testdata/BobAsShell/test.gpt\"}"
             }
@@ -1738,13 +1322,13 @@
         "usage": {}
     },
     {
-        "time": "2024-08-23T12:02:35.525179-04:00",
+        "time": "2024-08-23T10:47:10.509688-04:00",
         "callContext": {
-            "id": "call_UuPbpkR1GSivZ9EgqlN88ZZC",
+            "id": "call_vD91585uJENSGhqdl2PyMg3c",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -1762,7 +1346,7 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "call_wpsPQf57CvelJMMqc5pWuzYu",
+            "parentID": "call_PZs7uy2Znd3GrN6MRnppZLqu",
             "displayText": "Reading `testdata/BobAsShell/test.gpt`"
         },
         "type": "callStart",
@@ -1770,13 +1354,13 @@
         "content": "{\"filename\":\"testdata/BobAsShell/test.gpt\"}"
     },
     {
-        "time": "2024-08-23T12:02:35.525364-04:00",
+        "time": "2024-08-23T10:47:10.509868-04:00",
         "callContext": {
-            "id": "call_UuPbpkR1GSivZ9EgqlN88ZZC",
+            "id": "call_vD91585uJENSGhqdl2PyMg3c",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -1794,11 +1378,11 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "call_wpsPQf57CvelJMMqc5pWuzYu",
+            "parentID": "call_PZs7uy2Znd3GrN6MRnppZLqu",
             "displayText": "Reading `testdata/BobAsShell/test.gpt`"
         },
         "type": "callChat",
-        "chatCompletionId": "1724428960",
+        "chatCompletionId": "1724424435",
         "usage": {},
         "chatRequest": {
             "model": "",
@@ -1806,13 +1390,13 @@
         }
     },
     {
-        "time": "2024-08-23T12:02:35.525519-04:00",
+        "time": "2024-08-23T10:47:10.510139-04:00",
         "callContext": {
-            "id": "call_UuPbpkR1GSivZ9EgqlN88ZZC",
+            "id": "call_vD91585uJENSGhqdl2PyMg3c",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -1830,24 +1414,24 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "call_wpsPQf57CvelJMMqc5pWuzYu",
+            "parentID": "call_PZs7uy2Znd3GrN6MRnppZLqu",
             "displayText": "Reading `testdata/BobAsShell/test.gpt`"
         },
         "type": "callChat",
-        "chatCompletionId": "1724428960",
+        "chatCompletionId": "1724424435",
         "usage": {},
         "chatResponse": {
             "usage": {}
         }
     },
     {
-        "time": "2024-08-23T12:02:35.5256-04:00",
+        "time": "2024-08-23T10:47:10.510259-04:00",
         "callContext": {
-            "id": "call_UuPbpkR1GSivZ9EgqlN88ZZC",
+            "id": "call_vD91585uJENSGhqdl2PyMg3c",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -1865,7 +1449,7 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "call_wpsPQf57CvelJMMqc5pWuzYu",
+            "parentID": "call_PZs7uy2Znd3GrN6MRnppZLqu",
             "displayText": "Reading `testdata/BobAsShell/test.gpt`"
         },
         "type": "callFinish",
@@ -1873,13 +1457,13 @@
         "content": "\ntools: bob\n\nAsk Bob \"how are you doing\" and repeat his reply exactly.\n\n---\nname: bob\ndescription: I'm Bob, a friendly guy.\nargs: question: The question to ask Bob.\n\n#!/bin/bash\n\necho \"Thanks for asking ${QUESTION}, I'm doing great fellow friendly AI tool!\"\n"
     },
     {
-        "time": "2024-08-23T12:02:35.525685-04:00",
+        "time": "2024-08-23T10:47:10.510337-04:00",
         "callContext": {
-            "id": "call_wpsPQf57CvelJMMqc5pWuzYu",
+            "id": "call_PZs7uy2Znd3GrN6MRnppZLqu",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -1916,20 +1500,20 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
         },
         "toolResults": 1,
         "type": "callContinue",
         "usage": {}
     },
     {
-        "time": "2024-08-23T12:02:35.525801-04:00",
+        "time": "2024-08-23T10:47:10.510438-04:00",
         "callContext": {
-            "id": "call_wpsPQf57CvelJMMqc5pWuzYu",
+            "id": "call_PZs7uy2Znd3GrN6MRnppZLqu",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -1966,13 +1550,13 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
         },
         "type": "callChat",
-        "chatCompletionId": "1724428961",
+        "chatCompletionId": "1724424436",
         "usage": {},
         "chatRequest": {
-            "model": "gpt-4-turbo-2024-04-09",
+            "model": "gpt-4o-2024-08-06",
             "messages": [
                 {
                     "role": "system",
@@ -1987,7 +1571,7 @@
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "call_UuPbpkR1GSivZ9EgqlN88ZZC",
+                            "id": "call_vD91585uJENSGhqdl2PyMg3c",
                             "type": "function",
                             "function": {
                                 "name": "read",
@@ -2000,7 +1584,7 @@
                     "role": "tool",
                     "content": "\ntools: bob\n\nAsk Bob \"how are you doing\" and repeat his reply exactly.\n\n---\nname: bob\ndescription: I'm Bob, a friendly guy.\nargs: question: The question to ask Bob.\n\n#!/bin/bash\n\necho \"Thanks for asking ${QUESTION}, I'm doing great fellow friendly AI tool!\"\n",
                     "name": "read",
-                    "tool_call_id": "call_UuPbpkR1GSivZ9EgqlN88ZZC"
+                    "tool_call_id": "call_vD91585uJENSGhqdl2PyMg3c"
                 }
             ],
             "temperature": 0,
@@ -2025,13 +1609,13 @@
         }
     },
     {
-        "time": "2024-08-23T12:02:35.691021-04:00",
+        "time": "2024-08-23T10:47:10.567024-04:00",
         "callContext": {
-            "id": "call_Lxtq42Kdm8tva08cXF30Bfps",
+            "id": "call_womMx8To9O2qyCxvcDjeNszl",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2068,14 +1652,14 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
         },
         "type": "callChat",
-        "chatCompletionId": "1724428955",
+        "chatCompletionId": "1724424432",
         "usage": {
-            "promptTokens": 190,
-            "completionTokens": 35,
-            "totalTokens": 225
+            "promptTokens": 185,
+            "completionTokens": 21,
+            "totalTokens": 206
         },
         "chatResponse": {
             "role": "assistant",
@@ -2083,29 +1667,29 @@
                 {
                     "toolCall": {
                         "index": 0,
-                        "id": "call_EXwAUFgTkXhu0h0U11ekI13P",
+                        "id": "call_ACUQ0CXQLPUldRcbXbNLy8u5",
                         "function": {
                             "name": "read",
-                            "arguments": "{\"filename\": \"testdata/SamplesReadme/test.gpt\"}"
+                            "arguments": "{\"filename\":\"testdata/SamplesReadme/test.gpt\"}"
                         }
                     }
                 }
             ],
             "usage": {
-                "promptTokens": 190,
-                "completionTokens": 35,
-                "totalTokens": 225
+                "promptTokens": 185,
+                "completionTokens": 21,
+                "totalTokens": 206
             }
         }
     },
     {
-        "time": "2024-08-23T12:02:35.691079-04:00",
+        "time": "2024-08-23T10:47:10.567126-04:00",
         "callContext": {
-            "id": "call_Lxtq42Kdm8tva08cXF30Bfps",
+            "id": "call_womMx8To9O2qyCxvcDjeNszl",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2142,25 +1726,25 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
         },
         "toolSubCalls": {
-            "call_EXwAUFgTkXhu0h0U11ekI13P": {
+            "call_ACUQ0CXQLPUldRcbXbNLy8u5": {
                 "toolID": "sys.read",
-                "input": "{\"filename\": \"testdata/SamplesReadme/test.gpt\"}"
+                "input": "{\"filename\":\"testdata/SamplesReadme/test.gpt\"}"
             }
         },
         "type": "callSubCalls",
         "usage": {}
     },
     {
-        "time": "2024-08-23T12:02:35.691127-04:00",
+        "time": "2024-08-23T10:47:10.567295-04:00",
         "callContext": {
-            "id": "call_EXwAUFgTkXhu0h0U11ekI13P",
+            "id": "call_ACUQ0CXQLPUldRcbXbNLy8u5",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2178,21 +1762,21 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "call_Lxtq42Kdm8tva08cXF30Bfps",
+            "parentID": "call_womMx8To9O2qyCxvcDjeNszl",
             "displayText": "Reading `testdata/SamplesReadme/test.gpt`"
         },
         "type": "callStart",
         "usage": {},
-        "content": "{\"filename\": \"testdata/SamplesReadme/test.gpt\"}"
+        "content": "{\"filename\":\"testdata/SamplesReadme/test.gpt\"}"
     },
     {
-        "time": "2024-08-23T12:02:35.691188-04:00",
+        "time": "2024-08-23T10:47:10.567451-04:00",
         "callContext": {
-            "id": "call_EXwAUFgTkXhu0h0U11ekI13P",
+            "id": "call_ACUQ0CXQLPUldRcbXbNLy8u5",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2210,11 +1794,11 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "call_Lxtq42Kdm8tva08cXF30Bfps",
+            "parentID": "call_womMx8To9O2qyCxvcDjeNszl",
             "displayText": "Reading `testdata/SamplesReadme/test.gpt`"
         },
         "type": "callChat",
-        "chatCompletionId": "1724428962",
+        "chatCompletionId": "1724424437",
         "usage": {},
         "chatRequest": {
             "model": "",
@@ -2222,13 +1806,13 @@
         }
     },
     {
-        "time": "2024-08-23T12:02:35.691261-04:00",
+        "time": "2024-08-23T10:47:10.5676-04:00",
         "callContext": {
-            "id": "call_EXwAUFgTkXhu0h0U11ekI13P",
+            "id": "call_ACUQ0CXQLPUldRcbXbNLy8u5",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2246,24 +1830,24 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "call_Lxtq42Kdm8tva08cXF30Bfps",
+            "parentID": "call_womMx8To9O2qyCxvcDjeNszl",
             "displayText": "Reading `testdata/SamplesReadme/test.gpt`"
         },
         "type": "callChat",
-        "chatCompletionId": "1724428962",
+        "chatCompletionId": "1724424437",
         "usage": {},
         "chatResponse": {
             "usage": {}
         }
     },
     {
-        "time": "2024-08-23T12:02:35.69129-04:00",
+        "time": "2024-08-23T10:47:10.56768-04:00",
         "callContext": {
-            "id": "call_EXwAUFgTkXhu0h0U11ekI13P",
+            "id": "call_ACUQ0CXQLPUldRcbXbNLy8u5",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2281,7 +1865,7 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "call_Lxtq42Kdm8tva08cXF30Bfps",
+            "parentID": "call_womMx8To9O2qyCxvcDjeNszl",
             "displayText": "Reading `testdata/SamplesReadme/test.gpt`"
         },
         "type": "callFinish",
@@ -2289,13 +1873,13 @@
         "content": "tools: sys.find, sys.read, summary\n\nGenerate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.\n\n---\nname: summary\ndescription: Summarize a gpt file\nargs: file: filename to summarize\ntools: sys.read\n\nRead ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.\n"
     },
     {
-        "time": "2024-08-23T12:02:35.691317-04:00",
+        "time": "2024-08-23T10:47:10.567751-04:00",
         "callContext": {
-            "id": "call_Lxtq42Kdm8tva08cXF30Bfps",
+            "id": "call_womMx8To9O2qyCxvcDjeNszl",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2332,20 +1916,20 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
         },
         "toolResults": 1,
         "type": "callContinue",
         "usage": {}
     },
     {
-        "time": "2024-08-23T12:02:35.691352-04:00",
+        "time": "2024-08-23T10:47:10.567867-04:00",
         "callContext": {
-            "id": "call_Lxtq42Kdm8tva08cXF30Bfps",
+            "id": "call_womMx8To9O2qyCxvcDjeNszl",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2382,13 +1966,13 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
         },
         "type": "callChat",
-        "chatCompletionId": "1724428963",
+        "chatCompletionId": "1724424438",
         "usage": {},
         "chatRequest": {
-            "model": "gpt-4-turbo-2024-04-09",
+            "model": "gpt-4o-2024-08-06",
             "messages": [
                 {
                     "role": "system",
@@ -2403,11 +1987,11 @@
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "call_EXwAUFgTkXhu0h0U11ekI13P",
+                            "id": "call_ACUQ0CXQLPUldRcbXbNLy8u5",
                             "type": "function",
                             "function": {
                                 "name": "read",
-                                "arguments": "{\"filename\": \"testdata/SamplesReadme/test.gpt\"}"
+                                "arguments": "{\"filename\":\"testdata/SamplesReadme/test.gpt\"}"
                             }
                         }
                     ]
@@ -2416,7 +2000,7 @@
                     "role": "tool",
                     "content": "tools: sys.find, sys.read, summary\n\nGenerate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.\n\n---\nname: summary\ndescription: Summarize a gpt file\nargs: file: filename to summarize\ntools: sys.read\n\nRead ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.\n",
                     "name": "read",
-                    "tool_call_id": "call_EXwAUFgTkXhu0h0U11ekI13P"
+                    "tool_call_id": "call_ACUQ0CXQLPUldRcbXbNLy8u5"
                 }
             ],
             "temperature": 0,
@@ -2441,13 +2025,13 @@
         }
     },
     {
-        "time": "2024-08-23T12:02:38.194735-04:00",
+        "time": "2024-08-23T10:47:10.572187-04:00",
         "callContext": {
-            "id": "call_UJGEKUkaky3cULZKZNu3Cezo",
+            "id": "call_unZV9WLReLUEuMaU2Oa6huYs",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2484,37 +2068,44 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
         },
         "type": "callChat",
-        "chatCompletionId": "1724428959",
+        "chatCompletionId": "1724424433",
         "usage": {
-            "promptTokens": 282,
-            "completionTokens": 69,
-            "totalTokens": 351
+            "promptTokens": 183,
+            "completionTokens": 19,
+            "totalTokens": 202
         },
         "chatResponse": {
             "role": "assistant",
             "content": [
                 {
-                    "text": "The GPTScript file contains a script that demonstrates how to interact with a tool named \"Bob.\" The script instructs to ask Bob \"how are you doing\" and then to repeat his reply exactly. The tool \"Bob\" is described as a friendly guy who responds to the question about how he is doing with a specific formatted message."
+                    "toolCall": {
+                        "index": 0,
+                        "id": "call_Akl3CWcIIdquIXdtWgBnnFvj",
+                        "function": {
+                            "name": "read",
+                            "arguments": "{\"filename\":\"testdata/Bob/test.gpt\"}"
+                        }
+                    }
                 }
             ],
             "usage": {
-                "promptTokens": 282,
-                "completionTokens": 69,
-                "totalTokens": 351
+                "promptTokens": 183,
+                "completionTokens": 19,
+                "totalTokens": 202
             }
         }
     },
     {
-        "time": "2024-08-23T12:02:38.194813-04:00",
+        "time": "2024-08-23T10:47:10.572241-04:00",
         "callContext": {
-            "id": "call_UJGEKUkaky3cULZKZNu3Cezo",
+            "id": "call_unZV9WLReLUEuMaU2Oa6huYs",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2551,20 +2142,160 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
+        },
+        "toolSubCalls": {
+            "call_Akl3CWcIIdquIXdtWgBnnFvj": {
+                "toolID": "sys.read",
+                "input": "{\"filename\":\"testdata/Bob/test.gpt\"}"
+            }
+        },
+        "type": "callSubCalls",
+        "usage": {}
+    },
+    {
+        "time": "2024-08-23T10:47:10.5723-04:00",
+        "callContext": {
+            "id": "call_Akl3CWcIIdquIXdtWgBnnFvj",
+            "tool": {
+                "name": "sys.read",
+                "description": "Reads the contents of a file",
+                "modelName": "gpt-4o-2024-08-06",
+                "internalPrompt": null,
+                "arguments": {
+                    "properties": {
+                        "filename": {
+                            "description": "The name of the file to read",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "instructions": "#!sys.read",
+                "id": "sys.read",
+                "source": {}
+            },
+            "currentAgent": {},
+            "inputContext": null,
+            "toolName": "sys.read",
+            "parentID": "call_unZV9WLReLUEuMaU2Oa6huYs",
+            "displayText": "Reading `testdata/Bob/test.gpt`"
+        },
+        "type": "callStart",
+        "usage": {},
+        "content": "{\"filename\":\"testdata/Bob/test.gpt\"}"
+    },
+    {
+        "time": "2024-08-23T10:47:10.572376-04:00",
+        "callContext": {
+            "id": "call_Akl3CWcIIdquIXdtWgBnnFvj",
+            "tool": {
+                "name": "sys.read",
+                "description": "Reads the contents of a file",
+                "modelName": "gpt-4o-2024-08-06",
+                "internalPrompt": null,
+                "arguments": {
+                    "properties": {
+                        "filename": {
+                            "description": "The name of the file to read",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "instructions": "#!sys.read",
+                "id": "sys.read",
+                "source": {}
+            },
+            "currentAgent": {},
+            "inputContext": null,
+            "toolName": "sys.read",
+            "parentID": "call_unZV9WLReLUEuMaU2Oa6huYs",
+            "displayText": "Reading `testdata/Bob/test.gpt`"
+        },
+        "type": "callChat",
+        "chatCompletionId": "1724424439",
+        "usage": {},
+        "chatRequest": {
+            "model": "",
+            "messages": null
+        }
+    },
+    {
+        "time": "2024-08-23T10:47:10.572495-04:00",
+        "callContext": {
+            "id": "call_Akl3CWcIIdquIXdtWgBnnFvj",
+            "tool": {
+                "name": "sys.read",
+                "description": "Reads the contents of a file",
+                "modelName": "gpt-4o-2024-08-06",
+                "internalPrompt": null,
+                "arguments": {
+                    "properties": {
+                        "filename": {
+                            "description": "The name of the file to read",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "instructions": "#!sys.read",
+                "id": "sys.read",
+                "source": {}
+            },
+            "currentAgent": {},
+            "inputContext": null,
+            "toolName": "sys.read",
+            "parentID": "call_unZV9WLReLUEuMaU2Oa6huYs",
+            "displayText": "Reading `testdata/Bob/test.gpt`"
+        },
+        "type": "callChat",
+        "chatCompletionId": "1724424439",
+        "usage": {},
+        "chatResponse": {
+            "usage": {}
+        }
+    },
+    {
+        "time": "2024-08-23T10:47:10.572537-04:00",
+        "callContext": {
+            "id": "call_Akl3CWcIIdquIXdtWgBnnFvj",
+            "tool": {
+                "name": "sys.read",
+                "description": "Reads the contents of a file",
+                "modelName": "gpt-4o-2024-08-06",
+                "internalPrompt": null,
+                "arguments": {
+                    "properties": {
+                        "filename": {
+                            "description": "The name of the file to read",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "instructions": "#!sys.read",
+                "id": "sys.read",
+                "source": {}
+            },
+            "currentAgent": {},
+            "inputContext": null,
+            "toolName": "sys.read",
+            "parentID": "call_unZV9WLReLUEuMaU2Oa6huYs",
+            "displayText": "Reading `testdata/Bob/test.gpt`"
         },
         "type": "callFinish",
         "usage": {},
-        "content": "The GPTScript file contains a script that demonstrates how to interact with a tool named \"Bob.\" The script instructs to ask Bob \"how are you doing\" and then to repeat his reply exactly. The tool \"Bob\" is described as a friendly guy who responds to the question about how he is doing with a specific formatted message."
+        "content": "tools: bob\n\nAsk Bob \"how are you doing\" and repeat his reply exactly.\n\n---\nname: bob\ndescription: I'm Bob, a friendly guy.\nargs: question: The question to ask Bob.\n\nWhen asked how I am doing, respond with exactly \"Thanks for asking \"${QUESTION}\", I'm doing great fellow friendly AI tool!\"\n"
     },
     {
-        "time": "2024-08-23T12:02:38.963872-04:00",
+        "time": "2024-08-23T10:47:10.572574-04:00",
         "callContext": {
-            "id": "call_Lxtq42Kdm8tva08cXF30Bfps",
+            "id": "call_unZV9WLReLUEuMaU2Oa6huYs",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2601,37 +2332,189 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
+        },
+        "toolResults": 1,
+        "type": "callContinue",
+        "usage": {}
+    },
+    {
+        "time": "2024-08-23T10:47:10.572628-04:00",
+        "callContext": {
+            "id": "call_unZV9WLReLUEuMaU2Oa6huYs",
+            "tool": {
+                "name": "summary",
+                "description": "Summarize a gpt file",
+                "modelName": "gpt-4o-2024-08-06",
+                "internalPrompt": null,
+                "arguments": {
+                    "properties": {
+                        "file": {
+                            "description": "filename to summarize",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "tools": [
+                    "sys.read"
+                ],
+                "instructions": "Read ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.",
+                "id": "testdata/SamplesReadme/test.gpt:summary",
+                "toolMapping": {
+                    "sys.read": [
+                        {
+                            "reference": "sys.read",
+                            "toolID": "sys.read"
+                        }
+                    ]
+                },
+                "localTools": {
+                    "": "testdata/SamplesReadme/test.gpt:",
+                    "summary": "testdata/SamplesReadme/test.gpt:summary"
+                },
+                "source": {
+                    "location": "testdata/SamplesReadme/test.gpt",
+                    "lineNo": 7
+                },
+                "workingDir": "testdata/SamplesReadme"
+            },
+            "currentAgent": {},
+            "inputContext": null,
+            "toolName": "summary",
+            "parentID": "1724424428"
         },
         "type": "callChat",
-        "chatCompletionId": "1724428963",
+        "chatCompletionId": "1724424440",
+        "usage": {},
+        "chatRequest": {
+            "model": "gpt-4o-2024-08-06",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "\nYou are task oriented system.\nYou receive input from a user, process the input from the given instructions, and then output the result.\nYour objective is to provide consistent and correct results.\nYou do not need to explain the steps taken, only provide the result to the given instructions.\nYou are referred to as a tool.\nYou don't move to the next step until you have a result.\n\nRead ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate."
+                },
+                {
+                    "role": "user",
+                    "content": "{\"file\": \"testdata/Bob/test.gpt\"}"
+                },
+                {
+                    "role": "assistant",
+                    "content": "",
+                    "tool_calls": [
+                        {
+                            "id": "call_Akl3CWcIIdquIXdtWgBnnFvj",
+                            "type": "function",
+                            "function": {
+                                "name": "read",
+                                "arguments": "{\"filename\":\"testdata/Bob/test.gpt\"}"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "role": "tool",
+                    "content": "tools: bob\n\nAsk Bob \"how are you doing\" and repeat his reply exactly.\n\n---\nname: bob\ndescription: I'm Bob, a friendly guy.\nargs: question: The question to ask Bob.\n\nWhen asked how I am doing, respond with exactly \"Thanks for asking \"${QUESTION}\", I'm doing great fellow friendly AI tool!\"\n",
+                    "name": "read",
+                    "tool_call_id": "call_Akl3CWcIIdquIXdtWgBnnFvj"
+                }
+            ],
+            "temperature": 0,
+            "tools": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "read",
+                        "description": "Reads the contents of a file",
+                        "parameters": {
+                            "properties": {
+                                "filename": {
+                                    "description": "The name of the file to read",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "time": "2024-08-23T10:47:11.316054-04:00",
+        "callContext": {
+            "id": "call_PZs7uy2Znd3GrN6MRnppZLqu",
+            "tool": {
+                "name": "summary",
+                "description": "Summarize a gpt file",
+                "modelName": "gpt-4o-2024-08-06",
+                "internalPrompt": null,
+                "arguments": {
+                    "properties": {
+                        "file": {
+                            "description": "filename to summarize",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "tools": [
+                    "sys.read"
+                ],
+                "instructions": "Read ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.",
+                "id": "testdata/SamplesReadme/test.gpt:summary",
+                "toolMapping": {
+                    "sys.read": [
+                        {
+                            "reference": "sys.read",
+                            "toolID": "sys.read"
+                        }
+                    ]
+                },
+                "localTools": {
+                    "": "testdata/SamplesReadme/test.gpt:",
+                    "summary": "testdata/SamplesReadme/test.gpt:summary"
+                },
+                "source": {
+                    "location": "testdata/SamplesReadme/test.gpt",
+                    "lineNo": 7
+                },
+                "workingDir": "testdata/SamplesReadme"
+            },
+            "currentAgent": {},
+            "inputContext": null,
+            "toolName": "summary",
+            "parentID": "1724424428"
+        },
+        "type": "callChat",
+        "chatCompletionId": "1724424436",
         "usage": {
-            "promptTokens": 332,
-            "completionTokens": 90,
-            "totalTokens": 422
+            "promptTokens": 276,
+            "completionTokens": 57,
+            "totalTokens": 333
         },
         "chatResponse": {
             "role": "assistant",
             "content": [
                 {
-                    "text": "The GPTScript file contains a script designed to generate a README document that provides a consolidated summary of each \"*.gpt\" file in the \"testdata\" directory. Each entry in the README includes a link to the referenced file. The script uses tools such as `sys.find`, `sys.read`, and `summary` to accomplish this task. The technique demonstrated in the file is the automation of documentation generation for multiple script files within a directory."
+                    "text": "The GPTScript file demonstrates a technique where a tool named \"Bob\" is used to ask a question, \"how are you doing,\" and then repeat Bob's reply exactly. The script includes a bash script that outputs a predefined response from Bob, indicating that he is doing great."
                 }
             ],
             "usage": {
-                "promptTokens": 332,
-                "completionTokens": 90,
-                "totalTokens": 422
+                "promptTokens": 276,
+                "completionTokens": 57,
+                "totalTokens": 333
             }
         }
     },
     {
-        "time": "2024-08-23T12:02:38.963896-04:00",
+        "time": "2024-08-23T10:47:11.316101-04:00",
         "callContext": {
-            "id": "call_Lxtq42Kdm8tva08cXF30Bfps",
+            "id": "call_PZs7uy2Znd3GrN6MRnppZLqu",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2668,20 +2551,20 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
         },
         "type": "callFinish",
         "usage": {},
-        "content": "The GPTScript file contains a script designed to generate a README document that provides a consolidated summary of each \"*.gpt\" file in the \"testdata\" directory. Each entry in the README includes a link to the referenced file. The script uses tools such as `sys.find`, `sys.read`, and `summary` to accomplish this task. The technique demonstrated in the file is the automation of documentation generation for multiple script files within a directory."
+        "content": "The GPTScript file demonstrates a technique where a tool named \"Bob\" is used to ask a question, \"how are you doing,\" and then repeat Bob's reply exactly. The script includes a bash script that outputs a predefined response from Bob, indicating that he is doing great."
     },
     {
-        "time": "2024-08-23T12:02:39.142661-04:00",
+        "time": "2024-08-23T10:47:11.493664-04:00",
         "callContext": {
-            "id": "call_wpsPQf57CvelJMMqc5pWuzYu",
+            "id": "call_unZV9WLReLUEuMaU2Oa6huYs",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2718,37 +2601,37 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
         },
         "type": "callChat",
-        "chatCompletionId": "1724428961",
+        "chatCompletionId": "1724424440",
         "usage": {
-            "promptTokens": 282,
-            "completionTokens": 92,
-            "totalTokens": 374
+            "promptTokens": 276,
+            "completionTokens": 57,
+            "totalTokens": 333
         },
         "chatResponse": {
             "role": "assistant",
             "content": [
                 {
-                    "text": "The GPTScript file contains a script that interacts with a tool named \"Bob.\" The script is designed to ask Bob \"how are you doing\" and then repeat his reply exactly. The tool \"Bob\" is described as a friendly guy, and the script includes a bash script section that outputs a response thanking the user for the question and stating that Bob is doing great. This file demonstrates a simple interaction technique with a scripted character using a predefined response."
+                    "text": "The GPTScript file is demonstrating a technique where a tool named \"Bob\" is used to ask a question and then repeat Bob's reply exactly. The script specifies that when Bob is asked \"how are you doing,\" he should respond with a specific phrase that includes the question asked."
                 }
             ],
             "usage": {
-                "promptTokens": 282,
-                "completionTokens": 92,
-                "totalTokens": 374
+                "promptTokens": 276,
+                "completionTokens": 57,
+                "totalTokens": 333
             }
         }
     },
     {
-        "time": "2024-08-23T12:02:39.142716-04:00",
+        "time": "2024-08-23T10:47:11.493716-04:00",
         "callContext": {
-            "id": "call_wpsPQf57CvelJMMqc5pWuzYu",
+            "id": "call_unZV9WLReLUEuMaU2Oa6huYs",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2785,18 +2668,135 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1724428951"
+            "parentID": "1724424428"
         },
         "type": "callFinish",
         "usage": {},
-        "content": "The GPTScript file contains a script that interacts with a tool named \"Bob.\" The script is designed to ask Bob \"how are you doing\" and then repeat his reply exactly. The tool \"Bob\" is described as a friendly guy, and the script includes a bash script section that outputs a response thanking the user for the question and stating that Bob is doing great. This file demonstrates a simple interaction technique with a scripted character using a predefined response."
+        "content": "The GPTScript file is demonstrating a technique where a tool named \"Bob\" is used to ask a question and then repeat Bob's reply exactly. The script specifies that when Bob is asked \"how are you doing,\" he should respond with a specific phrase that includes the question asked."
     },
     {
-        "time": "2024-08-23T12:02:39.142748-04:00",
+        "time": "2024-08-23T10:47:11.694639-04:00",
         "callContext": {
-            "id": "1724428951",
+            "id": "call_womMx8To9O2qyCxvcDjeNszl",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "name": "summary",
+                "description": "Summarize a gpt file",
+                "modelName": "gpt-4o-2024-08-06",
+                "internalPrompt": null,
+                "arguments": {
+                    "properties": {
+                        "file": {
+                            "description": "filename to summarize",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "tools": [
+                    "sys.read"
+                ],
+                "instructions": "Read ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.",
+                "id": "testdata/SamplesReadme/test.gpt:summary",
+                "toolMapping": {
+                    "sys.read": [
+                        {
+                            "reference": "sys.read",
+                            "toolID": "sys.read"
+                        }
+                    ]
+                },
+                "localTools": {
+                    "": "testdata/SamplesReadme/test.gpt:",
+                    "summary": "testdata/SamplesReadme/test.gpt:summary"
+                },
+                "source": {
+                    "location": "testdata/SamplesReadme/test.gpt",
+                    "lineNo": 7
+                },
+                "workingDir": "testdata/SamplesReadme"
+            },
+            "currentAgent": {},
+            "inputContext": null,
+            "toolName": "summary",
+            "parentID": "1724424428"
+        },
+        "type": "callChat",
+        "chatCompletionId": "1724424438",
+        "usage": {
+            "promptTokens": 326,
+            "completionTokens": 76,
+            "totalTokens": 402
+        },
+        "chatResponse": {
+            "role": "assistant",
+            "content": [
+                {
+                    "text": "The GPTScript file is designed to generate a README that provides a consolidated summary of each *.gpt file in the testdata directory. It includes a link to the referenced file. The script utilizes tools such as `sys.find`, `sys.read`, and `summary` to achieve this task. The technique demonstrated is the automation of summarizing and linking files within a directory."
+                }
+            ],
+            "usage": {
+                "promptTokens": 326,
+                "completionTokens": 76,
+                "totalTokens": 402
+            }
+        }
+    },
+    {
+        "time": "2024-08-23T10:47:11.69473-04:00",
+        "callContext": {
+            "id": "call_womMx8To9O2qyCxvcDjeNszl",
+            "tool": {
+                "name": "summary",
+                "description": "Summarize a gpt file",
+                "modelName": "gpt-4o-2024-08-06",
+                "internalPrompt": null,
+                "arguments": {
+                    "properties": {
+                        "file": {
+                            "description": "filename to summarize",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "tools": [
+                    "sys.read"
+                ],
+                "instructions": "Read ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.",
+                "id": "testdata/SamplesReadme/test.gpt:summary",
+                "toolMapping": {
+                    "sys.read": [
+                        {
+                            "reference": "sys.read",
+                            "toolID": "sys.read"
+                        }
+                    ]
+                },
+                "localTools": {
+                    "": "testdata/SamplesReadme/test.gpt:",
+                    "summary": "testdata/SamplesReadme/test.gpt:summary"
+                },
+                "source": {
+                    "location": "testdata/SamplesReadme/test.gpt",
+                    "lineNo": 7
+                },
+                "workingDir": "testdata/SamplesReadme"
+            },
+            "currentAgent": {},
+            "inputContext": null,
+            "toolName": "summary",
+            "parentID": "1724424428"
+        },
+        "type": "callFinish",
+        "usage": {},
+        "content": "The GPTScript file is designed to generate a README that provides a consolidated summary of each *.gpt file in the testdata directory. It includes a link to the referenced file. The script utilizes tools such as `sys.find`, `sys.read`, and `summary` to achieve this task. The technique demonstrated is the automation of summarizing and linking files within a directory."
+    },
+    {
+        "time": "2024-08-23T10:47:11.694821-04:00",
+        "callContext": {
+            "id": "1724424428",
+            "tool": {
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "sys.find",
@@ -2843,11 +2843,11 @@
         "usage": {}
     },
     {
-        "time": "2024-08-23T12:02:39.142815-04:00",
+        "time": "2024-08-23T10:47:11.694947-04:00",
         "callContext": {
-            "id": "1724428951",
+            "id": "1724424428",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "sys.find",
@@ -2890,10 +2890,10 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1724428964",
+        "chatCompletionId": "1724424441",
         "usage": {},
         "chatRequest": {
-            "model": "gpt-4-turbo-2024-04-09",
+            "model": "gpt-4o-2024-08-06",
             "messages": [
                 {
                     "role": "system",
@@ -2904,11 +2904,11 @@
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "call_pV8RVkvcyzi8QbqeXcdCkAZd",
+                            "id": "call_GhPYkhrIge98l3U0CMJramDL",
                             "type": "function",
                             "function": {
                                 "name": "find",
-                                "arguments": "{\"pattern\":\"*.gpt\"}"
+                                "arguments": "{\"directory\":\"testdata\",\"pattern\":\"*.gpt\"}"
                             }
                         }
                     ]
@@ -2917,14 +2917,14 @@
                     "role": "tool",
                     "content": "testdata/Bob/test.gpt\ntestdata/BobAsShell/test.gpt\ntestdata/SamplesReadme/test.gpt",
                     "name": "find",
-                    "tool_call_id": "call_pV8RVkvcyzi8QbqeXcdCkAZd"
+                    "tool_call_id": "call_GhPYkhrIge98l3U0CMJramDL"
                 },
                 {
                     "role": "assistant",
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "call_UJGEKUkaky3cULZKZNu3Cezo",
+                            "id": "call_unZV9WLReLUEuMaU2Oa6huYs",
                             "type": "function",
                             "function": {
                                 "name": "summary",
@@ -2932,7 +2932,7 @@
                             }
                         },
                         {
-                            "id": "call_wpsPQf57CvelJMMqc5pWuzYu",
+                            "id": "call_PZs7uy2Znd3GrN6MRnppZLqu",
                             "type": "function",
                             "function": {
                                 "name": "summary",
@@ -2940,7 +2940,7 @@
                             }
                         },
                         {
-                            "id": "call_Lxtq42Kdm8tva08cXF30Bfps",
+                            "id": "call_womMx8To9O2qyCxvcDjeNszl",
                             "type": "function",
                             "function": {
                                 "name": "summary",
@@ -2951,21 +2951,21 @@
                 },
                 {
                     "role": "tool",
-                    "content": "The GPTScript file contains a script that demonstrates how to interact with a tool named \"Bob.\" The script instructs to ask Bob \"how are you doing\" and then to repeat his reply exactly. The tool \"Bob\" is described as a friendly guy who responds to the question about how he is doing with a specific formatted message.",
+                    "content": "The GPTScript file is demonstrating a technique where a tool named \"Bob\" is used to ask a question and then repeat Bob's reply exactly. The script specifies that when Bob is asked \"how are you doing,\" he should respond with a specific phrase that includes the question asked.",
                     "name": "summary",
-                    "tool_call_id": "call_UJGEKUkaky3cULZKZNu3Cezo"
+                    "tool_call_id": "call_unZV9WLReLUEuMaU2Oa6huYs"
                 },
                 {
                     "role": "tool",
-                    "content": "The GPTScript file contains a script that interacts with a tool named \"Bob.\" The script is designed to ask Bob \"how are you doing\" and then repeat his reply exactly. The tool \"Bob\" is described as a friendly guy, and the script includes a bash script section that outputs a response thanking the user for the question and stating that Bob is doing great. This file demonstrates a simple interaction technique with a scripted character using a predefined response.",
+                    "content": "The GPTScript file demonstrates a technique where a tool named \"Bob\" is used to ask a question, \"how are you doing,\" and then repeat Bob's reply exactly. The script includes a bash script that outputs a predefined response from Bob, indicating that he is doing great.",
                     "name": "summary",
-                    "tool_call_id": "call_wpsPQf57CvelJMMqc5pWuzYu"
+                    "tool_call_id": "call_PZs7uy2Znd3GrN6MRnppZLqu"
                 },
                 {
                     "role": "tool",
-                    "content": "The GPTScript file contains a script designed to generate a README document that provides a consolidated summary of each \"*.gpt\" file in the \"testdata\" directory. Each entry in the README includes a link to the referenced file. The script uses tools such as `sys.find`, `sys.read`, and `summary` to accomplish this task. The technique demonstrated in the file is the automation of documentation generation for multiple script files within a directory.",
+                    "content": "The GPTScript file is designed to generate a README that provides a consolidated summary of each *.gpt file in the testdata directory. It includes a link to the referenced file. The script utilizes tools such as `sys.find`, `sys.read`, and `summary` to achieve this task. The technique demonstrated is the automation of summarizing and linking files within a directory.",
                     "name": "summary",
-                    "tool_call_id": "call_Lxtq42Kdm8tva08cXF30Bfps"
+                    "tool_call_id": "call_womMx8To9O2qyCxvcDjeNszl"
                 }
             ],
             "temperature": 0,
@@ -3026,11 +3026,11 @@
         }
     },
     {
-        "time": "2024-08-23T12:02:49.535183-04:00",
+        "time": "2024-08-23T10:47:14.617019-04:00",
         "callContext": {
-            "id": "1724428951",
+            "id": "1724424428",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "sys.find",
@@ -3073,32 +3073,32 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1724428964",
+        "chatCompletionId": "1724424441",
         "usage": {
-            "promptTokens": 660,
-            "completionTokens": 322,
-            "totalTokens": 982
+            "promptTokens": 604,
+            "completionTokens": 254,
+            "totalTokens": 858
         },
         "chatResponse": {
             "role": "assistant",
             "content": [
                 {
-                    "text": "### README for GPT Files in Testdata Directory\n\n1. **[Bob/test.gpt](testdata/Bob/test.gpt)**  \n   The GPTScript file contains a script that demonstrates how to interact with a tool named \"Bob.\" The script instructs to ask Bob \"how are you doing\" and then to repeat his reply exactly. The tool \"Bob\" is described as a friendly guy who responds to the question about how he is doing with a specific formatted message.\n\n2. **[BobAsShell/test.gpt](testdata/BobAsShell/test.gpt)**  \n   The GPTScript file contains a script that interacts with a tool named \"Bob.\" The script is designed to ask Bob \"how are you doing\" and then repeat his reply exactly. The tool \"Bob\" is described as a friendly guy, and the script includes a bash script section that outputs a response thanking the user for the question and stating that Bob is doing great. This file demonstrates a simple interaction technique with a scripted character using a predefined response.\n\n3. **[SamplesReadme/test.gpt](testdata/SamplesReadme/test.gpt)**  \n   The GPTScript file contains a script designed to generate a README document that provides a consolidated summary of each \"*.gpt\" file in the \"testdata\" directory. Each entry in the README includes a link to the referenced file. The script uses tools such as `sys.find`, `sys.read`, and `summary` to accomplish this task. The technique demonstrated in the file is the automation of documentation generation for multiple script files within a directory."
+                    "text": "# GPT Files Summary\n\n## [testdata/Bob/test.gpt](testdata/Bob/test.gpt)\nThe GPTScript file demonstrates a technique where a tool named \"Bob\" is used to ask a question and then repeat Bob's reply exactly. The script specifies that when Bob is asked \"how are you doing,\" he should respond with a specific phrase that includes the question asked.\n\n## [testdata/BobAsShell/test.gpt](testdata/BobAsShell/test.gpt)\nThe GPTScript file demonstrates a technique where a tool named \"Bob\" is used to ask a question, \"how are you doing,\" and then repeat Bob's reply exactly. The script includes a bash script that outputs a predefined response from Bob, indicating that he is doing great.\n\n## [testdata/SamplesReadme/test.gpt](testdata/SamplesReadme/test.gpt)\nThe GPTScript file is designed to generate a README that provides a consolidated summary of each *.gpt file in the testdata directory. It includes a link to the referenced file. The script utilizes tools such as `sys.find`, `sys.read`, and `summary` to achieve this task. The technique demonstrated is the automation of summarizing and linking files within a directory."
                 }
             ],
             "usage": {
-                "promptTokens": 660,
-                "completionTokens": 322,
-                "totalTokens": 982
+                "promptTokens": 604,
+                "completionTokens": 254,
+                "totalTokens": 858
             }
         }
     },
     {
-        "time": "2024-08-23T12:02:49.53522-04:00",
+        "time": "2024-08-23T10:47:14.617097-04:00",
         "callContext": {
-            "id": "1724428951",
+            "id": "1724424428",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "sys.find",
@@ -3142,10 +3142,10 @@
         },
         "type": "callFinish",
         "usage": {},
-        "content": "### README for GPT Files in Testdata Directory\n\n1. **[Bob/test.gpt](testdata/Bob/test.gpt)**  \n   The GPTScript file contains a script that demonstrates how to interact with a tool named \"Bob.\" The script instructs to ask Bob \"how are you doing\" and then to repeat his reply exactly. The tool \"Bob\" is described as a friendly guy who responds to the question about how he is doing with a specific formatted message.\n\n2. **[BobAsShell/test.gpt](testdata/BobAsShell/test.gpt)**  \n   The GPTScript file contains a script that interacts with a tool named \"Bob.\" The script is designed to ask Bob \"how are you doing\" and then repeat his reply exactly. The tool \"Bob\" is described as a friendly guy, and the script includes a bash script section that outputs a response thanking the user for the question and stating that Bob is doing great. This file demonstrates a simple interaction technique with a scripted character using a predefined response.\n\n3. **[SamplesReadme/test.gpt](testdata/SamplesReadme/test.gpt)**  \n   The GPTScript file contains a script designed to generate a README document that provides a consolidated summary of each \"*.gpt\" file in the \"testdata\" directory. Each entry in the README includes a link to the referenced file. The script uses tools such as `sys.find`, `sys.read`, and `summary` to accomplish this task. The technique demonstrated in the file is the automation of documentation generation for multiple script files within a directory."
+        "content": "# GPT Files Summary\n\n## [testdata/Bob/test.gpt](testdata/Bob/test.gpt)\nThe GPTScript file demonstrates a technique where a tool named \"Bob\" is used to ask a question and then repeat Bob's reply exactly. The script specifies that when Bob is asked \"how are you doing,\" he should respond with a specific phrase that includes the question asked.\n\n## [testdata/BobAsShell/test.gpt](testdata/BobAsShell/test.gpt)\nThe GPTScript file demonstrates a technique where a tool named \"Bob\" is used to ask a question, \"how are you doing,\" and then repeat Bob's reply exactly. The script includes a bash script that outputs a predefined response from Bob, indicating that he is doing great.\n\n## [testdata/SamplesReadme/test.gpt](testdata/SamplesReadme/test.gpt)\nThe GPTScript file is designed to generate a README that provides a consolidated summary of each *.gpt file in the testdata directory. It includes a link to the referenced file. The script utilizes tools such as `sys.find`, `sys.read`, and `summary` to achieve this task. The technique demonstrated is the automation of summarizing and linking files within a directory."
     },
     {
-        "time": "2024-08-23T12:02:49.535257-04:00",
+        "time": "2024-08-23T10:47:14.617199-04:00",
         "type": "runFinish",
         "usage": {}
     }

@@ -1,13 +1,13 @@
 [
     {
-        "time": "2024-08-06T12:05:32.225085-04:00",
+        "time": "2024-08-23T12:02:23.303172-04:00",
         "type": "runStart",
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:05:32.226098-04:00",
+        "time": "2024-08-23T12:02:23.303434-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -16,7 +16,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -55,14 +55,14 @@
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:05:32.894044-04:00",
+        "time": "2024-08-23T12:02:23.952218-04:00",
         "type": "runStart",
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:05:32.894378-04:00",
+        "time": "2024-08-23T12:02:23.952555-04:00",
         "callContext": {
-            "id": "1722960334",
+            "id": "1724428945",
             "tool": {
                 "name": "Anthropic Claude3 Model Provider",
                 "description": "Model provider for Anthropic hosted Claude3 models",
@@ -107,9 +107,9 @@
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:05:33.911076-04:00",
+        "time": "2024-08-23T12:02:24.965699-04:00",
         "callContext": {
-            "id": "1722960334",
+            "id": "1724428945",
             "tool": {
                 "name": "Anthropic Claude3 Model Provider",
                 "description": "Model provider for Anthropic hosted Claude3 models",
@@ -152,17 +152,17 @@
         },
         "type": "callFinish",
         "usage": {},
-        "content": "http://127.0.0.1:10598"
+        "content": "http://127.0.0.1:11236"
     },
     {
-        "time": "2024-08-06T12:05:33.911294-04:00",
+        "time": "2024-08-23T12:02:24.965909-04:00",
         "type": "runFinish",
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:05:33.911369-04:00",
+        "time": "2024-08-23T12:02:24.966017-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -171,7 +171,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -207,14 +207,14 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1722960335",
+        "chatCompletionId": "1724428946",
         "usage": {},
         "chatRequest": {
             "model": "claude-3-5-sonnet-20240620",
             "messages": [
                 {
                     "role": "system",
-                    "content": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file."
+                    "content": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file."
                 }
             ],
             "temperature": 0,
@@ -275,9 +275,9 @@
         }
     },
     {
-        "time": "2024-08-06T12:05:37.827865-04:00",
+        "time": "2024-08-23T12:02:27.675387-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -286,7 +286,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -322,7 +322,7 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1722960335",
+        "chatCompletionId": "1724428946",
         "usage": {},
         "chatResponse": {
             "role": "assistant",
@@ -330,7 +330,7 @@
                 {
                     "toolCall": {
                         "index": 0,
-                        "id": "toolu_01LdSKcXyjdbBRxDeM1c9FC1",
+                        "id": "toolu_01YWQ7wLRQ7tv4dSUJ6drs6Z",
                         "function": {
                             "name": "find",
                             "arguments": "{\"directory\": \"testdata\", \"pattern\": \"*.gpt\"}"
@@ -342,9 +342,9 @@
         }
     },
     {
-        "time": "2024-08-06T12:05:37.82796-04:00",
+        "time": "2024-08-23T12:02:27.675761-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -353,7 +353,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -389,7 +389,7 @@
             "inputContext": null
         },
         "toolSubCalls": {
-            "toolu_01LdSKcXyjdbBRxDeM1c9FC1": {
+            "toolu_01YWQ7wLRQ7tv4dSUJ6drs6Z": {
                 "toolID": "sys.find",
                 "input": "{\"directory\": \"testdata\", \"pattern\": \"*.gpt\"}"
             }
@@ -398,9 +398,9 @@
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:05:37.828009-04:00",
+        "time": "2024-08-23T12:02:27.6758-04:00",
         "callContext": {
-            "id": "toolu_01LdSKcXyjdbBRxDeM1c9FC1",
+            "id": "toolu_01YWQ7wLRQ7tv4dSUJ6drs6Z",
             "tool": {
                 "name": "sys.find",
                 "description": "Traverse a directory looking for files that match a pattern in the style of the unix find command",
@@ -426,7 +426,7 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.find",
-            "parentID": "1722960333",
+            "parentID": "1724428944",
             "displayText": "Finding `*.gpt` in `testdata`"
         },
         "type": "callStart",
@@ -434,9 +434,9 @@
         "content": "{\"directory\": \"testdata\", \"pattern\": \"*.gpt\"}"
     },
     {
-        "time": "2024-08-06T12:05:37.828079-04:00",
+        "time": "2024-08-23T12:02:27.675881-04:00",
         "callContext": {
-            "id": "toolu_01LdSKcXyjdbBRxDeM1c9FC1",
+            "id": "toolu_01YWQ7wLRQ7tv4dSUJ6drs6Z",
             "tool": {
                 "name": "sys.find",
                 "description": "Traverse a directory looking for files that match a pattern in the style of the unix find command",
@@ -462,11 +462,11 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.find",
-            "parentID": "1722960333",
+            "parentID": "1724428944",
             "displayText": "Finding `*.gpt` in `testdata`"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960336",
+        "chatCompletionId": "1724428947",
         "usage": {},
         "chatRequest": {
             "model": "",
@@ -474,9 +474,9 @@
         }
     },
     {
-        "time": "2024-08-06T12:05:37.828287-04:00",
+        "time": "2024-08-23T12:02:27.676139-04:00",
         "callContext": {
-            "id": "toolu_01LdSKcXyjdbBRxDeM1c9FC1",
+            "id": "toolu_01YWQ7wLRQ7tv4dSUJ6drs6Z",
             "tool": {
                 "name": "sys.find",
                 "description": "Traverse a directory looking for files that match a pattern in the style of the unix find command",
@@ -502,20 +502,20 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.find",
-            "parentID": "1722960333",
+            "parentID": "1724428944",
             "displayText": "Finding `*.gpt` in `testdata`"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960336",
+        "chatCompletionId": "1724428947",
         "usage": {},
         "chatResponse": {
             "usage": {}
         }
     },
     {
-        "time": "2024-08-06T12:05:37.82832-04:00",
+        "time": "2024-08-23T12:02:27.676181-04:00",
         "callContext": {
-            "id": "toolu_01LdSKcXyjdbBRxDeM1c9FC1",
+            "id": "toolu_01YWQ7wLRQ7tv4dSUJ6drs6Z",
             "tool": {
                 "name": "sys.find",
                 "description": "Traverse a directory looking for files that match a pattern in the style of the unix find command",
@@ -541,7 +541,7 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.find",
-            "parentID": "1722960333",
+            "parentID": "1724428944",
             "displayText": "Finding `*.gpt` in `testdata`"
         },
         "type": "callFinish",
@@ -549,9 +549,9 @@
         "content": "testdata/Bob/test.gpt\ntestdata/BobAsShell/test.gpt\ntestdata/SamplesReadme/test.gpt"
     },
     {
-        "time": "2024-08-06T12:05:37.828345-04:00",
+        "time": "2024-08-23T12:02:27.67621-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -560,7 +560,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -600,9 +600,9 @@
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:05:38.016257-04:00",
+        "time": "2024-08-23T12:02:27.907536-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -611,7 +611,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -647,21 +647,21 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1722960337",
+        "chatCompletionId": "1724428948",
         "usage": {},
         "chatRequest": {
             "model": "claude-3-5-sonnet-20240620",
             "messages": [
                 {
                     "role": "system",
-                    "content": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file."
+                    "content": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file."
                 },
                 {
                     "role": "assistant",
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "toolu_01LdSKcXyjdbBRxDeM1c9FC1",
+                            "id": "toolu_01YWQ7wLRQ7tv4dSUJ6drs6Z",
                             "type": "function",
                             "function": {
                                 "name": "find",
@@ -674,7 +674,7 @@
                     "role": "tool",
                     "content": "testdata/Bob/test.gpt\ntestdata/BobAsShell/test.gpt\ntestdata/SamplesReadme/test.gpt",
                     "name": "find",
-                    "tool_call_id": "toolu_01LdSKcXyjdbBRxDeM1c9FC1"
+                    "tool_call_id": "toolu_01YWQ7wLRQ7tv4dSUJ6drs6Z"
                 }
             ],
             "temperature": 0,
@@ -735,9 +735,9 @@
         }
     },
     {
-        "time": "2024-08-06T12:05:40.239488-04:00",
+        "time": "2024-08-23T12:02:29.596773-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -746,63 +746,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
-                "id": "testdata/SamplesReadme/test.gpt:",
-                "toolMapping": {
-                    "summary": [
-                        {
-                            "reference": "summary",
-                            "toolID": "testdata/SamplesReadme/test.gpt:summary"
-                        }
-                    ],
-                    "sys.find": [
-                        {
-                            "reference": "sys.find",
-                            "toolID": "sys.find"
-                        }
-                    ],
-                    "sys.read": [
-                        {
-                            "reference": "sys.read",
-                            "toolID": "sys.read"
-                        }
-                    ]
-                },
-                "localTools": {
-                    "": "testdata/SamplesReadme/test.gpt:",
-                    "summary": "testdata/SamplesReadme/test.gpt:summary"
-                },
-                "source": {
-                    "location": "testdata/SamplesReadme/test.gpt",
-                    "lineNo": 1
-                },
-                "workingDir": "testdata/SamplesReadme"
-            },
-            "currentAgent": {},
-            "inputContext": null
-        },
-        "toolSubCalls": {
-            "toolu_01GA1t6HhRTq4pzvRH6XNNkx": {
-                "toolID": "testdata/SamplesReadme/test.gpt:summary",
-                "input": "{\"file\": \"testdata/Bob/test.gpt\"}"
-            }
-        },
-        "type": "callSubCalls",
-        "usage": {}
-    },
-    {
-        "time": "2024-08-06T12:05:40.23949-04:00",
-        "callContext": {
-            "id": "1722960333",
-            "tool": {
-                "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "internalPrompt": null,
-                "tools": [
-                    "sys.find",
-                    "sys.read",
-                    "summary"
-                ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -838,7 +782,7 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1722960337",
+        "chatCompletionId": "1724428948",
         "usage": {},
         "chatResponse": {
             "role": "assistant",
@@ -846,7 +790,7 @@
                 {
                     "toolCall": {
                         "index": 0,
-                        "id": "toolu_01GA1t6HhRTq4pzvRH6XNNkx",
+                        "id": "toolu_01W6GYNz1MwRBgehjZQQCWz3",
                         "function": {
                             "name": "summary",
                             "arguments": "{\"file\": \"testdata/Bob/test.gpt\"}"
@@ -858,14 +802,69 @@
         }
     },
     {
-        "time": "2024-08-06T12:05:40.239549-04:00",
+        "time": "2024-08-23T12:02:29.59679-04:00",
         "callContext": {
-            "id": "toolu_01GA1t6HhRTq4pzvRH6XNNkx",
+            "id": "1724428944",
+            "tool": {
+                "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
+                "internalPrompt": null,
+                "tools": [
+                    "sys.find",
+                    "sys.read",
+                    "summary"
+                ],
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
+                "id": "testdata/SamplesReadme/test.gpt:",
+                "toolMapping": {
+                    "summary": [
+                        {
+                            "reference": "summary",
+                            "toolID": "testdata/SamplesReadme/test.gpt:summary"
+                        }
+                    ],
+                    "sys.find": [
+                        {
+                            "reference": "sys.find",
+                            "toolID": "sys.find"
+                        }
+                    ],
+                    "sys.read": [
+                        {
+                            "reference": "sys.read",
+                            "toolID": "sys.read"
+                        }
+                    ]
+                },
+                "localTools": {
+                    "": "testdata/SamplesReadme/test.gpt:",
+                    "summary": "testdata/SamplesReadme/test.gpt:summary"
+                },
+                "source": {
+                    "location": "testdata/SamplesReadme/test.gpt",
+                    "lineNo": 1
+                },
+                "workingDir": "testdata/SamplesReadme"
+            },
+            "currentAgent": {},
+            "inputContext": null
+        },
+        "toolSubCalls": {
+            "toolu_01W6GYNz1MwRBgehjZQQCWz3": {
+                "toolID": "testdata/SamplesReadme/test.gpt:summary",
+                "input": "{\"file\": \"testdata/Bob/test.gpt\"}"
+            }
+        },
+        "type": "callSubCalls",
+        "usage": {}
+    },
+    {
+        "time": "2024-08-23T12:02:29.596885-04:00",
+        "callContext": {
+            "id": "toolu_01W6GYNz1MwRBgehjZQQCWz3",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -902,21 +901,20 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callStart",
         "usage": {},
         "content": "{\"file\": \"testdata/Bob/test.gpt\"}"
     },
     {
-        "time": "2024-08-06T12:05:40.486174-04:00",
+        "time": "2024-08-23T12:02:29.834449-04:00",
         "callContext": {
-            "id": "toolu_01GA1t6HhRTq4pzvRH6XNNkx",
+            "id": "toolu_01W6GYNz1MwRBgehjZQQCWz3",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -953,10 +951,10 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960338",
+        "chatCompletionId": "1724428949",
         "usage": {},
         "chatRequest": {
             "model": "claude-3-5-sonnet-20240620",
@@ -970,7 +968,7 @@
                     "content": "{\"file\": \"testdata/Bob/test.gpt\"}"
                 }
             ],
-            "temperature": 0.7,
+            "temperature": 0,
             "tools": [
                 {
                     "type": "function",
@@ -992,14 +990,13 @@
         }
     },
     {
-        "time": "2024-08-06T12:05:43.852168-04:00",
+        "time": "2024-08-23T12:02:31.80403-04:00",
         "callContext": {
-            "id": "toolu_01GA1t6HhRTq4pzvRH6XNNkx",
+            "id": "toolu_01W6GYNz1MwRBgehjZQQCWz3",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -1036,10 +1033,10 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960338",
+        "chatCompletionId": "1724428949",
         "usage": {},
         "chatResponse": {
             "role": "assistant",
@@ -1047,7 +1044,7 @@
                 {
                     "toolCall": {
                         "index": 0,
-                        "id": "toolu_01KhwrAvNEskbWRCFZBrn5co",
+                        "id": "toolu_01Qx7nHyrAr7SeGvNNM7sYVh",
                         "function": {
                             "name": "read",
                             "arguments": "{\"filename\": \"testdata/Bob/test.gpt\"}"
@@ -1059,14 +1056,13 @@
         }
     },
     {
-        "time": "2024-08-06T12:05:43.852236-04:00",
+        "time": "2024-08-23T12:02:31.804102-04:00",
         "callContext": {
-            "id": "toolu_01GA1t6HhRTq4pzvRH6XNNkx",
+            "id": "toolu_01W6GYNz1MwRBgehjZQQCWz3",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -1103,10 +1099,10 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "toolSubCalls": {
-            "toolu_01KhwrAvNEskbWRCFZBrn5co": {
+            "toolu_01Qx7nHyrAr7SeGvNNM7sYVh": {
                 "toolID": "sys.read",
                 "input": "{\"filename\": \"testdata/Bob/test.gpt\"}"
             }
@@ -1115,9 +1111,9 @@
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:05:43.852279-04:00",
+        "time": "2024-08-23T12:02:31.804143-04:00",
         "callContext": {
-            "id": "toolu_01KhwrAvNEskbWRCFZBrn5co",
+            "id": "toolu_01Qx7nHyrAr7SeGvNNM7sYVh",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
@@ -1139,7 +1135,7 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "toolu_01GA1t6HhRTq4pzvRH6XNNkx",
+            "parentID": "toolu_01W6GYNz1MwRBgehjZQQCWz3",
             "displayText": "Reading `testdata/Bob/test.gpt`"
         },
         "type": "callStart",
@@ -1147,9 +1143,9 @@
         "content": "{\"filename\": \"testdata/Bob/test.gpt\"}"
     },
     {
-        "time": "2024-08-06T12:05:43.852343-04:00",
+        "time": "2024-08-23T12:02:31.804204-04:00",
         "callContext": {
-            "id": "toolu_01KhwrAvNEskbWRCFZBrn5co",
+            "id": "toolu_01Qx7nHyrAr7SeGvNNM7sYVh",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
@@ -1171,11 +1167,11 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "toolu_01GA1t6HhRTq4pzvRH6XNNkx",
+            "parentID": "toolu_01W6GYNz1MwRBgehjZQQCWz3",
             "displayText": "Reading `testdata/Bob/test.gpt`"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960339",
+        "chatCompletionId": "1724428950",
         "usage": {},
         "chatRequest": {
             "model": "",
@@ -1183,9 +1179,9 @@
         }
     },
     {
-        "time": "2024-08-06T12:05:43.852425-04:00",
+        "time": "2024-08-23T12:02:31.804268-04:00",
         "callContext": {
-            "id": "toolu_01KhwrAvNEskbWRCFZBrn5co",
+            "id": "toolu_01Qx7nHyrAr7SeGvNNM7sYVh",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
@@ -1207,20 +1203,20 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "toolu_01GA1t6HhRTq4pzvRH6XNNkx",
+            "parentID": "toolu_01W6GYNz1MwRBgehjZQQCWz3",
             "displayText": "Reading `testdata/Bob/test.gpt`"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960339",
+        "chatCompletionId": "1724428950",
         "usage": {},
         "chatResponse": {
             "usage": {}
         }
     },
     {
-        "time": "2024-08-06T12:05:43.852462-04:00",
+        "time": "2024-08-23T12:02:31.804291-04:00",
         "callContext": {
-            "id": "toolu_01KhwrAvNEskbWRCFZBrn5co",
+            "id": "toolu_01Qx7nHyrAr7SeGvNNM7sYVh",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
@@ -1242,22 +1238,21 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "toolu_01GA1t6HhRTq4pzvRH6XNNkx",
+            "parentID": "toolu_01W6GYNz1MwRBgehjZQQCWz3",
             "displayText": "Reading `testdata/Bob/test.gpt`"
         },
         "type": "callFinish",
         "usage": {},
-        "content": "tools: bob\n\nAsk Bob \"how are you doing\" and repeat his reply exactly.\n\n---\nname: bob\ndescription: I'm Bob, a friendly guy.\nargs: question: The question to ask Bob.\n\nWhen asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"\n"
+        "content": "tools: bob\n\nAsk Bob \"how are you doing\" and repeat his reply exactly.\n\n---\nname: bob\ndescription: I'm Bob, a friendly guy.\nargs: question: The question to ask Bob.\n\nWhen asked how I am doing, respond with exactly \"Thanks for asking \"${QUESTION}\", I'm doing great fellow friendly AI tool!\"\n"
     },
     {
-        "time": "2024-08-06T12:05:43.852484-04:00",
+        "time": "2024-08-23T12:02:31.804313-04:00",
         "callContext": {
-            "id": "toolu_01GA1t6HhRTq4pzvRH6XNNkx",
+            "id": "toolu_01W6GYNz1MwRBgehjZQQCWz3",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -1294,21 +1289,20 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "toolResults": 1,
         "type": "callContinue",
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:05:44.274147-04:00",
+        "time": "2024-08-23T12:02:32.040688-04:00",
         "callContext": {
-            "id": "toolu_01GA1t6HhRTq4pzvRH6XNNkx",
+            "id": "toolu_01W6GYNz1MwRBgehjZQQCWz3",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -1345,10 +1339,10 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960340",
+        "chatCompletionId": "1724428951",
         "usage": {},
         "chatRequest": {
             "model": "claude-3-5-sonnet-20240620",
@@ -1366,7 +1360,7 @@
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "toolu_01KhwrAvNEskbWRCFZBrn5co",
+                            "id": "toolu_01Qx7nHyrAr7SeGvNNM7sYVh",
                             "type": "function",
                             "function": {
                                 "name": "read",
@@ -1377,12 +1371,12 @@
                 },
                 {
                     "role": "tool",
-                    "content": "tools: bob\n\nAsk Bob \"how are you doing\" and repeat his reply exactly.\n\n---\nname: bob\ndescription: I'm Bob, a friendly guy.\nargs: question: The question to ask Bob.\n\nWhen asked how I am doing, respond with exactly \"Thanks for asking \"${question}\", I'm doing great fellow friendly AI tool!\"\n",
+                    "content": "tools: bob\n\nAsk Bob \"how are you doing\" and repeat his reply exactly.\n\n---\nname: bob\ndescription: I'm Bob, a friendly guy.\nargs: question: The question to ask Bob.\n\nWhen asked how I am doing, respond with exactly \"Thanks for asking \"${QUESTION}\", I'm doing great fellow friendly AI tool!\"\n",
                     "name": "read",
-                    "tool_call_id": "toolu_01KhwrAvNEskbWRCFZBrn5co"
+                    "tool_call_id": "toolu_01Qx7nHyrAr7SeGvNNM7sYVh"
                 }
             ],
-            "temperature": 0.7,
+            "temperature": 0,
             "tools": [
                 {
                     "type": "function",
@@ -1404,14 +1398,13 @@
         }
     },
     {
-        "time": "2024-08-06T12:05:53.297643-04:00",
+        "time": "2024-08-23T12:02:38.871357-04:00",
         "callContext": {
-            "id": "toolu_01GA1t6HhRTq4pzvRH6XNNkx",
+            "id": "toolu_01W6GYNz1MwRBgehjZQQCWz3",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -1448,30 +1441,29 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960340",
+        "chatCompletionId": "1724428951",
         "usage": {},
         "chatResponse": {
             "role": "assistant",
             "content": [
                 {
-                    "text": "Thank you for providing the GPTScript file. I've read its contents, and I'll briefly describe what it contains and the technique it's demonstrating.\n\nThe GPTScript file contains a simple script that demonstrates the use of a custom AI tool or agent named \"Bob\". Here's a breakdown of the file's contents and the technique it's showcasing:\n\n1. Content Description:\n   - The script defines a tool called \"bob\" in the tools section.\n   - It includes a main instruction to ask Bob \"how are you doing\" and repeat his reply exactly.\n   - The \"bob\" tool is defined with a name, description, and an argument called \"question\".\n   - Bob is programmed to respond in a specific way when asked how he's doing.\n\n2. Technique Demonstration:\n   The script is demonstrating a few key concepts in AI automation and scripting:\n\n   a) Custom Tool Creation: It shows how to define a custom AI tool or agent (in this case, \"Bob\") with specific behaviors and responses.\n   \n   b) Parameterized Responses: The script showcases how to create a tool that can take an input (the \"question\" argument) and incorporate it into a predefined response template.\n   \n   c) Scripted Interactions: It demonstrates how to script a simple interaction with an AI tool, including asking a specific question and handling the response.\n   \n   d) Template-based Replies: Bob's response is templated, showing how to create consistent yet personalized responses by inserting a variable (${question}) into a fixed string.\n\nIn essence, this GPTScript file is a simple example of creating and interacting with a custom AI agent within an automation framework. It shows how one might script basic conversational interactions and define specific behaviors for AI tools or personas in a larger automation system."
+                    "text": "Thank you for providing the GPTScript file. I've read its contents, and I'll briefly describe what it contains and the technique it's trying to demonstrate.\n\nThe GPTScript file \"test.gpt\" is demonstrating a simple AI automation script that involves interaction with a simulated AI tool or agent named \"Bob\". Here's a breakdown of its contents and the technique it's showcasing:\n\n1. Content Description:\n   - The script defines a tool called \"bob\".\n   - It instructs to ask Bob a specific question: \"how are you doing\".\n   - It then directs to repeat Bob's reply exactly.\n   - The script includes a definition for the \"bob\" tool, describing it as a friendly character.\n   - It specifies an argument \"question\" for interacting with Bob.\n   - Finally, it provides a specific response format for when Bob is asked how he's doing.\n\n2. Technique Demonstration:\n   The script is demonstrating several key concepts in AI automation scripting:\n\n   a) Tool Definition: It shows how to define a custom AI tool or agent (in this case, \"bob\") within a script.\n   \n   b) Parameterized Interactions: The script demonstrates how to set up parameterized interactions with an AI tool, using the \"question\" argument.\n   \n   c) Scripted Responses: It showcases how to create scripted or predefined responses for specific inputs. In this case, when asked \"how are you doing\", Bob has a specific, templated response.\n   \n   d) String Interpolation: The response uses string interpolation (${QUESTION}) to incorporate the input question into the output, demonstrating dynamic response generation.\n   \n   e) Exact Output Control: The script emphasizes exact repetition of responses, showing how GPTScript can be used to control AI outputs precisely.\n\nIn summary, this GPTScript file is a simple yet effective demonstration of creating a basic interactive AI tool with predefined behaviors and responses. It showcases the potential of GPTScript for crafting specific AI interactions and responses in an automation context."
                 }
             ],
             "usage": {}
         }
     },
     {
-        "time": "2024-08-06T12:05:53.297743-04:00",
+        "time": "2024-08-23T12:02:38.871416-04:00",
         "callContext": {
-            "id": "toolu_01GA1t6HhRTq4pzvRH6XNNkx",
+            "id": "toolu_01W6GYNz1MwRBgehjZQQCWz3",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -1508,16 +1500,16 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callFinish",
         "usage": {},
-        "content": "Thank you for providing the GPTScript file. I've read its contents, and I'll briefly describe what it contains and the technique it's demonstrating.\n\nThe GPTScript file contains a simple script that demonstrates the use of a custom AI tool or agent named \"Bob\". Here's a breakdown of the file's contents and the technique it's showcasing:\n\n1. Content Description:\n   - The script defines a tool called \"bob\" in the tools section.\n   - It includes a main instruction to ask Bob \"how are you doing\" and repeat his reply exactly.\n   - The \"bob\" tool is defined with a name, description, and an argument called \"question\".\n   - Bob is programmed to respond in a specific way when asked how he's doing.\n\n2. Technique Demonstration:\n   The script is demonstrating a few key concepts in AI automation and scripting:\n\n   a) Custom Tool Creation: It shows how to define a custom AI tool or agent (in this case, \"Bob\") with specific behaviors and responses.\n   \n   b) Parameterized Responses: The script showcases how to create a tool that can take an input (the \"question\" argument) and incorporate it into a predefined response template.\n   \n   c) Scripted Interactions: It demonstrates how to script a simple interaction with an AI tool, including asking a specific question and handling the response.\n   \n   d) Template-based Replies: Bob's response is templated, showing how to create consistent yet personalized responses by inserting a variable (${question}) into a fixed string.\n\nIn essence, this GPTScript file is a simple example of creating and interacting with a custom AI agent within an automation framework. It shows how one might script basic conversational interactions and define specific behaviors for AI tools or personas in a larger automation system."
+        "content": "Thank you for providing the GPTScript file. I've read its contents, and I'll briefly describe what it contains and the technique it's trying to demonstrate.\n\nThe GPTScript file \"test.gpt\" is demonstrating a simple AI automation script that involves interaction with a simulated AI tool or agent named \"Bob\". Here's a breakdown of its contents and the technique it's showcasing:\n\n1. Content Description:\n   - The script defines a tool called \"bob\".\n   - It instructs to ask Bob a specific question: \"how are you doing\".\n   - It then directs to repeat Bob's reply exactly.\n   - The script includes a definition for the \"bob\" tool, describing it as a friendly character.\n   - It specifies an argument \"question\" for interacting with Bob.\n   - Finally, it provides a specific response format for when Bob is asked how he's doing.\n\n2. Technique Demonstration:\n   The script is demonstrating several key concepts in AI automation scripting:\n\n   a) Tool Definition: It shows how to define a custom AI tool or agent (in this case, \"bob\") within a script.\n   \n   b) Parameterized Interactions: The script demonstrates how to set up parameterized interactions with an AI tool, using the \"question\" argument.\n   \n   c) Scripted Responses: It showcases how to create scripted or predefined responses for specific inputs. In this case, when asked \"how are you doing\", Bob has a specific, templated response.\n   \n   d) String Interpolation: The response uses string interpolation (${QUESTION}) to incorporate the input question into the output, demonstrating dynamic response generation.\n   \n   e) Exact Output Control: The script emphasizes exact repetition of responses, showing how GPTScript can be used to control AI outputs precisely.\n\nIn summary, this GPTScript file is a simple yet effective demonstration of creating a basic interactive AI tool with predefined behaviors and responses. It showcases the potential of GPTScript for crafting specific AI interactions and responses in an automation context."
     },
     {
-        "time": "2024-08-06T12:05:53.298113-04:00",
+        "time": "2024-08-23T12:02:38.871459-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -1526,7 +1518,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -1566,9 +1558,9 @@
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:05:53.49392-04:00",
+        "time": "2024-08-23T12:02:39.125653-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -1577,7 +1569,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -1613,21 +1605,21 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1722960341",
+        "chatCompletionId": "1724428952",
         "usage": {},
         "chatRequest": {
             "model": "claude-3-5-sonnet-20240620",
             "messages": [
                 {
                     "role": "system",
-                    "content": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file."
+                    "content": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file."
                 },
                 {
                     "role": "assistant",
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "toolu_01LdSKcXyjdbBRxDeM1c9FC1",
+                            "id": "toolu_01YWQ7wLRQ7tv4dSUJ6drs6Z",
                             "type": "function",
                             "function": {
                                 "name": "find",
@@ -1640,14 +1632,14 @@
                     "role": "tool",
                     "content": "testdata/Bob/test.gpt\ntestdata/BobAsShell/test.gpt\ntestdata/SamplesReadme/test.gpt",
                     "name": "find",
-                    "tool_call_id": "toolu_01LdSKcXyjdbBRxDeM1c9FC1"
+                    "tool_call_id": "toolu_01YWQ7wLRQ7tv4dSUJ6drs6Z"
                 },
                 {
                     "role": "assistant",
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "toolu_01GA1t6HhRTq4pzvRH6XNNkx",
+                            "id": "toolu_01W6GYNz1MwRBgehjZQQCWz3",
                             "type": "function",
                             "function": {
                                 "name": "summary",
@@ -1658,9 +1650,9 @@
                 },
                 {
                     "role": "tool",
-                    "content": "Thank you for providing the GPTScript file. I've read its contents, and I'll briefly describe what it contains and the technique it's demonstrating.\n\nThe GPTScript file contains a simple script that demonstrates the use of a custom AI tool or agent named \"Bob\". Here's a breakdown of the file's contents and the technique it's showcasing:\n\n1. Content Description:\n   - The script defines a tool called \"bob\" in the tools section.\n   - It includes a main instruction to ask Bob \"how are you doing\" and repeat his reply exactly.\n   - The \"bob\" tool is defined with a name, description, and an argument called \"question\".\n   - Bob is programmed to respond in a specific way when asked how he's doing.\n\n2. Technique Demonstration:\n   The script is demonstrating a few key concepts in AI automation and scripting:\n\n   a) Custom Tool Creation: It shows how to define a custom AI tool or agent (in this case, \"Bob\") with specific behaviors and responses.\n   \n   b) Parameterized Responses: The script showcases how to create a tool that can take an input (the \"question\" argument) and incorporate it into a predefined response template.\n   \n   c) Scripted Interactions: It demonstrates how to script a simple interaction with an AI tool, including asking a specific question and handling the response.\n   \n   d) Template-based Replies: Bob's response is templated, showing how to create consistent yet personalized responses by inserting a variable (${question}) into a fixed string.\n\nIn essence, this GPTScript file is a simple example of creating and interacting with a custom AI agent within an automation framework. It shows how one might script basic conversational interactions and define specific behaviors for AI tools or personas in a larger automation system.",
+                    "content": "Thank you for providing the GPTScript file. I've read its contents, and I'll briefly describe what it contains and the technique it's trying to demonstrate.\n\nThe GPTScript file \"test.gpt\" is demonstrating a simple AI automation script that involves interaction with a simulated AI tool or agent named \"Bob\". Here's a breakdown of its contents and the technique it's showcasing:\n\n1. Content Description:\n   - The script defines a tool called \"bob\".\n   - It instructs to ask Bob a specific question: \"how are you doing\".\n   - It then directs to repeat Bob's reply exactly.\n   - The script includes a definition for the \"bob\" tool, describing it as a friendly character.\n   - It specifies an argument \"question\" for interacting with Bob.\n   - Finally, it provides a specific response format for when Bob is asked how he's doing.\n\n2. Technique Demonstration:\n   The script is demonstrating several key concepts in AI automation scripting:\n\n   a) Tool Definition: It shows how to define a custom AI tool or agent (in this case, \"bob\") within a script.\n   \n   b) Parameterized Interactions: The script demonstrates how to set up parameterized interactions with an AI tool, using the \"question\" argument.\n   \n   c) Scripted Responses: It showcases how to create scripted or predefined responses for specific inputs. In this case, when asked \"how are you doing\", Bob has a specific, templated response.\n   \n   d) String Interpolation: The response uses string interpolation (${QUESTION}) to incorporate the input question into the output, demonstrating dynamic response generation.\n   \n   e) Exact Output Control: The script emphasizes exact repetition of responses, showing how GPTScript can be used to control AI outputs precisely.\n\nIn summary, this GPTScript file is a simple yet effective demonstration of creating a basic interactive AI tool with predefined behaviors and responses. It showcases the potential of GPTScript for crafting specific AI interactions and responses in an automation context.",
                     "name": "summary",
-                    "tool_call_id": "toolu_01GA1t6HhRTq4pzvRH6XNNkx"
+                    "tool_call_id": "toolu_01W6GYNz1MwRBgehjZQQCWz3"
                 }
             ],
             "temperature": 0,
@@ -1721,9 +1713,9 @@
         }
     },
     {
-        "time": "2024-08-06T12:05:55.636946-04:00",
+        "time": "2024-08-23T12:02:41.73696-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -1732,7 +1724,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -1768,7 +1760,7 @@
             "inputContext": null
         },
         "toolSubCalls": {
-            "toolu_01VTsZPAxCf1sJusFUoqHtgR": {
+            "toolu_01VosVGbzD4M8g6jw5ZQUgQy": {
                 "toolID": "testdata/SamplesReadme/test.gpt:summary",
                 "input": "{\"file\": \"testdata/BobAsShell/test.gpt\"}"
             }
@@ -1777,9 +1769,9 @@
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:05:55.636958-04:00",
+        "time": "2024-08-23T12:02:41.736966-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -1788,7 +1780,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -1824,7 +1816,7 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1722960341",
+        "chatCompletionId": "1724428952",
         "usage": {},
         "chatResponse": {
             "role": "assistant",
@@ -1832,7 +1824,7 @@
                 {
                     "toolCall": {
                         "index": 0,
-                        "id": "toolu_01VTsZPAxCf1sJusFUoqHtgR",
+                        "id": "toolu_01VosVGbzD4M8g6jw5ZQUgQy",
                         "function": {
                             "name": "summary",
                             "arguments": "{\"file\": \"testdata/BobAsShell/test.gpt\"}"
@@ -1844,14 +1836,13 @@
         }
     },
     {
-        "time": "2024-08-06T12:05:55.637002-04:00",
+        "time": "2024-08-23T12:02:41.737024-04:00",
         "callContext": {
-            "id": "toolu_01VTsZPAxCf1sJusFUoqHtgR",
+            "id": "toolu_01VosVGbzD4M8g6jw5ZQUgQy",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -1888,21 +1879,20 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callStart",
         "usage": {},
         "content": "{\"file\": \"testdata/BobAsShell/test.gpt\"}"
     },
     {
-        "time": "2024-08-06T12:05:55.806829-04:00",
+        "time": "2024-08-23T12:02:42.081991-04:00",
         "callContext": {
-            "id": "toolu_01VTsZPAxCf1sJusFUoqHtgR",
+            "id": "toolu_01VosVGbzD4M8g6jw5ZQUgQy",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -1939,10 +1929,10 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960342",
+        "chatCompletionId": "1724428953",
         "usage": {},
         "chatRequest": {
             "model": "claude-3-5-sonnet-20240620",
@@ -1956,7 +1946,7 @@
                     "content": "{\"file\": \"testdata/BobAsShell/test.gpt\"}"
                 }
             ],
-            "temperature": 0.7,
+            "temperature": 0,
             "tools": [
                 {
                     "type": "function",
@@ -1978,14 +1968,13 @@
         }
     },
     {
-        "time": "2024-08-06T12:05:58.795512-04:00",
+        "time": "2024-08-23T12:02:44.971294-04:00",
         "callContext": {
-            "id": "toolu_01VTsZPAxCf1sJusFUoqHtgR",
+            "id": "toolu_01VosVGbzD4M8g6jw5ZQUgQy",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2022,10 +2011,10 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960342",
+        "chatCompletionId": "1724428953",
         "usage": {},
         "chatResponse": {
             "role": "assistant",
@@ -2033,7 +2022,7 @@
                 {
                     "toolCall": {
                         "index": 0,
-                        "id": "toolu_01Ph36AMoyPFtJyoSSh3fkPX",
+                        "id": "toolu_01Wk8G3ag7MXGTKSwDhPdbnT",
                         "function": {
                             "name": "read",
                             "arguments": "{\"filename\": \"testdata/BobAsShell/test.gpt\"}"
@@ -2045,14 +2034,13 @@
         }
     },
     {
-        "time": "2024-08-06T12:05:58.795554-04:00",
+        "time": "2024-08-23T12:02:44.971336-04:00",
         "callContext": {
-            "id": "toolu_01VTsZPAxCf1sJusFUoqHtgR",
+            "id": "toolu_01VosVGbzD4M8g6jw5ZQUgQy",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2089,10 +2077,10 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "toolSubCalls": {
-            "toolu_01Ph36AMoyPFtJyoSSh3fkPX": {
+            "toolu_01Wk8G3ag7MXGTKSwDhPdbnT": {
                 "toolID": "sys.read",
                 "input": "{\"filename\": \"testdata/BobAsShell/test.gpt\"}"
             }
@@ -2101,9 +2089,9 @@
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:05:58.795591-04:00",
+        "time": "2024-08-23T12:02:44.971405-04:00",
         "callContext": {
-            "id": "toolu_01Ph36AMoyPFtJyoSSh3fkPX",
+            "id": "toolu_01Wk8G3ag7MXGTKSwDhPdbnT",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
@@ -2125,7 +2113,7 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "toolu_01VTsZPAxCf1sJusFUoqHtgR",
+            "parentID": "toolu_01VosVGbzD4M8g6jw5ZQUgQy",
             "displayText": "Reading `testdata/BobAsShell/test.gpt`"
         },
         "type": "callStart",
@@ -2133,9 +2121,9 @@
         "content": "{\"filename\": \"testdata/BobAsShell/test.gpt\"}"
     },
     {
-        "time": "2024-08-06T12:05:58.795642-04:00",
+        "time": "2024-08-23T12:02:44.971462-04:00",
         "callContext": {
-            "id": "toolu_01Ph36AMoyPFtJyoSSh3fkPX",
+            "id": "toolu_01Wk8G3ag7MXGTKSwDhPdbnT",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
@@ -2157,11 +2145,11 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "toolu_01VTsZPAxCf1sJusFUoqHtgR",
+            "parentID": "toolu_01VosVGbzD4M8g6jw5ZQUgQy",
             "displayText": "Reading `testdata/BobAsShell/test.gpt`"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960343",
+        "chatCompletionId": "1724428954",
         "usage": {},
         "chatRequest": {
             "model": "",
@@ -2169,9 +2157,9 @@
         }
     },
     {
-        "time": "2024-08-06T12:05:58.795709-04:00",
+        "time": "2024-08-23T12:02:44.971526-04:00",
         "callContext": {
-            "id": "toolu_01Ph36AMoyPFtJyoSSh3fkPX",
+            "id": "toolu_01Wk8G3ag7MXGTKSwDhPdbnT",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
@@ -2193,20 +2181,20 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "toolu_01VTsZPAxCf1sJusFUoqHtgR",
+            "parentID": "toolu_01VosVGbzD4M8g6jw5ZQUgQy",
             "displayText": "Reading `testdata/BobAsShell/test.gpt`"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960343",
+        "chatCompletionId": "1724428954",
         "usage": {},
         "chatResponse": {
             "usage": {}
         }
     },
     {
-        "time": "2024-08-06T12:05:58.795729-04:00",
+        "time": "2024-08-23T12:02:44.971548-04:00",
         "callContext": {
-            "id": "toolu_01Ph36AMoyPFtJyoSSh3fkPX",
+            "id": "toolu_01Wk8G3ag7MXGTKSwDhPdbnT",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
@@ -2228,22 +2216,21 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "toolu_01VTsZPAxCf1sJusFUoqHtgR",
+            "parentID": "toolu_01VosVGbzD4M8g6jw5ZQUgQy",
             "displayText": "Reading `testdata/BobAsShell/test.gpt`"
         },
         "type": "callFinish",
         "usage": {},
-        "content": "\ntools: bob\n\nAsk Bob \"how are you doing\" and repeat his reply exactly.\n\n---\nname: bob\ndescription: I'm Bob, a friendly guy.\nargs: question: The question to ask Bob.\n\n#!/bin/bash\n\necho \"Thanks for asking ${question}, I'm doing great fellow friendly AI tool!\"\n"
+        "content": "\ntools: bob\n\nAsk Bob \"how are you doing\" and repeat his reply exactly.\n\n---\nname: bob\ndescription: I'm Bob, a friendly guy.\nargs: question: The question to ask Bob.\n\n#!/bin/bash\n\necho \"Thanks for asking ${QUESTION}, I'm doing great fellow friendly AI tool!\"\n"
     },
     {
-        "time": "2024-08-06T12:05:58.795747-04:00",
+        "time": "2024-08-23T12:02:44.971575-04:00",
         "callContext": {
-            "id": "toolu_01VTsZPAxCf1sJusFUoqHtgR",
+            "id": "toolu_01VosVGbzD4M8g6jw5ZQUgQy",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2280,21 +2267,20 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "toolResults": 1,
         "type": "callContinue",
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:05:59.059914-04:00",
+        "time": "2024-08-23T12:02:45.19226-04:00",
         "callContext": {
-            "id": "toolu_01VTsZPAxCf1sJusFUoqHtgR",
+            "id": "toolu_01VosVGbzD4M8g6jw5ZQUgQy",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2331,10 +2317,10 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960344",
+        "chatCompletionId": "1724428955",
         "usage": {},
         "chatRequest": {
             "model": "claude-3-5-sonnet-20240620",
@@ -2352,7 +2338,7 @@
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "toolu_01Ph36AMoyPFtJyoSSh3fkPX",
+                            "id": "toolu_01Wk8G3ag7MXGTKSwDhPdbnT",
                             "type": "function",
                             "function": {
                                 "name": "read",
@@ -2363,12 +2349,12 @@
                 },
                 {
                     "role": "tool",
-                    "content": "\ntools: bob\n\nAsk Bob \"how are you doing\" and repeat his reply exactly.\n\n---\nname: bob\ndescription: I'm Bob, a friendly guy.\nargs: question: The question to ask Bob.\n\n#!/bin/bash\n\necho \"Thanks for asking ${question}, I'm doing great fellow friendly AI tool!\"\n",
+                    "content": "\ntools: bob\n\nAsk Bob \"how are you doing\" and repeat his reply exactly.\n\n---\nname: bob\ndescription: I'm Bob, a friendly guy.\nargs: question: The question to ask Bob.\n\n#!/bin/bash\n\necho \"Thanks for asking ${QUESTION}, I'm doing great fellow friendly AI tool!\"\n",
                     "name": "read",
-                    "tool_call_id": "toolu_01Ph36AMoyPFtJyoSSh3fkPX"
+                    "tool_call_id": "toolu_01Wk8G3ag7MXGTKSwDhPdbnT"
                 }
             ],
-            "temperature": 0.7,
+            "temperature": 0,
             "tools": [
                 {
                     "type": "function",
@@ -2390,14 +2376,13 @@
         }
     },
     {
-        "time": "2024-08-06T12:06:07.091565-04:00",
+        "time": "2024-08-23T12:02:52.544775-04:00",
         "callContext": {
-            "id": "toolu_01VTsZPAxCf1sJusFUoqHtgR",
+            "id": "toolu_01VosVGbzD4M8g6jw5ZQUgQy",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2434,30 +2419,29 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960344",
+        "chatCompletionId": "1724428955",
         "usage": {},
         "chatResponse": {
             "role": "assistant",
             "content": [
                 {
-                    "text": "I have read the contents of the file \"testdata/BobAsShell/test.gpt\". This is a sample GPTScript file that demonstrates a simple interaction with a custom AI tool named \"Bob\". Let me briefly describe the contents and the technique it's trying to demonstrate:\n\n1. Contents of the GPTScript file:\n   - The file starts by declaring the tool it will use: \"bob\"\n   - It then provides an instruction to ask Bob \"how are you doing\" and repeat his reply exactly.\n   - After that, there's a section that defines the \"bob\" tool:\n     - It gives Bob a name and a brief description\n     - It specifies that Bob takes one argument: \"question\"\n     - The implementation of Bob is written in Bash script\n\n2. Technique being demonstrated:\n   This GPTScript file is demonstrating the technique of creating and using a custom AI tool within the GPTScript environment. Specifically, it shows:\n\n   a. Tool Declaration: How to declare a tool that will be used in the script.\n   b. Tool Definition: How to define a custom tool, including its name, description, and parameters.\n   c. Tool Implementation: How to implement the functionality of a tool using a different programming language (in this case, Bash).\n   d. Tool Usage: How to use the defined tool within the GPTScript by providing instructions to interact with it.\n\nThe script creates a simple conversational AI named Bob, implemented as a Bash script, which responds to questions in a friendly manner. This demonstrates how GPTScript can integrate external scripts or programs as AI tools, allowing for flexible and extensible AI automation workflows."
+                    "text": "I've read the contents of the file \"testdata/BobAsShell/test.gpt\". This is a sample GPTScript file that demonstrates a simple interaction with a custom AI tool named \"Bob\". Let me briefly describe the contents and the technique it's trying to demonstrate:\n\n1. Contents of the GPTScript file:\n   - The file starts by declaring the tool it will use: \"bob\"\n   - It then provides an instruction to ask Bob \"how are you doing\" and repeat his reply exactly.\n   - After that, there's a section that defines the \"bob\" tool:\n     - It gives Bob a name and a description: \"I'm Bob, a friendly guy.\"\n     - It specifies that Bob takes one argument: \"question\"\n     - The implementation of Bob is written in Bash script, which echoes a friendly response incorporating the question asked.\n\n2. Technique demonstrated:\n   This GPTScript file is demonstrating the creation and use of a custom AI tool within the GPTScript environment. Specifically, it shows:\n\n   a. Tool Declaration: How to declare a tool that will be used in the script.\n   b. Tool Definition: How to define a custom tool, including its name, description, and parameters.\n   c. Tool Implementation: How to implement the tool's functionality (in this case, using a Bash script).\n   d. Tool Usage: How to use the defined tool within the script by asking it a question.\n\nThe technique showcases the flexibility of GPTScript in integrating custom tools that can be implemented in various ways (like Bash scripts) and then used seamlessly within the AI conversation flow. This allows for extending the capabilities of the AI system with custom, potentially external functionalities.\n\nIn this specific example, \"Bob\" is a simple tool that responds to questions in a friendly manner, demonstrating how personality or specific response patterns can be incorporated into custom tools in GPTScript."
                 }
             ],
             "usage": {}
         }
     },
     {
-        "time": "2024-08-06T12:06:07.091589-04:00",
+        "time": "2024-08-23T12:02:52.544808-04:00",
         "callContext": {
-            "id": "toolu_01VTsZPAxCf1sJusFUoqHtgR",
+            "id": "toolu_01VosVGbzD4M8g6jw5ZQUgQy",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2494,16 +2478,16 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callFinish",
         "usage": {},
-        "content": "I have read the contents of the file \"testdata/BobAsShell/test.gpt\". This is a sample GPTScript file that demonstrates a simple interaction with a custom AI tool named \"Bob\". Let me briefly describe the contents and the technique it's trying to demonstrate:\n\n1. Contents of the GPTScript file:\n   - The file starts by declaring the tool it will use: \"bob\"\n   - It then provides an instruction to ask Bob \"how are you doing\" and repeat his reply exactly.\n   - After that, there's a section that defines the \"bob\" tool:\n     - It gives Bob a name and a brief description\n     - It specifies that Bob takes one argument: \"question\"\n     - The implementation of Bob is written in Bash script\n\n2. Technique being demonstrated:\n   This GPTScript file is demonstrating the technique of creating and using a custom AI tool within the GPTScript environment. Specifically, it shows:\n\n   a. Tool Declaration: How to declare a tool that will be used in the script.\n   b. Tool Definition: How to define a custom tool, including its name, description, and parameters.\n   c. Tool Implementation: How to implement the functionality of a tool using a different programming language (in this case, Bash).\n   d. Tool Usage: How to use the defined tool within the GPTScript by providing instructions to interact with it.\n\nThe script creates a simple conversational AI named Bob, implemented as a Bash script, which responds to questions in a friendly manner. This demonstrates how GPTScript can integrate external scripts or programs as AI tools, allowing for flexible and extensible AI automation workflows."
+        "content": "I've read the contents of the file \"testdata/BobAsShell/test.gpt\". This is a sample GPTScript file that demonstrates a simple interaction with a custom AI tool named \"Bob\". Let me briefly describe the contents and the technique it's trying to demonstrate:\n\n1. Contents of the GPTScript file:\n   - The file starts by declaring the tool it will use: \"bob\"\n   - It then provides an instruction to ask Bob \"how are you doing\" and repeat his reply exactly.\n   - After that, there's a section that defines the \"bob\" tool:\n     - It gives Bob a name and a description: \"I'm Bob, a friendly guy.\"\n     - It specifies that Bob takes one argument: \"question\"\n     - The implementation of Bob is written in Bash script, which echoes a friendly response incorporating the question asked.\n\n2. Technique demonstrated:\n   This GPTScript file is demonstrating the creation and use of a custom AI tool within the GPTScript environment. Specifically, it shows:\n\n   a. Tool Declaration: How to declare a tool that will be used in the script.\n   b. Tool Definition: How to define a custom tool, including its name, description, and parameters.\n   c. Tool Implementation: How to implement the tool's functionality (in this case, using a Bash script).\n   d. Tool Usage: How to use the defined tool within the script by asking it a question.\n\nThe technique showcases the flexibility of GPTScript in integrating custom tools that can be implemented in various ways (like Bash scripts) and then used seamlessly within the AI conversation flow. This allows for extending the capabilities of the AI system with custom, potentially external functionalities.\n\nIn this specific example, \"Bob\" is a simple tool that responds to questions in a friendly manner, demonstrating how personality or specific response patterns can be incorporated into custom tools in GPTScript."
     },
     {
-        "time": "2024-08-06T12:06:07.09162-04:00",
+        "time": "2024-08-23T12:02:52.544835-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -2512,7 +2496,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -2552,9 +2536,9 @@
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:06:07.414741-04:00",
+        "time": "2024-08-23T12:02:52.808549-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -2563,7 +2547,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -2599,21 +2583,21 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1722960345",
+        "chatCompletionId": "1724428956",
         "usage": {},
         "chatRequest": {
             "model": "claude-3-5-sonnet-20240620",
             "messages": [
                 {
                     "role": "system",
-                    "content": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file."
+                    "content": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file."
                 },
                 {
                     "role": "assistant",
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "toolu_01LdSKcXyjdbBRxDeM1c9FC1",
+                            "id": "toolu_01YWQ7wLRQ7tv4dSUJ6drs6Z",
                             "type": "function",
                             "function": {
                                 "name": "find",
@@ -2626,14 +2610,14 @@
                     "role": "tool",
                     "content": "testdata/Bob/test.gpt\ntestdata/BobAsShell/test.gpt\ntestdata/SamplesReadme/test.gpt",
                     "name": "find",
-                    "tool_call_id": "toolu_01LdSKcXyjdbBRxDeM1c9FC1"
+                    "tool_call_id": "toolu_01YWQ7wLRQ7tv4dSUJ6drs6Z"
                 },
                 {
                     "role": "assistant",
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "toolu_01GA1t6HhRTq4pzvRH6XNNkx",
+                            "id": "toolu_01W6GYNz1MwRBgehjZQQCWz3",
                             "type": "function",
                             "function": {
                                 "name": "summary",
@@ -2644,16 +2628,16 @@
                 },
                 {
                     "role": "tool",
-                    "content": "Thank you for providing the GPTScript file. I've read its contents, and I'll briefly describe what it contains and the technique it's demonstrating.\n\nThe GPTScript file contains a simple script that demonstrates the use of a custom AI tool or agent named \"Bob\". Here's a breakdown of the file's contents and the technique it's showcasing:\n\n1. Content Description:\n   - The script defines a tool called \"bob\" in the tools section.\n   - It includes a main instruction to ask Bob \"how are you doing\" and repeat his reply exactly.\n   - The \"bob\" tool is defined with a name, description, and an argument called \"question\".\n   - Bob is programmed to respond in a specific way when asked how he's doing.\n\n2. Technique Demonstration:\n   The script is demonstrating a few key concepts in AI automation and scripting:\n\n   a) Custom Tool Creation: It shows how to define a custom AI tool or agent (in this case, \"Bob\") with specific behaviors and responses.\n   \n   b) Parameterized Responses: The script showcases how to create a tool that can take an input (the \"question\" argument) and incorporate it into a predefined response template.\n   \n   c) Scripted Interactions: It demonstrates how to script a simple interaction with an AI tool, including asking a specific question and handling the response.\n   \n   d) Template-based Replies: Bob's response is templated, showing how to create consistent yet personalized responses by inserting a variable (${question}) into a fixed string.\n\nIn essence, this GPTScript file is a simple example of creating and interacting with a custom AI agent within an automation framework. It shows how one might script basic conversational interactions and define specific behaviors for AI tools or personas in a larger automation system.",
+                    "content": "Thank you for providing the GPTScript file. I've read its contents, and I'll briefly describe what it contains and the technique it's trying to demonstrate.\n\nThe GPTScript file \"test.gpt\" is demonstrating a simple AI automation script that involves interaction with a simulated AI tool or agent named \"Bob\". Here's a breakdown of its contents and the technique it's showcasing:\n\n1. Content Description:\n   - The script defines a tool called \"bob\".\n   - It instructs to ask Bob a specific question: \"how are you doing\".\n   - It then directs to repeat Bob's reply exactly.\n   - The script includes a definition for the \"bob\" tool, describing it as a friendly character.\n   - It specifies an argument \"question\" for interacting with Bob.\n   - Finally, it provides a specific response format for when Bob is asked how he's doing.\n\n2. Technique Demonstration:\n   The script is demonstrating several key concepts in AI automation scripting:\n\n   a) Tool Definition: It shows how to define a custom AI tool or agent (in this case, \"bob\") within a script.\n   \n   b) Parameterized Interactions: The script demonstrates how to set up parameterized interactions with an AI tool, using the \"question\" argument.\n   \n   c) Scripted Responses: It showcases how to create scripted or predefined responses for specific inputs. In this case, when asked \"how are you doing\", Bob has a specific, templated response.\n   \n   d) String Interpolation: The response uses string interpolation (${QUESTION}) to incorporate the input question into the output, demonstrating dynamic response generation.\n   \n   e) Exact Output Control: The script emphasizes exact repetition of responses, showing how GPTScript can be used to control AI outputs precisely.\n\nIn summary, this GPTScript file is a simple yet effective demonstration of creating a basic interactive AI tool with predefined behaviors and responses. It showcases the potential of GPTScript for crafting specific AI interactions and responses in an automation context.",
                     "name": "summary",
-                    "tool_call_id": "toolu_01GA1t6HhRTq4pzvRH6XNNkx"
+                    "tool_call_id": "toolu_01W6GYNz1MwRBgehjZQQCWz3"
                 },
                 {
                     "role": "assistant",
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "toolu_01VTsZPAxCf1sJusFUoqHtgR",
+                            "id": "toolu_01VosVGbzD4M8g6jw5ZQUgQy",
                             "type": "function",
                             "function": {
                                 "name": "summary",
@@ -2664,9 +2648,9 @@
                 },
                 {
                     "role": "tool",
-                    "content": "I have read the contents of the file \"testdata/BobAsShell/test.gpt\". This is a sample GPTScript file that demonstrates a simple interaction with a custom AI tool named \"Bob\". Let me briefly describe the contents and the technique it's trying to demonstrate:\n\n1. Contents of the GPTScript file:\n   - The file starts by declaring the tool it will use: \"bob\"\n   - It then provides an instruction to ask Bob \"how are you doing\" and repeat his reply exactly.\n   - After that, there's a section that defines the \"bob\" tool:\n     - It gives Bob a name and a brief description\n     - It specifies that Bob takes one argument: \"question\"\n     - The implementation of Bob is written in Bash script\n\n2. Technique being demonstrated:\n   This GPTScript file is demonstrating the technique of creating and using a custom AI tool within the GPTScript environment. Specifically, it shows:\n\n   a. Tool Declaration: How to declare a tool that will be used in the script.\n   b. Tool Definition: How to define a custom tool, including its name, description, and parameters.\n   c. Tool Implementation: How to implement the functionality of a tool using a different programming language (in this case, Bash).\n   d. Tool Usage: How to use the defined tool within the GPTScript by providing instructions to interact with it.\n\nThe script creates a simple conversational AI named Bob, implemented as a Bash script, which responds to questions in a friendly manner. This demonstrates how GPTScript can integrate external scripts or programs as AI tools, allowing for flexible and extensible AI automation workflows.",
+                    "content": "I've read the contents of the file \"testdata/BobAsShell/test.gpt\". This is a sample GPTScript file that demonstrates a simple interaction with a custom AI tool named \"Bob\". Let me briefly describe the contents and the technique it's trying to demonstrate:\n\n1. Contents of the GPTScript file:\n   - The file starts by declaring the tool it will use: \"bob\"\n   - It then provides an instruction to ask Bob \"how are you doing\" and repeat his reply exactly.\n   - After that, there's a section that defines the \"bob\" tool:\n     - It gives Bob a name and a description: \"I'm Bob, a friendly guy.\"\n     - It specifies that Bob takes one argument: \"question\"\n     - The implementation of Bob is written in Bash script, which echoes a friendly response incorporating the question asked.\n\n2. Technique demonstrated:\n   This GPTScript file is demonstrating the creation and use of a custom AI tool within the GPTScript environment. Specifically, it shows:\n\n   a. Tool Declaration: How to declare a tool that will be used in the script.\n   b. Tool Definition: How to define a custom tool, including its name, description, and parameters.\n   c. Tool Implementation: How to implement the tool's functionality (in this case, using a Bash script).\n   d. Tool Usage: How to use the defined tool within the script by asking it a question.\n\nThe technique showcases the flexibility of GPTScript in integrating custom tools that can be implemented in various ways (like Bash scripts) and then used seamlessly within the AI conversation flow. This allows for extending the capabilities of the AI system with custom, potentially external functionalities.\n\nIn this specific example, \"Bob\" is a simple tool that responds to questions in a friendly manner, demonstrating how personality or specific response patterns can be incorporated into custom tools in GPTScript.",
                     "name": "summary",
-                    "tool_call_id": "toolu_01VTsZPAxCf1sJusFUoqHtgR"
+                    "tool_call_id": "toolu_01VosVGbzD4M8g6jw5ZQUgQy"
                 }
             ],
             "temperature": 0,
@@ -2727,9 +2711,9 @@
         }
     },
     {
-        "time": "2024-08-06T12:06:09.627418-04:00",
+        "time": "2024-08-23T12:02:54.364328-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -2738,7 +2722,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -2774,7 +2758,7 @@
             "inputContext": null
         },
         "toolSubCalls": {
-            "toolu_01CtiU6WoJfeRsjPKomxvZQr": {
+            "toolu_013SmwvbjZPRdmiS1kSKGMAX": {
                 "toolID": "testdata/SamplesReadme/test.gpt:summary",
                 "input": "{\"file\": \"testdata/SamplesReadme/test.gpt\"}"
             }
@@ -2783,9 +2767,9 @@
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:06:09.627424-04:00",
+        "time": "2024-08-23T12:02:54.364331-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -2794,7 +2778,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -2830,7 +2814,7 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1722960345",
+        "chatCompletionId": "1724428956",
         "usage": {},
         "chatResponse": {
             "role": "assistant",
@@ -2838,7 +2822,7 @@
                 {
                     "toolCall": {
                         "index": 0,
-                        "id": "toolu_01CtiU6WoJfeRsjPKomxvZQr",
+                        "id": "toolu_013SmwvbjZPRdmiS1kSKGMAX",
                         "function": {
                             "name": "summary",
                             "arguments": "{\"file\": \"testdata/SamplesReadme/test.gpt\"}"
@@ -2850,14 +2834,13 @@
         }
     },
     {
-        "time": "2024-08-06T12:06:09.627488-04:00",
+        "time": "2024-08-23T12:02:54.364381-04:00",
         "callContext": {
-            "id": "toolu_01CtiU6WoJfeRsjPKomxvZQr",
+            "id": "toolu_013SmwvbjZPRdmiS1kSKGMAX",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2894,21 +2877,20 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callStart",
         "usage": {},
         "content": "{\"file\": \"testdata/SamplesReadme/test.gpt\"}"
     },
     {
-        "time": "2024-08-06T12:06:09.9307-04:00",
+        "time": "2024-08-23T12:02:54.702447-04:00",
         "callContext": {
-            "id": "toolu_01CtiU6WoJfeRsjPKomxvZQr",
+            "id": "toolu_013SmwvbjZPRdmiS1kSKGMAX",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -2945,10 +2927,10 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960346",
+        "chatCompletionId": "1724428957",
         "usage": {},
         "chatRequest": {
             "model": "claude-3-5-sonnet-20240620",
@@ -2962,7 +2944,7 @@
                     "content": "{\"file\": \"testdata/SamplesReadme/test.gpt\"}"
                 }
             ],
-            "temperature": 0.7,
+            "temperature": 0,
             "tools": [
                 {
                     "type": "function",
@@ -2984,14 +2966,13 @@
         }
     },
     {
-        "time": "2024-08-06T12:06:12.392264-04:00",
+        "time": "2024-08-23T12:02:56.647885-04:00",
         "callContext": {
-            "id": "toolu_01CtiU6WoJfeRsjPKomxvZQr",
+            "id": "toolu_013SmwvbjZPRdmiS1kSKGMAX",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -3028,10 +3009,10 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960346",
+        "chatCompletionId": "1724428957",
         "usage": {},
         "chatResponse": {
             "role": "assistant",
@@ -3039,7 +3020,7 @@
                 {
                     "toolCall": {
                         "index": 0,
-                        "id": "toolu_018fvDQyfKTcLfUtv2SYkDSf",
+                        "id": "toolu_01Vt9aQ5wYA5vGiHzqnrgDu1",
                         "function": {
                             "name": "read",
                             "arguments": "{\"filename\": \"testdata/SamplesReadme/test.gpt\"}"
@@ -3051,14 +3032,13 @@
         }
     },
     {
-        "time": "2024-08-06T12:06:12.392317-04:00",
+        "time": "2024-08-23T12:02:56.647928-04:00",
         "callContext": {
-            "id": "toolu_01CtiU6WoJfeRsjPKomxvZQr",
+            "id": "toolu_013SmwvbjZPRdmiS1kSKGMAX",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -3095,10 +3075,10 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "toolSubCalls": {
-            "toolu_018fvDQyfKTcLfUtv2SYkDSf": {
+            "toolu_01Vt9aQ5wYA5vGiHzqnrgDu1": {
                 "toolID": "sys.read",
                 "input": "{\"filename\": \"testdata/SamplesReadme/test.gpt\"}"
             }
@@ -3107,9 +3087,9 @@
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:06:12.392356-04:00",
+        "time": "2024-08-23T12:02:56.647965-04:00",
         "callContext": {
-            "id": "toolu_018fvDQyfKTcLfUtv2SYkDSf",
+            "id": "toolu_01Vt9aQ5wYA5vGiHzqnrgDu1",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
@@ -3131,7 +3111,7 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "toolu_01CtiU6WoJfeRsjPKomxvZQr",
+            "parentID": "toolu_013SmwvbjZPRdmiS1kSKGMAX",
             "displayText": "Reading `testdata/SamplesReadme/test.gpt`"
         },
         "type": "callStart",
@@ -3139,9 +3119,9 @@
         "content": "{\"filename\": \"testdata/SamplesReadme/test.gpt\"}"
     },
     {
-        "time": "2024-08-06T12:06:12.392409-04:00",
+        "time": "2024-08-23T12:02:56.648017-04:00",
         "callContext": {
-            "id": "toolu_018fvDQyfKTcLfUtv2SYkDSf",
+            "id": "toolu_01Vt9aQ5wYA5vGiHzqnrgDu1",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
@@ -3163,11 +3143,11 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "toolu_01CtiU6WoJfeRsjPKomxvZQr",
+            "parentID": "toolu_013SmwvbjZPRdmiS1kSKGMAX",
             "displayText": "Reading `testdata/SamplesReadme/test.gpt`"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960347",
+        "chatCompletionId": "1724428958",
         "usage": {},
         "chatRequest": {
             "model": "",
@@ -3175,9 +3155,9 @@
         }
     },
     {
-        "time": "2024-08-06T12:06:12.392481-04:00",
+        "time": "2024-08-23T12:02:56.648063-04:00",
         "callContext": {
-            "id": "toolu_018fvDQyfKTcLfUtv2SYkDSf",
+            "id": "toolu_01Vt9aQ5wYA5vGiHzqnrgDu1",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
@@ -3199,20 +3179,20 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "toolu_01CtiU6WoJfeRsjPKomxvZQr",
+            "parentID": "toolu_013SmwvbjZPRdmiS1kSKGMAX",
             "displayText": "Reading `testdata/SamplesReadme/test.gpt`"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960347",
+        "chatCompletionId": "1724428958",
         "usage": {},
         "chatResponse": {
             "usage": {}
         }
     },
     {
-        "time": "2024-08-06T12:06:12.392502-04:00",
+        "time": "2024-08-23T12:02:56.648087-04:00",
         "callContext": {
-            "id": "toolu_018fvDQyfKTcLfUtv2SYkDSf",
+            "id": "toolu_01Vt9aQ5wYA5vGiHzqnrgDu1",
             "tool": {
                 "name": "sys.read",
                 "description": "Reads the contents of a file",
@@ -3234,22 +3214,21 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "sys.read",
-            "parentID": "toolu_01CtiU6WoJfeRsjPKomxvZQr",
+            "parentID": "toolu_013SmwvbjZPRdmiS1kSKGMAX",
             "displayText": "Reading `testdata/SamplesReadme/test.gpt`"
         },
         "type": "callFinish",
         "usage": {},
-        "content": "tools: sys.find, sys.read, summary\n\nGenerate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.\n\n---\nname: summary\ndescription: Summarize a gpt file\nargs: file: filename to summarize\ntools: sys.read\ntemperature: 0.7\n\nRead ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.\n"
+        "content": "tools: sys.find, sys.read, summary\n\nGenerate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.\n\n---\nname: summary\ndescription: Summarize a gpt file\nargs: file: filename to summarize\ntools: sys.read\n\nRead ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.\n"
     },
     {
-        "time": "2024-08-06T12:06:12.392523-04:00",
+        "time": "2024-08-23T12:02:56.648105-04:00",
         "callContext": {
-            "id": "toolu_01CtiU6WoJfeRsjPKomxvZQr",
+            "id": "toolu_013SmwvbjZPRdmiS1kSKGMAX",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -3286,21 +3265,20 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "toolResults": 1,
         "type": "callContinue",
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:06:12.613886-04:00",
+        "time": "2024-08-23T12:02:56.917924-04:00",
         "callContext": {
-            "id": "toolu_01CtiU6WoJfeRsjPKomxvZQr",
+            "id": "toolu_013SmwvbjZPRdmiS1kSKGMAX",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -3337,10 +3315,10 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960348",
+        "chatCompletionId": "1724428959",
         "usage": {},
         "chatRequest": {
             "model": "claude-3-5-sonnet-20240620",
@@ -3358,7 +3336,7 @@
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "toolu_018fvDQyfKTcLfUtv2SYkDSf",
+                            "id": "toolu_01Vt9aQ5wYA5vGiHzqnrgDu1",
                             "type": "function",
                             "function": {
                                 "name": "read",
@@ -3369,12 +3347,12 @@
                 },
                 {
                     "role": "tool",
-                    "content": "tools: sys.find, sys.read, summary\n\nGenerate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.\n\n---\nname: summary\ndescription: Summarize a gpt file\nargs: file: filename to summarize\ntools: sys.read\ntemperature: 0.7\n\nRead ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.\n",
+                    "content": "tools: sys.find, sys.read, summary\n\nGenerate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.\n\n---\nname: summary\ndescription: Summarize a gpt file\nargs: file: filename to summarize\ntools: sys.read\n\nRead ${file} which is a sample GPTScript file. GPT script is an AI automation scripting language.\nBriefly describe the contents of the GPTScript file and what technique the file is trying to demonstrate.\n",
                     "name": "read",
-                    "tool_call_id": "toolu_018fvDQyfKTcLfUtv2SYkDSf"
+                    "tool_call_id": "toolu_01Vt9aQ5wYA5vGiHzqnrgDu1"
                 }
             ],
-            "temperature": 0.7,
+            "temperature": 0,
             "tools": [
                 {
                     "type": "function",
@@ -3396,14 +3374,13 @@
         }
     },
     {
-        "time": "2024-08-06T12:06:21.557353-04:00",
+        "time": "2024-08-23T12:03:02.794299-04:00",
         "callContext": {
-            "id": "toolu_01CtiU6WoJfeRsjPKomxvZQr",
+            "id": "toolu_013SmwvbjZPRdmiS1kSKGMAX",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -3440,30 +3417,29 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callChat",
-        "chatCompletionId": "1722960348",
+        "chatCompletionId": "1724428959",
         "usage": {},
         "chatResponse": {
             "role": "assistant",
             "content": [
                 {
-                    "text": "Based on the contents of the file \"testdata/SamplesReadme/test.gpt\", I can provide you with a brief description of its contents and the technique it's trying to demonstrate:\n\nThe GPTScript file contains a script designed to generate a readme that provides a consolidated summary of each sample *.gpt file in a \"testdata\" directory. Here's a breakdown of its contents and techniques:\n\n1. Tools Used:\n   - sys.find: Likely used to locate the *.gpt files in the testdata directory.\n   - sys.read: Used to read the contents of each found file.\n   - summary: A custom tool defined within the script.\n\n2. Main Objective:\n   The script aims to create a readme with summaries of each sample GPTScript file, including links to the referenced files.\n\n3. Custom Tool Definition:\n   The script defines a custom tool called \"summary\" with the following properties:\n   - Name: summary\n   - Description: Summarize a gpt file\n   - Arguments: file (filename to summarize)\n   - Tools used: sys.read\n   - Temperature: 0.7 (controlling the randomness of the AI's output)\n\n4. Summarization Technique:\n   The \"summary\" tool reads a specified GPTScript file and then asks an AI to briefly describe the contents of the file and explain what technique the file is trying to demonstrate.\n\n5. AI Prompt:\n   The script includes a prompt for the AI, instructing it to read the specified file, describe its contents, and explain the demonstrated technique.\n\nThe main technique this GPTScript file is demonstrating is the creation of a custom tool (\"summary\") that can be used to automatically generate summaries of other GPTScript files. This approach allows for the systematic documentation of a collection of script samples, which can be particularly useful for maintaining a library of GPTScript examples or for creating user documentation."
+                    "text": "Based on the contents of the file \"testdata/SamplesReadme/test.gpt\", I can provide you with a brief description of its contents and the technique it's trying to demonstrate:\n\nThe GPTScript file contains a script designed to generate a readme that provides a consolidated summary of each *.gpt file in the testdata directory. Here's a breakdown of its contents and techniques:\n\n1. Tools used: The script utilizes three tools: sys.find, sys.read, and a custom tool called \"summary\".\n\n2. Main functionality: The script is intended to create a readme with summaries of GPTScript files, including links to the referenced files.\n\n3. Custom tool definition: The file defines a custom tool called \"summary\" with the following properties:\n   - Name: summary\n   - Description: Summarize a gpt file\n   - Arguments: file (filename to summarize)\n   - Tools used: sys.read\n\n4. Summarization technique: The \"summary\" tool is designed to read a given GPTScript file and provide a brief description of its contents and the technique it's demonstrating.\n\n5. AI prompt: The script includes a prompt for an AI to read the specified file, recognize it as a GPTScript file, and generate a concise description of its contents and purpose.\n\nThe main technique this file is trying to demonstrate is the creation of a custom tool within a GPTScript that can be used to summarize other GPTScript files. This approach allows for a meta-level analysis of GPTScript files, which can be useful for documentation, organization, or quick reference purposes. The script showcases how GPTScript can be used to automate the process of generating documentation for a collection of scripts."
                 }
             ],
             "usage": {}
         }
     },
     {
-        "time": "2024-08-06T12:06:21.557382-04:00",
+        "time": "2024-08-23T12:03:02.794331-04:00",
         "callContext": {
-            "id": "toolu_01CtiU6WoJfeRsjPKomxvZQr",
+            "id": "toolu_013SmwvbjZPRdmiS1kSKGMAX",
             "tool": {
                 "name": "summary",
                 "description": "Summarize a gpt file",
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
-                "temperature": 0.7,
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -3500,16 +3476,16 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "summary",
-            "parentID": "1722960333"
+            "parentID": "1724428944"
         },
         "type": "callFinish",
         "usage": {},
-        "content": "Based on the contents of the file \"testdata/SamplesReadme/test.gpt\", I can provide you with a brief description of its contents and the technique it's trying to demonstrate:\n\nThe GPTScript file contains a script designed to generate a readme that provides a consolidated summary of each sample *.gpt file in a \"testdata\" directory. Here's a breakdown of its contents and techniques:\n\n1. Tools Used:\n   - sys.find: Likely used to locate the *.gpt files in the testdata directory.\n   - sys.read: Used to read the contents of each found file.\n   - summary: A custom tool defined within the script.\n\n2. Main Objective:\n   The script aims to create a readme with summaries of each sample GPTScript file, including links to the referenced files.\n\n3. Custom Tool Definition:\n   The script defines a custom tool called \"summary\" with the following properties:\n   - Name: summary\n   - Description: Summarize a gpt file\n   - Arguments: file (filename to summarize)\n   - Tools used: sys.read\n   - Temperature: 0.7 (controlling the randomness of the AI's output)\n\n4. Summarization Technique:\n   The \"summary\" tool reads a specified GPTScript file and then asks an AI to briefly describe the contents of the file and explain what technique the file is trying to demonstrate.\n\n5. AI Prompt:\n   The script includes a prompt for the AI, instructing it to read the specified file, describe its contents, and explain the demonstrated technique.\n\nThe main technique this GPTScript file is demonstrating is the creation of a custom tool (\"summary\") that can be used to automatically generate summaries of other GPTScript files. This approach allows for the systematic documentation of a collection of script samples, which can be particularly useful for maintaining a library of GPTScript examples or for creating user documentation."
+        "content": "Based on the contents of the file \"testdata/SamplesReadme/test.gpt\", I can provide you with a brief description of its contents and the technique it's trying to demonstrate:\n\nThe GPTScript file contains a script designed to generate a readme that provides a consolidated summary of each *.gpt file in the testdata directory. Here's a breakdown of its contents and techniques:\n\n1. Tools used: The script utilizes three tools: sys.find, sys.read, and a custom tool called \"summary\".\n\n2. Main functionality: The script is intended to create a readme with summaries of GPTScript files, including links to the referenced files.\n\n3. Custom tool definition: The file defines a custom tool called \"summary\" with the following properties:\n   - Name: summary\n   - Description: Summarize a gpt file\n   - Arguments: file (filename to summarize)\n   - Tools used: sys.read\n\n4. Summarization technique: The \"summary\" tool is designed to read a given GPTScript file and provide a brief description of its contents and the technique it's demonstrating.\n\n5. AI prompt: The script includes a prompt for an AI to read the specified file, recognize it as a GPTScript file, and generate a concise description of its contents and purpose.\n\nThe main technique this file is trying to demonstrate is the creation of a custom tool within a GPTScript that can be used to summarize other GPTScript files. This approach allows for a meta-level analysis of GPTScript files, which can be useful for documentation, organization, or quick reference purposes. The script showcases how GPTScript can be used to automate the process of generating documentation for a collection of scripts."
     },
     {
-        "time": "2024-08-06T12:06:21.557426-04:00",
+        "time": "2024-08-23T12:03:02.794354-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -3518,7 +3494,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -3558,9 +3534,9 @@
         "usage": {}
     },
     {
-        "time": "2024-08-06T12:06:21.787875-04:00",
+        "time": "2024-08-23T12:03:03.093811-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -3569,7 +3545,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -3605,21 +3581,21 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1722960349",
+        "chatCompletionId": "1724428960",
         "usage": {},
         "chatRequest": {
             "model": "claude-3-5-sonnet-20240620",
             "messages": [
                 {
                     "role": "system",
-                    "content": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file."
+                    "content": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file."
                 },
                 {
                     "role": "assistant",
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "toolu_01LdSKcXyjdbBRxDeM1c9FC1",
+                            "id": "toolu_01YWQ7wLRQ7tv4dSUJ6drs6Z",
                             "type": "function",
                             "function": {
                                 "name": "find",
@@ -3632,14 +3608,14 @@
                     "role": "tool",
                     "content": "testdata/Bob/test.gpt\ntestdata/BobAsShell/test.gpt\ntestdata/SamplesReadme/test.gpt",
                     "name": "find",
-                    "tool_call_id": "toolu_01LdSKcXyjdbBRxDeM1c9FC1"
+                    "tool_call_id": "toolu_01YWQ7wLRQ7tv4dSUJ6drs6Z"
                 },
                 {
                     "role": "assistant",
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "toolu_01GA1t6HhRTq4pzvRH6XNNkx",
+                            "id": "toolu_01W6GYNz1MwRBgehjZQQCWz3",
                             "type": "function",
                             "function": {
                                 "name": "summary",
@@ -3650,16 +3626,16 @@
                 },
                 {
                     "role": "tool",
-                    "content": "Thank you for providing the GPTScript file. I've read its contents, and I'll briefly describe what it contains and the technique it's demonstrating.\n\nThe GPTScript file contains a simple script that demonstrates the use of a custom AI tool or agent named \"Bob\". Here's a breakdown of the file's contents and the technique it's showcasing:\n\n1. Content Description:\n   - The script defines a tool called \"bob\" in the tools section.\n   - It includes a main instruction to ask Bob \"how are you doing\" and repeat his reply exactly.\n   - The \"bob\" tool is defined with a name, description, and an argument called \"question\".\n   - Bob is programmed to respond in a specific way when asked how he's doing.\n\n2. Technique Demonstration:\n   The script is demonstrating a few key concepts in AI automation and scripting:\n\n   a) Custom Tool Creation: It shows how to define a custom AI tool or agent (in this case, \"Bob\") with specific behaviors and responses.\n   \n   b) Parameterized Responses: The script showcases how to create a tool that can take an input (the \"question\" argument) and incorporate it into a predefined response template.\n   \n   c) Scripted Interactions: It demonstrates how to script a simple interaction with an AI tool, including asking a specific question and handling the response.\n   \n   d) Template-based Replies: Bob's response is templated, showing how to create consistent yet personalized responses by inserting a variable (${question}) into a fixed string.\n\nIn essence, this GPTScript file is a simple example of creating and interacting with a custom AI agent within an automation framework. It shows how one might script basic conversational interactions and define specific behaviors for AI tools or personas in a larger automation system.",
+                    "content": "Thank you for providing the GPTScript file. I've read its contents, and I'll briefly describe what it contains and the technique it's trying to demonstrate.\n\nThe GPTScript file \"test.gpt\" is demonstrating a simple AI automation script that involves interaction with a simulated AI tool or agent named \"Bob\". Here's a breakdown of its contents and the technique it's showcasing:\n\n1. Content Description:\n   - The script defines a tool called \"bob\".\n   - It instructs to ask Bob a specific question: \"how are you doing\".\n   - It then directs to repeat Bob's reply exactly.\n   - The script includes a definition for the \"bob\" tool, describing it as a friendly character.\n   - It specifies an argument \"question\" for interacting with Bob.\n   - Finally, it provides a specific response format for when Bob is asked how he's doing.\n\n2. Technique Demonstration:\n   The script is demonstrating several key concepts in AI automation scripting:\n\n   a) Tool Definition: It shows how to define a custom AI tool or agent (in this case, \"bob\") within a script.\n   \n   b) Parameterized Interactions: The script demonstrates how to set up parameterized interactions with an AI tool, using the \"question\" argument.\n   \n   c) Scripted Responses: It showcases how to create scripted or predefined responses for specific inputs. In this case, when asked \"how are you doing\", Bob has a specific, templated response.\n   \n   d) String Interpolation: The response uses string interpolation (${QUESTION}) to incorporate the input question into the output, demonstrating dynamic response generation.\n   \n   e) Exact Output Control: The script emphasizes exact repetition of responses, showing how GPTScript can be used to control AI outputs precisely.\n\nIn summary, this GPTScript file is a simple yet effective demonstration of creating a basic interactive AI tool with predefined behaviors and responses. It showcases the potential of GPTScript for crafting specific AI interactions and responses in an automation context.",
                     "name": "summary",
-                    "tool_call_id": "toolu_01GA1t6HhRTq4pzvRH6XNNkx"
+                    "tool_call_id": "toolu_01W6GYNz1MwRBgehjZQQCWz3"
                 },
                 {
                     "role": "assistant",
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "toolu_01VTsZPAxCf1sJusFUoqHtgR",
+                            "id": "toolu_01VosVGbzD4M8g6jw5ZQUgQy",
                             "type": "function",
                             "function": {
                                 "name": "summary",
@@ -3670,16 +3646,16 @@
                 },
                 {
                     "role": "tool",
-                    "content": "I have read the contents of the file \"testdata/BobAsShell/test.gpt\". This is a sample GPTScript file that demonstrates a simple interaction with a custom AI tool named \"Bob\". Let me briefly describe the contents and the technique it's trying to demonstrate:\n\n1. Contents of the GPTScript file:\n   - The file starts by declaring the tool it will use: \"bob\"\n   - It then provides an instruction to ask Bob \"how are you doing\" and repeat his reply exactly.\n   - After that, there's a section that defines the \"bob\" tool:\n     - It gives Bob a name and a brief description\n     - It specifies that Bob takes one argument: \"question\"\n     - The implementation of Bob is written in Bash script\n\n2. Technique being demonstrated:\n   This GPTScript file is demonstrating the technique of creating and using a custom AI tool within the GPTScript environment. Specifically, it shows:\n\n   a. Tool Declaration: How to declare a tool that will be used in the script.\n   b. Tool Definition: How to define a custom tool, including its name, description, and parameters.\n   c. Tool Implementation: How to implement the functionality of a tool using a different programming language (in this case, Bash).\n   d. Tool Usage: How to use the defined tool within the GPTScript by providing instructions to interact with it.\n\nThe script creates a simple conversational AI named Bob, implemented as a Bash script, which responds to questions in a friendly manner. This demonstrates how GPTScript can integrate external scripts or programs as AI tools, allowing for flexible and extensible AI automation workflows.",
+                    "content": "I've read the contents of the file \"testdata/BobAsShell/test.gpt\". This is a sample GPTScript file that demonstrates a simple interaction with a custom AI tool named \"Bob\". Let me briefly describe the contents and the technique it's trying to demonstrate:\n\n1. Contents of the GPTScript file:\n   - The file starts by declaring the tool it will use: \"bob\"\n   - It then provides an instruction to ask Bob \"how are you doing\" and repeat his reply exactly.\n   - After that, there's a section that defines the \"bob\" tool:\n     - It gives Bob a name and a description: \"I'm Bob, a friendly guy.\"\n     - It specifies that Bob takes one argument: \"question\"\n     - The implementation of Bob is written in Bash script, which echoes a friendly response incorporating the question asked.\n\n2. Technique demonstrated:\n   This GPTScript file is demonstrating the creation and use of a custom AI tool within the GPTScript environment. Specifically, it shows:\n\n   a. Tool Declaration: How to declare a tool that will be used in the script.\n   b. Tool Definition: How to define a custom tool, including its name, description, and parameters.\n   c. Tool Implementation: How to implement the tool's functionality (in this case, using a Bash script).\n   d. Tool Usage: How to use the defined tool within the script by asking it a question.\n\nThe technique showcases the flexibility of GPTScript in integrating custom tools that can be implemented in various ways (like Bash scripts) and then used seamlessly within the AI conversation flow. This allows for extending the capabilities of the AI system with custom, potentially external functionalities.\n\nIn this specific example, \"Bob\" is a simple tool that responds to questions in a friendly manner, demonstrating how personality or specific response patterns can be incorporated into custom tools in GPTScript.",
                     "name": "summary",
-                    "tool_call_id": "toolu_01VTsZPAxCf1sJusFUoqHtgR"
+                    "tool_call_id": "toolu_01VosVGbzD4M8g6jw5ZQUgQy"
                 },
                 {
                     "role": "assistant",
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "toolu_01CtiU6WoJfeRsjPKomxvZQr",
+                            "id": "toolu_013SmwvbjZPRdmiS1kSKGMAX",
                             "type": "function",
                             "function": {
                                 "name": "summary",
@@ -3690,9 +3666,9 @@
                 },
                 {
                     "role": "tool",
-                    "content": "Based on the contents of the file \"testdata/SamplesReadme/test.gpt\", I can provide you with a brief description of its contents and the technique it's trying to demonstrate:\n\nThe GPTScript file contains a script designed to generate a readme that provides a consolidated summary of each sample *.gpt file in a \"testdata\" directory. Here's a breakdown of its contents and techniques:\n\n1. Tools Used:\n   - sys.find: Likely used to locate the *.gpt files in the testdata directory.\n   - sys.read: Used to read the contents of each found file.\n   - summary: A custom tool defined within the script.\n\n2. Main Objective:\n   The script aims to create a readme with summaries of each sample GPTScript file, including links to the referenced files.\n\n3. Custom Tool Definition:\n   The script defines a custom tool called \"summary\" with the following properties:\n   - Name: summary\n   - Description: Summarize a gpt file\n   - Arguments: file (filename to summarize)\n   - Tools used: sys.read\n   - Temperature: 0.7 (controlling the randomness of the AI's output)\n\n4. Summarization Technique:\n   The \"summary\" tool reads a specified GPTScript file and then asks an AI to briefly describe the contents of the file and explain what technique the file is trying to demonstrate.\n\n5. AI Prompt:\n   The script includes a prompt for the AI, instructing it to read the specified file, describe its contents, and explain the demonstrated technique.\n\nThe main technique this GPTScript file is demonstrating is the creation of a custom tool (\"summary\") that can be used to automatically generate summaries of other GPTScript files. This approach allows for the systematic documentation of a collection of script samples, which can be particularly useful for maintaining a library of GPTScript examples or for creating user documentation.",
+                    "content": "Based on the contents of the file \"testdata/SamplesReadme/test.gpt\", I can provide you with a brief description of its contents and the technique it's trying to demonstrate:\n\nThe GPTScript file contains a script designed to generate a readme that provides a consolidated summary of each *.gpt file in the testdata directory. Here's a breakdown of its contents and techniques:\n\n1. Tools used: The script utilizes three tools: sys.find, sys.read, and a custom tool called \"summary\".\n\n2. Main functionality: The script is intended to create a readme with summaries of GPTScript files, including links to the referenced files.\n\n3. Custom tool definition: The file defines a custom tool called \"summary\" with the following properties:\n   - Name: summary\n   - Description: Summarize a gpt file\n   - Arguments: file (filename to summarize)\n   - Tools used: sys.read\n\n4. Summarization technique: The \"summary\" tool is designed to read a given GPTScript file and provide a brief description of its contents and the technique it's demonstrating.\n\n5. AI prompt: The script includes a prompt for an AI to read the specified file, recognize it as a GPTScript file, and generate a concise description of its contents and purpose.\n\nThe main technique this file is trying to demonstrate is the creation of a custom tool within a GPTScript that can be used to summarize other GPTScript files. This approach allows for a meta-level analysis of GPTScript files, which can be useful for documentation, organization, or quick reference purposes. The script showcases how GPTScript can be used to automate the process of generating documentation for a collection of scripts.",
                     "name": "summary",
-                    "tool_call_id": "toolu_01CtiU6WoJfeRsjPKomxvZQr"
+                    "tool_call_id": "toolu_013SmwvbjZPRdmiS1kSKGMAX"
                 }
             ],
             "temperature": 0,
@@ -3753,9 +3729,9 @@
         }
     },
     {
-        "time": "2024-08-06T12:06:33.603142-04:00",
+        "time": "2024-08-23T12:03:11.019312-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -3764,7 +3740,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -3800,22 +3776,22 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1722960349",
+        "chatCompletionId": "1724428960",
         "usage": {},
         "chatResponse": {
             "role": "assistant",
             "content": [
                 {
-                    "text": "Based on the summaries of the GPTScript files found in the testdata directory, I'll now generate a README that provides a consolidated summary of each sample *.gpt file, including links to the referenced files:\n\n# Sample GPTScript Files README\n\nThis README provides a summary of the sample GPTScript files found in the testdata directory. Each entry includes a brief description of the file's contents and the technique it demonstrates, along with a link to the file.\n\n## [testdata/Bob/test.gpt](testdata/Bob/test.gpt)\n\nThis GPTScript file demonstrates the creation and use of a custom AI tool named \"Bob\". \n\n**Key Features:**\n- Defines a custom tool called \"bob\" with a specific behavior\n- Shows how to create parameterized responses\n- Demonstrates scripted interactions with an AI tool\n- Illustrates the use of template-based replies\n\n**Technique Demonstrated:** The script showcases how to create a simple conversational AI agent within an automation framework, including defining specific behaviors and scripting basic interactions.\n\n## [testdata/BobAsShell/test.gpt](testdata/BobAsShell/test.gpt)\n\nThis GPTScript file demonstrates the integration of an external script (in this case, a Bash script) as a custom AI tool named \"Bob\".\n\n**Key Features:**\n- Declares and defines a custom tool \"bob\"\n- Implements the tool's functionality using Bash script\n- Shows how to interact with the custom tool within GPTScript\n\n**Technique Demonstrated:** This script illustrates how GPTScript can integrate external scripts or programs as AI tools, allowing for flexible and extensible AI automation workflows.\n\n## [testdata/SamplesReadme/test.gpt](testdata/SamplesReadme/test.gpt)\n\nThis GPTScript file is designed to generate a readme that summarizes other GPTScript files in a directory.\n\n**Key Features:**\n- Uses system tools (sys.find, sys.read) to locate and read GPTScript files\n- Defines a custom \"summary\" tool for file summarization\n- Demonstrates how to create documentation for a collection of scripts\n\n**Technique Demonstrated:** The script showcases the creation of a custom tool for automatic documentation generation, which can be useful for maintaining a library of GPTScript examples or creating user documentation.\n\nThis README provides an overview of the sample GPTScript files, demonstrating various techniques from simple AI interactions to more complex automation and documentation tasks. Each sample illustrates different aspects of working with GPTScript, offering valuable examples for users learning to create their own AI-powered automation scripts."
+                    "text": "Based on the summaries of the GPTScript files found in the testdata directory, I'll now generate a README with consolidated summaries for each file, including links to the referenced files:\n\n# GPTScript Files Summary\n\n## [testdata/Bob/test.gpt](testdata/Bob/test.gpt)\n\nThis GPTScript file demonstrates a simple AI automation script involving interaction with a simulated AI tool or agent named \"Bob\". Key features include:\n\n- Definition of a custom AI tool called \"bob\"\n- Demonstration of parameterized interactions with the AI tool\n- Showcase of scripted responses for specific inputs\n- Use of string interpolation for dynamic response generation\n- Emphasis on exact output control\n\nThe script effectively demonstrates the creation of a basic interactive AI tool with predefined behaviors and responses, highlighting the potential of GPTScript for crafting specific AI interactions in an automation context.\n\n## [testdata/BobAsShell/test.gpt](testdata/BobAsShell/test.gpt)\n\nThis GPTScript file showcases the creation and use of a custom AI tool named \"Bob\" within the GPTScript environment. Notable aspects include:\n\n- Declaration and definition of a custom tool\n- Implementation of the tool's functionality using a Bash script\n- Demonstration of tool usage within the script\n- Integration of personality into the custom tool's responses\n\nThe script illustrates the flexibility of GPTScript in integrating custom tools that can be implemented in various ways (like Bash scripts) and then used seamlessly within the AI conversation flow. This allows for extending the capabilities of the AI system with custom, potentially external functionalities.\n\n## [testdata/SamplesReadme/test.gpt](testdata/SamplesReadme/test.gpt)\n\nThis GPTScript file contains a script designed to generate a readme that provides a consolidated summary of each *.gpt file in the testdata directory. Key features include:\n\n- Utilization of multiple tools: sys.find, sys.read, and a custom \"summary\" tool\n- Definition of a custom \"summary\" tool for summarizing GPTScript files\n- Implementation of a meta-level analysis of GPTScript files\n- Automation of documentation generation for a collection of scripts\n\nThe script demonstrates how GPTScript can be used to create custom tools for analyzing and documenting other GPTScript files, showcasing its potential for automating meta-level tasks and generating documentation.\n\nThis README provides an overview of the GPTScript files found in the testdata directory, highlighting their key features and demonstrating various techniques for working with GPTScript."
                 }
             ],
             "usage": {}
         }
     },
     {
-        "time": "2024-08-06T12:06:33.603177-04:00",
+        "time": "2024-08-23T12:03:11.019337-04:00",
         "callContext": {
-            "id": "1722960333",
+            "id": "1724428944",
             "tool": {
                 "modelName": "claude-3-5-sonnet-20240620 from github.com/gptscript-ai/claude3-anthropic-provider",
                 "internalPrompt": null,
@@ -3824,7 +3800,7 @@
                     "sys.read",
                     "summary"
                 ],
-                "instructions": "Generate a readme that gives a consolidated summary of each sample *.gpt file in testdata \nEach entry should be a include a link to the referenced file.",
+                "instructions": "Generate a readme that gives a consolidated summary of each *.gpt file in the testdata directory.\nEach entry should be a include a link to the referenced file.",
                 "id": "testdata/SamplesReadme/test.gpt:",
                 "toolMapping": {
                     "summary": [
@@ -3861,10 +3837,10 @@
         },
         "type": "callFinish",
         "usage": {},
-        "content": "Based on the summaries of the GPTScript files found in the testdata directory, I'll now generate a README that provides a consolidated summary of each sample *.gpt file, including links to the referenced files:\n\n# Sample GPTScript Files README\n\nThis README provides a summary of the sample GPTScript files found in the testdata directory. Each entry includes a brief description of the file's contents and the technique it demonstrates, along with a link to the file.\n\n## [testdata/Bob/test.gpt](testdata/Bob/test.gpt)\n\nThis GPTScript file demonstrates the creation and use of a custom AI tool named \"Bob\". \n\n**Key Features:**\n- Defines a custom tool called \"bob\" with a specific behavior\n- Shows how to create parameterized responses\n- Demonstrates scripted interactions with an AI tool\n- Illustrates the use of template-based replies\n\n**Technique Demonstrated:** The script showcases how to create a simple conversational AI agent within an automation framework, including defining specific behaviors and scripting basic interactions.\n\n## [testdata/BobAsShell/test.gpt](testdata/BobAsShell/test.gpt)\n\nThis GPTScript file demonstrates the integration of an external script (in this case, a Bash script) as a custom AI tool named \"Bob\".\n\n**Key Features:**\n- Declares and defines a custom tool \"bob\"\n- Implements the tool's functionality using Bash script\n- Shows how to interact with the custom tool within GPTScript\n\n**Technique Demonstrated:** This script illustrates how GPTScript can integrate external scripts or programs as AI tools, allowing for flexible and extensible AI automation workflows.\n\n## [testdata/SamplesReadme/test.gpt](testdata/SamplesReadme/test.gpt)\n\nThis GPTScript file is designed to generate a readme that summarizes other GPTScript files in a directory.\n\n**Key Features:**\n- Uses system tools (sys.find, sys.read) to locate and read GPTScript files\n- Defines a custom \"summary\" tool for file summarization\n- Demonstrates how to create documentation for a collection of scripts\n\n**Technique Demonstrated:** The script showcases the creation of a custom tool for automatic documentation generation, which can be useful for maintaining a library of GPTScript examples or creating user documentation.\n\nThis README provides an overview of the sample GPTScript files, demonstrating various techniques from simple AI interactions to more complex automation and documentation tasks. Each sample illustrates different aspects of working with GPTScript, offering valuable examples for users learning to create their own AI-powered automation scripts."
+        "content": "Based on the summaries of the GPTScript files found in the testdata directory, I'll now generate a README with consolidated summaries for each file, including links to the referenced files:\n\n# GPTScript Files Summary\n\n## [testdata/Bob/test.gpt](testdata/Bob/test.gpt)\n\nThis GPTScript file demonstrates a simple AI automation script involving interaction with a simulated AI tool or agent named \"Bob\". Key features include:\n\n- Definition of a custom AI tool called \"bob\"\n- Demonstration of parameterized interactions with the AI tool\n- Showcase of scripted responses for specific inputs\n- Use of string interpolation for dynamic response generation\n- Emphasis on exact output control\n\nThe script effectively demonstrates the creation of a basic interactive AI tool with predefined behaviors and responses, highlighting the potential of GPTScript for crafting specific AI interactions in an automation context.\n\n## [testdata/BobAsShell/test.gpt](testdata/BobAsShell/test.gpt)\n\nThis GPTScript file showcases the creation and use of a custom AI tool named \"Bob\" within the GPTScript environment. Notable aspects include:\n\n- Declaration and definition of a custom tool\n- Implementation of the tool's functionality using a Bash script\n- Demonstration of tool usage within the script\n- Integration of personality into the custom tool's responses\n\nThe script illustrates the flexibility of GPTScript in integrating custom tools that can be implemented in various ways (like Bash scripts) and then used seamlessly within the AI conversation flow. This allows for extending the capabilities of the AI system with custom, potentially external functionalities.\n\n## [testdata/SamplesReadme/test.gpt](testdata/SamplesReadme/test.gpt)\n\nThis GPTScript file contains a script designed to generate a readme that provides a consolidated summary of each *.gpt file in the testdata directory. Key features include:\n\n- Utilization of multiple tools: sys.find, sys.read, and a custom \"summary\" tool\n- Definition of a custom \"summary\" tool for summarizing GPTScript files\n- Implementation of a meta-level analysis of GPTScript files\n- Automation of documentation generation for a collection of scripts\n\nThe script demonstrates how GPTScript can be used to create custom tools for analyzing and documenting other GPTScript files, showcasing its potential for automating meta-level tasks and generating documentation.\n\nThis README provides an overview of the GPTScript files found in the testdata directory, highlighting their key features and demonstrating various techniques for working with GPTScript."
     },
     {
-        "time": "2024-08-06T12:06:33.603203-04:00",
+        "time": "2024-08-23T12:03:11.019355-04:00",
         "type": "runFinish",
         "usage": {}
     }
