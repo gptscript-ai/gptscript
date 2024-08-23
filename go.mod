@@ -9,6 +9,7 @@ require (
 	github.com/chzyer/readline v1.5.1
 	github.com/docker/cli v26.0.0+incompatible
 	github.com/docker/docker-credential-helpers v0.8.1
+	github.com/expr-lang/expr v1.16.10-0.20240715091933-5e660e753e47
 	github.com/fatih/color v1.17.0
 	github.com/getkin/kin-openapi v0.124.0
 	github.com/go-git/go-git/v5 v5.12.0
