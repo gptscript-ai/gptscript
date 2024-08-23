@@ -59,6 +59,35 @@ jobs:
 
           echo "run_smoke_tests=false" >> $GITHUB_OUTPUT
 
+  gpt-4o-2024-08-06:
+    needs: check-label
+    if: ${{ needs.check-label.outputs.run_smoke_tests == 'true' }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout base repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Checkout PR code if running for a PR
+        if: ${{ github.event_name == 'pull_request_target' }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/setup-go@v5
+        with:
+          cache: false
+          go-version: "1.21"
+      - env:
+          OPENAI_API_KEY: ${{ secrets.SMOKE_OPENAI_API_KEY }}
+          GPTSCRIPT_DEFAULT_MODEL: gpt-4o-2024-08-06
+        name: Run smoke test for gpt-4o-2024-08-06
+        run: |
+          echo "Running smoke test for model gpt-4o-2024-08-06"
+          export PATH="$(pwd)/bin:${PATH}"
+          make smoke
+
   gpt-4o-2024-05-13:
     needs: check-label
     if: ${{ needs.check-label.outputs.run_smoke_tests == 'true' }}
