@@ -110,8 +110,7 @@ func New(ctx context.Context, o ...Options) (*GPTScript, error) {
 
 	if opts.DefaultModelProvider == "" {
 		oaiClient, err := openai.NewClient(ctx, credStore, opts.OpenAI, openai.Options{
-			Cache:   cacheClient,
-			SetSeed: true,
+			Cache: cacheClient,
 		})
 		if err != nil {
 			return nil, err

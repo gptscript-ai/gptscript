@@ -44,7 +44,6 @@ type Client struct {
 	cache        *cache.Client
 	invalidAuth  bool
 	cacheKeyBase string
-	setSeed      bool
 	credStore    credentials.CredentialStore
 }
 
@@ -54,7 +53,6 @@ type Options struct {
 	OrgID        string `usage:"OpenAI organization ID" name:"openai-org-id" env:"OPENAI_ORG_ID"`
 	DefaultModel string `usage:"Default LLM model to use" default:"gpt-4o"`
 	ConfigFile   string `usage:"Path to GPTScript config file" name:"config"`
-	SetSeed      bool   `usage:"-"`
 	CacheKey     string `usage:"-"`
 	Cache        *cache.Client
 }
@@ -66,7 +64,6 @@ func Complete(opts ...Options) (result Options) {
 		result.OrgID = types.FirstSet(opt.OrgID, result.OrgID)
 		result.Cache = types.FirstSet(opt.Cache, result.Cache)
 		result.DefaultModel = types.FirstSet(opt.DefaultModel, result.DefaultModel)
-		result.SetSeed = types.FirstSet(opt.SetSeed, result.SetSeed)
 		result.CacheKey = types.FirstSet(opt.CacheKey, result.CacheKey)
 	}
 
@@ -125,7 +122,6 @@ func NewClient(ctx context.Context, credStore credentials.CredentialStore, opts 
 		defaultModel: opt.DefaultModel,
 		cacheKeyBase: cacheKeyBase,
 		invalidAuth:  opt.APIKey == "" && opt.BaseURL == "",
-		setSeed:      opt.SetSeed,
 		credStore:    credStore,
 	}, nil
 }
@@ -234,15 +230,11 @@ func toToolCall(call types.CompletionToolCall) openai.ToolCall {
 	}
 }
 
-func toMessages(request types.CompletionRequest, compat bool) (result []openai.ChatCompletionMessage, err error) {
+func toMessages(request types.CompletionRequest) (result []openai.ChatCompletionMessage, err error) {
 	var (
 		systemPrompts []string
 		msgs          []types.CompletionMessage
 	)
-
-	if !compat && (request.InternalSystemPrompt == nil || *request.InternalSystemPrompt) {
-		systemPrompts = append(systemPrompts, system.InternalSystemPrompt)
-	}
 
 	for _, message := range request.Messages {
 		if message.Role == types.CompletionMessageRoleTypeSystem {
@@ -311,7 +303,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		messageRequest.Model = c.defaultModel
 	}
 
-	msgs, err := toMessages(messageRequest, !c.setSeed)
+	msgs, err := toMessages(messageRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -372,11 +364,9 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	}
 
 	var cacheResponse bool
-	if c.setSeed {
-		request.Seed = ptr(c.seed(request))
-		request.StreamOptions = &openai.StreamOptions{
-			IncludeUsage: true,
-		}
+	request.Seed = ptr(c.seed(request))
+	request.StreamOptions = &openai.StreamOptions{
+		IncludeUsage: true,
 	}
 	response, ok, err := c.fromCache(ctx, messageRequest, request)
 	if err != nil {

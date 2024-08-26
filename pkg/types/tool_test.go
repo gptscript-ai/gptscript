@@ -18,7 +18,6 @@ func TestToolDef_String(t *testing.T) {
 			Chat:                true,
 			Temperature:         float32Ptr(0.8),
 			Cache:               boolPtr(true),
-			InternalPrompt:      boolPtr(true),
 			Arguments:           ObjectSchema("arg1", "desc1", "arg2", "desc2"),
 			Tools:               []string{"Tool1", "Tool2"},
 			GlobalTools:         []string{"GlobalTool1", "GlobalTool2"},
@@ -67,7 +66,6 @@ JSON Response: true
 Temperature: 0.800000
 Parameter: arg1: desc1
 Parameter: arg2: desc2
-Internal Prompt: true
 Credential: Credential1
 Credential: Credential2
 Share Credential: ExportCredential1

@@ -8,7 +8,6 @@
         "input": "No, You're stupid!\n ha ha ha\n",
         "completion": {
           "model": "gpt-4o",
-          "internalSystemPrompt": false,
           "messages": [
             {
               "role": "system",
