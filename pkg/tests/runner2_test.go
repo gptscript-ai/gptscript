@@ -32,3 +32,26 @@ echo This is the input: ${GPTSCRIPT_INPUT}
 	resp, err = r.Chat(context.Background(), resp.State, prg, nil, "input 2")
 	r.AssertStep(t, resp, err)
 }
+
+func TestContextShareBug(t *testing.T) {
+	r := tester.NewRunner(t)
+	prg, err := loader.ProgramFromSource(context.Background(), `
+chat: true
+tools: sharecontext
+
+Say hi
+
+---
+name: sharecontext
+share context: realcontext
+---
+name: realcontext
+
+#!sys.echo
+
+Yo dawg`, "")
+	require.NoError(t, err)
+
+	resp, err := r.Chat(context.Background(), nil, prg, nil, "input 1")
+	r.AssertStep(t, resp, err)
+}
