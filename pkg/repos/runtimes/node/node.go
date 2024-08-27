@@ -26,6 +26,7 @@ var releasesData []byte
 const (
 	downloadURL = "https://nodejs.org/dist/%s/"
 	packageJSON = "package.json"
+	nodeModules = "node_modules"
 )
 
 type Runtime struct {
@@ -64,8 +65,15 @@ func (r *Runtime) supports(testCmd string, cmd []string) bool {
 
 func (r *Runtime) GetHash(tool types.Tool) (string, error) {
 	if !tool.Source.IsGit() && tool.WorkingDir != "" {
+		var prefix string
+		// This hashes if the node_modules directory was deleted
+		if s, err := os.Stat(filepath.Join(tool.WorkingDir, nodeModules)); err == nil {
+			prefix = hash.Digest(tool.WorkingDir + s.ModTime().String())[:7]
+		} else if s, err := os.Stat(tool.WorkingDir); err == nil {
+			prefix = hash.Digest(tool.WorkingDir + s.ModTime().String())[:7]
+		}
 		if s, err := os.Stat(filepath.Join(tool.WorkingDir, packageJSON)); err == nil {
-			return hash.Digest(tool.WorkingDir + s.ModTime().String())[:7], nil
+			return prefix + hash.Digest(tool.WorkingDir + s.ModTime().String())[:7], nil
 		}
 	}
 	return "", nil

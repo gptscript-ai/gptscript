@@ -6,7 +6,7 @@
       "role": "system",
       "content": [
         {
-          "text": "Assistant Response 2 - from context tool\nHello"
+          "text": "This is the input: input 1\n\nSay hi"
         }
       ],
       "usage": {}
@@ -15,7 +15,7 @@
       "role": "user",
       "content": [
         {
-          "text": "User 1"
+          "text": "input 1"
         }
       ],
       "usage": {}

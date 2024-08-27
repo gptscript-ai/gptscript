@@ -135,7 +135,8 @@ func (c *Client) Call(_ context.Context, messageRequest types.CompletionRequest,
 type Runner struct {
 	*runner.Runner
 
-	Client *Client
+	Client       *Client
+	StepAsserted int
 }
 
 func (r *Runner) RunDefault() string {
@@ -164,6 +165,21 @@ func (r *Runner) Run(script, input string) (string, error) {
 func (r *Runner) AssertResponded(t *testing.T) {
 	t.Helper()
 	require.Len(t, r.Client.result, 0)
+}
+
+func toJSONString(t *testing.T, v interface{}) string {
+	t.Helper()
+	x, err := json.MarshalIndent(v, "", "  ")
+	require.NoError(t, err)
+	return string(x)
+}
+
+func (r *Runner) AssertStep(t *testing.T, resp runner.ChatResponse, err error) {
+	t.Helper()
+	r.StepAsserted++
+	require.NoError(t, err)
+	r.AssertResponded(t)
+	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+fmt.Sprintf("/step%d", r.StepAsserted)))
 }
 
 func (r *Runner) RespondWith(result ...Result) {

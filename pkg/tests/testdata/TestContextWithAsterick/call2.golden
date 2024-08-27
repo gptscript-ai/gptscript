@@ -6,7 +6,7 @@
       "role": "system",
       "content": [
         {
-          "text": "Assistant Response 5 - from context tool resume\nHello"
+          "text": "This is the input: input 2\n\nSay hi"
         }
       ],
       "usage": {}
@@ -15,7 +15,7 @@
       "role": "user",
       "content": [
         {
-          "text": "User 1"
+          "text": "input 1"
         }
       ],
       "usage": {}
@@ -24,7 +24,7 @@
       "role": "assistant",
       "content": [
         {
-          "text": "Assistant Response 3 - from main chat tool"
+          "text": "TEST RESULT CALL: 1"
         }
       ],
       "usage": {}
@@ -33,7 +33,7 @@
       "role": "user",
       "content": [
         {
-          "text": "User 3"
+          "text": "input 2"
         }
       ],
       "usage": {}
