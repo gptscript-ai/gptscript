@@ -172,11 +172,7 @@ func (r *Runner) Chat(ctx context.Context, prevState ChatState, prg types.Progra
 		return resp, err
 	}
 
-	if state == nil || state.StartContinuation {
-		if state != nil {
-			state = state.WithResumeInput(&input)
-			input = state.InputContextContinuationInput
-		}
+	if state == nil {
 		state, err = r.start(callCtx, state, monitor, env, input)
 		if err != nil {
 			return resp, err
@@ -186,11 +182,9 @@ func (r *Runner) Chat(ctx context.Context, prevState ChatState, prg types.Progra
 		state.ResumeInput = &input
 	}
 
-	if !state.StartContinuation {
-		state, err = r.resume(callCtx, monitor, env, state)
-		if err != nil {
-			return resp, err
-		}
+	state, err = r.resume(callCtx, monitor, env, state)
+	if err != nil {
+		return resp, err
 	}
 
 	if state.Result != nil {
@@ -335,24 +329,10 @@ func getToolRefInput(prg *types.Program, ref types.ToolReference, input string) 
 	return string(output), err
 }
 
-func (r *Runner) getContext(callCtx engine.Context, state *State, monitor Monitor, env []string, input string) (result []engine.InputContext, _ *State, _ error) {
+func (r *Runner) getContext(callCtx engine.Context, state *State, monitor Monitor, env []string, input string) (result []engine.InputContext, _ error) {
 	toolRefs, err := callCtx.Tool.GetContextTools(*callCtx.Program)
 	if err != nil {
-		return nil, nil, err
-	}
-
-	var newState *State
-	if state != nil {
-		cp := *state
-		newState = &cp
-		if newState.InputContextContinuation != nil {
-			newState.InputContexts = nil
-			newState.InputContextContinuation = nil
-			newState.InputContextContinuationInput = ""
-			newState.ResumeInput = state.InputContextContinuationResumeInput
-
-			input = state.InputContextContinuationInput
-		}
+		return nil, err
 	}
 
 	for i, toolRef := range toolRefs {
@@ -363,29 +343,16 @@ func (r *Runner) getContext(callCtx engine.Context, state *State, monitor Monito
 
 		contextInput, err := getToolRefInput(callCtx.Program, toolRef, input)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 
 		var content *State
-		if state != nil && state.InputContextContinuation != nil {
-			content, err = r.subCallResume(callCtx.Ctx, callCtx, monitor, env, toolRef.ToolID, "", state.InputContextContinuation.WithResumeInput(state.ResumeInput), engine.ContextToolCategory)
-		} else {
-			content, err = r.subCall(callCtx.Ctx, callCtx, monitor, env, toolRef.ToolID, contextInput, "", engine.ContextToolCategory)
-		}
+		content, err = r.subCall(callCtx.Ctx, callCtx, monitor, env, toolRef.ToolID, contextInput, "", engine.ContextToolCategory)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		if content.Continuation != nil {
-			if newState == nil {
-				newState = &State{}
-			}
-			newState.InputContexts = result
-			newState.InputContextContinuation = content
-			newState.InputContextContinuationInput = input
-			if state != nil {
-				newState.InputContextContinuationResumeInput = state.ResumeInput
-			}
-			return nil, newState, nil
+			return nil, fmt.Errorf("invalid state: context tool [%s] can not result in a continuation", toolRef.ToolID)
 		}
 		result = append(result, engine.InputContext{
 			ToolID:  toolRef.ToolID,
@@ -393,16 +360,13 @@ func (r *Runner) getContext(callCtx engine.Context, state *State, monitor Monito
 		})
 	}
 
-	return result, newState, nil
+	return result, nil
 }
 
 func (r *Runner) call(callCtx engine.Context, monitor Monitor, env []string, input string) (*State, error) {
 	result, err := r.start(callCtx, nil, monitor, env, input)
 	if err != nil {
 		return nil, err
-	}
-	if result.StartContinuation {
-		return result, nil
 	}
 	return r.resume(callCtx, monitor, env, result)
 }
@@ -435,14 +399,9 @@ func (r *Runner) start(callCtx engine.Context, state *State, monitor Monitor, en
 		}
 	}
 
-	var newState *State
-	callCtx.InputContext, newState, err = r.getContext(callCtx, state, monitor, env, input)
+	callCtx.InputContext, err = r.getContext(callCtx, state, monitor, env, input)
 	if err != nil {
 		return nil, err
-	}
-	if newState != nil && newState.InputContextContinuation != nil {
-		newState.StartContinuation = true
-		return newState, nil
 	}
 
 	e := engine.Engine{
@@ -493,11 +452,7 @@ type State struct {
 	SubCalls    []SubCallResult `json:"subCalls,omitempty"`
 	SubCallID   string          `json:"subCallID,omitempty"`
 
-	InputContexts                       []engine.InputContext `json:"inputContexts,omitempty"`
-	InputContextContinuation            *State                `json:"inputContextContinuation,omitempty"`
-	InputContextContinuationInput       string                `json:"inputContextContinuationInput,omitempty"`
-	InputContextContinuationResumeInput *string               `json:"inputContextContinuationResumeInput,omitempty"`
-	StartContinuation                   bool                  `json:"startContinuation,omitempty"`
+	InputContexts []engine.InputContext `json:"inputContexts,omitempty"`
 }
 
 func (s State) WithResumeInput(input *string) *State {
@@ -508,10 +463,6 @@ func (s State) WithResumeInput(input *string) *State {
 func (s State) ContinuationContentToolID() (string, error) {
 	if s.Continuation != nil && s.Continuation.Result != nil {
 		return s.ContinuationToolID, nil
-	}
-
-	if s.InputContextContinuation != nil {
-		return s.InputContextContinuation.ContinuationContentToolID()
 	}
 
 	for _, subCall := range s.SubCalls {
@@ -525,10 +476,6 @@ func (s State) ContinuationContentToolID() (string, error) {
 func (s State) ContinuationContent() (string, error) {
 	if s.Continuation != nil && s.Continuation.Result != nil {
 		return *s.Continuation.Result, nil
-	}
-
-	if s.InputContextContinuation != nil {
-		return s.InputContextContinuation.ContinuationContent()
 	}
 
 	for _, subCall := range s.SubCalls {
@@ -548,10 +495,6 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 	defer func() {
 		retState, retErr = r.handleOutput(callCtx, monitor, env, retState, retErr)
 	}()
-
-	if state.StartContinuation {
-		return nil, fmt.Errorf("invalid state, resume should not have StartContinuation set to true")
-	}
 
 	if state.Continuation == nil {
 		return nil, errors.New("invalid state, resume should have Continuation data")
@@ -651,18 +594,18 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 			Env:            env,
 		}
 
-		var contextInput string
+		var contentInput string
 
 		if state.Continuation != nil && state.Continuation.State != nil {
-			contextInput = state.Continuation.State.Input
+			contentInput = state.Continuation.State.Input
 		}
 
 		if state.ResumeInput != nil {
-			contextInput = *state.ResumeInput
+			contentInput = *state.ResumeInput
 		}
 
-		callCtx.InputContext, state, err = r.getContext(callCtx, state, monitor, env, contextInput)
-		if err != nil || state.InputContextContinuation != nil {
+		callCtx.InputContext, err = r.getContext(callCtx, state, monitor, env, contentInput)
+		if err != nil {
 			return state, err
 		}
 
@@ -770,10 +713,6 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 
 	if state.Continuation != nil {
 		callCtx.LastReturn = state.Continuation
-	}
-
-	if state.InputContextContinuation != nil {
-		return state, nil, nil
 	}
 
 	if state.SubCallID != "" {
