@@ -1,0 +1,73 @@
+`{
+  "model": "gpt-4o",
+  "internalSystemPrompt": false,
+  "tools": [
+    {
+      "function": {
+        "toolID": "sys.ls",
+        "name": "ls",
+        "description": "Lists the contents of a directory",
+        "parameters": {
+          "properties": {
+            "dir": {
+              "description": "The directory to list",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      }
+    },
+    {
+      "function": {
+        "toolID": "sys.write",
+        "name": "write",
+        "description": "Write the contents to a file",
+        "parameters": {
+          "properties": {
+            "content": {
+              "description": "The content to write",
+              "type": "string"
+            },
+            "filename": {
+              "description": "The name of the file to write to",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      }
+    }
+  ],
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "input 1"
+        }
+      ],
+      "usage": {}
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "TEST RESULT CALL: 1"
+        }
+      ],
+      "usage": {}
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "input 2"
+        }
+      ],
+      "usage": {}
+    }
+  ],
+  "chat": true,
+  "temperature": 0.6
+}`

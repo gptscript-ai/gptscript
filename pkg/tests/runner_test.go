@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/gptscript-ai/gptscript/pkg/engine"
+	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/tests/tester"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/hexops/autogold/v2"
@@ -1040,4 +1041,34 @@ func TestRuntimesLocalDev(t *testing.T) {
 	r.RunDefault()
 	_ = os.RemoveAll("testdata/TestRuntimesLocalDev/node_modules")
 	_ = os.RemoveAll("testdata/TestRuntimesLocalDev/package-lock.json")
+}
+
+func TestToolsChange(t *testing.T) {
+	r := tester.NewRunner(t)
+	prg, err := loader.ProgramFromSource(context.Background(), `
+chat: true
+tools: sys.ls, sys.read, sys.write
+`, "")
+	require.NoError(t, err)
+
+	resp, err := r.Chat(context.Background(), nil, prg, nil, "input 1")
+	require.NoError(t, err)
+	r.AssertResponded(t)
+	assert.False(t, resp.Done)
+	autogold.Expect("TEST RESULT CALL: 1").Equal(t, resp.Content)
+	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step1"))
+
+	prg, err = loader.ProgramFromSource(context.Background(), `
+chat: true
+temperature: 0.6
+tools: sys.ls, sys.write
+`, "")
+	require.NoError(t, err)
+
+	resp, err = r.Chat(context.Background(), resp.State, prg, nil, "input 2")
+	require.NoError(t, err)
+	r.AssertResponded(t)
+	assert.False(t, resp.Done)
+	autogold.Expect("TEST RESULT CALL: 2").Equal(t, resp.Content)
+	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step2"))
 }

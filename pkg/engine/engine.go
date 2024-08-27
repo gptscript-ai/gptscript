@@ -258,6 +258,29 @@ func (c *Context) WrappedContext(e *Engine) context.Context {
 	return context.WithValue(c.Ctx, engineContext{}, &cp)
 }
 
+func populateMessageParams(ctx Context, completion *types.CompletionRequest, tool types.Tool) error {
+	completion.Model = tool.Parameters.ModelName
+	completion.MaxTokens = tool.Parameters.MaxTokens
+	completion.JSONResponse = tool.Parameters.JSONResponse
+	completion.Cache = tool.Parameters.Cache
+	completion.Chat = tool.Parameters.Chat
+	completion.Temperature = tool.Parameters.Temperature
+	completion.InternalSystemPrompt = tool.Parameters.InternalPrompt
+
+	if tool.Chat && completion.InternalSystemPrompt == nil {
+		completion.InternalSystemPrompt = new(bool)
+	}
+
+	var err error
+	completion.Tools, err = tool.GetCompletionTools(*ctx.Program, ctx.AgentGroup...)
+	if err != nil {
+		return err
+	}
+
+	completion.Messages = addUpdateSystem(ctx, tool, completion.Messages)
+	return nil
+}
+
 func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 	tool := ctx.Tool
 
@@ -290,27 +313,10 @@ func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 		return nil, fmt.Errorf("credential tools cannot make calls to the LLM")
 	}
 
-	completion := types.CompletionRequest{
-		Model:                tool.Parameters.ModelName,
-		MaxTokens:            tool.Parameters.MaxTokens,
-		JSONResponse:         tool.Parameters.JSONResponse,
-		Cache:                tool.Parameters.Cache,
-		Chat:                 tool.Parameters.Chat,
-		Temperature:          tool.Parameters.Temperature,
-		InternalSystemPrompt: tool.Parameters.InternalPrompt,
-	}
-
-	if tool.Chat && completion.InternalSystemPrompt == nil {
-		completion.InternalSystemPrompt = new(bool)
-	}
-
-	var err error
-	completion.Tools, err = tool.GetCompletionTools(*ctx.Program, ctx.AgentGroup...)
-	if err != nil {
+	var completion types.CompletionRequest
+	if err := populateMessageParams(ctx, &completion, tool); err != nil {
 		return nil, err
 	}
-
-	completion.Messages = addUpdateSystem(ctx, tool, completion.Messages)
 
 	if tool.Chat && input == "{}" {
 		input = ""
@@ -497,6 +503,9 @@ func (e *Engine) Continue(ctx Context, state *State, results ...CallResult) (*Re
 		return nil, fmt.Errorf("invalid continue call, no completion needed")
 	}
 
-	state.Completion.Messages = addUpdateSystem(ctx, ctx.Tool, state.Completion.Messages)
+	if err := populateMessageParams(ctx, &state.Completion, ctx.Tool); err != nil {
+		return nil, err
+	}
+
 	return e.complete(ctx.Ctx, state)
 }
