@@ -1,0 +1,25 @@
+`{
+  "model": "gpt-4o",
+  "internalSystemPrompt": false,
+  "messages": [
+    {
+      "role": "system",
+      "content": [
+        {
+          "text": "\nYo dawg\nSay hi"
+        }
+      ],
+      "usage": {}
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "input 1"
+        }
+      ],
+      "usage": {}
+    }
+  ],
+  "chat": true
+}`
