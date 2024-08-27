@@ -260,6 +260,10 @@ func getToolRefInput(prg *types.Program, ref types.ToolReference, input string) 
 	targetArgs := prg.ToolSet[ref.ToolID].Arguments
 	targetKeys := map[string]string{}
 
+	if ref.Arg == "*" {
+		return input, nil
+	}
+
 	if targetArgs == nil {
 		return "", nil
 	}
@@ -647,13 +651,17 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 			Env:            env,
 		}
 
-		var contentInput string
+		var contextInput string
 
 		if state.Continuation != nil && state.Continuation.State != nil {
-			contentInput = state.Continuation.State.Input
+			contextInput = state.Continuation.State.Input
 		}
 
-		callCtx.InputContext, state, err = r.getContext(callCtx, state, monitor, env, contentInput)
+		if state.ResumeInput != nil {
+			contextInput = *state.ResumeInput
+		}
+
+		callCtx.InputContext, state, err = r.getContext(callCtx, state, monitor, env, contextInput)
 		if err != nil || state.InputContextContinuation != nil {
 			return state, err
 		}

@@ -1,0 +1,66 @@
+`{
+  "done": false,
+  "content": "TEST RESULT CALL: 2",
+  "toolID": "inline:",
+  "state": {
+    "continuation": {
+      "state": {
+        "input": "input 1",
+        "completion": {
+          "model": "gpt-4o",
+          "internalSystemPrompt": false,
+          "messages": [
+            {
+              "role": "system",
+              "content": [
+                {
+                  "text": "This is the input: input 2\n\nSay hi"
+                }
+              ],
+              "usage": {}
+            },
+            {
+              "role": "user",
+              "content": [
+                {
+                  "text": "input 1"
+                }
+              ],
+              "usage": {}
+            },
+            {
+              "role": "assistant",
+              "content": [
+                {
+                  "text": "TEST RESULT CALL: 1"
+                }
+              ],
+              "usage": {}
+            },
+            {
+              "role": "user",
+              "content": [
+                {
+                  "text": "input 2"
+                }
+              ],
+              "usage": {}
+            },
+            {
+              "role": "assistant",
+              "content": [
+                {
+                  "text": "TEST RESULT CALL: 2"
+                }
+              ],
+              "usage": {}
+            }
+          ],
+          "chat": true
+        }
+      },
+      "result": "TEST RESULT CALL: 2"
+    },
+    "continuationToolID": "inline:"
+  }
+}`
