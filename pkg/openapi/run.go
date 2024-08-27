@@ -107,6 +107,7 @@ func Run(operationID, defaultHost, args string, t *openapi3.T, envs []string) (s
 				return "", false, fmt.Errorf("failed to encode JSON: %w", err)
 			}
 			req.Header.Set("Content-Type", "application/json")
+			req.ContentLength = int64(body.Len())
 
 		case "text/plain":
 			reqBody := ""
