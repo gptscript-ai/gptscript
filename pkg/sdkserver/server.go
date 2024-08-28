@@ -32,6 +32,8 @@ type Options struct {
 
 // Run will start the server and block until the server is shut down.
 func Run(ctx context.Context, opts Options) error {
+	opts = complete(opts)
+
 	listener, err := newListener(opts)
 	if err != nil {
 		return err
