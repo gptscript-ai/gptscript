@@ -35,6 +35,7 @@ var SafeTools = map[string]struct{}{
 	"sys.time.now":                  {},
 	"sys.context":                   {},
 	"sys.model.provider.credential": {},
+	"sys.interp.template.text":      {},
 }
 
 var tools = map[string]types.Tool{

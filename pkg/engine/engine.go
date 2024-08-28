@@ -299,7 +299,10 @@ func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 			return e.runOpenAPI(tool, input)
 		} else if tool.IsEcho() {
 			return e.runEcho(tool)
+		} else if tool.IsInterpTemplateText() {
+			return e.runInterpTemplateText(ctx, tool, input)
 		}
+
 		s, err := e.runCommand(ctx, tool, input, ctx.ToolCategory)
 		if err != nil {
 			return nil, err

@@ -16,10 +16,11 @@ import (
 )
 
 const (
-	DaemonPrefix  = "#!sys.daemon"
-	OpenAPIPrefix = "#!sys.openapi"
-	EchoPrefix    = "#!sys.echo"
-	CommandPrefix = "#!"
+	InterpTemplateTextPrefix = "#!sys.interp.template.text"
+	DaemonPrefix             = "#!sys.daemon"
+	OpenAPIPrefix            = "#!sys.openapi"
+	EchoPrefix               = "#!sys.echo"
+	CommandPrefix            = "#!"
 )
 
 var (
@@ -896,6 +897,10 @@ func (t Tool) IsEcho() bool {
 func (t Tool) IsHTTP() bool {
 	return strings.HasPrefix(t.Instructions, "#!http://") ||
 		strings.HasPrefix(t.Instructions, "#!https://")
+}
+
+func (t Tool) IsInterpTemplateText() bool {
+	return strings.HasPrefix(t.Instructions, InterpTemplateTextPrefix)
 }
 
 func FirstSet[T comparable](in ...T) (result T) {
