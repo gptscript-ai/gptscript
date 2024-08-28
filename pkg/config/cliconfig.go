@@ -137,7 +137,7 @@ func ReadCLIConfig(gptscriptConfigFile string) (*CLIConfig, error) {
 		location:  gptscriptConfigFile,
 	}
 	if err := json.Unmarshal(data, result); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal %s: %v", gptscriptConfigFile, err)
 	}
 
 	if result.CredentialsStore == "" {
