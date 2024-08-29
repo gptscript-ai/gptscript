@@ -453,7 +453,7 @@ func (c *Client) contextLimitRetryLoop(ctx context.Context, request openai.ChatC
 		request.Messages = dropMessagesOverCount(maxTokens, request.Messages)
 		response, err = c.call(ctx, request, id, status)
 		if err == nil {
-			break
+			return response, nil
 		}
 
 		var apiError *openai.APIError
@@ -465,7 +465,7 @@ func (c *Client) contextLimitRetryLoop(ctx context.Context, request openai.ChatC
 		return nil, err
 	}
 
-	return response, nil
+	return nil, err
 }
 
 func appendMessage(msg types.CompletionMessage, response openai.ChatCompletionStreamResponse) types.CompletionMessage {
