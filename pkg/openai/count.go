@@ -53,7 +53,7 @@ func dropMessagesOverCount(maxTokens int, msgs []openai.ChatCompletionMessage) (
 		withinBudget++
 	}
 
-	if withinBudget >= len(msgs)-1 {
+	if withinBudget == len(msgs)-1 {
 		// We are going to drop all non system messages, which seems useless, so just return them
 		// all and let it fail
 		return msgs
