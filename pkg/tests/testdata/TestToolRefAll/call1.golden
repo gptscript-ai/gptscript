@@ -18,12 +18,12 @@
     },
     {
       "function": {
-        "toolID": "testdata/TestToolRefAll/test.gpt:none",
-        "name": "none",
+        "toolID": "testdata/TestToolRefAll/test.gpt:agentAssistant",
+        "name": "agentAssistant",
         "parameters": {
           "properties": {
-            "noneArg": {
-              "description": "stuff",
+            "defaultPromptParameter": {
+              "description": "Prompt to send to the tool. This may be an instruction or question.",
               "type": "string"
             }
           },
@@ -33,12 +33,12 @@
     },
     {
       "function": {
-        "toolID": "testdata/TestToolRefAll/test.gpt:agentAssistant",
-        "name": "agent",
+        "toolID": "testdata/TestToolRefAll/test.gpt:none",
+        "name": "none",
         "parameters": {
           "properties": {
-            "defaultPromptParameter": {
-              "description": "Prompt to send to the tool. This may be an instruction or question.",
+            "noneArg": {
+              "description": "stuff",
               "type": "string"
             }
           },
@@ -52,7 +52,7 @@
       "role": "system",
       "content": [
         {
-          "text": "\nShared context\n\nContext Body\nMain tool"
+          "text": "\nContext Body\n\nShared context\nMain tool"
         }
       ],
       "usage": {}

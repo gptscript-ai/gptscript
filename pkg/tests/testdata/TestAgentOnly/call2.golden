@@ -4,8 +4,8 @@
   "tools": [
     {
       "function": {
-        "toolID": "testdata/TestAgentOnly/test.gpt:agent1",
-        "name": "agent1",
+        "toolID": "testdata/TestAgentOnly/test.gpt:agent3",
+        "name": "agent3",
         "parameters": {
           "properties": {
             "defaultPromptParameter": {
@@ -19,8 +19,8 @@
     },
     {
       "function": {
-        "toolID": "testdata/TestAgentOnly/test.gpt:agent3",
-        "name": "agent3",
+        "toolID": "testdata/TestAgentOnly/test.gpt:agent1",
+        "name": "agent1",
         "parameters": {
           "properties": {
             "defaultPromptParameter": {

@@ -330,7 +330,7 @@ func getToolRefInput(prg *types.Program, ref types.ToolReference, input string) 
 }
 
 func (r *Runner) getContext(callCtx engine.Context, state *State, monitor Monitor, env []string, input string) (result []engine.InputContext, _ error) {
-	toolRefs, err := callCtx.Tool.GetContextTools(*callCtx.Program)
+	toolRefs, err := callCtx.Tool.GetToolsByType(callCtx.Program, types.ToolTypeContext)
 	if err != nil {
 		return nil, err
 	}
@@ -387,7 +387,7 @@ func (r *Runner) start(callCtx engine.Context, state *State, monitor Monitor, en
 		return nil, err
 	}
 
-	credTools, err := callCtx.Tool.GetCredentialTools(*callCtx.Program, callCtx.AgentGroup)
+	credTools, err := callCtx.Tool.GetToolsByType(callCtx.Program, types.ToolTypeCredential)
 	if err != nil {
 		return nil, err
 	}
@@ -503,7 +503,7 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 	progress, progressClose := streamProgress(&callCtx, monitor)
 	defer progressClose()
 
-	credTools, err := callCtx.Tool.GetCredentialTools(*callCtx.Program, callCtx.AgentGroup)
+	credTools, err := callCtx.Tool.GetToolsByType(callCtx.Program, types.ToolTypeCredential)
 	if err != nil {
 		return nil, err
 	}

@@ -3,7 +3,7 @@
   "content": [
     {
       "toolCall": {
-        "index": 2,
+        "index": 1,
         "id": "call_1",
         "function": {
           "name": "transient"
