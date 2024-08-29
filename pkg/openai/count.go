@@ -1,19 +1,31 @@
 package openai
 
-import openai "github.com/gptscript-ai/chat-completion-client"
+import (
+	"math"
+
+	openai "github.com/gptscript-ai/chat-completion-client"
+)
+
+const DefaultMaxTokens = 128_000
+
+func decreaseTenPercent(maxTokens int) int {
+	maxTokens = getBudget(maxTokens)
+	return int(math.Round(float64(maxTokens) * 0.9))
+}
+
+func getBudget(maxTokens int) int {
+	if maxTokens == 0 {
+		return DefaultMaxTokens
+	}
+	return maxTokens
+}
 
 func dropMessagesOverCount(maxTokens int, msgs []openai.ChatCompletionMessage) (result []openai.ChatCompletionMessage) {
 	var (
 		lastSystem   int
 		withinBudget int
-		budget       = maxTokens
+		budget       = getBudget(maxTokens)
 	)
-
-	if maxTokens == 0 {
-		budget = 300_000
-	} else {
-		budget *= 3
-	}
 
 	for i, msg := range msgs {
 		if msg.Role == openai.ChatMessageRoleSystem {
@@ -33,7 +45,15 @@ func dropMessagesOverCount(maxTokens int, msgs []openai.ChatCompletionMessage) (
 		}
 	}
 
-	if withinBudget == len(msgs)-1 {
+	// OpenAI gets upset if there is a tool message without a tool call preceding it.
+	// Check the oldest message within budget, and if it is a tool message, just drop it.
+	// We do this in a loop because it is possible for multiple tool messages to be in a row,
+	// due to parallel tool calls.
+	for withinBudget < len(msgs) && msgs[withinBudget].Role == openai.ChatMessageRoleTool {
+		withinBudget++
+	}
+
+	if withinBudget >= len(msgs)-1 {
 		// We are going to drop all non system messages, which seems useless, so just return them
 		// all and let it fail
 		return msgs

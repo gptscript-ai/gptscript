@@ -2,8 +2,10 @@ package openai
 
 import (
 	"context"
+	"errors"
 	"io"
 	"log/slog"
+	"math"
 	"os"
 	"slices"
 	"sort"
@@ -24,6 +26,7 @@ import (
 const (
 	DefaultModel    = openai.GPT4o
 	BuiltinCredName = "sys.openai"
+	TooLongMessage  = "Error: tool call output is too long"
 )
 
 var (
@@ -317,6 +320,14 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	}
 
 	if messageRequest.Chat {
+		// Check the last message. If it is from a tool call, and if it takes up more than 80% of the budget on its own, reject it.
+		lastMessage := msgs[len(msgs)-1]
+		if lastMessage.Role == string(types.CompletionMessageRoleTypeTool) && countMessage(lastMessage) > int(math.Round(float64(getBudget(messageRequest.MaxTokens))*0.8)) {
+			// We need to update it in the msgs slice for right now and in the messageRequest for future calls.
+			msgs[len(msgs)-1].Content = TooLongMessage
+			messageRequest.Messages[len(messageRequest.Messages)-1].Content = types.Text(TooLongMessage)
+		}
+
 		msgs = dropMessagesOverCount(messageRequest.MaxTokens, msgs)
 	}
 
@@ -383,6 +394,16 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		return nil, err
 	} else if !ok {
 		response, err = c.call(ctx, request, id, status)
+
+		// If we got back a context length exceeded error, keep retrying and shrinking the message history until we pass.
+		var apiError *openai.APIError
+		if err != nil && errors.As(err, &apiError) && apiError.Code == "context_length_exceeded" && messageRequest.Chat {
+			// Decrease maxTokens by 10% to make garbage collection more aggressive.
+			// The retry loop will further decrease maxTokens if needed.
+			maxTokens := decreaseTenPercent(messageRequest.MaxTokens)
+			response, err = c.contextLimitRetryLoop(ctx, request, id, maxTokens, status)
+		}
+
 		if err != nil {
 			return nil, err
 		}
@@ -419,6 +440,32 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	}
 
 	return &result, nil
+}
+
+func (c *Client) contextLimitRetryLoop(ctx context.Context, request openai.ChatCompletionRequest, id string, maxTokens int, status chan<- types.CompletionStatus) ([]openai.ChatCompletionStreamResponse, error) {
+	var (
+		response []openai.ChatCompletionStreamResponse
+		err      error
+	)
+
+	for range 10 { // maximum 10 tries
+		// Try to drop older messages again, with a decreased max tokens.
+		request.Messages = dropMessagesOverCount(maxTokens, request.Messages)
+		response, err = c.call(ctx, request, id, status)
+		if err == nil {
+			break
+		}
+
+		var apiError *openai.APIError
+		if errors.As(err, &apiError) && apiError.Code == "context_length_exceeded" {
+			// Decrease maxTokens and try again
+			maxTokens = decreaseTenPercent(maxTokens)
+			continue
+		}
+		return nil, err
+	}
+
+	return response, nil
 }
 
 func appendMessage(msg types.CompletionMessage, response openai.ChatCompletionStreamResponse) types.CompletionMessage {
