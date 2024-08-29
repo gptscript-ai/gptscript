@@ -19,6 +19,17 @@ func (t *toolRefSet) List() (result []ToolReference, err error) {
 	return result, t.err
 }
 
+func (t *toolRefSet) Contains(value ToolReference) bool {
+	key := toolRefKey{
+		name:   value.Named,
+		toolID: value.ToolID,
+		arg:    value.Arg,
+	}
+
+	_, ok := t.set[key]
+	return ok
+}
+
 func (t *toolRefSet) HasTool(toolID string) bool {
 	for _, ref := range t.set {
 		if ref.ToolID == toolID {

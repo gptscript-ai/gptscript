@@ -5,10 +5,11 @@ import (
 	"fmt"
 
 	"github.com/gptscript-ai/gptscript/pkg/engine"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 func (r *Runner) handleInput(callCtx engine.Context, monitor Monitor, env []string, input string) (string, error) {
-	inputToolRefs, err := callCtx.Tool.GetInputFilterTools(*callCtx.Program)
+	inputToolRefs, err := callCtx.Tool.GetToolsByType(callCtx.Program, types.ToolTypeInput)
 	if err != nil {
 		return "", err
 	}

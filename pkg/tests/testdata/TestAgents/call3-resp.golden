@@ -3,7 +3,7 @@
   "content": [
     {
       "toolCall": {
-        "index": 1,
+        "index": 0,
         "id": "call_3",
         "function": {
           "name": "agent3"

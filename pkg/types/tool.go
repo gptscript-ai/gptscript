@@ -33,11 +33,15 @@ const (
 	ToolTypeAgent      = ToolType("agent")
 	ToolTypeOutput     = ToolType("output")
 	ToolTypeInput      = ToolType("input")
-	ToolTypeAssistant  = ToolType("assistant")
 	ToolTypeTool       = ToolType("tool")
 	ToolTypeCredential = ToolType("credential")
-	ToolTypeProvider   = ToolType("provider")
 	ToolTypeDefault    = ToolType("")
+
+	// The following types logically exist but have no real code reference. These are kept
+	// here just so that we have a comprehensive list
+
+	ToolTypeAssistant = ToolType("assistant")
+	ToolTypeProvider  = ToolType("provider")
 )
 
 type ErrToolNotFound struct {
@@ -138,6 +142,28 @@ type Parameters struct {
 	ExportOutputFilters []string         `json:"exportOutputFilters,omitempty"`
 	Blocking            bool             `json:"-"`
 	Type                ToolType         `json:"type,omitempty"`
+}
+
+func (p Parameters) allExports() []string {
+	return slices.Concat(
+		p.ExportContext,
+		p.Export,
+		p.ExportCredentials,
+		p.ExportInputFilters,
+		p.ExportOutputFilters,
+	)
+}
+
+func (p Parameters) allReferences() []string {
+	return slices.Concat(
+		p.GlobalTools,
+		p.Tools,
+		p.Context,
+		p.Agents,
+		p.Credentials,
+		p.InputFilters,
+		p.OutputFilters,
+	)
 }
 
 func (p Parameters) ToolRefNames() []string {
@@ -335,39 +361,6 @@ func ParseCredentialArgs(toolName string, input string) (string, string, map[str
 	return originalName, alias, args, nil
 }
 
-func (t Tool) GetAgents(prg Program) (result []ToolReference, _ error) {
-	toolRefs, err := t.GetToolRefsFromNames(t.Agents)
-	if err != nil {
-		return nil, err
-	}
-
-	genericToolRefs, err := t.getCompletionToolRefs(prg, nil, ToolTypeAgent)
-	if err != nil {
-		return nil, err
-	}
-
-	toolRefs = append(toolRefs, genericToolRefs...)
-
-	// Agent Tool refs must be named
-	for i, toolRef := range toolRefs {
-		if toolRef.Named != "" {
-			continue
-		}
-		tool := prg.ToolSet[toolRef.ToolID]
-		name := tool.Name
-		if name == "" {
-			name = toolRef.Reference
-		}
-		normed := ToolNormalizer(name)
-		if trimmed := strings.TrimSuffix(strings.TrimSuffix(normed, "Agent"), "Assistant"); trimmed != "" {
-			normed = trimmed
-		}
-		toolRefs[i].Named = normed
-	}
-
-	return toolRefs, nil
-}
-
 func (t Tool) GetToolRefsFromNames(names []string) (result []ToolReference, _ error) {
 	for _, toolName := range names {
 		toolRefs, ok := t.ToolMapping[toolName]
@@ -507,145 +500,9 @@ func (t ToolDef) String() string {
 	return buf.String()
 }
 
-func (t Tool) getExportedContext(prg Program) ([]ToolReference, error) {
-	result := &toolRefSet{}
-
-	exportRefs, err := t.GetToolRefsFromNames(t.ExportContext)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, exportRef := range exportRefs {
-		result.Add(exportRef)
-
-		tool := prg.ToolSet[exportRef.ToolID]
-		result.AddAll(tool.getExportedContext(prg))
-	}
-
-	return result.List()
-}
-
-func (t Tool) getExportedTools(prg Program) ([]ToolReference, error) {
-	result := &toolRefSet{}
-
-	exportRefs, err := t.GetToolRefsFromNames(t.Export)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, exportRef := range exportRefs {
-		result.Add(exportRef)
-		result.AddAll(prg.ToolSet[exportRef.ToolID].getExportedTools(prg))
-	}
-
-	return result.List()
-}
-
-// GetContextTools returns all tools that are in the context of the tool including all the
-// contexts that are exported by the context tools. This will recurse all exports.
-func (t Tool) GetContextTools(prg Program) ([]ToolReference, error) {
-	result := &toolRefSet{}
-	result.AddAll(t.getDirectContextToolRefs(prg))
-
-	contextRefs, err := t.getCompletionToolRefs(prg, nil, ToolTypeContext)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, contextRef := range contextRefs {
-		result.AddAll(prg.ToolSet[contextRef.ToolID].getExportedContext(prg))
-		result.Add(contextRef)
-	}
-
-	exportOnlyTools, err := t.getCompletionToolRefs(prg, nil, ToolTypeDefault, ToolTypeContext)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, contextRef := range exportOnlyTools {
-		result.AddAll(prg.ToolSet[contextRef.ToolID].getExportedContext(prg))
-	}
-
-	return result.List()
-}
-
-// GetContextTools returns all tools that are in the context of the tool including all the
-// contexts that are exported by the context tools. This will recurse all exports.
-func (t Tool) getDirectContextToolRefs(prg Program) ([]ToolReference, error) {
-	result := &toolRefSet{}
-
-	contextRefs, err := t.GetToolRefsFromNames(t.Context)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, contextRef := range contextRefs {
-		result.AddAll(prg.ToolSet[contextRef.ToolID].getExportedContext(prg))
-		result.Add(contextRef)
-	}
-
-	return result.List()
-}
-
-func (t Tool) GetOutputFilterTools(program Program) ([]ToolReference, error) {
-	result := &toolRefSet{}
-
-	outputFilterRefs, err := t.GetToolRefsFromNames(t.OutputFilters)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, outputFilterRef := range outputFilterRefs {
-		result.Add(outputFilterRef)
-	}
-
-	result.AddAll(t.getCompletionToolRefs(program, nil, ToolTypeOutput))
-
-	contextRefs, err := t.getDirectContextToolRefs(program)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, contextRef := range contextRefs {
-		contextTool := program.ToolSet[contextRef.ToolID]
-		result.AddAll(contextTool.GetToolRefsFromNames(contextTool.ExportOutputFilters))
-	}
-
-	return result.List()
-}
-
-func (t Tool) GetInputFilterTools(program Program) ([]ToolReference, error) {
-	result := &toolRefSet{}
-
-	inputFilterRefs, err := t.GetToolRefsFromNames(t.InputFilters)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, inputFilterRef := range inputFilterRefs {
-		result.Add(inputFilterRef)
-	}
-
-	result.AddAll(t.getCompletionToolRefs(program, nil, ToolTypeInput))
-
-	contextRefs, err := t.getDirectContextToolRefs(program)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, contextRef := range contextRefs {
-		contextTool := program.ToolSet[contextRef.ToolID]
-		result.AddAll(contextTool.GetToolRefsFromNames(contextTool.ExportInputFilters))
-	}
-
-	return result.List()
-}
-
-func (t Tool) GetNextAgentGroup(prg Program, agentGroup []ToolReference, toolID string) (result []ToolReference, _ error) {
+func (t Tool) GetNextAgentGroup(prg *Program, agentGroup []ToolReference, toolID string) (result []ToolReference, _ error) {
 	newAgentGroup := toolRefSet{}
-	if err := t.addAgents(prg, &newAgentGroup); err != nil {
-		return nil, err
-	}
+	newAgentGroup.AddAll(t.GetToolsByType(prg, ToolTypeAgent))
 
 	if newAgentGroup.HasTool(toolID) {
 		// Join new agent group
@@ -655,21 +512,162 @@ func (t Tool) GetNextAgentGroup(prg Program, agentGroup []ToolReference, toolID 
 	return agentGroup, nil
 }
 
-func filterRefs(prg Program, refs []ToolReference, types ...ToolType) (result []ToolReference) {
-	for _, ref := range refs {
-		if slices.Contains(types, prg.ToolSet[ref.ToolID].Type) {
-			result = append(result, ref)
-		}
+func (t Tool) getAgents(prg *Program) (result []ToolReference, _ error) {
+	toolRefs, err := t.GetToolRefsFromNames(t.Agents)
+	if err != nil {
+		return nil, err
 	}
-	return
+
+	// Agent Tool refs must be named
+	for i, toolRef := range toolRefs {
+		if toolRef.Named != "" {
+			continue
+		}
+		tool := prg.ToolSet[toolRef.ToolID]
+		name := tool.Name
+		if name == "" {
+			name = toolRef.Reference
+		}
+		normed := ToolNormalizer(name)
+		if trimmed := strings.TrimSuffix(strings.TrimSuffix(normed, "Agent"), "Assistant"); trimmed != "" {
+			normed = trimmed
+		}
+		toolRefs[i].Named = normed
+	}
+
+	return toolRefs, nil
 }
 
-func (t Tool) GetCompletionTools(prg Program, agentGroup ...ToolReference) (result []CompletionTool, err error) {
-	toolSet := &toolRefSet{}
-	toolSet.AddAll(t.getCompletionToolRefs(prg, agentGroup, ToolTypeDefault, ToolTypeTool))
+func (t Tool) GetToolsByType(prg *Program, toolType ToolType) ([]ToolReference, error) {
+	if toolType == ToolTypeAgent {
+		// Agents are special, they can only be sourced from direct references and not the generic 'tool:' or shared by references
+		return t.getAgents(prg)
+	}
 
-	if err := t.addAgents(prg, toolSet); err != nil {
+	toolSet := &toolRefSet{}
+
+	var (
+		directRefs          []string
+		toolsListFilterType = []ToolType{toolType}
+	)
+
+	switch toolType {
+	case ToolTypeContext:
+		directRefs = t.Context
+	case ToolTypeOutput:
+		directRefs = t.OutputFilters
+	case ToolTypeInput:
+		directRefs = t.InputFilters
+	case ToolTypeTool:
+		toolsListFilterType = append(toolsListFilterType, ToolTypeDefault, ToolTypeAgent)
+	case ToolTypeCredential:
+		directRefs = t.Credentials
+	default:
+		return nil, fmt.Errorf("unknown tool type %v", toolType)
+	}
+
+	toolSet.AddAll(t.GetToolRefsFromNames(directRefs))
+
+	toolRefs, err := t.GetToolRefsFromNames(t.Tools)
+	if err != nil {
 		return nil, err
+	}
+
+	for _, toolRef := range toolRefs {
+		tool, ok := prg.ToolSet[toolRef.ToolID]
+		if !ok {
+			continue
+		}
+		if slices.Contains(toolsListFilterType, tool.Type) {
+			toolSet.Add(toolRef)
+		}
+	}
+
+	exportSources, err := t.getExportSources(prg)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, exportSource := range exportSources {
+		var (
+			tool       = prg.ToolSet[exportSource.ToolID]
+			exportRefs []string
+		)
+
+		switch toolType {
+		case ToolTypeContext:
+			exportRefs = tool.ExportContext
+		case ToolTypeOutput:
+			exportRefs = tool.ExportOutputFilters
+		case ToolTypeInput:
+			exportRefs = tool.ExportInputFilters
+		case ToolTypeTool:
+			exportRefs = tool.Export
+		case ToolTypeCredential:
+			exportRefs = tool.ExportCredentials
+		default:
+			return nil, fmt.Errorf("unknown tool type %v", toolType)
+		}
+		toolSet.AddAll(tool.GetToolRefsFromNames(exportRefs))
+	}
+
+	return toolSet.List()
+}
+
+func (t Tool) addExportsRecursively(prg *Program, toolSet *toolRefSet) error {
+	toolRefs, err := t.GetToolRefsFromNames(t.allExports())
+	if err != nil {
+		return err
+	}
+
+	for _, toolRef := range toolRefs {
+		if toolSet.Contains(toolRef) {
+			continue
+		}
+
+		toolSet.Add(toolRef)
+		if err := prg.ToolSet[toolRef.ToolID].addExportsRecursively(prg, toolSet); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (t Tool) getExportSources(prg *Program) ([]ToolReference, error) {
+	// We start first with all references from this tool. This gives us the
+	// initial set of export sources.
+	// Then all tools in the export sources in the set we look for exports of those tools recursively.
+	// So a share of a share of a share should be added.
+
+	toolSet := toolRefSet{}
+	toolRefs, err := t.GetToolRefsFromNames(t.allReferences())
+	if err != nil {
+		return nil, err
+	}
+
+	for _, toolRef := range toolRefs {
+		if err := prg.ToolSet[toolRef.ToolID].addExportsRecursively(prg, &toolSet); err != nil {
+			return nil, err
+		}
+		toolSet.Add(toolRef)
+	}
+
+	return toolSet.List()
+}
+
+func (t Tool) GetChatCompletionTools(prg Program, agentGroup ...ToolReference) (result []ChatCompletionTool, err error) {
+	toolSet := &toolRefSet{}
+	toolSet.AddAll(t.GetToolsByType(&prg, ToolTypeTool))
+	toolSet.AddAll(t.GetToolsByType(&prg, ToolTypeAgent))
+
+	if t.Chat {
+		for _, agent := range agentGroup {
+			// don't add yourself
+			if agent.ToolID != t.ID {
+				toolSet.Add(agent)
+			}
+		}
 	}
 
 	refs, err := toolSet.List()
@@ -680,120 +678,7 @@ func (t Tool) GetCompletionTools(prg Program, agentGroup ...ToolReference) (resu
 	return toolRefsToCompletionTools(refs, prg), nil
 }
 
-func (t Tool) addAgents(prg Program, result *toolRefSet) error {
-	subToolRefs, err := t.GetAgents(prg)
-	if err != nil {
-		return err
-	}
-
-	for _, subToolRef := range subToolRefs {
-		// don't add yourself
-		if subToolRef.ToolID != t.ID {
-			// Add the tool itself and no exports
-			result.Add(subToolRef)
-		}
-	}
-
-	return nil
-}
-
-func (t Tool) addReferencedTools(prg Program, result *toolRefSet) error {
-	subToolRefs, err := t.GetToolRefsFromNames(t.Parameters.Tools)
-	if err != nil {
-		return err
-	}
-
-	for _, subToolRef := range subToolRefs {
-		// Add the tool
-		result.Add(subToolRef)
-
-		// Get all tools exports
-		result.AddAll(prg.ToolSet[subToolRef.ToolID].getExportedTools(prg))
-	}
-
-	return nil
-}
-
-func (t Tool) addContextExportedTools(prg Program, result *toolRefSet) error {
-	contextTools, err := t.getDirectContextToolRefs(prg)
-	if err != nil {
-		return err
-	}
-
-	for _, contextTool := range contextTools {
-		result.AddAll(prg.ToolSet[contextTool.ToolID].getExportedTools(prg))
-	}
-
-	return nil
-}
-
-func (t Tool) getCompletionToolRefs(prg Program, agentGroup []ToolReference, types ...ToolType) ([]ToolReference, error) {
-	if len(types) == 0 {
-		types = []ToolType{ToolTypeDefault, ToolTypeTool}
-	}
-
-	result := toolRefSet{}
-
-	if t.Chat {
-		for _, agent := range agentGroup {
-			// don't add yourself
-			if agent.ToolID != t.ID {
-				result.Add(agent)
-			}
-		}
-	}
-
-	if err := t.addReferencedTools(prg, &result); err != nil {
-		return nil, err
-	}
-
-	if err := t.addContextExportedTools(prg, &result); err != nil {
-		return nil, err
-	}
-
-	refs, err := result.List()
-	return filterRefs(prg, refs, types...), err
-}
-
-func (t Tool) GetCredentialTools(prg Program, agentGroup []ToolReference) ([]ToolReference, error) {
-	result := toolRefSet{}
-
-	result.AddAll(t.GetToolRefsFromNames(t.Credentials))
-
-	result.AddAll(t.getCompletionToolRefs(prg, nil, ToolTypeCredential))
-
-	toolRefs, err := result.List()
-	if err != nil {
-		return nil, err
-	}
-	for _, toolRef := range toolRefs {
-		referencedTool := prg.ToolSet[toolRef.ToolID]
-		result.AddAll(referencedTool.GetToolRefsFromNames(referencedTool.ExportCredentials))
-	}
-
-	toolRefs, err = t.getCompletionToolRefs(prg, agentGroup)
-	if err != nil {
-		return nil, err
-	}
-	for _, toolRef := range toolRefs {
-		referencedTool := prg.ToolSet[toolRef.ToolID]
-		result.AddAll(referencedTool.GetToolRefsFromNames(referencedTool.ExportCredentials))
-	}
-
-	contextToolRefs, err := t.GetContextTools(prg)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, contextToolRef := range contextToolRefs {
-		contextTool := prg.ToolSet[contextToolRef.ToolID]
-		result.AddAll(contextTool.GetToolRefsFromNames(contextTool.ExportCredentials))
-	}
-
-	return result.List()
-}
-
-func toolRefsToCompletionTools(completionTools []ToolReference, prg Program) (result []CompletionTool) {
+func toolRefsToCompletionTools(completionTools []ToolReference, prg Program) (result []ChatCompletionTool) {
 	toolNames := map[string]struct{}{}
 
 	for _, subToolRef := range completionTools {
@@ -814,7 +699,7 @@ func toolRefsToCompletionTools(completionTools []ToolReference, prg Program) (re
 		if subTool.Instructions == "" {
 			log.Debugf("Skipping zero instruction tool %s (%s)", subToolName, subTool.ID)
 		} else {
-			result = append(result, CompletionTool{
+			result = append(result, ChatCompletionTool{
 				Function: CompletionFunctionDefinition{
 					ToolID:      subTool.ID,
 					Name:        PickToolName(subToolName, toolNames),

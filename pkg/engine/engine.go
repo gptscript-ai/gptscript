@@ -204,7 +204,7 @@ func NewContext(ctx context.Context, prg *types.Program, input string) (Context,
 		Input:   input,
 	}
 
-	agentGroup, err := callCtx.Tool.GetAgents(*prg)
+	agentGroup, err := callCtx.Tool.GetToolsByType(prg, types.ToolTypeAgent)
 	if err != nil {
 		return callCtx, err
 	}
@@ -225,7 +225,7 @@ func (c *Context) SubCallContext(ctx context.Context, input, toolID, callID stri
 		callID = counter.Next()
 	}
 
-	agentGroup, err := c.Tool.GetNextAgentGroup(*c.Program, c.AgentGroup, toolID)
+	agentGroup, err := c.Tool.GetNextAgentGroup(c.Program, c.AgentGroup, toolID)
 	if err != nil {
 		return Context{}, err
 	}
@@ -272,7 +272,7 @@ func populateMessageParams(ctx Context, completion *types.CompletionRequest, too
 	}
 
 	var err error
-	completion.Tools, err = tool.GetCompletionTools(*ctx.Program, ctx.AgentGroup...)
+	completion.Tools, err = tool.GetChatCompletionTools(*ctx.Program, ctx.AgentGroup...)
 	if err != nil {
 		return err
 	}
