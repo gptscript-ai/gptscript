@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"log/slog"
-	"math"
 	"os"
 	"slices"
 	"sort"
@@ -322,7 +321,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	if messageRequest.Chat {
 		// Check the last message. If it is from a tool call, and if it takes up more than 80% of the budget on its own, reject it.
 		lastMessage := msgs[len(msgs)-1]
-		if lastMessage.Role == string(types.CompletionMessageRoleTypeTool) && countMessage(lastMessage) > int(math.Round(float64(getBudget(messageRequest.MaxTokens))*0.8)) {
+		if lastMessage.Role == string(types.CompletionMessageRoleTypeTool) && countMessage(lastMessage) > int(float64(getBudget(messageRequest.MaxTokens))*0.8) {
 			// We need to update it in the msgs slice for right now and in the messageRequest for future calls.
 			msgs[len(msgs)-1].Content = TooLongMessage
 			messageRequest.Messages[len(messageRequest.Messages)-1].Content = types.Text(TooLongMessage)
@@ -397,7 +396,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 
 		// If we got back a context length exceeded error, keep retrying and shrinking the message history until we pass.
 		var apiError *openai.APIError
-		if err != nil && errors.As(err, &apiError) && apiError.Code == "context_length_exceeded" && messageRequest.Chat {
+		if errors.As(err, &apiError) && apiError.Code == "context_length_exceeded" && messageRequest.Chat {
 			// Decrease maxTokens by 10% to make garbage collection more aggressive.
 			// The retry loop will further decrease maxTokens if needed.
 			maxTokens := decreaseTenPercent(messageRequest.MaxTokens)

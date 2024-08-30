@@ -1,8 +1,6 @@
 package openai
 
 import (
-	"math"
-
 	openai "github.com/gptscript-ai/chat-completion-client"
 )
 
@@ -10,7 +8,7 @@ const DefaultMaxTokens = 128_000
 
 func decreaseTenPercent(maxTokens int) int {
 	maxTokens = getBudget(maxTokens)
-	return int(math.Round(float64(maxTokens) * 0.9))
+	return int(float64(maxTokens) * 0.9)
 }
 
 func getBudget(maxTokens int) int {
