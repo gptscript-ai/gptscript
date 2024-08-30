@@ -59,7 +59,7 @@ var tools = map[string]types.Tool{
 	"sys.read": {
 		ToolDef: types.ToolDef{
 			Parameters: types.Parameters{
-				Description: "Reads the contents of a file",
+				Description: "Reads the contents of a file. Can only read plain text files, not binary files",
 				Arguments: types.ObjectSchema(
 					"filename", "The name of the file to read"),
 			},
