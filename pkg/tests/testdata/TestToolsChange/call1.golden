@@ -22,7 +22,7 @@
       "function": {
         "toolID": "sys.read",
         "name": "read",
-        "description": "Reads the contents of a file",
+        "description": "Reads the contents of a file. Can only read plain text files, not binary files",
         "parameters": {
           "properties": {
             "filename": {
