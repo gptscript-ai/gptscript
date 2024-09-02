@@ -11,6 +11,7 @@ import (
 
 type SDKServer struct {
 	*GPTScript
+	Standalone bool `usage:"Standalone mode" local:"true"`
 }
 
 func (c *SDKServer) Customize(cmd *cobra.Command) {
@@ -37,5 +38,6 @@ func (c *SDKServer) Run(cmd *cobra.Command, _ []string) error {
 		Options:       opts,
 		ListenAddress: c.ListenAddress,
 		Debug:         c.Debug,
+		Standalone:    c.Standalone,
 	})
 }
