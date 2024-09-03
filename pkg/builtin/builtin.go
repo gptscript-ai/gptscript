@@ -489,6 +489,12 @@ func SysRead(_ context.Context, _ []string, input string, _ chan<- string) (stri
 	if len(data) == 0 {
 		return fmt.Sprintf("The file %s has no contents", params.Filename), nil
 	}
+
+	// Assume the file is not text if it contains a null byte
+	if bytes.IndexByte(data, 0) != -1 {
+		return fmt.Sprintf("The file %s cannot be read because it is not a plaintext file", params.Filename), nil
+	}
+
 	return string(data), nil
 }
 
