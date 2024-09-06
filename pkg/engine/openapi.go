@@ -66,7 +66,7 @@ func (e *Engine) runOpenAPIRevamp(tool types.Tool, input string) (*Return, error
 			} else if !match {
 				// Report to the LLM that the operation was not found
 				return &Return{
-					Result: ptr(fmt.Sprintf("operation %s not found", operation)),
+					Result: ptr(fmt.Sprintf("ERROR: operation %s not found", operation)),
 				}, nil
 			}
 		}
@@ -92,7 +92,7 @@ func (e *Engine) runOpenAPIRevamp(tool types.Tool, input string) (*Return, error
 		if !found {
 			// Report to the LLM that the operation was not found
 			return &Return{
-				Result: ptr(fmt.Sprintf("operation %s not found", operation)),
+				Result: ptr(fmt.Sprintf("ERROR: operation %s not found", operation)),
 			}, nil
 		}
 
@@ -115,7 +115,7 @@ func (e *Engine) runOpenAPIRevamp(tool types.Tool, input string) (*Return, error
 			} else if !match {
 				// Report to the LLM that the operation was not found
 				return &Return{
-					Result: ptr(fmt.Sprintf("operation %s not found", operation)),
+					Result: ptr(fmt.Sprintf("ERROR: operation %s not found", operation)),
 				}, nil
 			}
 		}
@@ -140,7 +140,7 @@ func (e *Engine) runOpenAPIRevamp(tool types.Tool, input string) (*Return, error
 		} else if !found {
 			// Report to the LLM that the operation was not found
 			return &Return{
-				Result: ptr(fmt.Sprintf("operation %s not found", operation)),
+				Result: ptr(fmt.Sprintf("ERROR: operation %s not found", operation)),
 			}, nil
 		}
 
