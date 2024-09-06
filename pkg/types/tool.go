@@ -698,7 +698,10 @@ func toolRefsToCompletionTools(completionTools []ToolReference, prg Program) (re
 	for _, subToolRef := range completionTools {
 		subTool := prg.ToolSet[subToolRef.ToolID]
 
-		subToolName := subToolRef.Reference
+		subToolName := subTool.Name
+		if subToolName == "" {
+			subToolName = subToolRef.Reference
+		}
 		if subToolRef.Named != "" {
 			subToolName = subToolRef.Named
 		}
