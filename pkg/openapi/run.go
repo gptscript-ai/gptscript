@@ -38,7 +38,8 @@ func Run(operationID, defaultHost, args string, t *openapi3.T, envs []string) (s
 	// Validate args against the schema.
 	validationResult, err := gojsonschema.Validate(gojsonschema.NewStringLoader(schemaJSON), gojsonschema.NewStringLoader(args))
 	if err != nil {
-		return "", false, err
+		// We don't return an error here because we want the LLM to be able to maintain control and try again.
+		return fmt.Sprintf("ERROR: failed to validate arguments. Make sure your arguments are valid JSON. %v", err), false, nil
 	}
 
 	if !validationResult.Valid() {
