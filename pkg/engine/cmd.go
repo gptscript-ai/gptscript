@@ -217,30 +217,34 @@ func appendInputAsEnv(env []string, input string) []string {
 	dec := json.NewDecoder(bytes.NewReader([]byte(input)))
 	dec.UseNumber()
 
-	env = appendEnv(env, "GPTSCRIPT_INPUT", input)
+	// If we don't create a new slice here, then parallel tool calls can end up getting messed up.
+	newEnv := make([]string, len(env), cap(env)+1+len(data))
+	copy(newEnv, env)
+
+	newEnv = appendEnv(newEnv, "GPTSCRIPT_INPUT", input)
 
 	if err := json.Unmarshal([]byte(input), &data); err != nil {
 		// ignore invalid JSON
-		return env
+		return newEnv
 	}
 
 	for k, v := range data {
 		switch val := v.(type) {
 		case string:
-			env = appendEnv(env, k, val)
+			newEnv = appendEnv(newEnv, k, val)
 		case json.Number:
-			env = appendEnv(env, k, string(val))
+			newEnv = appendEnv(newEnv, k, string(val))
 		case bool:
-			env = appendEnv(env, k, fmt.Sprint(val))
+			newEnv = appendEnv(newEnv, k, fmt.Sprint(val))
 		default:
 			data, err := json.Marshal(val)
 			if err == nil {
-				env = appendEnv(env, k, string(data))
+				newEnv = appendEnv(newEnv, k, string(data))
 			}
 		}
 	}
 
-	return env
+	return newEnv
 }
 
 func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.Tool, input string, useShell bool) (*exec.Cmd, func(), error) {
@@ -248,7 +252,7 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 		useShell = false
 	}
 
-	envvars := append(e.Env[:], extraEnv...)
+	envvars := append(e.Env, extraEnv...)
 	envvars = appendInputAsEnv(envvars, input)
 	if log.IsDebug() {
 		envvars = append(envvars, "GPTSCRIPT_DEBUG=true")
