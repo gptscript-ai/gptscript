@@ -602,13 +602,27 @@ func (t Tool) GetToolsByType(prg *Program, toolType ToolType) ([]ToolReference, 
 		case ToolTypeInput:
 			exportRefs = tool.ExportInputFilters
 		case ToolTypeTool:
-			exportRefs = tool.Export
 		case ToolTypeCredential:
 			exportRefs = tool.ExportCredentials
 		default:
 			return nil, fmt.Errorf("unknown tool type %v", toolType)
 		}
 		toolSet.AddAll(tool.GetToolRefsFromNames(exportRefs))
+
+		toolRefs, err := tool.GetToolRefsFromNames(tool.Export)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, toolRef := range toolRefs {
+			tool, ok := prg.ToolSet[toolRef.ToolID]
+			if !ok {
+				continue
+			}
+			if slices.Contains(toolsListFilterType, tool.Type) {
+				toolSet.Add(toolRef)
+			}
+		}
 	}
 
 	return toolSet.List()
