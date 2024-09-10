@@ -146,6 +146,11 @@ func (m *Manager) deferredSetUpCredentialHelpers(ctx context.Context, cliCfg *co
 	}
 
 	tool := types.Tool{
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Name: "gptscript-credential-helpers",
+			},
+		},
 		Source: types.ToolSource{
 			Repo: &types.Repo{
 				Root: runtimeEnv.VarOrDefault("GPTSCRIPT_CRED_HELPERS_ROOT", "https://github.com/gptscript-ai/gptscript-credential-helpers.git"),
