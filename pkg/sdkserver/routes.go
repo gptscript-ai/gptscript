@@ -58,6 +58,11 @@ func (s *server) addRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /confirm/{id}", s.confirm)
 	mux.HandleFunc("POST /prompt/{id}", s.prompt)
 	mux.HandleFunc("POST /prompt-response/{id}", s.promptResponse)
+
+	mux.HandleFunc("POST /credentials", s.listCredentials)
+	mux.HandleFunc("POST /credentials/create", s.createCredential)
+	mux.HandleFunc("POST /credentials/reveal", s.revealCredential)
+	mux.HandleFunc("DELETE /credentials", s.deleteCredential)
 }
 
 // health just provides an endpoint for checking whether the server is running and accessible.

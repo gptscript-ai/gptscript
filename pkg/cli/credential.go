@@ -45,7 +45,7 @@ func (c *Credential) Run(cmd *cobra.Command, _ []string) error {
 
 	ctx := c.root.CredentialContext
 	if c.AllContexts {
-		ctx = "*"
+		ctx = credentials.AllCredentialContexts
 	}
 
 	opts, err := c.root.NewGPTScriptOpts()

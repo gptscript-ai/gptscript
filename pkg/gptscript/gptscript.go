@@ -75,7 +75,7 @@ func Complete(opts ...Options) Options {
 		result.Env = os.Environ()
 	}
 	if result.CredentialContext == "" {
-		result.CredentialContext = "default"
+		result.CredentialContext = credentials.DefaultCredentialContext
 	}
 
 	return result
