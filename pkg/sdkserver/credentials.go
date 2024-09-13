@@ -9,7 +9,6 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
-	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes"
 )
 
 func (s *server) initializeCredentialStore(ctx context.Context, credCtx string) (credentials.CredentialStore, error) {
@@ -18,16 +17,14 @@ func (s *server) initializeCredentialStore(ctx context.Context, credCtx string) 
 		return nil, fmt.Errorf("failed to read CLI config: %w", err)
 	}
 
-	// TODO - are we sure we want to always use runtimes.Default here?
-	runtimeManager := runtimes.Default(s.gptscriptOpts.Cache.CacheDir)
-	if err := runtimeManager.SetUpCredentialHelpers(ctx, cfg); err != nil {
+	if err := s.runtimeManager.SetUpCredentialHelpers(ctx, cfg); err != nil {
 		return nil, fmt.Errorf("failed to set up credential helpers: %w", err)
 	}
-	if err := runtimeManager.EnsureCredentialHelpers(ctx); err != nil {
+	if err := s.runtimeManager.EnsureCredentialHelpers(ctx); err != nil {
 		return nil, fmt.Errorf("failed to ensure credential helpers: %w", err)
 	}
 
-	store, err := credentials.NewStore(cfg, runtimeManager, credCtx, s.gptscriptOpts.Cache.CacheDir)
+	store, err := credentials.NewStore(cfg, s.runtimeManager, credCtx, s.gptscriptOpts.Cache.CacheDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize credential store: %w", err)
 	}
