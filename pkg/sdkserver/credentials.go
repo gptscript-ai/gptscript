@@ -1,6 +1,7 @@
 package sdkserver
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -8,17 +9,22 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
-	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes"
 )
 
-func (s *server) initializeCredentialStore(ctx string) (credentials.CredentialStore, error) {
+func (s *server) initializeCredentialStore(ctx context.Context, credCtx string) (credentials.CredentialStore, error) {
 	cfg, err := config.ReadCLIConfig(s.gptscriptOpts.OpenAI.ConfigFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read CLI config: %w", err)
 	}
 
-	// TODO - are we sure we want to always use runtimes.Default here?
-	store, err := credentials.NewStore(cfg, runtimes.Default(s.gptscriptOpts.Cache.CacheDir), ctx, s.gptscriptOpts.Cache.CacheDir)
+	if err := s.runtimeManager.SetUpCredentialHelpers(ctx, cfg); err != nil {
+		return nil, fmt.Errorf("failed to set up credential helpers: %w", err)
+	}
+	if err := s.runtimeManager.EnsureCredentialHelpers(ctx); err != nil {
+		return nil, fmt.Errorf("failed to ensure credential helpers: %w", err)
+	}
+
+	store, err := credentials.NewStore(cfg, s.runtimeManager, credCtx, s.gptscriptOpts.Cache.CacheDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize credential store: %w", err)
 	}
@@ -40,7 +46,7 @@ func (s *server) listCredentials(w http.ResponseWriter, r *http.Request) {
 		req.Context = credentials.DefaultCredentialContext
 	}
 
-	store, err := s.initializeCredentialStore(req.Context)
+	store, err := s.initializeCredentialStore(r.Context(), req.Context)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, err)
 		return
@@ -81,7 +87,7 @@ func (s *server) createCredential(w http.ResponseWriter, r *http.Request) {
 		cred.Context = credentials.DefaultCredentialContext
 	}
 
-	store, err := s.initializeCredentialStore(cred.Context)
+	store, err := s.initializeCredentialStore(r.Context(), cred.Context)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, err)
 		return
@@ -115,7 +121,7 @@ func (s *server) revealCredential(w http.ResponseWriter, r *http.Request) {
 		req.Context = credentials.DefaultCredentialContext
 	}
 
-	store, err := s.initializeCredentialStore(req.Context)
+	store, err := s.initializeCredentialStore(r.Context(), req.Context)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, err)
 		return
@@ -152,7 +158,7 @@ func (s *server) deleteCredential(w http.ResponseWriter, r *http.Request) {
 		req.Context = credentials.DefaultCredentialContext
 	}
 
-	store, err := s.initializeCredentialStore(req.Context)
+	store, err := s.initializeCredentialStore(r.Context(), req.Context)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, err)
 		return

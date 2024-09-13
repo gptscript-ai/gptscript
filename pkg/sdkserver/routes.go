@@ -13,6 +13,7 @@ import (
 	"github.com/gptscript-ai/broadcaster"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
+	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/input"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
@@ -29,6 +30,8 @@ type server struct {
 	address, token string
 	client         *gptscript.GPTScript
 	events         *broadcaster.Broadcaster[event]
+
+	runtimeManager engine.RuntimeManager
 
 	lock             sync.RWMutex
 	waitingToConfirm map[string]chan runner.AuthorizerResponse

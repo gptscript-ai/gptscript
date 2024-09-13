@@ -17,6 +17,7 @@ import (
 	"github.com/gptscript-ai/broadcaster"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
+	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/rs/cors"
@@ -108,6 +109,7 @@ func run(ctx context.Context, listener net.Listener, opts Options) error {
 		token:            token,
 		client:           g,
 		events:           events,
+		runtimeManager:   runtimes.Default(opts.Options.Cache.CacheDir), // TODO - do we always want to use runtimes.Default here?
 		waitingToConfirm: make(map[string]chan runner.AuthorizerResponse),
 		waitingToPrompt:  make(map[string]chan map[string]string),
 	}
