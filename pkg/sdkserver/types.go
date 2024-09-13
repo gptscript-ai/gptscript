@@ -252,3 +252,10 @@ type prompt struct {
 	Type         runner.EventType `json:"type,omitempty"`
 	Time         time.Time        `json:"time,omitempty"`
 }
+
+type credentialsRequest struct {
+	content     `json:",inline"`
+	AllContexts bool   `json:"allContexts"`
+	Context     string `json:"context"`
+	Name        string `json:"name"`
+}

@@ -11,6 +11,11 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/config"
 )
 
+const (
+	DefaultCredentialContext = "default"
+	AllCredentialContexts    = "*"
+)
+
 type CredentialBuilder interface {
 	EnsureCredentialHelpers(ctx context.Context) error
 }
@@ -105,7 +110,7 @@ func (s Store) List(ctx context.Context) ([]Credential, error) {
 		if err != nil {
 			return nil, err
 		}
-		if s.credCtx == "*" || c.Context == s.credCtx {
+		if s.credCtx == AllCredentialContexts || c.Context == s.credCtx {
 			creds = append(creds, c)
 		}
 	}
@@ -139,7 +144,7 @@ func validateCredentialCtx(ctx string) error {
 		return fmt.Errorf("credential context cannot be empty")
 	}
 
-	if ctx == "*" { // this represents "all contexts" and is allowed
+	if ctx == AllCredentialContexts {
 		return nil
 	}
 
