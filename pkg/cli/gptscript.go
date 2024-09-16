@@ -64,7 +64,7 @@ type GPTScript struct {
 	Chdir                    string   `usage:"Change current working directory" short:"C"`
 	Daemon                   bool     `usage:"Run tool as a daemon" local:"true" hidden:"true"`
 	Ports                    string   `usage:"The port range to use for ephemeral daemon ports (ex: 11000-12000)" hidden:"true"`
-	CredentialContext        string   `usage:"Context name in which to store credentials" default:"default"`
+	CredentialContext        []string `usage:"Context name(s) in which to store credentials" default:"default"`
 	CredentialOverride       []string `usage:"Credentials to override (ex: --credential-override github.com/example/cred-tool:API_TOKEN=1234)"`
 	ChatState                string   `usage:"The chat state to continue, or null to start a new chat and return the state" local:"true"`
 	ForceChat                bool     `usage:"Force an interactive chat session if even the top level tool is not a chat tool" local:"true"`
@@ -142,7 +142,7 @@ func (r *GPTScript) NewGPTScriptOpts() (gptscript.Options, error) {
 		},
 		Quiet:                r.Quiet,
 		Env:                  os.Environ(),
-		CredentialContext:    r.CredentialContext,
+		CredentialContexts:   r.CredentialContext,
 		Workspace:            r.Workspace,
 		DisablePromptServer:  r.UI,
 		DefaultModelProvider: r.DefaultModelProvider,

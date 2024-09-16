@@ -31,18 +31,18 @@ type CredentialStore interface {
 }
 
 type Store struct {
-	credCtx        []string
+	credCtxs       []string
 	credBuilder    CredentialBuilder
 	credHelperDirs CredentialHelperDirs
 	cfg            *config.CLIConfig
 }
 
-func NewStore(cfg *config.CLIConfig, credentialBuilder CredentialBuilder, credCtx, cacheDir string) (CredentialStore, error) {
-	if err := validateCredentialCtx(credCtx); err != nil {
+func NewStore(cfg *config.CLIConfig, credentialBuilder CredentialBuilder, credCtxs []string, cacheDir string) (CredentialStore, error) {
+	if err := validateCredentialCtx(credCtxs); err != nil {
 		return nil, err
 	}
 	return Store{
-		credCtx:        strings.Split(credCtx, ","),
+		credCtxs:       credCtxs,
 		credBuilder:    credentialBuilder,
 		credHelperDirs: GetCredentialHelperDirs(cacheDir),
 		cfg:            cfg,
@@ -50,7 +50,7 @@ func NewStore(cfg *config.CLIConfig, credentialBuilder CredentialBuilder, credCt
 }
 
 func (s Store) Get(ctx context.Context, toolName string) (*Credential, bool, error) {
-	if first(s.credCtx) == AllCredentialContexts {
+	if first(s.credCtxs) == AllCredentialContexts {
 		return nil, false, fmt.Errorf("cannot get a credential with context %q", AllCredentialContexts)
 	}
 
@@ -63,7 +63,7 @@ func (s Store) Get(ctx context.Context, toolName string) (*Credential, bool, err
 		authCfg types.AuthConfig
 		credCtx string
 	)
-	for _, c := range s.credCtx {
+	for _, c := range s.credCtxs {
 		auth, err := store.Get(toolNameWithCtx(toolName, c))
 		if err != nil {
 			if credentials2.IsErrCredentialsNotFound(err) {
@@ -96,10 +96,10 @@ func (s Store) Get(ctx context.Context, toolName string) (*Credential, bool, err
 }
 
 func (s Store) Add(ctx context.Context, cred Credential) error {
-	if first(s.credCtx) == AllCredentialContexts {
+	if first(s.credCtxs) == AllCredentialContexts {
 		return fmt.Errorf("cannot add a credential with context %q", AllCredentialContexts)
 	}
-	cred.Context = first(s.credCtx)
+	cred.Context = first(s.credCtxs)
 	store, err := s.getStore(ctx)
 	if err != nil {
 		return err
@@ -112,21 +112,16 @@ func (s Store) Add(ctx context.Context, cred Credential) error {
 }
 
 func (s Store) Remove(ctx context.Context, toolName string) error {
+	if len(s.credCtxs) > 1 {
+		return fmt.Errorf("error: credential deletion is not supported when multiple credential contexts are provided")
+	}
+
 	store, err := s.getStore(ctx)
 	if err != nil {
 		return err
 	}
 
-	// TODO - should we erase this cred in all provided contexts, or just the first matching one?
-	cred, found, err := s.Get(ctx, toolName)
-	if err != nil {
-		return err
-	}
-	if !found {
-		return nil
-	}
-
-	return store.Erase(toolNameWithCtx(cred.ToolName, cred.Context))
+	return store.Erase(toolNameWithCtx(toolName, first(s.credCtxs)))
 }
 
 func (s Store) List(ctx context.Context) ([]Credential, error) {
@@ -160,15 +155,15 @@ func (s Store) List(ctx context.Context) ([]Credential, error) {
 		}
 	}
 
-	if first(s.credCtx) == AllCredentialContexts {
+	if first(s.credCtxs) == AllCredentialContexts {
 		return allCreds, nil
 	}
 
 	// Go through the contexts in reverse order so that higher priority contexts override lower ones.
 	// TODO - is this how we want to do it?
 	credsByName := make(map[string]Credential)
-	for i := len(s.credCtx) - 1; i >= 0; i-- {
-		for _, c := range credsByContext[s.credCtx[i]] {
+	for i := len(s.credCtxs) - 1; i >= 0; i-- {
+		for _, c := range credsByContext[s.credCtxs[i]] {
 			credsByName[c.ToolName] = c
 		}
 	}
@@ -197,18 +192,18 @@ func (s *Store) getStoreByHelper(ctx context.Context, helper string) (credential
 	return NewHelper(s.cfg, helper)
 }
 
-func validateCredentialCtx(ctx string) error {
-	if ctx == "" {
-		return fmt.Errorf("credential context cannot be empty")
+func validateCredentialCtx(ctxs []string) error {
+	if len(ctxs) == 0 {
+		return fmt.Errorf("credential contexts must be provided")
 	}
 
-	if ctx == AllCredentialContexts {
+	if len(ctxs) == 1 && ctxs[0] == AllCredentialContexts {
 		return nil
 	}
 
 	// check alphanumeric
 	r := regexp.MustCompile("^[a-zA-Z0-9]+$")
-	for _, c := range strings.Split(ctx, ",") {
+	for _, c := range ctxs {
 		if !r.MatchString(c) {
 			return fmt.Errorf("credential contexts must be alphanumeric")
 		}

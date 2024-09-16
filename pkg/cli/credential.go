@@ -45,7 +45,7 @@ func (c *Credential) Run(cmd *cobra.Command, _ []string) error {
 
 	ctx := c.root.CredentialContext
 	if c.AllContexts {
-		ctx = credentials.AllCredentialContexts
+		ctx = []string{credentials.AllCredentialContexts}
 	}
 
 	opts, err := c.root.NewGPTScriptOpts()
@@ -77,7 +77,7 @@ func (c *Credential) Run(cmd *cobra.Command, _ []string) error {
 	defer w.Flush()
 
 	// Sort credentials and print column names, depending on the options.
-	if c.AllContexts {
+	if c.AllContexts || len(c.root.CredentialContext) > 1 {
 		// Sort credentials by context
 		sort.Slice(creds, func(i, j int) bool {
 			if creds[i].Context == creds[j].Context {
@@ -114,7 +114,7 @@ func (c *Credential) Run(cmd *cobra.Command, _ []string) error {
 		}
 
 		var fields []any
-		if c.AllContexts {
+		if c.AllContexts || len(c.root.CredentialContext) > 1 {
 			fields = []any{cred.Context, cred.ToolName, expires}
 		} else {
 			fields = []any{cred.ToolName, expires}

@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 )
 
-func (s *server) initializeCredentialStore(ctx context.Context, credCtx string) (credentials.CredentialStore, error) {
+func (s *server) initializeCredentialStore(ctx context.Context, credCtxs []string) (credentials.CredentialStore, error) {
 	cfg, err := config.ReadCLIConfig(s.gptscriptOpts.OpenAI.ConfigFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read CLI config: %w", err)
@@ -24,7 +25,7 @@ func (s *server) initializeCredentialStore(ctx context.Context, credCtx string) 
 		return nil, fmt.Errorf("failed to ensure credential helpers: %w", err)
 	}
 
-	store, err := credentials.NewStore(cfg, s.runtimeManager, credCtx, s.gptscriptOpts.Cache.CacheDir)
+	store, err := credentials.NewStore(cfg, s.runtimeManager, credCtxs, s.gptscriptOpts.Cache.CacheDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize credential store: %w", err)
 	}
@@ -41,9 +42,9 @@ func (s *server) listCredentials(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.AllContexts {
-		req.Context = credentials.AllCredentialContexts
-	} else if req.Context == "" {
-		req.Context = credentials.DefaultCredentialContext
+		req.Context = []string{credentials.AllCredentialContexts}
+	} else if len(req.Context) == 0 {
+		req.Context = []string{credentials.DefaultCredentialContext}
 	}
 
 	store, err := s.initializeCredentialStore(r.Context(), req.Context)
@@ -87,7 +88,7 @@ func (s *server) createCredential(w http.ResponseWriter, r *http.Request) {
 		cred.Context = credentials.DefaultCredentialContext
 	}
 
-	store, err := s.initializeCredentialStore(r.Context(), cred.Context)
+	store, err := s.initializeCredentialStore(r.Context(), []string{cred.Context})
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, err)
 		return
@@ -114,11 +115,11 @@ func (s *server) revealCredential(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.AllContexts || req.Context == credentials.AllCredentialContexts {
+	if req.AllContexts || slices.Contains(req.Context, credentials.AllCredentialContexts) {
 		writeError(logger, w, http.StatusBadRequest, fmt.Errorf("allContexts is not supported for credential retrieval; please specify the specific context that the credential is in"))
 		return
-	} else if req.Context == "" {
-		req.Context = credentials.DefaultCredentialContext
+	} else if len(req.Context) == 0 {
+		req.Context = []string{credentials.DefaultCredentialContext}
 	}
 
 	store, err := s.initializeCredentialStore(r.Context(), req.Context)
@@ -151,11 +152,11 @@ func (s *server) deleteCredential(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.AllContexts || req.Context == credentials.AllCredentialContexts {
+	if req.AllContexts || slices.Contains(req.Context, credentials.AllCredentialContexts) {
 		writeError(logger, w, http.StatusBadRequest, fmt.Errorf("allContexts is not supported for credential deletion; please specify the specific context that the credential is in"))
 		return
-	} else if req.Context == "" {
-		req.Context = credentials.DefaultCredentialContext
+	} else if len(req.Context) == 0 {
+		req.Context = []string{credentials.DefaultCredentialContext}
 	}
 
 	store, err := s.initializeCredentialStore(r.Context(), req.Context)

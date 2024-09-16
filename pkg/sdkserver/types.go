@@ -58,7 +58,7 @@ type toolOrFileRequest struct {
 	ChatState            string   `json:"chatState"`
 	Workspace            string   `json:"workspace"`
 	Env                  []string `json:"env"`
-	CredentialContext    string   `json:"credentialContext"`
+	CredentialContext    []string `json:"credentialContext"`
 	CredentialOverrides  []string `json:"credentialOverrides"`
 	Confirm              bool     `json:"confirm"`
 	Location             string   `json:"location,omitempty"`
@@ -255,7 +255,7 @@ type prompt struct {
 
 type credentialsRequest struct {
 	content     `json:",inline"`
-	AllContexts bool   `json:"allContexts"`
-	Context     string `json:"context"`
-	Name        string `json:"name"`
+	AllContexts bool     `json:"allContexts"`
+	Context     []string `json:"context"`
+	Name        string   `json:"name"`
 }
