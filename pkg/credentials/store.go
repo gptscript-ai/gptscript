@@ -112,7 +112,7 @@ func (s Store) Add(ctx context.Context, cred Credential) error {
 }
 
 func (s Store) Remove(ctx context.Context, toolName string) error {
-	if len(s.credCtxs) > 1 {
+	if len(s.credCtxs) > 1 || first(s.credCtxs) == AllCredentialContexts {
 		return fmt.Errorf("error: credential deletion is not supported when multiple credential contexts are provided")
 	}
 
@@ -160,7 +160,6 @@ func (s Store) List(ctx context.Context) ([]Credential, error) {
 	}
 
 	// Go through the contexts in reverse order so that higher priority contexts override lower ones.
-	// TODO - is this how we want to do it?
 	credsByName := make(map[string]Credential)
 	for i := len(s.credCtxs) - 1; i >= 0; i-- {
 		for _, c := range credsByContext[s.credCtxs[i]] {
