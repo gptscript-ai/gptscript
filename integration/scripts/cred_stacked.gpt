@@ -1,0 +1,36 @@
+name: testcred_one
+credential: cred_one as testcred
+
+#!python3
+
+import os
+
+print(os.environ.get("VALUE"))
+
+---
+name: testcred_two
+credential: cred_two as testcred
+
+#!python3
+
+import os
+
+print(os.environ.get("VALUE"))
+
+---
+name: cred_one
+
+#!python3
+
+import json
+
+print(json.dumps({"env": {"VALUE": "one"}}))
+
+---
+name: cred_two
+
+#!python3
+
+import json
+
+print(json.dumps({"env": {"VALUE": "two"}}))
