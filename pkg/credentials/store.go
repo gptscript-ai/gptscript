@@ -8,7 +8,10 @@ import (
 	"strings"
 
 	"github.com/docker/cli/cli/config/credentials"
+	"github.com/docker/cli/cli/config/types"
+	credentials2 "github.com/docker/docker-credential-helpers/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/config"
+	"golang.org/x/exp/maps"
 )
 
 const (
@@ -28,7 +31,7 @@ type CredentialStore interface {
 }
 
 type Store struct {
-	credCtx        string
+	credCtx        []string
 	credBuilder    CredentialBuilder
 	credHelperDirs CredentialHelperDirs
 	cfg            *config.CLIConfig
@@ -39,7 +42,7 @@ func NewStore(cfg *config.CLIConfig, credentialBuilder CredentialBuilder, credCt
 		return nil, err
 	}
 	return Store{
-		credCtx:        credCtx,
+		credCtx:        strings.Split(credCtx, ","),
 		credBuilder:    credentialBuilder,
 		credHelperDirs: GetCredentialHelperDirs(cacheDir),
 		cfg:            cfg,
@@ -47,22 +50,45 @@ func NewStore(cfg *config.CLIConfig, credentialBuilder CredentialBuilder, credCt
 }
 
 func (s Store) Get(ctx context.Context, toolName string) (*Credential, bool, error) {
+	if first(s.credCtx) == AllCredentialContexts {
+		return nil, false, fmt.Errorf("cannot get a credential with context %q", AllCredentialContexts)
+	}
+
 	store, err := s.getStore(ctx)
 	if err != nil {
 		return nil, false, err
 	}
-	auth, err := store.Get(toolNameWithCtx(toolName, s.credCtx))
-	if err != nil {
-		return nil, false, err
-	} else if auth.Password == "" {
+
+	var (
+		authCfg types.AuthConfig
+		credCtx string
+	)
+	for _, c := range s.credCtx {
+		auth, err := store.Get(toolNameWithCtx(toolName, c))
+		if err != nil {
+			if credentials2.IsErrCredentialsNotFound(err) {
+				continue
+			}
+			return nil, false, err
+		} else if auth.Password == "" {
+			continue
+		}
+
+		authCfg = auth
+		credCtx = c
+		break
+	}
+
+	if credCtx == "" {
+		// Didn't find the credential
 		return nil, false, nil
 	}
 
-	if auth.ServerAddress == "" {
-		auth.ServerAddress = toolNameWithCtx(toolName, s.credCtx) // Not sure why we have to do this, but we do.
+	if authCfg.ServerAddress == "" {
+		authCfg.ServerAddress = toolNameWithCtx(toolName, credCtx) // Not sure why we have to do this, but we do.
 	}
 
-	cred, err := credentialFromDockerAuthConfig(auth)
+	cred, err := credentialFromDockerAuthConfig(authCfg)
 	if err != nil {
 		return nil, false, err
 	}
@@ -70,7 +96,10 @@ func (s Store) Get(ctx context.Context, toolName string) (*Credential, bool, err
 }
 
 func (s Store) Add(ctx context.Context, cred Credential) error {
-	cred.Context = s.credCtx
+	if first(s.credCtx) == AllCredentialContexts {
+		return fmt.Errorf("cannot add a credential with context %q", AllCredentialContexts)
+	}
+	cred.Context = first(s.credCtx)
 	store, err := s.getStore(ctx)
 	if err != nil {
 		return err
@@ -87,7 +116,17 @@ func (s Store) Remove(ctx context.Context, toolName string) error {
 	if err != nil {
 		return err
 	}
-	return store.Erase(toolNameWithCtx(toolName, s.credCtx))
+
+	// TODO - should we erase this cred in all provided contexts, or just the first matching one?
+	cred, found, err := s.Get(ctx, toolName)
+	if err != nil {
+		return err
+	}
+	if !found {
+		return nil
+	}
+
+	return store.Erase(toolNameWithCtx(cred.ToolName, cred.Context))
 }
 
 func (s Store) List(ctx context.Context) ([]Credential, error) {
@@ -100,7 +139,8 @@ func (s Store) List(ctx context.Context) ([]Credential, error) {
 		return nil, err
 	}
 
-	var creds []Credential
+	credsByContext := make(map[string][]Credential)
+	allCreds := make([]Credential, 0)
 	for serverAddress, authCfg := range list {
 		if authCfg.ServerAddress == "" {
 			authCfg.ServerAddress = serverAddress // Not sure why we have to do this, but we do.
@@ -110,12 +150,30 @@ func (s Store) List(ctx context.Context) ([]Credential, error) {
 		if err != nil {
 			return nil, err
 		}
-		if s.credCtx == AllCredentialContexts || c.Context == s.credCtx {
-			creds = append(creds, c)
+
+		allCreds = append(allCreds, c)
+
+		if credsByContext[c.Context] == nil {
+			credsByContext[c.Context] = []Credential{c}
+		} else {
+			credsByContext[c.Context] = append(credsByContext[c.Context], c)
 		}
 	}
 
-	return creds, nil
+	if first(s.credCtx) == AllCredentialContexts {
+		return allCreds, nil
+	}
+
+	// Go through the contexts in reverse order so that higher priority contexts override lower ones.
+	// TODO - is this how we want to do it?
+	credsByName := make(map[string]Credential)
+	for i := len(s.credCtx) - 1; i >= 0; i-- {
+		for _, c := range credsByContext[s.credCtx[i]] {
+			credsByName[c.ToolName] = c
+		}
+	}
+
+	return maps.Values(credsByName), nil
 }
 
 func (s *Store) getStore(ctx context.Context) (credentials.Store, error) {
@@ -150,8 +208,11 @@ func validateCredentialCtx(ctx string) error {
 
 	// check alphanumeric
 	r := regexp.MustCompile("^[a-zA-Z0-9]+$")
-	if !r.MatchString(ctx) {
-		return fmt.Errorf("credential context must be alphanumeric")
+	for _, c := range strings.Split(ctx, ",") {
+		if !r.MatchString(c) {
+			return fmt.Errorf("credential contexts must be alphanumeric")
+		}
 	}
+
 	return nil
 }
