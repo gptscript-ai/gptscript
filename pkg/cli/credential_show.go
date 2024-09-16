@@ -42,11 +42,16 @@ func (c *Show) Run(cmd *cobra.Command, args []string) error {
 		opts.Runner.RuntimeManager = runtimes.Default(opts.Cache.CacheDir)
 	}
 
+	credCtx := c.root.CredentialContext
+	if len(credCtx) == 0 {
+		credCtx = []string{credentials.DefaultCredentialContext}
+	}
+
 	if err = opts.Runner.RuntimeManager.SetUpCredentialHelpers(cmd.Context(), cfg); err != nil {
 		return err
 	}
 
-	store, err := credentials.NewStore(cfg, opts.Runner.RuntimeManager, c.root.CredentialContext, opts.Cache.CacheDir)
+	store, err := credentials.NewStore(cfg, opts.Runner.RuntimeManager, credCtx, opts.Cache.CacheDir)
 	if err != nil {
 		return fmt.Errorf("failed to get credentials store: %w", err)
 	}

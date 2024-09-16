@@ -43,9 +43,11 @@ func (c *Credential) Run(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("failed to read CLI config: %w", err)
 	}
 
-	ctx := c.root.CredentialContext
+	ctxs := c.root.CredentialContext
 	if c.AllContexts {
-		ctx = []string{credentials.AllCredentialContexts}
+		ctxs = []string{credentials.AllCredentialContexts}
+	} else if len(ctxs) == 0 {
+		ctxs = []string{credentials.DefaultCredentialContext}
 	}
 
 	opts, err := c.root.NewGPTScriptOpts()
@@ -63,7 +65,7 @@ func (c *Credential) Run(cmd *cobra.Command, _ []string) error {
 	}
 
 	// Initialize the credential store and get all the credentials.
-	store, err := credentials.NewStore(cfg, opts.Runner.RuntimeManager, ctx, opts.Cache.CacheDir)
+	store, err := credentials.NewStore(cfg, opts.Runner.RuntimeManager, ctxs, opts.Cache.CacheDir)
 	if err != nil {
 		return fmt.Errorf("failed to get credentials store: %w", err)
 	}
