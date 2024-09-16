@@ -20,7 +20,7 @@ gptscript credential [flags]
 ### Options inherited from parent commands
 
 ```
-      --credential-context string   Context name in which to store credentials ($GPTSCRIPT_CREDENTIAL_CONTEXT) (default "default")
+      --credential-context strings   Context name(s) in which to store credentials ($GPTSCRIPT_CREDENTIAL_CONTEXT)
 ```
 
 ### SEE ALSO
