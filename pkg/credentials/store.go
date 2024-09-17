@@ -96,10 +96,12 @@ func (s Store) Get(ctx context.Context, toolName string) (*Credential, bool, err
 }
 
 func (s Store) Add(ctx context.Context, cred Credential) error {
-	if first(s.credCtxs) == AllCredentialContexts {
+	first := first(s.credCtxs)
+	if first == AllCredentialContexts {
 		return fmt.Errorf("cannot add a credential with context %q", AllCredentialContexts)
 	}
-	cred.Context = first(s.credCtxs)
+	cred.Context = first
+
 	store, err := s.getStore(ctx)
 	if err != nil {
 		return err
@@ -112,7 +114,8 @@ func (s Store) Add(ctx context.Context, cred Credential) error {
 }
 
 func (s Store) Remove(ctx context.Context, toolName string) error {
-	if len(s.credCtxs) > 1 || first(s.credCtxs) == AllCredentialContexts {
+	first := first(s.credCtxs)
+	if len(s.credCtxs) > 1 || first == AllCredentialContexts {
 		return fmt.Errorf("error: credential deletion is not supported when multiple credential contexts are provided")
 	}
 
@@ -121,7 +124,7 @@ func (s Store) Remove(ctx context.Context, toolName string) error {
 		return err
 	}
 
-	return store.Erase(toolNameWithCtx(toolName, first(s.credCtxs)))
+	return store.Erase(toolNameWithCtx(toolName, first))
 }
 
 func (s Store) List(ctx context.Context) ([]Credential, error) {
