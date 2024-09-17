@@ -103,7 +103,7 @@ func New(ctx context.Context, o ...Options) (*GPTScript, error) {
 		return nil, err
 	}
 
-	credStore, err := credentials.NewStore(cliCfg, opts.Runner.RuntimeManager, opts.CredentialContexts, cacheClient.CacheDir())
+	credStore, err := credentials.NewStore(ctx, cliCfg, opts.Runner.RuntimeManager, opts.CredentialContexts, cacheClient.CacheDir())
 	if err != nil {
 		return nil, err
 	}

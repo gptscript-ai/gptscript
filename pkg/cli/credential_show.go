@@ -44,7 +44,7 @@ func (c *Show) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	store, err := credentials.NewStore(cfg, opts.Runner.RuntimeManager, opts.CredentialContexts, opts.Cache.CacheDir)
+	store, err := credentials.NewStore(cmd.Context(), cfg, opts.Runner.RuntimeManager, opts.CredentialContexts, opts.Cache.CacheDir)
 	if err != nil {
 		return fmt.Errorf("failed to get credentials store: %w", err)
 	}

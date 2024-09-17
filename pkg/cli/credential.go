@@ -61,7 +61,7 @@ func (c *Credential) Run(cmd *cobra.Command, _ []string) error {
 	}
 
 	// Initialize the credential store and get all the credentials.
-	store, err := credentials.NewStore(cfg, opts.Runner.RuntimeManager, ctxs, opts.Cache.CacheDir)
+	store, err := credentials.NewStore(cmd.Context(), cfg, opts.Runner.RuntimeManager, ctxs, opts.Cache.CacheDir)
 	if err != nil {
 		return fmt.Errorf("failed to get credentials store: %w", err)
 	}

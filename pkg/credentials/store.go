@@ -37,10 +37,15 @@ type Store struct {
 	cfg            *config.CLIConfig
 }
 
-func NewStore(cfg *config.CLIConfig, credentialBuilder CredentialBuilder, credCtxs []string, cacheDir string) (CredentialStore, error) {
+func NewStore(ctx context.Context, cfg *config.CLIConfig, credentialBuilder CredentialBuilder, credCtxs []string, cacheDir string) (CredentialStore, error) {
 	if err := validateCredentialCtx(credCtxs); err != nil {
 		return nil, err
 	}
+
+	if cfg.CredentialsStore == config.CredentialStoreSQLite {
+		return NewDBStore(ctx, cfg, credCtxs)
+	}
+
 	return Store{
 		credCtxs:       credCtxs,
 		credBuilder:    credentialBuilder,
@@ -178,7 +183,7 @@ func (s *Store) getStore(ctx context.Context) (credentials.Store, error) {
 }
 
 func (s *Store) getStoreByHelper(ctx context.Context, helper string) (credentials.Store, error) {
-	if helper == "" || helper == config.GPTScriptHelperPrefix+"file" {
+	if helper == "" || helper == config.GPTScriptHelperPrefix+config.CredentialStoreFile {
 		return credentials.NewFileStore(s.cfg), nil
 	}
 

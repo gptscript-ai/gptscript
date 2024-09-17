@@ -109,12 +109,12 @@ func (m *Manager) deferredSetUpCredentialHelpers(ctx context.Context, cliCfg *co
 		helperName       = cliCfg.CredentialsStore
 		distInfo, suffix string
 	)
-	// The file helper is built-in and does not need to be downloaded.
-	if helperName == "file" {
+	// The file and SQLite helpers are built-in and do not need to be downloaded.
+	if helperName == config.CredentialStoreFile || helperName == config.CredentialStoreSQLite {
 		return nil
 	}
 	switch helperName {
-	case "wincred":
+	case config.CredentialStoreWincred:
 		suffix = ".exe"
 	default:
 		distInfo = fmt.Sprintf("-%s-%s", runtime.GOOS, runtime.GOARCH)

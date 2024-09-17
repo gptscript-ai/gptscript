@@ -25,7 +25,7 @@ func (s *server) initializeCredentialStore(ctx context.Context, credCtxs []strin
 		return nil, fmt.Errorf("failed to ensure credential helpers: %w", err)
 	}
 
-	store, err := credentials.NewStore(cfg, s.runtimeManager, credCtxs, s.gptscriptOpts.Cache.CacheDir)
+	store, err := credentials.NewStore(ctx, cfg, s.runtimeManager, credCtxs, s.gptscriptOpts.Cache.CacheDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize credential store: %w", err)
 	}

@@ -15,13 +15,21 @@ import (
 	"github.com/docker/cli/cli/config/types"
 )
 
-var (
-	darwinHelpers  = []string{"osxkeychain", "file"}
-	windowsHelpers = []string{"wincred", "file"}
-	linuxHelpers   = []string{"secretservice", "pass", "file"}
+const (
+	GPTScriptHelperPrefix        = "gptscript-credential-"
+	CredentialStoreFile          = "file"
+	CredentialStoreOSXKeychain   = "osxkeychain"
+	CredentialStoreWincred       = "wincred"
+	CredentialStoreSecretService = "secretservice"
+	CredentialStorePass          = "pass"
+	CredentialStoreSQLite        = "sqlite"
 )
 
-const GPTScriptHelperPrefix = "gptscript-credential-"
+var (
+	darwinHelpers  = []string{CredentialStoreOSXKeychain, CredentialStoreFile, CredentialStoreSQLite}
+	windowsHelpers = []string{CredentialStoreWincred, CredentialStoreFile, CredentialStoreSQLite}
+	linuxHelpers   = []string{CredentialStoreSecretService, CredentialStorePass, CredentialStoreFile, CredentialStoreSQLite}
+)
 
 type AuthConfig types.AuthConfig
 
@@ -146,15 +154,15 @@ func ReadCLIConfig(gptscriptConfigFile string) (*CLIConfig, error) {
 		}
 	}
 
-	if !isValidCredentialHelper(result.CredentialsStore) {
+	if !isValidCredentialStore(result.CredentialsStore) {
 		errMsg := fmt.Sprintf("invalid credential store '%s'", result.CredentialsStore)
 		switch runtime.GOOS {
 		case "darwin":
-			errMsg += " (use 'osxkeychain' or 'file')"
+			errMsg += " (use 'osxkeychain', 'file', or 'sqlite')"
 		case "windows":
-			errMsg += " (use 'wincred' or 'file')"
+			errMsg += " (use 'wincred', 'file' or 'sqlite')"
 		case "linux":
-			errMsg += " (use 'secretservice', 'pass', or 'file')"
+			errMsg += " (use 'secretservice', 'pass', 'file', or 'sqlite')"
 		default:
 			errMsg += " (use 'file')"
 		}
@@ -169,25 +177,25 @@ func ReadCLIConfig(gptscriptConfigFile string) (*CLIConfig, error) {
 func (c *CLIConfig) setDefaultCredentialsStore() error {
 	switch runtime.GOOS {
 	case "darwin":
-		c.CredentialsStore = "osxkeychain"
+		c.CredentialsStore = CredentialStoreOSXKeychain
 	case "windows":
-		c.CredentialsStore = "wincred"
+		c.CredentialsStore = CredentialStoreWincred
 	default:
-		c.CredentialsStore = "file"
+		c.CredentialsStore = CredentialStoreFile
 	}
 	return c.Save()
 }
 
-func isValidCredentialHelper(helper string) bool {
+func isValidCredentialStore(store string) bool {
 	switch runtime.GOOS {
 	case "darwin":
-		return slices.Contains(darwinHelpers, helper)
+		return slices.Contains(darwinHelpers, store)
 	case "windows":
-		return slices.Contains(windowsHelpers, helper)
+		return slices.Contains(windowsHelpers, store)
 	case "linux":
-		return slices.Contains(linuxHelpers, helper)
+		return slices.Contains(linuxHelpers, store)
 	default:
-		return helper == "file"
+		return store == CredentialStoreFile || store == CredentialStoreSQLite
 	}
 }
 
