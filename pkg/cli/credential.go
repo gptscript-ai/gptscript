@@ -9,11 +9,10 @@ import (
 	"time"
 
 	cmd2 "github.com/gptscript-ai/cmd"
-	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
+	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes"
-	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/spf13/cobra"
 )
 
@@ -43,21 +42,18 @@ func (c *Credential) Run(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("failed to read CLI config: %w", err)
 	}
 
-	ctxs := c.root.CredentialContext
-	if c.AllContexts {
-		ctxs = []string{credentials.AllCredentialContexts}
-	} else if len(ctxs) == 0 {
-		ctxs = []string{credentials.DefaultCredentialContext}
-	}
-
 	opts, err := c.root.NewGPTScriptOpts()
 	if err != nil {
 		return err
 	}
-	opts.Cache = cache.Complete(opts.Cache)
-	opts.Runner = runner.Complete(opts.Runner)
+	opts = gptscript.Complete(opts)
 	if opts.Runner.RuntimeManager == nil {
 		opts.Runner.RuntimeManager = runtimes.Default(opts.Cache.CacheDir)
+	}
+
+	ctxs := opts.CredentialContexts
+	if c.AllContexts {
+		ctxs = []string{credentials.AllCredentialContexts}
 	}
 
 	if err = opts.Runner.RuntimeManager.SetUpCredentialHelpers(cmd.Context(), cfg); err != nil {
