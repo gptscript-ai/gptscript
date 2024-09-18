@@ -14,6 +14,7 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/glebarez/sqlite"
 	"github.com/gptscript-ai/gptscript/pkg/config"
+	"golang.org/x/exp/maps"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -302,28 +303,59 @@ func (d *DBStore) Remove(ctx context.Context, toolName string) error {
 }
 
 func (d *DBStore) List(ctx context.Context) ([]Credential, error) {
-	var (
-		dbCreds []GptscriptCredential
-		err     error
-	)
-	if err = d.db.WithContext(ctx).Where("context = ?", first(d.credCtxs)).Find(&dbCreds).Error; err != nil {
+	if first(d.credCtxs) == AllCredentialContexts {
+		return d.listAll(ctx)
+	}
+
+	credsByContext := make(map[string][]GptscriptCredential)
+	for _, credCtx := range d.credCtxs {
+		var creds []GptscriptCredential
+		if err := d.db.WithContext(ctx).Where("context = ?", credCtx).Find(&creds).Error; err != nil {
+			return nil, fmt.Errorf("failed to list credentials: %w", err)
+		}
+		credsByContext[credCtx] = creds
+	}
+
+	// Go through the contexts in reverse order so that higher priority contexts override lower ones.
+	credsByName := make(map[string]Credential)
+	for i := len(d.credCtxs) - 1; i >= 0; i-- {
+		for _, dbCred := range credsByContext[d.credCtxs[i]] {
+			dbCred, err := d.decryptCred(ctx, dbCred)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decrypt credential: %w", err)
+			}
+
+			cred, err := dbCredToCred(dbCred)
+			if err != nil {
+				return nil, fmt.Errorf("failed to convert GptscriptCredential to Credential: %w", err)
+			}
+
+			credsByName[cred.ToolName] = cred
+		}
+	}
+
+	return maps.Values(credsByName), nil
+}
+
+func (d *DBStore) listAll(ctx context.Context) ([]Credential, error) {
+	var allCreds []GptscriptCredential
+	if err := d.db.WithContext(ctx).Find(&allCreds).Error; err != nil {
 		return nil, fmt.Errorf("failed to list credentials: %w", err)
 	}
 
-	var credentials []Credential
-	for _, dbCred := range dbCreds {
-		dbCred, err = d.decryptCred(ctx, dbCred)
+	var creds []Credential
+	for _, dbCred := range allCreds {
+		dbCred, err := d.decryptCred(ctx, dbCred)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decrypt credential: %w", err)
 		}
 
-		credential, err := dbCredToCred(dbCred)
+		cred, err := dbCredToCred(dbCred)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert GptscriptCredential to Credential: %w", err)
 		}
-
-		credentials = append(credentials, credential)
+		creds = append(creds, cred)
 	}
 
-	return credentials, nil
+	return creds, nil
 }
