@@ -3,11 +3,10 @@ package cli
 import (
 	"fmt"
 
-	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
+	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes"
-	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/spf13/cobra"
 )
 
@@ -34,8 +33,7 @@ func (c *Delete) Run(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to read CLI config: %w", err)
 	}
 
-	opts.Cache = cache.Complete(opts.Cache)
-	opts.Runner = runner.Complete(opts.Runner)
+	opts = gptscript.Complete(opts)
 	if opts.Runner.RuntimeManager == nil {
 		opts.Runner.RuntimeManager = runtimes.Default(opts.Cache.CacheDir)
 	}
@@ -44,7 +42,7 @@ func (c *Delete) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	store, err := credentials.NewStore(cfg, opts.Runner.RuntimeManager, c.root.CredentialContext, opts.Cache.CacheDir)
+	store, err := credentials.NewStore(cfg, opts.Runner.RuntimeManager, opts.CredentialContexts, opts.Cache.CacheDir)
 	if err != nil {
 		return fmt.Errorf("failed to get credentials store: %w", err)
 	}

@@ -15,3 +15,10 @@ func GetCredentialHelperDirs(cacheDir string) CredentialHelperDirs {
 		BinDir:          filepath.Join(cacheDir, "repos", "gptscript-credential-helpers", "bin"),
 	}
 }
+
+func first(s []string) string {
+	if len(s) == 0 {
+		return ""
+	}
+	return s[0]
+}

@@ -9,11 +9,10 @@ import (
 	"time"
 
 	cmd2 "github.com/gptscript-ai/cmd"
-	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
+	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes"
-	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/spf13/cobra"
 )
 
@@ -43,19 +42,18 @@ func (c *Credential) Run(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("failed to read CLI config: %w", err)
 	}
 
-	ctx := c.root.CredentialContext
-	if c.AllContexts {
-		ctx = credentials.AllCredentialContexts
-	}
-
 	opts, err := c.root.NewGPTScriptOpts()
 	if err != nil {
 		return err
 	}
-	opts.Cache = cache.Complete(opts.Cache)
-	opts.Runner = runner.Complete(opts.Runner)
+	opts = gptscript.Complete(opts)
 	if opts.Runner.RuntimeManager == nil {
 		opts.Runner.RuntimeManager = runtimes.Default(opts.Cache.CacheDir)
+	}
+
+	ctxs := opts.CredentialContexts
+	if c.AllContexts {
+		ctxs = []string{credentials.AllCredentialContexts}
 	}
 
 	if err = opts.Runner.RuntimeManager.SetUpCredentialHelpers(cmd.Context(), cfg); err != nil {
@@ -63,7 +61,7 @@ func (c *Credential) Run(cmd *cobra.Command, _ []string) error {
 	}
 
 	// Initialize the credential store and get all the credentials.
-	store, err := credentials.NewStore(cfg, opts.Runner.RuntimeManager, ctx, opts.Cache.CacheDir)
+	store, err := credentials.NewStore(cfg, opts.Runner.RuntimeManager, ctxs, opts.Cache.CacheDir)
 	if err != nil {
 		return fmt.Errorf("failed to get credentials store: %w", err)
 	}
@@ -77,7 +75,7 @@ func (c *Credential) Run(cmd *cobra.Command, _ []string) error {
 	defer w.Flush()
 
 	// Sort credentials and print column names, depending on the options.
-	if c.AllContexts {
+	if c.AllContexts || len(c.root.CredentialContext) > 1 {
 		// Sort credentials by context
 		sort.Slice(creds, func(i, j int) bool {
 			if creds[i].Context == creds[j].Context {
@@ -114,7 +112,7 @@ func (c *Credential) Run(cmd *cobra.Command, _ []string) error {
 		}
 
 		var fields []any
-		if c.AllContexts {
+		if c.AllContexts || len(c.root.CredentialContext) > 1 {
 			fields = []any{cred.Context, cred.ToolName, expires}
 		} else {
 			fields = []any{cred.ToolName, expires}

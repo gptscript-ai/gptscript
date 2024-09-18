@@ -45,7 +45,7 @@ type Options struct {
 	Monitor              monitor.Options
 	Runner               runner.Options
 	DefaultModelProvider string
-	CredentialContext    string
+	CredentialContexts   []string
 	Quiet                *bool
 	Workspace            string
 	DisablePromptServer  bool
@@ -60,7 +60,7 @@ func Complete(opts ...Options) Options {
 		result.Runner = runner.Complete(result.Runner, opt.Runner)
 		result.OpenAI = openai.Complete(result.OpenAI, opt.OpenAI)
 
-		result.CredentialContext = types.FirstSet(opt.CredentialContext, result.CredentialContext)
+		result.CredentialContexts = append(result.CredentialContexts, opt.CredentialContexts...)
 		result.Quiet = types.FirstSet(opt.Quiet, result.Quiet)
 		result.Workspace = types.FirstSet(opt.Workspace, result.Workspace)
 		result.Env = append(result.Env, opt.Env...)
@@ -74,8 +74,8 @@ func Complete(opts ...Options) Options {
 	if len(result.Env) == 0 {
 		result.Env = os.Environ()
 	}
-	if result.CredentialContext == "" {
-		result.CredentialContext = credentials.DefaultCredentialContext
+	if len(result.CredentialContexts) == 0 {
+		result.CredentialContexts = []string{credentials.DefaultCredentialContext}
 	}
 
 	return result
@@ -103,7 +103,7 @@ func New(ctx context.Context, o ...Options) (*GPTScript, error) {
 		return nil, err
 	}
 
-	credStore, err := credentials.NewStore(cliCfg, opts.Runner.RuntimeManager, opts.CredentialContext, cacheClient.CacheDir())
+	credStore, err := credentials.NewStore(cliCfg, opts.Runner.RuntimeManager, opts.CredentialContexts, cacheClient.CacheDir())
 	if err != nil {
 		return nil, err
 	}

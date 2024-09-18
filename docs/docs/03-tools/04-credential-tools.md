@@ -222,3 +222,55 @@ import os
 
 print("myCred expires at " + os.getenv("GPTSCRIPT_CREDENTIAL_EXPIRATION", ""))
 ```
+
+## Stacked Credential Contexts (Advanced)
+
+When setting the `--credential-context` argument in GPTScript, you can specify multiple contexts separated by commas.
+We refer to this as "stacked credential contexts", or just stacked contexts for short. This allows you to specify an order
+of priority for credential contexts. This is best explained by example.
+
+### Example: stacked contexts when running a script that uses a credential
+
+Let's say you have two contexts, `one` and `two`, and you specify them like this:
+
+```bash
+gptscript --credential-context one,two my-script.gpt
+```
+
+```
+Credential: my-credential-tool.gpt as myCred
+
+<tool stuff here>
+```
+
+When GPTScript runs, it will first look for a credential called `myCred` in the `one` context.
+If it doesn't find it there, it will look for it in the `two` context. If it also doesn't find it there,
+it will run the `my-credential-tool.gpt` tool to get the credential. It will then store the new credential into the `one`
+context, since that has the highest priority.
+
+### Example: stacked contexts when listing credentials
+
+```bash
+gptscript --credential-context one,two credentials
+```
+
+When you list credentials like this, GPTScript will print out the information for all credentials in contexts one and two,
+with one exception. If there is a credential name that exists in both contexts, GPTScript will only print the information
+for the credential in the context with the highest priority, which in this case is `one`.
+
+(To see all credentials in all contexts, you can still use the `--all-contexts` flag, and it will show all credentials,
+regardless of whether the same name appears in another context.)
+
+### Example: stacked contexts when showing credentials
+
+```bash
+gptscript --credential-context one,two credential show myCred
+```
+
+When you show a credential like this, GPTScript will first look for `myCred` in the `one` context. If it doesn't find it
+there, it will look for it in the `two` context. If it doesn't find it in either context, it will print an error message.
+
+:::note
+You cannot specify stacked contexts when doing `gptscript credential delete`. GPTScript will return an error if
+more than one context is specified for this command.
+:::
