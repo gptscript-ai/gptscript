@@ -179,7 +179,6 @@ func (r *Runner) Chat(ctx context.Context, prevState ChatState, prg types.Progra
 		}
 	} else {
 		state = state.WithResumeInput(&input)
-		state.ResumeInput = &input
 	}
 
 	state, err = r.resume(callCtx, monitor, env, state)
@@ -683,7 +682,13 @@ func (r *Runner) subCall(ctx context.Context, parentContext engine.Context, moni
 		}, nil
 	}
 
-	return r.call(callCtx, monitor, env, input)
+	state, err := r.call(callCtx, monitor, env, input)
+	if finishErr := (*engine.ErrChatFinish)(nil); errors.As(err, &finishErr) && callCtx.Tool.Chat {
+		return &State{
+			Result: &finishErr.Message,
+		}, nil
+	}
+	return state, err
 }
 
 func (r *Runner) subCallResume(ctx context.Context, parentContext engine.Context, monitor Monitor, env []string, toolID, callID string, state *State, toolCategory engine.ToolCategory) (*State, error) {
@@ -692,7 +697,13 @@ func (r *Runner) subCallResume(ctx context.Context, parentContext engine.Context
 		return nil, err
 	}
 
-	return r.resume(callCtx, monitor, env, state)
+	state, err = r.resume(callCtx, monitor, env, state)
+	if finishErr := (*engine.ErrChatFinish)(nil); errors.As(err, &finishErr) && callCtx.Tool.Chat {
+		return &State{
+			Result: &finishErr.Message,
+		}, nil
+	}
+	return state, err
 }
 
 type SubCallResult struct {

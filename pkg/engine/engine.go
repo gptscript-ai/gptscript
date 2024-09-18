@@ -281,6 +281,25 @@ func populateMessageParams(ctx Context, completion *types.CompletionRequest, too
 	return nil
 }
 
+func (e *Engine) runCommandTools(ctx Context, tool types.Tool, input string) (*Return, error) {
+	if tool.IsHTTP() {
+		return e.runHTTP(ctx.Ctx, ctx.Program, tool, input)
+	} else if tool.IsDaemon() {
+		return e.runDaemon(ctx.Ctx, ctx.Program, tool, input)
+	} else if tool.IsOpenAPI() {
+		return e.runOpenAPI(tool, input)
+	} else if tool.IsEcho() {
+		return e.runEcho(tool)
+	}
+	s, err := e.runCommand(ctx, tool, input, ctx.ToolCategory)
+	if err != nil {
+		return nil, err
+	}
+	return &Return{
+		Result: &s,
+	}, nil
+}
+
 func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 	tool := ctx.Tool
 
@@ -291,22 +310,7 @@ func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 	}()
 
 	if tool.IsCommand() {
-		if tool.IsHTTP() {
-			return e.runHTTP(ctx.Ctx, ctx.Program, tool, input)
-		} else if tool.IsDaemon() {
-			return e.runDaemon(ctx.Ctx, ctx.Program, tool, input)
-		} else if tool.IsOpenAPI() {
-			return e.runOpenAPI(tool, input)
-		} else if tool.IsEcho() {
-			return e.runEcho(tool)
-		}
-		s, err := e.runCommand(ctx, tool, input, ctx.ToolCategory)
-		if err != nil {
-			return nil, err
-		}
-		return &Return{
-			Result: &s,
-		}, nil
+		return e.runCommandTools(ctx, tool, input)
 	}
 
 	if ctx.ToolCategory == CredentialToolCategory {
@@ -431,6 +435,14 @@ func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 }
 
 func (e *Engine) Continue(ctx Context, state *State, results ...CallResult) (*Return, error) {
+	if ctx.Tool.IsCommand() {
+		var input string
+		if len(results) == 1 {
+			input = results[0].User
+		}
+		return e.runCommandTools(ctx, ctx.Tool, input)
+	}
+
 	if state == nil {
 		return nil, fmt.Errorf("invalid continue call, missing state")
 	}

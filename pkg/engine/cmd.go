@@ -68,12 +68,14 @@ func compressEnv(envs []string) (result []string) {
 func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCategory ToolCategory) (cmdOut string, cmdErr error) {
 	id := counter.Next()
 
+	var combinedOutput string
 	defer func() {
 		e.Progress <- types.CompletionStatus{
 			CompletionID: id,
 			Response: map[string]any{
-				"output": cmdOut,
-				"err":    cmdErr,
+				"output":     cmdOut,
+				"fullOutput": combinedOutput,
+				"err":        cmdErr,
 			},
 		}
 	}()
@@ -156,9 +158,11 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 			return fmt.Sprintf("ERROR: got (%v) while running tool, OUTPUT: %s", err, stdoutAndErr), nil
 		}
 		log.Errorf("failed to run tool [%s] cmd %v: %v", tool.Parameters.Name, cmd.Args, err)
+		combinedOutput = stdoutAndErr.String()
 		return "", fmt.Errorf("ERROR: %s: %w", result, err)
 	}
 
+	combinedOutput = stdoutAndErr.String()
 	return result.String(), IsChatFinishMessage(result.String())
 }
 
