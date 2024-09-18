@@ -44,11 +44,16 @@ type DBStore struct {
 
 // GptscriptCredential is the struct we use to represent credentials in the database.
 type GptscriptCredential struct {
-	ID                      uint `gorm:"primarykey"`
-	CreatedAt               time.Time
-	UpdatedAt               time.Time
-	Context                 string `gorm:"index:contextname,unique"`
-	Name                    string `gorm:"index:contextname,unique"`
+	// We aren't using gorm.Model because we don't want a DeletedAt field.
+	// We want records to be fully deleted from the database.
+	ID        uint `gorm:"primarykey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+
+	// We set up an extra index here to enforce a unique constraint on context+name.
+	Context string `gorm:"index:contextname,unique"`
+	Name    string `gorm:"index:contextname,unique"`
+
 	Type, Env, RefreshToken string
 	Ephemeral               bool
 	ExpiresAt               *time.Time
@@ -98,6 +103,7 @@ func NewDBStore(ctx context.Context, cfg *config.CLIConfig, credCtxs []string) (
 	if err != nil {
 		return nil, fmt.Errorf("failed to read encryption config: %w", err)
 	} else if encryptionConf != nil {
+		// The transformer that we get from the encryption configuration is the interface we use for encryption and decryption.
 		transformer, exists := encryptionConf.Transformers[groupResource]
 		if !exists {
 			return nil, fmt.Errorf("failed to find encryption transformer for %s", groupResource.String())
@@ -150,6 +156,7 @@ func readEncryptionConfig(ctx context.Context) (*encryptionconfig.EncryptionConf
 		return nil, fmt.Errorf("failed to stat encryption config file: %w", err)
 	}
 
+	// Use k8s libraries to load the encryption config from the file:
 	return encryptionconfig.LoadEncryptionConfig(ctx, encryptionConfigPath, false, "gptscript")
 }
 
