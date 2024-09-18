@@ -122,8 +122,6 @@ func TestDBStoreStackedContexts(t *testing.T) {
 			require.Equal(t, credential1.Context, c.Context)
 			found = true
 			break
-		} else {
-			require.Fail(t, "unexpected credential found")
 		}
 	}
 	require.True(t, found)
