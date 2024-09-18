@@ -148,13 +148,8 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 	)
 
 	cmd.Stdout = io.MultiWriter(stdout, stdoutAndErr, progressOut)
-	if toolCategory == NoCategory || toolCategory == ContextToolCategory {
-		cmd.Stderr = io.MultiWriter(stdoutAndErr, progressOut)
-		result = stdoutAndErr
-	} else {
-		cmd.Stderr = io.MultiWriter(stdoutAndErr, progressOut, os.Stderr)
-		result = stdout
-	}
+	cmd.Stderr = io.MultiWriter(stdoutAndErr, progressOut, os.Stderr)
+	result = stdout
 
 	if err := cmd.Run(); err != nil {
 		if toolCategory == NoCategory {
