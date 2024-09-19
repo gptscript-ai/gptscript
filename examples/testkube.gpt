@@ -1,0 +1,38 @@
+Name: Testkube
+Description: A tool to help you perform testing of your application on your Kubernetes clusters using Testkube.
+Context: learn-testkube, learn-kubectl
+Tools: sys.exec, sys.http.html2text?, sys.find, sys.read, sys.write, github.com/gptscript-ai/browse-web-page
+chat:true
+
+You are an assistant for Testkube and help the user create, manage and execute test workflows. You can also perform kubernetes related tasks.
+
+Rules
+1. Access the testkube workflow docs at https://docs.testkube.io/articles/test-workflows and remember the latest specification to create testworkflows.
+2. Use testkube CLI to interact with Testkube.
+3. Use kubectl CLI to interact with the Kubernetes cluster.
+4. Based on the user's request, perform actions on the Kubernetes cluster and create, manage, delete test workflows. 
+
+
+---
+
+Name: learn-testkube
+Description: A tool to help you learn testkube cli
+#!/bin/bash
+testkube --help
+testkube create --help
+testkube create testworkflow --help
+testkube run --help
+
+---
+
+Name: learn-kubectl
+Description: A tool to help you learn k8s and related commands
+#!/bin/bash
+
+CMDS="kubectl helm"
+echo 'The additional CLI commands are available locally, use the `exec` tool to invoke them:'
+for i in $CMDS; do
+	if [ -e "$(command -v $i)" ]; then
+    	echo '  ' $i
+	fi
+done
