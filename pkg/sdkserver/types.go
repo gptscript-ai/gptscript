@@ -58,7 +58,7 @@ type toolOrFileRequest struct {
 	ChatState            string   `json:"chatState"`
 	Workspace            string   `json:"workspace"`
 	Env                  []string `json:"env"`
-	CredentialContext    []string `json:"credentialContext"`
+	CredentialContexts   []string `json:"credentialContexts"`
 	CredentialOverrides  []string `json:"credentialOverrides"`
 	Confirm              bool     `json:"confirm"`
 	Location             string   `json:"location,omitempty"`
