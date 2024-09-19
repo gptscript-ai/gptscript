@@ -60,7 +60,7 @@ func Complete(opts ...Options) Options {
 		result.Runner = runner.Complete(result.Runner, opt.Runner)
 		result.OpenAI = openai.Complete(result.OpenAI, opt.OpenAI)
 
-		result.CredentialContexts = append(result.CredentialContexts, opt.CredentialContexts...)
+		result.CredentialContexts = opt.CredentialContexts
 		result.Quiet = types.FirstSet(opt.Quiet, result.Quiet)
 		result.Workspace = types.FirstSet(opt.Workspace, result.Workspace)
 		result.Env = append(result.Env, opt.Env...)
