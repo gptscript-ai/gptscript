@@ -188,7 +188,7 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 		OpenAI:             openai.Options(reqObject.openAIOptions),
 		Env:                reqObject.Env,
 		Workspace:          reqObject.Workspace,
-		CredentialContexts: reqObject.CredentialContext,
+		CredentialContexts: reqObject.CredentialContexts,
 		Runner: runner.Options{
 			// Set the monitor factory so that we can get events from the server.
 			MonitorFactory:      NewSessionFactory(s.events),
