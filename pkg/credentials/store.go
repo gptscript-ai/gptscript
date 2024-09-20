@@ -44,7 +44,7 @@ func NewStore(cfg *config.CLIConfig, credentialBuilder CredentialBuilder, credCt
 	return Store{
 		credCtxs:       credCtxs,
 		credBuilder:    credentialBuilder,
-		credHelperDirs: GetCredentialHelperDirs(cacheDir),
+		credHelperDirs: GetCredentialHelperDirs(cacheDir, cfg.CredentialsStore),
 		cfg:            cfg,
 	}, nil
 }
