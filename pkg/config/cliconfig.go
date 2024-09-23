@@ -28,7 +28,7 @@ const (
 
 var (
 	darwinHelpers  = []string{Osxkeychain, File, Sqlite}
-	windowsHelpers = []string{Wincred, File, Sqlite}
+	windowsHelpers = []string{Wincred, File}
 	linuxHelpers   = []string{Secretservice, Pass, File, Sqlite}
 )
 
@@ -159,11 +159,11 @@ func ReadCLIConfig(gptscriptConfigFile string) (*CLIConfig, error) {
 		errMsg := fmt.Sprintf("invalid credential store '%s'", result.CredentialsStore)
 		switch runtime.GOOS {
 		case "darwin":
-			errMsg += " (use 'osxkeychain' or 'file')"
+			errMsg += " (use 'osxkeychain', 'file', or 'sqlite')"
 		case "windows":
 			errMsg += " (use 'wincred' or 'file')"
 		case "linux":
-			errMsg += " (use 'secretservice', 'pass', or 'file')"
+			errMsg += " (use 'secretservice', 'pass', 'file', or 'sqlite')"
 		default:
 			errMsg += " (use 'file')"
 		}
