@@ -960,6 +960,8 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 					log.Warnf("Not saving credential for tool %s - credentials will only be saved for tools from GitHub, or tools that use aliases.", toolName)
 				}
 			}
+		} else {
+			resultCredential = *c
 		}
 
 		if resultCredential.ExpiresAt != nil && (nearestExpiration == nil || nearestExpiration.After(*resultCredential.ExpiresAt)) {
