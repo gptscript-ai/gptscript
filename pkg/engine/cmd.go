@@ -328,7 +328,7 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 	}
 
 	if useShell {
-		args = append([]string{"/bin/sh", "-c"}, strings.Join(args, " "))
+		args = append([]string{"/bin/sh", "-c"}, "exec "+strings.Join(args, " "))
 	} else {
 		args[0] = env.Lookup(envvars, args[0])
 	}
