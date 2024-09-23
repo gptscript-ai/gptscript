@@ -25,6 +25,9 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/types"
+
+	// Load all VCS
+	_ "github.com/gptscript-ai/gptscript/pkg/loader/vcs"
 )
 
 var log = mvl.Package()
