@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/docker/cli/cli/config/credentials"
@@ -26,6 +27,7 @@ type CredentialBuilder interface {
 type CredentialStore interface {
 	Get(ctx context.Context, toolName string) (*Credential, bool, error)
 	Add(ctx context.Context, cred Credential) error
+	Refresh(ctx context.Context, cred Credential) error
 	Remove(ctx context.Context, toolName string) error
 	List(ctx context.Context) ([]Credential, error)
 }
@@ -95,12 +97,31 @@ func (s Store) Get(ctx context.Context, toolName string) (*Credential, bool, err
 	return &cred, true, nil
 }
 
+// Add adds a new credential to the credential store.
+// Any context set on the credential object will be overwritten with the first context of the credential store.
 func (s Store) Add(ctx context.Context, cred Credential) error {
 	first := first(s.credCtxs)
 	if first == AllCredentialContexts {
 		return fmt.Errorf("cannot add a credential with context %q", AllCredentialContexts)
 	}
 	cred.Context = first
+
+	store, err := s.getStore(ctx)
+	if err != nil {
+		return err
+	}
+	auth, err := cred.toDockerAuthConfig()
+	if err != nil {
+		return err
+	}
+	return store.Store(auth)
+}
+
+// Refresh updates an existing credential in the credential store.
+func (s Store) Refresh(ctx context.Context, cred Credential) error {
+	if !slices.Contains(s.credCtxs, cred.Context) {
+		return fmt.Errorf("context %q not in list of valid contexts for this credential store", cred.Context)
+	}
 
 	store, err := s.getStore(ctx)
 	if err != nil {

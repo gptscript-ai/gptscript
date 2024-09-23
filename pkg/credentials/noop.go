@@ -12,6 +12,10 @@ func (s NoopStore) Add(context.Context, Credential) error {
 	return nil
 }
 
+func (s NoopStore) Refresh(context.Context, Credential) error {
+	return nil
+}
+
 func (s NoopStore) Remove(context.Context, string) error {
 	return nil
 }
