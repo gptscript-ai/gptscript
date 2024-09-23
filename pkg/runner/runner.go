@@ -962,7 +962,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			}
 		}
 
-		if resultCredential.ExpiresAt != nil && (nearestExpiration == nil || nearestExpiration.After(*c.ExpiresAt)) {
+		if resultCredential.ExpiresAt != nil && (nearestExpiration == nil || nearestExpiration.After(*resultCredential.ExpiresAt)) {
 			nearestExpiration = resultCredential.ExpiresAt
 		}
 
