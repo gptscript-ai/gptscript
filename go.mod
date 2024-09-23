@@ -17,8 +17,8 @@ require (
 	github.com/gptscript-ai/broadcaster v0.0.0-20240625175512-c43682019b86
 	github.com/gptscript-ai/chat-completion-client v0.0.0-20240813051153-a440ada7e3c3
 	github.com/gptscript-ai/cmd v0.0.0-20240802230653-326b7baf6fcb
-	github.com/gptscript-ai/go-gptscript v0.9.4-0.20240801203434-840b14393b17
-	github.com/gptscript-ai/tui v0.0.0-20240804004233-efc5673dc76e
+	github.com/gptscript-ai/go-gptscript v0.9.5-rc5.0.20240920232051-64eaa0ac8caf
+	github.com/gptscript-ai/tui v0.0.0-20240923192013-172e51ccf1d6
 	github.com/hexops/autogold/v2 v2.2.1
 	github.com/hexops/valast v1.4.4
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
