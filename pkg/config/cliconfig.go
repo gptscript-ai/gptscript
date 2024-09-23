@@ -196,7 +196,7 @@ func isValidCredentialHelper(helper string) bool {
 	case "linux":
 		return slices.Contains(linuxHelpers, helper)
 	default:
-		return helper == File || helper == Sqlite
+		return helper == File
 	}
 }
 
