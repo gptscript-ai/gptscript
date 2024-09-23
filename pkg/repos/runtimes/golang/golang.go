@@ -18,6 +18,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/gptscript-ai/gptscript/pkg/config"
 	"github.com/gptscript-ai/gptscript/pkg/debugcmd"
 	runtimeEnv "github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
@@ -286,7 +287,7 @@ func (r *Runtime) Setup(ctx context.Context, _ types.Tool, dataRoot, toolSource 
 }
 
 func (r *Runtime) DownloadCredentialHelper(ctx context.Context, tool types.Tool, helperName, distInfo, suffix string, binDir string) error {
-	if helperName == "file" {
+	if helperName == config.File {
 		return nil
 	}
 

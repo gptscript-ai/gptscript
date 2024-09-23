@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/gptscript-ai/gptscript/pkg/config"
 	runtimeEnv "github.com/gptscript-ai/gptscript/pkg/env"
 )
 
@@ -13,7 +14,7 @@ type CredentialHelperDirs struct {
 
 func RepoNameForCredentialStore(store string) string {
 	switch store {
-	case "sqlite":
+	case config.Sqlite:
 		return "gptscript-credential-sqlite"
 	default:
 		return "gptscript-credential-helpers"

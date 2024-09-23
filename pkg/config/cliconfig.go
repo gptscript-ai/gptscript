@@ -15,13 +15,22 @@ import (
 	"github.com/docker/cli/cli/config/types"
 )
 
-var (
-	darwinHelpers  = []string{"osxkeychain", "file"}
-	windowsHelpers = []string{"wincred", "file"}
-	linuxHelpers   = []string{"secretservice", "pass", "file"}
+const (
+	Wincred       = "wincred"
+	Osxkeychain   = "osxkeychain"
+	Secretservice = "secretservice"
+	Pass          = "pass"
+	File          = "file"
+	Sqlite        = "sqlite"
+
+	GPTScriptHelperPrefix = "gptscript-credential-"
 )
 
-const GPTScriptHelperPrefix = "gptscript-credential-"
+var (
+	darwinHelpers  = []string{Osxkeychain, File, Sqlite}
+	windowsHelpers = []string{Wincred, File, Sqlite}
+	linuxHelpers   = []string{Secretservice, Pass, File, Sqlite}
+)
 
 type AuthConfig types.AuthConfig
 
@@ -169,11 +178,11 @@ func ReadCLIConfig(gptscriptConfigFile string) (*CLIConfig, error) {
 func (c *CLIConfig) setDefaultCredentialsStore() error {
 	switch runtime.GOOS {
 	case "darwin":
-		c.CredentialsStore = "osxkeychain"
+		c.CredentialsStore = Osxkeychain
 	case "windows":
-		c.CredentialsStore = "wincred"
+		c.CredentialsStore = Wincred
 	default:
-		c.CredentialsStore = "file"
+		c.CredentialsStore = File
 	}
 	return c.Save()
 }
@@ -187,7 +196,7 @@ func isValidCredentialHelper(helper string) bool {
 	case "linux":
 		return slices.Contains(linuxHelpers, helper)
 	default:
-		return helper == "file"
+		return helper == File || helper == Sqlite
 	}
 }
 
