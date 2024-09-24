@@ -287,7 +287,7 @@ func (r *Runtime) Setup(ctx context.Context, _ types.Tool, dataRoot, toolSource 
 }
 
 func (r *Runtime) DownloadCredentialHelper(ctx context.Context, tool types.Tool, helperName, distInfo, suffix string, binDir string) error {
-	if helperName == config.File {
+	if helperName == config.FileCredHelper {
 		return nil
 	}
 

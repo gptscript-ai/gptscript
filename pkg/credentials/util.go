@@ -14,7 +14,7 @@ type CredentialHelperDirs struct {
 
 func RepoNameForCredentialStore(store string) string {
 	switch store {
-	case config.Sqlite:
+	case config.SqliteCredHelper:
 		return "gptscript-credential-sqlite"
 	default:
 		return "gptscript-credential-helpers"

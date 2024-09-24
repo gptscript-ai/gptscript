@@ -178,7 +178,7 @@ func (s *Store) getStore(ctx context.Context) (credentials.Store, error) {
 }
 
 func (s *Store) getStoreByHelper(ctx context.Context, helper string) (credentials.Store, error) {
-	if helper == "" || helper == config.GPTScriptHelperPrefix+config.File {
+	if helper == "" || helper == config.GPTScriptHelperPrefix+config.FileCredHelper {
 		return credentials.NewFileStore(s.cfg), nil
 	}
 

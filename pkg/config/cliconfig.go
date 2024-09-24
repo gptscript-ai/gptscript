@@ -16,21 +16,31 @@ import (
 )
 
 const (
-	Wincred       = "wincred"
-	Osxkeychain   = "osxkeychain"
-	Secretservice = "secretservice"
-	Pass          = "pass"
-	File          = "file"
-	Sqlite        = "sqlite"
+	WincredCredHelper       = "wincred"
+	OsxkeychainCredHelper   = "osxkeychain"
+	SecretserviceCredHelper = "secretservice"
+	PassCredHelper          = "pass"
+	FileCredHelper          = "file"
+	SqliteCredHelper        = "sqlite"
 
 	GPTScriptHelperPrefix = "gptscript-credential-"
 )
 
 var (
-	darwinHelpers  = []string{Osxkeychain, File, Sqlite}
-	windowsHelpers = []string{Wincred, File}
-	linuxHelpers   = []string{Secretservice, Pass, File, Sqlite}
+	darwinHelpers  = []string{OsxkeychainCredHelper, FileCredHelper, SqliteCredHelper}
+	windowsHelpers = []string{WincredCredHelper, FileCredHelper}
+	linuxHelpers   = []string{SecretserviceCredHelper, PassCredHelper, FileCredHelper, SqliteCredHelper}
 )
+
+func listAsString(helpers []string) string {
+	if len(helpers) == 0 {
+		return ""
+	} else if len(helpers) == 1 {
+		return helpers[0]
+	}
+
+	return strings.Join(helpers[:len(helpers)-1], ", ") + " or " + helpers[len(helpers)-1]
+}
 
 type AuthConfig types.AuthConfig
 
@@ -159,13 +169,13 @@ func ReadCLIConfig(gptscriptConfigFile string) (*CLIConfig, error) {
 		errMsg := fmt.Sprintf("invalid credential store '%s'", result.CredentialsStore)
 		switch runtime.GOOS {
 		case "darwin":
-			errMsg += " (use 'osxkeychain', 'file', or 'sqlite')"
+			errMsg += fmt.Sprintf(" (use %s)", listAsString(darwinHelpers))
 		case "windows":
-			errMsg += " (use 'wincred' or 'file')"
+			errMsg += fmt.Sprintf(" (use %s)", listAsString(windowsHelpers))
 		case "linux":
-			errMsg += " (use 'secretservice', 'pass', 'file', or 'sqlite')"
+			errMsg += fmt.Sprintf(" (use %s)", listAsString(linuxHelpers))
 		default:
-			errMsg += " (use 'file')"
+			errMsg += fmt.Sprintf(" (use file)")
 		}
 		errMsg += fmt.Sprintf("\nPlease edit your config file at %s to fix this.", result.location)
 
@@ -178,11 +188,11 @@ func ReadCLIConfig(gptscriptConfigFile string) (*CLIConfig, error) {
 func (c *CLIConfig) setDefaultCredentialsStore() error {
 	switch runtime.GOOS {
 	case "darwin":
-		c.CredentialsStore = Osxkeychain
+		c.CredentialsStore = OsxkeychainCredHelper
 	case "windows":
-		c.CredentialsStore = Wincred
+		c.CredentialsStore = WincredCredHelper
 	default:
-		c.CredentialsStore = File
+		c.CredentialsStore = FileCredHelper
 	}
 	return c.Save()
 }
@@ -196,7 +206,7 @@ func isValidCredentialHelper(helper string) bool {
 	case "linux":
 		return slices.Contains(linuxHelpers, helper)
 	default:
-		return helper == File
+		return helper == FileCredHelper
 	}
 }
 
