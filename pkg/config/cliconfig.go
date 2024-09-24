@@ -175,7 +175,7 @@ func ReadCLIConfig(gptscriptConfigFile string) (*CLIConfig, error) {
 		case "linux":
 			errMsg += fmt.Sprintf(" (use %s)", listAsString(linuxHelpers))
 		default:
-			errMsg += fmt.Sprintf(" (use file)")
+			errMsg += " (use file)"
 		}
 		errMsg += fmt.Sprintf("\nPlease edit your config file at %s to fix this.", result.location)
 
