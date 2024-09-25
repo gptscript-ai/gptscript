@@ -173,6 +173,9 @@ func (r *runInfo) process(e event) map[string]any {
 		if e.Content != "" {
 			call.Input = e.Content
 		}
+		if e.ToolResults > 0 {
+			call.ToolResults = e.ToolResults
+		}
 
 	case runner.EventTypeCallSubCalls:
 		call.setSubCalls(e.ToolSubCalls)
@@ -185,6 +188,8 @@ func (r *runInfo) process(e event) map[string]any {
 		call.setOutput(e.Content)
 
 	case runner.EventTypeChat:
+		call.Usage = e.Usage
+		call.ChatResponseCached = e.ChatResponseCached
 		if e.ChatRequest != nil {
 			call.LLMRequest = e.ChatRequest
 		}
@@ -210,14 +215,16 @@ func (r *runInfo) processStdout(cs runner.ChatResponse) {
 type call struct {
 	engine.CallContext `json:",inline"`
 
-	Type        runner.EventType `json:"type"`
-	Start       time.Time        `json:"start"`
-	End         time.Time        `json:"end"`
-	Input       string           `json:"input"`
-	Output      []output         `json:"output"`
-	Usage       types.Usage      `json:"usage"`
-	LLMRequest  any              `json:"llmRequest"`
-	LLMResponse any              `json:"llmResponse"`
+	Type               runner.EventType `json:"type"`
+	Start              time.Time        `json:"start"`
+	End                time.Time        `json:"end"`
+	Input              string           `json:"input"`
+	Output             []output         `json:"output"`
+	Usage              types.Usage      `json:"usage"`
+	ChatResponseCached bool             `json:"chatResponseCached"`
+	ToolResults        int              `json:"toolResults"`
+	LLMRequest         any              `json:"llmRequest"`
+	LLMResponse        any              `json:"llmResponse"`
 }
 
 func (c *call) setSubCalls(subCalls map[string]engine.Call) {
