@@ -15,12 +15,14 @@ func (r *Runner) handleInput(callCtx engine.Context, monitor Monitor, env []stri
 	}
 
 	for _, inputToolRef := range inputToolRefs {
-		inputData, err := json.Marshal(map[string]any{
-			"input": input,
-		})
+		data := map[string]any{}
+		_ = json.Unmarshal([]byte(input), &data)
+		data["input"] = input
+		inputData, err := json.Marshal(data)
 		if err != nil {
 			return "", fmt.Errorf("failed to marshal input: %w", err)
 		}
+
 		res, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, inputToolRef.ToolID, string(inputData), "", engine.InputToolCategory)
 		if err != nil {
 			return "", err
