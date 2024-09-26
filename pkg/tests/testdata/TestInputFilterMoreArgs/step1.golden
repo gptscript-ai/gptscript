@@ -1,0 +1,48 @@
+`{
+  "done": false,
+  "content": "TEST RESULT CALL: 1",
+  "toolID": "inline:",
+  "state": {
+    "continuation": {
+      "state": {
+        "input": "123:{\"foo\":\"123\"}\n",
+        "completion": {
+          "model": "gpt-4o",
+          "internalSystemPrompt": false,
+          "messages": [
+            {
+              "role": "system",
+              "content": [
+                {
+                  "text": "Say hi"
+                }
+              ],
+              "usage": {}
+            },
+            {
+              "role": "user",
+              "content": [
+                {
+                  "text": "123:{\"foo\":\"123\"}\n"
+                }
+              ],
+              "usage": {}
+            },
+            {
+              "role": "assistant",
+              "content": [
+                {
+                  "text": "TEST RESULT CALL: 1"
+                }
+              ],
+              "usage": {}
+            }
+          ],
+          "chat": true
+        }
+      },
+      "result": "TEST RESULT CALL: 1"
+    },
+    "continuationToolID": "inline:"
+  }
+}`

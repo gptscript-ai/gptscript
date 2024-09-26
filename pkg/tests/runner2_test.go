@@ -55,3 +55,27 @@ Yo dawg`, "")
 	resp, err := r.Chat(context.Background(), nil, prg, nil, "input 1")
 	r.AssertStep(t, resp, err)
 }
+
+func TestInputFilterMoreArgs(t *testing.T) {
+	r := tester.NewRunner(t)
+	prg, err := loader.ProgramFromSource(context.Background(), `
+chat: true
+inputfilters: stuff
+
+Say hi
+
+---
+name: stuff
+params: foo: bar
+params: input: baz
+
+#!/bin/bash
+echo ${FOO}:${INPUT}
+`, "")
+	require.NoError(t, err)
+
+	resp, err := r.Chat(context.Background(), nil, prg, nil, `{"foo":"123"}`)
+	r.AssertStep(t, resp, err)
+	resp, err = r.Chat(context.Background(), nil, prg, nil, `"foo":"123"}`)
+	r.AssertStep(t, resp, err)
+}
