@@ -16,7 +16,6 @@ import (
 	"github.com/BurntSushi/locker"
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
-	runtimeEnv "github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/repos/git"
 	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes/golang"
@@ -55,10 +54,10 @@ func (n noopRuntime) Setup(_ context.Context, _ types.Tool, _, _ string, _ []str
 }
 
 type Manager struct {
+	cacheDir         string
 	storageDir       string
 	gitDir           string
 	runtimeDir       string
-	credHelperDirs   credentials.CredentialHelperDirs
 	runtimes         []Runtime
 	credHelperConfig *credHelperConfig
 }
@@ -72,11 +71,11 @@ type credHelperConfig struct {
 func New(cacheDir string, runtimes ...Runtime) *Manager {
 	root := filepath.Join(cacheDir, "repos")
 	return &Manager{
-		storageDir:     root,
-		gitDir:         filepath.Join(root, "git"),
-		runtimeDir:     filepath.Join(root, "runtimes"),
-		credHelperDirs: credentials.GetCredentialHelperDirs(cacheDir),
-		runtimes:       runtimes,
+		cacheDir:   cacheDir,
+		storageDir: root,
+		gitDir:     filepath.Join(root, "git"),
+		runtimeDir: filepath.Join(root, "runtimes"),
+		runtimes:   runtimes,
 	}
 }
 
@@ -110,50 +109,59 @@ func (m *Manager) deferredSetUpCredentialHelpers(ctx context.Context, cliCfg *co
 		distInfo, suffix string
 	)
 	// The file helper is built-in and does not need to be downloaded.
-	if helperName == "file" {
+	if helperName == config.FileCredHelper {
 		return nil
 	}
 	switch helperName {
-	case "wincred":
+	case config.WincredCredHelper:
 		suffix = ".exe"
 	default:
 		distInfo = fmt.Sprintf("-%s-%s", runtime.GOOS, runtime.GOARCH)
 	}
 
-	locker.Lock("gptscript-credential-helpers")
-	defer locker.Unlock("gptscript-credential-helpers")
+	repoName := credentials.RepoNameForCredentialStore(helperName)
+
+	locker.Lock(repoName)
+	defer locker.Unlock(repoName)
+
+	credHelperDirs := credentials.GetCredentialHelperDirs(m.cacheDir, helperName)
 
 	// Load the last-checked file to make sure we haven't checked the repo in the last 24 hours.
 	now := time.Now()
-	lastChecked, err := os.ReadFile(m.credHelperDirs.LastCheckedFile)
+	lastChecked, err := os.ReadFile(credHelperDirs.LastCheckedFile)
 	if err == nil {
 		if t, err := time.Parse(time.RFC3339, strings.TrimSpace(string(lastChecked))); err == nil && now.Sub(t) < 24*time.Hour {
 			// Make sure the binary still exists, and if it does, return.
-			if _, err := os.Stat(filepath.Join(m.credHelperDirs.BinDir, "gptscript-credential-"+helperName+suffix)); err == nil {
+			if _, err := os.Stat(filepath.Join(credHelperDirs.BinDir, "gptscript-credential-"+helperName+suffix)); err == nil {
 				log.Debugf("Credential helper %s up-to-date as of %v, checking for updates after %v", helperName, t, t.Add(24*time.Hour))
 				return nil
 			}
 		}
 	}
 
-	if err := os.MkdirAll(filepath.Dir(m.credHelperDirs.LastCheckedFile), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(credHelperDirs.LastCheckedFile), 0755); err != nil {
 		return err
 	}
 
 	// Update the last-checked file.
-	if err := os.WriteFile(m.credHelperDirs.LastCheckedFile, []byte(now.Format(time.RFC3339)), 0644); err != nil {
+	if err := os.WriteFile(credHelperDirs.LastCheckedFile, []byte(now.Format(time.RFC3339)), 0644); err != nil {
+		return err
+	}
+
+	gitURL, err := credentials.GitURLForRepoName(repoName)
+	if err != nil {
 		return err
 	}
 
 	tool := types.Tool{
 		ToolDef: types.ToolDef{
 			Parameters: types.Parameters{
-				Name: "gptscript-credential-helpers",
+				Name: repoName,
 			},
 		},
 		Source: types.ToolSource{
 			Repo: &types.Repo{
-				Root: runtimeEnv.VarOrDefault("GPTSCRIPT_CRED_HELPERS_ROOT", "https://github.com/gptscript-ai/gptscript-credential-helpers.git"),
+				Root: gitURL,
 			},
 		},
 	}
@@ -164,12 +172,12 @@ func (m *Manager) deferredSetUpCredentialHelpers(ctx context.Context, cliCfg *co
 
 	var needsDownloaded bool
 	// Check the last revision shasum and see if it is different from the current one.
-	lastRevision, err := os.ReadFile(m.credHelperDirs.RevisionFile)
+	lastRevision, err := os.ReadFile(credHelperDirs.RevisionFile)
 	if (err == nil && strings.TrimSpace(string(lastRevision)) != tool.Source.Repo.Root+tag) || errors.Is(err, fs.ErrNotExist) {
 		// Need to pull the latest version.
 		needsDownloaded = true
 		// Update the revision file to the new revision.
-		if err = os.WriteFile(m.credHelperDirs.RevisionFile, []byte(tool.Source.Repo.Root+tag), 0644); err != nil {
+		if err = os.WriteFile(credHelperDirs.RevisionFile, []byte(tool.Source.Repo.Root+tag), 0644); err != nil {
 			return err
 		}
 	} else if err != nil {
@@ -179,7 +187,7 @@ func (m *Manager) deferredSetUpCredentialHelpers(ctx context.Context, cliCfg *co
 	if !needsDownloaded {
 		// Check for the existence of the credential helper binary.
 		// If it's there, we have no need to download it and can just return.
-		if _, err = os.Stat(filepath.Join(m.credHelperDirs.BinDir, "gptscript-credential-"+helperName+suffix)); err == nil {
+		if _, err = os.Stat(filepath.Join(credHelperDirs.BinDir, "gptscript-credential-"+helperName+suffix)); err == nil {
 			return nil
 		}
 	}
@@ -187,7 +195,7 @@ func (m *Manager) deferredSetUpCredentialHelpers(ctx context.Context, cliCfg *co
 	// Find the Go runtime and use it to build the credential helper.
 	for _, rt := range m.runtimes {
 		if strings.HasPrefix(rt.ID(), "go") {
-			return rt.(*golang.Runtime).DownloadCredentialHelper(ctx, tool, helperName, distInfo, suffix, m.credHelperDirs.BinDir)
+			return rt.(*golang.Runtime).DownloadCredentialHelper(ctx, tool, helperName, distInfo, suffix, credHelperDirs.BinDir)
 		}
 	}
 

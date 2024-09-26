@@ -46,7 +46,7 @@ func NewStore(cfg *config.CLIConfig, credentialBuilder CredentialBuilder, credCt
 	return Store{
 		credCtxs:       credCtxs,
 		credBuilder:    credentialBuilder,
-		credHelperDirs: GetCredentialHelperDirs(cacheDir),
+		credHelperDirs: GetCredentialHelperDirs(cacheDir, cfg.CredentialsStore),
 		cfg:            cfg,
 	}, nil
 }
@@ -199,7 +199,7 @@ func (s *Store) getStore(ctx context.Context) (credentials.Store, error) {
 }
 
 func (s *Store) getStoreByHelper(ctx context.Context, helper string) (credentials.Store, error) {
-	if helper == "" || helper == config.GPTScriptHelperPrefix+"file" {
+	if helper == "" || helper == config.GPTScriptHelperPrefix+config.FileCredHelper {
 		return credentials.NewFileStore(s.cfg), nil
 	}
 
