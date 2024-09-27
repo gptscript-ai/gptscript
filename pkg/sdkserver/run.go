@@ -75,7 +75,9 @@ func processEventStreamOutput(ctx context.Context, logger mvl.Logger, w http.Res
 			"stdout": out,
 		})
 	case err := <-errChan:
-		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run file: %w", err))
+		writeServerSentEvent(logger, w, map[string]any{
+			"stderr": fmt.Sprintf("failed to run: %v", err),
+		})
 	}
 
 	// Now that we have received all events, send the DONE event.
