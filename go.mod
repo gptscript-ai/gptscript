@@ -1,6 +1,6 @@
 module github.com/gptscript-ai/gptscript
 
-go 1.23.0
+go 1.23.1
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
@@ -17,7 +17,7 @@ require (
 	github.com/gptscript-ai/broadcaster v0.0.0-20240625175512-c43682019b86
 	github.com/gptscript-ai/chat-completion-client v0.0.0-20240813051153-a440ada7e3c3
 	github.com/gptscript-ai/cmd v0.0.0-20240802230653-326b7baf6fcb
-	github.com/gptscript-ai/go-gptscript v0.9.5-rc5.0.20240920232051-64eaa0ac8caf
+	github.com/gptscript-ai/go-gptscript v0.9.5-rc5.0.20240927194651-15782507bdff
 	github.com/gptscript-ai/tui v0.0.0-20240923192013-172e51ccf1d6
 	github.com/hexops/autogold/v2 v2.2.1
 	github.com/hexops/valast v1.4.4
