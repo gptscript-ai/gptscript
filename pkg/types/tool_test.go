@@ -73,6 +73,7 @@ Credential: Credential2
 Share Credential: ExportCredential1
 Share Credential: ExportCredential2
 Chat: true
+Meta Data: requirements.txt: requests=5
 
 This is a sample instruction
 ---
@@ -81,9 +82,6 @@ This is a sample instruction
 // blah blah some ugly JSON
 }
 
----
-!metadata:Tool Sample:requirements.txt
-requests=5
 `).Equal(t, tool.String())
 }
 

@@ -79,3 +79,35 @@ echo ${FOO}:${INPUT}
 	resp, err = r.Chat(context.Background(), nil, prg, nil, `"foo":"123"}`)
 	r.AssertStep(t, resp, err)
 }
+
+func TestShareCreds(t *testing.T) {
+	r := tester.NewRunner(t)
+	prg, err := loader.ProgramFromSource(context.Background(), `
+creds: foo
+
+#!/bin/bash
+echo $CRED
+echo $CRED2
+
+---
+name: foo
+share credentials: bar
+
+---
+name: bar
+share credentials: baz
+
+#!/bin/bash
+echo '{"env": {"CRED": "that worked"}}'
+
+---
+name: baz
+
+#!/bin/bash
+echo '{"env": {"CRED2": "that also worked"}}'
+`, "")
+	require.NoError(t, err)
+
+	resp, err := r.Chat(context.Background(), nil, prg, nil, "")
+	r.AssertStep(t, resp, err)
+}
