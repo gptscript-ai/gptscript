@@ -32,6 +32,8 @@ import (
 
 var log = mvl.Package()
 
+const defaultDatasetToolRepo = "github.com/gptscript-ai/datasets"
+
 type GPTScript struct {
 	Registry               *llm.Registry
 	Runner                 *runner.Runner
@@ -51,6 +53,7 @@ type Options struct {
 	CredentialContexts   []string
 	Quiet                *bool
 	Workspace            string
+	DatasetToolRepo      string
 	DisablePromptServer  bool
 	Env                  []string
 }
@@ -66,6 +69,7 @@ func Complete(opts ...Options) Options {
 		result.CredentialContexts = opt.CredentialContexts
 		result.Quiet = types.FirstSet(opt.Quiet, result.Quiet)
 		result.Workspace = types.FirstSet(opt.Workspace, result.Workspace)
+		result.DatasetToolRepo = types.FirstSet(opt.DatasetToolRepo, result.DatasetToolRepo)
 		result.Env = append(result.Env, opt.Env...)
 		result.DisablePromptServer = types.FirstSet(opt.DisablePromptServer, result.DisablePromptServer)
 		result.DefaultModelProvider = types.FirstSet(opt.DefaultModelProvider, result.DefaultModelProvider)
@@ -79,6 +83,9 @@ func Complete(opts ...Options) Options {
 	}
 	if len(result.CredentialContexts) == 0 {
 		result.CredentialContexts = []string{credentials.DefaultCredentialContext}
+	}
+	if result.DatasetToolRepo == "" {
+		result.DatasetToolRepo = defaultDatasetToolRepo
 	}
 
 	return result
