@@ -18,7 +18,7 @@ var (
 	sepRegex       = regexp.MustCompile(`^\s*---+\s*$`)
 	endHeaderRegex = regexp.MustCompile(`^\s*===+\s*$`)
 	strictSepRegex = regexp.MustCompile(`^---\n$`)
-	skipRegex      = regexp.MustCompile(`^![-.:*\w]+\s*$`)
+	skipRegex      = regexp.MustCompile(`^![ -.:*\w]+\s*$`)
 	nameRegex      = regexp.MustCompile(`^[a-z]+$`)
 )
 
