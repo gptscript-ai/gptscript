@@ -242,6 +242,23 @@ share output filters: shared
 	}}).Equal(t, out)
 }
 
+func TestParseMetaDataSpace(t *testing.T) {
+	input := `
+name: a space
+body
+---
+!metadata:a space:other
+foo bar
+`
+	tools, err := ParseTools(strings.NewReader(input))
+	require.NoError(t, err)
+
+	assert.Len(t, tools, 1)
+	autogold.Expect(map[string]string{
+		"other": "foo bar",
+	}).Equal(t, tools[0].MetaData)
+}
+
 func TestParseMetaData(t *testing.T) {
 	input := `
 name: first
