@@ -476,9 +476,22 @@ func (t ToolDef) String() string {
 		_, _ = fmt.Fprintf(buf, "Chat: true\n")
 	}
 
+	keys := maps.Keys(t.MetaData)
+	sort.Strings(keys)
+	for _, key := range keys {
+		value := t.MetaData[key]
+		if !strings.Contains(value, "\n") {
+			_, _ = fmt.Fprintf(buf, "Meta Data: %s: %s\n", key, value)
+		}
+	}
+
 	// Instructions should be printed last
 	if t.Instructions != "" && t.BuiltinFunc == nil {
-		_, _ = fmt.Fprintln(buf)
+		if strings.Contains(strings.Split(strings.TrimSpace(t.Instructions), "\n")[0], ":") {
+			_, _ = fmt.Fprintln(buf, "===")
+		} else {
+			_, _ = fmt.Fprintln(buf)
+		}
 		_, _ = fmt.Fprintln(buf, t.Instructions)
 	}
 
@@ -486,14 +499,17 @@ func (t ToolDef) String() string {
 		keys := maps.Keys(t.MetaData)
 		sort.Strings(keys)
 		for _, key := range keys {
-			buf.WriteString("---\n")
-			buf.WriteString("!metadata:")
-			buf.WriteString(t.Name)
-			buf.WriteString(":")
-			buf.WriteString(key)
-			buf.WriteString("\n")
-			buf.WriteString(t.MetaData[key])
-			buf.WriteString("\n")
+			value := t.MetaData[key]
+			if strings.Contains(value, "\n") {
+				buf.WriteString("---\n")
+				buf.WriteString("!metadata:")
+				buf.WriteString(t.Name)
+				buf.WriteString(":")
+				buf.WriteString(key)
+				buf.WriteString("\n")
+				buf.WriteString(t.MetaData[key])
+				buf.WriteString("\n")
+			}
 		}
 	}
 
@@ -510,6 +526,56 @@ func (t Tool) GetNextAgentGroup(prg *Program, agentGroup []ToolReference, toolID
 	}
 
 	return agentGroup, nil
+}
+
+func (t Tool) getCredentials(prg *Program) (result []ToolReference, _ error) {
+	toolRefs, err := t.GetToolRefsFromNames(t.Credentials)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, toolRef := range toolRefs {
+		tool, ok := prg.ToolSet[toolRef.ToolID]
+		if !ok {
+			continue
+		}
+
+		if !tool.IsNoop() {
+			result = append(result, toolRef)
+		}
+
+		shared, err := tool.getSharedCredentials(prg)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, shared...)
+	}
+
+	return result, nil
+}
+
+func (t Tool) getSharedCredentials(prg *Program) (result []ToolReference, _ error) {
+	toolRefs, err := t.GetToolRefsFromNames(t.ExportCredentials)
+	if err != nil {
+		return nil, err
+	}
+	for _, toolRef := range toolRefs {
+		tool, ok := prg.ToolSet[toolRef.ToolID]
+		if !ok {
+			continue
+		}
+
+		if !tool.IsNoop() {
+			result = append(result, toolRef)
+		}
+
+		nested, err := tool.getSharedCredentials(prg)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, nested...)
+	}
+	return result, nil
 }
 
 func (t Tool) getAgents(prg *Program) (result []ToolReference, _ error) {
@@ -542,6 +608,9 @@ func (t Tool) GetToolsByType(prg *Program, toolType ToolType) ([]ToolReference, 
 	if toolType == ToolTypeAgent {
 		// Agents are special, they can only be sourced from direct references and not the generic 'tool:' or shared by references
 		return t.getAgents(prg)
+	} else if toolType == ToolTypeCredential {
+		// Credentials are special too, you can only get shared credentials from directly referenced credentials
+		return t.getCredentials(prg)
 	}
 
 	toolSet := &toolRefSet{}
@@ -560,8 +629,6 @@ func (t Tool) GetToolsByType(prg *Program, toolType ToolType) ([]ToolReference, 
 		directRefs = t.InputFilters
 	case ToolTypeTool:
 		toolsListFilterType = append(toolsListFilterType, ToolTypeDefault, ToolTypeAgent)
-	case ToolTypeCredential:
-		directRefs = t.Credentials
 	default:
 		return nil, fmt.Errorf("unknown tool type %v", toolType)
 	}
@@ -602,8 +669,6 @@ func (t Tool) GetToolsByType(prg *Program, toolType ToolType) ([]ToolReference, 
 		case ToolTypeInput:
 			exportRefs = tool.ExportInputFilters
 		case ToolTypeTool:
-		case ToolTypeCredential:
-			exportRefs = tool.ExportCredentials
 		default:
 			return nil, fmt.Errorf("unknown tool type %v", toolType)
 		}

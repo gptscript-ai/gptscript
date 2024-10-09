@@ -73,7 +73,6 @@ func (a *AuthConfig) UnmarshalJSON(data []byte) error {
 type CLIConfig struct {
 	Auths            map[string]AuthConfig `json:"auths,omitempty"`
 	CredentialsStore string                `json:"credsStore,omitempty"`
-	GatewayURL       string                `json:"gatewayURL,omitempty"`
 	Integrations     map[string]string     `json:"integrations,omitempty"`
 
 	auths     map[string]types.AuthConfig

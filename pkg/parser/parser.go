@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"maps"
@@ -17,8 +16,10 @@ import (
 
 var (
 	sepRegex       = regexp.MustCompile(`^\s*---+\s*$`)
+	endHeaderRegex = regexp.MustCompile(`^\s*===+\s*$`)
 	strictSepRegex = regexp.MustCompile(`^---\n$`)
 	skipRegex      = regexp.MustCompile(`^![-.:*\w]+\s*$`)
+	nameRegex      = regexp.MustCompile(`^[a-z]+$`)
 )
 
 func normalize(key string) string {
@@ -74,7 +75,7 @@ func addArg(line string, tool *types.Tool) error {
 	return nil
 }
 
-func isParam(line string, tool *types.Tool) (_ bool, err error) {
+func isParam(line string, tool *types.Tool, scan *simplescanner) (_ bool, err error) {
 	key, value, ok := strings.Cut(line, ":")
 	if !ok {
 		return false, nil
@@ -90,7 +91,7 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 	case "globalmodel", "globalmodelname":
 		tool.Parameters.GlobalModelName = value
 	case "description":
-		tool.Parameters.Description = value
+		tool.Parameters.Description = scan.AddMultiline(value)
 	case "internalprompt":
 		v, err := toBool(value)
 		if err != nil {
@@ -104,27 +105,33 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 		}
 		tool.Parameters.Chat = v
 	case "export", "exporttool", "exports", "exporttools", "sharetool", "sharetools", "sharedtool", "sharedtools":
-		tool.Parameters.Export = append(tool.Parameters.Export, csv(value)...)
+		tool.Parameters.Export = append(tool.Parameters.Export, csv(scan.AddMultiline(value))...)
 	case "tool", "tools":
-		tool.Parameters.Tools = append(tool.Parameters.Tools, csv(value)...)
+		tool.Parameters.Tools = append(tool.Parameters.Tools, csv(scan.AddMultiline(value))...)
 	case "inputfilter", "inputfilters":
-		tool.Parameters.InputFilters = append(tool.Parameters.InputFilters, csv(value)...)
+		tool.Parameters.InputFilters = append(tool.Parameters.InputFilters, csv(scan.AddMultiline(value))...)
 	case "shareinputfilter", "shareinputfilters", "sharedinputfilter", "sharedinputfilters":
-		tool.Parameters.ExportInputFilters = append(tool.Parameters.ExportInputFilters, csv(value)...)
+		tool.Parameters.ExportInputFilters = append(tool.Parameters.ExportInputFilters, csv(scan.AddMultiline(value))...)
 	case "outputfilter", "outputfilters":
-		tool.Parameters.OutputFilters = append(tool.Parameters.OutputFilters, csv(value)...)
+		tool.Parameters.OutputFilters = append(tool.Parameters.OutputFilters, csv(scan.AddMultiline(value))...)
 	case "shareoutputfilter", "shareoutputfilters", "sharedoutputfilter", "sharedoutputfilters":
-		tool.Parameters.ExportOutputFilters = append(tool.Parameters.ExportOutputFilters, csv(value)...)
+		tool.Parameters.ExportOutputFilters = append(tool.Parameters.ExportOutputFilters, csv(scan.AddMultiline(value))...)
 	case "agent", "agents":
-		tool.Parameters.Agents = append(tool.Parameters.Agents, csv(value)...)
+		tool.Parameters.Agents = append(tool.Parameters.Agents, csv(scan.AddMultiline(value))...)
 	case "globaltool", "globaltools":
-		tool.Parameters.GlobalTools = append(tool.Parameters.GlobalTools, csv(value)...)
+		tool.Parameters.GlobalTools = append(tool.Parameters.GlobalTools, csv(scan.AddMultiline(value))...)
 	case "exportcontext", "exportcontexts", "sharecontext", "sharecontexts", "sharedcontext", "sharedcontexts":
-		tool.Parameters.ExportContext = append(tool.Parameters.ExportContext, csv(value)...)
+		tool.Parameters.ExportContext = append(tool.Parameters.ExportContext, csv(scan.AddMultiline(value))...)
 	case "context":
-		tool.Parameters.Context = append(tool.Parameters.Context, csv(value)...)
+		tool.Parameters.Context = append(tool.Parameters.Context, csv(scan.AddMultiline(value))...)
+	case "metadata":
+		mkey, mvalue, _ := strings.Cut(scan.AddMultiline(value), ":")
+		if tool.MetaData == nil {
+			tool.MetaData = map[string]string{}
+		}
+		tool.MetaData[strings.TrimSpace(mkey)] = strings.TrimSpace(mvalue)
 	case "args", "arg", "param", "params", "parameters", "parameter":
-		if err := addArg(value, tool); err != nil {
+		if err := addArg(scan.AddMultiline(value), tool); err != nil {
 			return false, err
 		}
 	case "maxtoken", "maxtokens":
@@ -149,13 +156,13 @@ func isParam(line string, tool *types.Tool) (_ bool, err error) {
 			return false, err
 		}
 	case "credentials", "creds", "credential", "cred":
-		tool.Parameters.Credentials = append(tool.Parameters.Credentials, value)
+		tool.Parameters.Credentials = append(tool.Parameters.Credentials, csv(scan.AddMultiline(value))...)
 	case "sharecredentials", "sharecreds", "sharecredential", "sharecred", "sharedcredentials", "sharedcreds", "sharedcredential", "sharedcred":
-		tool.Parameters.ExportCredentials = append(tool.Parameters.ExportCredentials, value)
+		tool.Parameters.ExportCredentials = append(tool.Parameters.ExportCredentials, scan.AddMultiline(value))
 	case "type":
 		tool.Type = types.ToolType(strings.ToLower(value))
 	default:
-		return false, nil
+		return nameRegex.MatchString(key), nil
 	}
 
 	return true, nil
@@ -206,6 +213,7 @@ func (c *context) finish(tools *[]Node) {
 		len(c.tool.ExportInputFilters) > 0 ||
 		len(c.tool.ExportOutputFilters) > 0 ||
 		len(c.tool.Agents) > 0 ||
+		len(c.tool.ExportCredentials) > 0 ||
 		c.tool.Chat {
 		*tools = append(*tools, Node{
 			ToolNode: &ToolNode{
@@ -391,7 +399,10 @@ func assignMetadata(nodes []Node) (result []Node) {
 
 	for _, node := range nodes {
 		if node.ToolNode != nil {
-			node.ToolNode.Tool.MetaData = metadata[node.ToolNode.Tool.Name]
+			if node.ToolNode.Tool.MetaData == nil {
+				node.ToolNode.Tool.MetaData = map[string]string{}
+			}
+			maps.Copy(node.ToolNode.Tool.MetaData, metadata[node.ToolNode.Tool.Name])
 			for wildcard := range metadata {
 				if strings.Contains(wildcard, "*") {
 					if m, err := path.Match(wildcard, node.ToolNode.Tool.Name); m && err == nil {
@@ -433,14 +444,70 @@ func isGPTScriptHashBang(line string) bool {
 	return false
 }
 
-func parse(input io.Reader) ([]Node, error) {
-	scan := bufio.NewScanner(input)
+type simplescanner struct {
+	lines []string
+}
 
+func newSimpleScanner(data []byte) *simplescanner {
+	if len(data) == 0 {
+		return &simplescanner{}
+	}
+	lines := strings.Split(string(data), "\n")
+	return &simplescanner{
+		lines: append([]string{""}, lines...),
+	}
+}
+
+func dropCR(s string) string {
+	if len(s) > 0 && s[len(s)-1] == '\r' {
+		return s[:len(s)-1]
+	}
+	return s
+}
+
+func (s *simplescanner) AddMultiline(current string) string {
+	result := current
+	for {
+		if len(s.lines) < 2 || len(s.lines[1]) == 0 {
+			return result
+		}
+		if strings.HasPrefix(s.lines[1], " ") || strings.HasPrefix(s.lines[1], "\t") {
+			result += " " + dropCR(s.lines[1])
+			s.lines = s.lines[1:]
+		} else {
+			return result
+		}
+	}
+}
+
+func (s *simplescanner) Text() string {
+	if len(s.lines) == 0 {
+		return ""
+	}
+	return dropCR(s.lines[0])
+}
+
+func (s *simplescanner) Scan() bool {
+	if len(s.lines) == 0 {
+		return false
+	}
+	s.lines = s.lines[1:]
+	return true
+}
+
+func parse(input io.Reader) ([]Node, error) {
 	var (
 		tools   []Node
 		context context
 		lineNo  int
 	)
+
+	data, err := io.ReadAll(input)
+	if err != nil {
+		return nil, err
+	}
+
+	scan := newSimpleScanner(data)
 
 	for scan.Scan() {
 		lineNo++
@@ -488,10 +555,14 @@ func parse(input io.Reader) ([]Node, error) {
 			}
 
 			// Look for params
-			if isParam, err := isParam(line, &context.tool); err != nil {
+			if isParam, err := isParam(line, &context.tool, scan); err != nil {
 				return nil, NewErrLine("", lineNo, err)
 			} else if isParam {
 				context.seenParam = true
+				continue
+			} else if endHeaderRegex.MatchString(line) {
+				// force the end of the header and don't include the current line in the header
+				context.inBody = true
 				continue
 			}
 		}

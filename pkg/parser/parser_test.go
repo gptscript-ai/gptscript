@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -244,6 +245,7 @@ share output filters: shared
 func TestParseMetaData(t *testing.T) {
 	input := `
 name: first
+metadata: foo: bar
 
 body
 ---
@@ -269,8 +271,89 @@ foo bar
 
 	assert.Len(t, tools, 1)
 	autogold.Expect(map[string]string{
+		"foo":              "bar",
 		"package.json":     "foo=base\nf",
 		"requirements.txt": "asdf",
 		"other":            "foo bar",
 	}).Equal(t, tools[0].MetaData)
+
+	autogold.Expect(`Name: first
+Meta Data: foo: bar
+Meta Data: other: foo bar
+Meta Data: requirements.txt: asdf
+
+body
+---
+!metadata:first:package.json
+foo=base
+f
+`).Equal(t, tools[0].String())
+}
+
+func TestFormatWithBadInstruction(t *testing.T) {
+	input := types.Tool{
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Name: "foo",
+			},
+			Instructions: "foo: bar",
+		},
+	}
+	autogold.Expect("Name: foo\n===\nfoo: bar\n").Equal(t, input.String())
+
+	tools, err := ParseTools(strings.NewReader(input.String()))
+	require.NoError(t, err)
+	if reflect.DeepEqual(input, tools[0]) {
+		t.Errorf("expected %v, got %v", input, tools[0])
+	}
+}
+
+func TestSingleTool(t *testing.T) {
+	input := `
+name: foo
+
+#!sys.echo
+hi
+`
+
+	tools, err := ParseTools(strings.NewReader(input))
+	require.NoError(t, err)
+	autogold.Expect(types.Tool{
+		ToolDef: types.ToolDef{
+			Parameters:   types.Parameters{Name: "foo"},
+			Instructions: "#!sys.echo\nhi",
+		},
+		Source: types.ToolSource{LineNo: 1},
+	}).Equal(t, tools[0])
+}
+
+func TestMultiline(t *testing.T) {
+	input := `
+name: first
+credential: foo
+  ,  bar,
+	 baz
+model: the model
+
+body
+`
+	tools, err := ParseTools(strings.NewReader(input))
+	require.NoError(t, err)
+
+	assert.Len(t, tools, 1)
+	autogold.Expect(types.Tool{
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Name:      "first",
+				ModelName: "the model",
+				Credentials: []string{
+					"foo",
+					"bar",
+					"baz",
+				},
+			},
+			Instructions: "body",
+		},
+		Source: types.ToolSource{LineNo: 1},
+	}).Equal(t, tools[0])
 }
