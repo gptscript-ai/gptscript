@@ -74,7 +74,7 @@ func (s *server) listDatasets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeResponse(logger, w, result)
+	writeResponse(logger, w, map[string]any{"stdout": result})
 }
 
 type createDatasetArgs struct {
@@ -135,7 +135,7 @@ func (s *server) createDataset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeResponse(logger, w, result)
+	writeResponse(logger, w, map[string]any{"stdout": result})
 }
 
 type addDatasetElementArgs struct {
@@ -203,7 +203,7 @@ func (s *server) addDatasetElement(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeResponse(logger, w, result)
+	writeResponse(logger, w, map[string]any{"stdout": result})
 }
 
 type listDatasetElementsArgs struct {
@@ -262,7 +262,7 @@ func (s *server) listDatasetElements(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeResponse(logger, w, result)
+	writeResponse(logger, w, map[string]any{"stdout": result})
 }
 
 type getDatasetElementArgs struct {
@@ -325,5 +325,5 @@ func (s *server) getDatasetElement(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeResponse(logger, w, result)
+	writeResponse(logger, w, map[string]any{"stdout": result})
 }
