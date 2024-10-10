@@ -87,7 +87,7 @@ type createDatasetArgs struct {
 
 func (a createDatasetArgs) validate() error {
 	if a.Name == "" {
-		return fmt.Errorf("dataset_name is required")
+		return fmt.Errorf("datasetName is required")
 	}
 	return nil
 }
@@ -150,13 +150,13 @@ type addDatasetElementArgs struct {
 
 func (a addDatasetElementArgs) validate() error {
 	if a.DatasetID == "" {
-		return fmt.Errorf("dataset_id is required")
+		return fmt.Errorf("datasetID is required")
 	}
 	if a.ElementName == "" {
-		return fmt.Errorf("element_name is required")
+		return fmt.Errorf("elementName is required")
 	}
 	if a.ElementContent == "" {
-		return fmt.Errorf("element_content is required")
+		return fmt.Errorf("elementContent is required")
 	}
 	return nil
 }
@@ -215,7 +215,7 @@ type listDatasetElementsArgs struct {
 
 func (a listDatasetElementsArgs) validate() error {
 	if a.DatasetID == "" {
-		return fmt.Errorf("dataset_id is required")
+		return fmt.Errorf("datasetID is required")
 	}
 	return nil
 }
@@ -275,7 +275,7 @@ type getDatasetElementArgs struct {
 
 func (a getDatasetElementArgs) validate() error {
 	if a.DatasetID == "" {
-		return fmt.Errorf("dataset_id is required")
+		return fmt.Errorf("datasetID is required")
 	}
 	if a.Element == "" {
 		return fmt.Errorf("element is required")
