@@ -75,7 +75,6 @@ type GPTScript struct {
 	SaveChatStateFile        string   `usage:"A file to save the chat state to so that a conversation can be resumed with --chat-state" local:"true"`
 	DefaultModelProvider     string   `usage:"Default LLM model provider to use, this will override OpenAI settings"`
 	GithubEnterpriseHostname string   `usage:"The host name for a Github Enterprise instance to enable for remote loading" local:"true"`
-	DatasetToolRepo          string   `usage:"The repo to use for dataset tools" default:"github.com/gptscript-ai/datasets" local:"true"`
 
 	readData []byte
 }
@@ -147,7 +146,6 @@ func (r *GPTScript) NewGPTScriptOpts() (gptscript.Options, error) {
 		Workspace:            r.Workspace,
 		DisablePromptServer:  r.UI,
 		DefaultModelProvider: r.DefaultModelProvider,
-		DatasetToolRepo:      r.DatasetToolRepo,
 	}
 
 	if r.Confirm {

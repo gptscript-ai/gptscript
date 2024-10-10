@@ -23,8 +23,6 @@ import (
 	"github.com/rs/cors"
 )
 
-const defaultDatasetToolRepo = "github.com/gptscript-ai/datasets"
-
 type Options struct {
 	gptscript.Options
 
@@ -165,10 +163,6 @@ func complete(opts ...Options) Options {
 
 	if result.ListenAddress == "" {
 		result.ListenAddress = "127.0.0.1:0"
-	}
-
-	if result.DatasetToolRepo == "" {
-		result.DatasetToolRepo = defaultDatasetToolRepo
 	}
 
 	return result

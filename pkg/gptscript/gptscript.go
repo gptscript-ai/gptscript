@@ -51,7 +51,6 @@ type Options struct {
 	CredentialContexts   []string
 	Quiet                *bool
 	Workspace            string
-	DatasetToolRepo      string
 	DisablePromptServer  bool
 	Env                  []string
 }
@@ -67,7 +66,6 @@ func Complete(opts ...Options) Options {
 		result.CredentialContexts = opt.CredentialContexts
 		result.Quiet = types.FirstSet(opt.Quiet, result.Quiet)
 		result.Workspace = types.FirstSet(opt.Workspace, result.Workspace)
-		result.DatasetToolRepo = types.FirstSet(opt.DatasetToolRepo, result.DatasetToolRepo)
 		result.Env = append(result.Env, opt.Env...)
 		result.DisablePromptServer = types.FirstSet(opt.DisablePromptServer, result.DisablePromptServer)
 		result.DefaultModelProvider = types.FirstSet(opt.DefaultModelProvider, result.DefaultModelProvider)
