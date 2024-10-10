@@ -40,6 +40,8 @@ After making a determination, respond with a JSON object that conforms to the fo
   ]
 }
 
+If you determine actual and expected are not equivalent, include a diff of the parts of actual and expected that are not equivalent in the reasoning field of your response.
+
 Your responses are concise and include only the json object described above.
 `
 
@@ -84,10 +86,10 @@ func New[T any](client *openai.Client) (*Judge[T], error) {
 }
 
 func (j *Judge[T]) Equal(ctx context.Context, expected, actual T, criteria string) (equal bool, reasoning string, err error) {
-	comparisonJSON, err := json.MarshalIndent(&comparison[T]{
+	comparisonJSON, err := json.Marshal(&comparison[T]{
 		Expected: expected,
 		Actual:   actual,
-	}, "", "    ")
+	})
 	if err != nil {
 		return false, "", fmt.Errorf("failed to marshal judge testcase JSON: %w", err)
 	}

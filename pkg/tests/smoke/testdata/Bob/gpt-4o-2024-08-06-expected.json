@@ -1,15 +1,15 @@
 [
     {
-        "time": "2024-08-23T10:57:23.621143-04:00",
+        "time": "2024-08-23T11:30:01.577023-04:00",
         "type": "runStart",
         "usage": {}
     },
     {
-        "time": "2024-08-23T10:57:23.62178-04:00",
+        "time": "2024-08-23T11:30:01.577297-04:00",
         "callContext": {
-            "id": "1724425044",
+            "id": "1724427002",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -41,11 +41,11 @@
         "usage": {}
     },
     {
-        "time": "2024-08-23T10:57:23.621807-04:00",
+        "time": "2024-08-23T11:30:01.577466-04:00",
         "callContext": {
-            "id": "1724425044",
+            "id": "1724427002",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -74,10 +74,10 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1724425045",
+        "chatCompletionId": "1724427003",
         "usage": {},
         "chatRequest": {
-            "model": "gpt-4-turbo-2024-04-09",
+            "model": "gpt-4o-2024-08-06",
             "messages": [
                 {
                     "role": "system",
@@ -106,11 +106,11 @@
         }
     },
     {
-        "time": "2024-08-23T10:57:24.816101-04:00",
+        "time": "2024-08-23T11:30:02.103572-04:00",
         "callContext": {
-            "id": "1724425044",
+            "id": "1724427002",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -139,11 +139,11 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1724425045",
+        "chatCompletionId": "1724427003",
         "usage": {
-            "promptTokens": 142,
+            "promptTokens": 138,
             "completionTokens": 17,
-            "totalTokens": 159
+            "totalTokens": 155
         },
         "chatResponse": {
             "role": "assistant",
@@ -151,7 +151,7 @@
                 {
                     "toolCall": {
                         "index": 0,
-                        "id": "call_GuCVVGT6CDEdsFWn13k880S2",
+                        "id": "call_k5gUMCNtxH9gKglmCEkjfWAR",
                         "function": {
                             "name": "bob",
                             "arguments": "{\"question\":\"how are you doing\"}"
@@ -160,18 +160,18 @@
                 }
             ],
             "usage": {
-                "promptTokens": 142,
+                "promptTokens": 138,
                 "completionTokens": 17,
-                "totalTokens": 159
+                "totalTokens": 155
             }
         }
     },
     {
-        "time": "2024-08-23T10:57:24.81638-04:00",
+        "time": "2024-08-23T11:30:02.103835-04:00",
         "callContext": {
-            "id": "1724425044",
+            "id": "1724427002",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -200,7 +200,7 @@
             "inputContext": null
         },
         "toolSubCalls": {
-            "call_GuCVVGT6CDEdsFWn13k880S2": {
+            "call_k5gUMCNtxH9gKglmCEkjfWAR": {
                 "toolID": "testdata/Bob/test.gpt:bob",
                 "input": "{\"question\":\"how are you doing\"}"
             }
@@ -209,13 +209,13 @@
         "usage": {}
     },
     {
-        "time": "2024-08-23T10:57:24.816559-04:00",
+        "time": "2024-08-23T11:30:02.103996-04:00",
         "callContext": {
-            "id": "call_GuCVVGT6CDEdsFWn13k880S2",
+            "id": "call_k5gUMCNtxH9gKglmCEkjfWAR",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -241,20 +241,20 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1724425044"
+            "parentID": "1724427002"
         },
         "type": "callStart",
         "usage": {},
         "content": "{\"question\":\"how are you doing\"}"
     },
     {
-        "time": "2024-08-23T10:57:24.818507-04:00",
+        "time": "2024-08-23T11:30:02.104177-04:00",
         "callContext": {
-            "id": "call_GuCVVGT6CDEdsFWn13k880S2",
+            "id": "call_k5gUMCNtxH9gKglmCEkjfWAR",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -280,13 +280,13 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1724425044"
+            "parentID": "1724427002"
         },
         "type": "callChat",
-        "chatCompletionId": "1724425046",
+        "chatCompletionId": "1724427004",
         "usage": {},
         "chatRequest": {
-            "model": "gpt-4-turbo-2024-04-09",
+            "model": "gpt-4o-2024-08-06",
             "messages": [
                 {
                     "role": "system",
@@ -301,13 +301,13 @@
         }
     },
     {
-        "time": "2024-08-23T10:57:25.978016-04:00",
+        "time": "2024-08-23T11:30:02.567871-04:00",
         "callContext": {
-            "id": "call_GuCVVGT6CDEdsFWn13k880S2",
+            "id": "call_k5gUMCNtxH9gKglmCEkjfWAR",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -333,37 +333,37 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1724425044"
+            "parentID": "1724427002"
         },
         "type": "callChat",
-        "chatCompletionId": "1724425046",
+        "chatCompletionId": "1724427004",
         "usage": {
-            "promptTokens": 124,
-            "completionTokens": 18,
-            "totalTokens": 142
+            "promptTokens": 122,
+            "completionTokens": 14,
+            "totalTokens": 136
         },
         "chatResponse": {
             "role": "assistant",
             "content": [
                 {
-                    "text": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!"
+                    "text": "Thanks for asking \"${QUESTION}\", I'm doing great fellow friendly AI tool!"
                 }
             ],
             "usage": {
-                "promptTokens": 124,
-                "completionTokens": 18,
-                "totalTokens": 142
+                "promptTokens": 122,
+                "completionTokens": 14,
+                "totalTokens": 136
             }
         }
     },
     {
-        "time": "2024-08-23T10:57:25.978152-04:00",
+        "time": "2024-08-23T11:30:02.568006-04:00",
         "callContext": {
-            "id": "call_GuCVVGT6CDEdsFWn13k880S2",
+            "id": "call_k5gUMCNtxH9gKglmCEkjfWAR",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "arguments": {
                     "properties": {
@@ -389,18 +389,18 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1724425044"
+            "parentID": "1724427002"
         },
         "type": "callFinish",
         "usage": {},
-        "content": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!"
+        "content": "Thanks for asking \"${QUESTION}\", I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-08-23T10:57:25.978236-04:00",
+        "time": "2024-08-23T11:30:02.568167-04:00",
         "callContext": {
-            "id": "1724425044",
+            "id": "1724427002",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -433,11 +433,11 @@
         "usage": {}
     },
     {
-        "time": "2024-08-23T10:57:25.980293-04:00",
+        "time": "2024-08-23T11:30:02.568274-04:00",
         "callContext": {
-            "id": "1724425044",
+            "id": "1724427002",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -466,10 +466,10 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1724425047",
+        "chatCompletionId": "1724427005",
         "usage": {},
         "chatRequest": {
-            "model": "gpt-4-turbo-2024-04-09",
+            "model": "gpt-4o-2024-08-06",
             "messages": [
                 {
                     "role": "system",
@@ -480,7 +480,7 @@
                     "content": "",
                     "tool_calls": [
                         {
-                            "id": "call_GuCVVGT6CDEdsFWn13k880S2",
+                            "id": "call_k5gUMCNtxH9gKglmCEkjfWAR",
                             "type": "function",
                             "function": {
                                 "name": "bob",
@@ -491,9 +491,9 @@
                 },
                 {
                     "role": "tool",
-                    "content": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!",
+                    "content": "Thanks for asking \"${QUESTION}\", I'm doing great fellow friendly AI tool!",
                     "name": "bob",
-                    "tool_call_id": "call_GuCVVGT6CDEdsFWn13k880S2"
+                    "tool_call_id": "call_k5gUMCNtxH9gKglmCEkjfWAR"
                 }
             ],
             "temperature": 0,
@@ -518,11 +518,11 @@
         }
     },
     {
-        "time": "2024-08-23T10:57:26.937038-04:00",
+        "time": "2024-08-23T11:30:03.052817-04:00",
         "callContext": {
-            "id": "1724425044",
+            "id": "1724427002",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -551,32 +551,32 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1724425047",
+        "chatCompletionId": "1724427005",
         "usage": {
-            "promptTokens": 184,
-            "completionTokens": 10,
+            "promptTokens": 176,
+            "completionTokens": 18,
             "totalTokens": 194
         },
         "chatResponse": {
             "role": "assistant",
             "content": [
                 {
-                    "text": "I'm doing great fellow friendly AI tool!"
+                    "text": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!"
                 }
             ],
             "usage": {
-                "promptTokens": 184,
-                "completionTokens": 10,
+                "promptTokens": 176,
+                "completionTokens": 18,
                 "totalTokens": 194
             }
         }
     },
     {
-        "time": "2024-08-23T10:57:26.937115-04:00",
+        "time": "2024-08-23T11:30:03.05287-04:00",
         "callContext": {
-            "id": "1724425044",
+            "id": "1724427002",
             "tool": {
-                "modelName": "gpt-4-turbo-2024-04-09",
+                "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
@@ -606,10 +606,10 @@
         },
         "type": "callFinish",
         "usage": {},
-        "content": "I'm doing great fellow friendly AI tool!"
+        "content": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-08-23T10:57:26.937179-04:00",
+        "time": "2024-08-23T11:30:03.052914-04:00",
         "type": "runFinish",
         "usage": {}
     }
