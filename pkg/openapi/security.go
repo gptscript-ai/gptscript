@@ -20,6 +20,8 @@ func (i SecurityInfo) GetCredentialToolStrings(hostname string) []string {
 	vars := i.getCredentialNamesAndEnvVars(hostname)
 	var tools []string
 
+	ctool := env.VarOrDefault("GPTSCRIPT_OPENAPI_CREDENTIAL_TOOL", "github.com/gptscript-ai/credential")
+
 	for cred, v := range vars {
 		field := "value"
 		switch i.Type {
@@ -37,8 +39,8 @@ func (i SecurityInfo) GetCredentialToolStrings(hostname string) []string {
 			}
 		}
 
-		tools = append(tools, fmt.Sprintf("github.com/gptscript-ai/credential as %s with %s as env and %q as message and %q as field",
-			cred, v, "Please provide a value for the "+v+" environment variable", field))
+		tools = append(tools, fmt.Sprintf("%s as %s with %s as env and %q as message and %q as field",
+			ctool, cred, v, "Please provide a value for the "+v+" environment variable", field))
 	}
 	return tools
 }
