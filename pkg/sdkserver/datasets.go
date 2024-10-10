@@ -13,7 +13,7 @@ import (
 type datasetRequest struct {
 	Input           string `json:"input"`
 	Workspace       string `json:"workspace"`
-	DatasetToolRepo string `json:"datasetToolRepo"`
+	DatasetToolRepo string `json:"dataset_tool_repo"`
 }
 
 func (r datasetRequest) validate(requireInput bool) error {
