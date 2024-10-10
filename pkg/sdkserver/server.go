@@ -29,6 +29,7 @@ type Options struct {
 	ListenAddress             string
 	Debug                     bool
 	DisableServerErrorLogging bool
+	Standalone                bool
 }
 
 // Run will start the server and block until the server is shut down.
@@ -47,13 +48,15 @@ func Run(ctx context.Context, opts Options) error {
 
 	sigCtx, cancel := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGKILL)
 	defer cancel()
-	go func() {
-		// This is a hack. This server will be run as a forked process in the SDKs. The SDKs will hold stdin open for as long
-		// as it wants the server running. When stdin is closed (or the parent process dies), then this will unblock and the
-		// server will be shutdown.
-		_, _ = io.ReadAll(os.Stdin)
-		cancel()
-	}()
+	if !opts.Standalone {
+		go func() {
+			// This is a hack. This server will be run as a forked process in the SDKs. The SDKs will hold stdin open for as long
+			// as it wants the server running. When stdin is closed (or the parent process dies), then this will unblock and the
+			// server will be shutdown.
+			_, _ = io.ReadAll(os.Stdin)
+			cancel()
+		}()
+	}
 
 	return run(sigCtx, listener, opts)
 }
@@ -159,6 +162,7 @@ func complete(opts ...Options) Options {
 		result.ListenAddress = types.FirstSet(opt.ListenAddress, result.ListenAddress)
 		result.Debug = types.FirstSet(opt.Debug, result.Debug)
 		result.DisableServerErrorLogging = types.FirstSet(opt.DisableServerErrorLogging, result.DisableServerErrorLogging)
+		result.Standalone = types.FirstSet(opt.Standalone, result.Standalone)
 	}
 
 	if result.ListenAddress == "" {
