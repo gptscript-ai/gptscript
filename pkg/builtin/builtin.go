@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -137,7 +138,8 @@ var tools = map[string]types.Tool{
 				Arguments: types.ObjectSchema(
 					"url", "The URL to POST to",
 					"content", "The content to POST",
-					"contentType", "The \"content type\" of the content such as application/json or text/plain"),
+					"contentType", "The \"content type\" of the content such as application/json or text/plain",
+					"includeResponse", "true/false, include POST response to output. Default false"),
 			},
 			BuiltinFunc: SysHTTPPost,
 		},
@@ -622,14 +624,16 @@ func SysHTTPHtml2Text(ctx context.Context, env []string, input string, progress 
 
 func SysHTTPPost(ctx context.Context, _ []string, input string, _ chan<- string) (_ string, err error) {
 	var params struct {
-		URL         string `json:"url,omitempty"`
-		Content     string `json:"content,omitempty"`
-		ContentType string `json:"contentType,omitempty"`
+		URL             string `json:"url,omitempty"`
+		Content         string `json:"content,omitempty"`
+		ContentType     string `json:"contentType,omitempty"`
+		IncludeResponse string `json:"includeResponse,omitempty"`
 	}
 	if err := json.Unmarshal([]byte(input), &params); err != nil {
 		return invalidArgument(input, err), nil
 	}
 
+	includeResponse, _ := strconv.ParseBool(params.IncludeResponse)
 	params.URL = fixQueries(params.URL)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, params.URL, strings.NewReader(params.Content))
@@ -648,9 +652,28 @@ func SysHTTPPost(ctx context.Context, _ []string, input string, _ chan<- string)
 	}
 	defer resp.Body.Close()
 
-	_, _ = io.ReadAll(resp.Body)
+	var (
+		rawData    []byte
+		outputData string
+	)
+
+	rawData, err = io.ReadAll(resp.Body)
+	if includeResponse && err != nil {
+		rawData = []byte(err.Error())
+	}
+	if includeResponse {
+		outputData = strings.TrimSpace(string(rawData))
+	}
+
 	if resp.StatusCode > 399 {
+		if includeResponse && len(outputData) > 0 {
+			return fmt.Sprintf("Failed to post URL %s: %s (cause: %s)", params.URL, resp.Status, outputData), nil
+		}
 		return fmt.Sprintf("Failed to post URL %s: %s", params.URL, resp.Status), nil
+	}
+
+	if includeResponse && len(outputData) > 0 {
+		return outputData, nil
 	}
 
 	return fmt.Sprintf("Wrote %d to %s", len([]byte(params.Content)), params.URL), nil
