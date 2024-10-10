@@ -356,6 +356,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		}
 	}
 
+	toolMapping := map[string]string{}
 	for _, tool := range messageRequest.Tools {
 		var params any = tool.Function.Parameters
 		if tool.Function.Parameters == nil || len(tool.Function.Parameters.Properties) == 0 {
@@ -363,6 +364,10 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 				"type":       "object",
 				"properties": map[string]any{},
 			}
+		}
+
+		if tool.Function.ToolID != "" {
+			toolMapping[tool.Function.Name] = tool.Function.ToolID
 		}
 
 		request.Tools = append(request.Tools, openai.Tool{
@@ -378,7 +383,10 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	id := counter.Next()
 	status <- types.CompletionStatus{
 		CompletionID: id,
-		Request:      request,
+		Request: map[string]any{
+			"chatCompletion": request,
+			"toolMapping":    toolMapping,
+		},
 	}
 
 	var cacheResponse bool
