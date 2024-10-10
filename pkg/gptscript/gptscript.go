@@ -32,8 +32,6 @@ import (
 
 var log = mvl.Package()
 
-const defaultDatasetToolRepo = "github.com/gptscript-ai/datasets"
-
 type GPTScript struct {
 	Registry               *llm.Registry
 	Runner                 *runner.Runner
@@ -83,9 +81,6 @@ func Complete(opts ...Options) Options {
 	}
 	if len(result.CredentialContexts) == 0 {
 		result.CredentialContexts = []string{credentials.DefaultCredentialContext}
-	}
-	if result.DatasetToolRepo == "" {
-		result.DatasetToolRepo = defaultDatasetToolRepo
 	}
 
 	return result
