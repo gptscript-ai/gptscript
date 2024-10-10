@@ -20,7 +20,6 @@ gptscript [flags] PROGRAM_FILE [INPUT...]
       --confirm                             Prompt before running potentially dangerous commands ($GPTSCRIPT_CONFIRM)
       --credential-context strings          Context name(s) in which to store credentials ($GPTSCRIPT_CREDENTIAL_CONTEXT)
       --credential-override strings         Credentials to override (ex: --credential-override github.com/example/cred-tool:API_TOKEN=1234) ($GPTSCRIPT_CREDENTIAL_OVERRIDE)
-      --dataset-tool-repo string            The repo to use for dataset tools ($GPTSCRIPT_DATASET_TOOL_REPO) (default "github.com/gptscript-ai/datasets")
       --debug                               Enable debug logging ($GPTSCRIPT_DEBUG)
       --debug-messages                      Enable logging of chat completion calls ($GPTSCRIPT_DEBUG_MESSAGES)
       --default-model string                Default LLM model to use ($GPTSCRIPT_DEFAULT_MODEL) (default "gpt-4o")
