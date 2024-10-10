@@ -13,7 +13,7 @@ import (
 type datasetRequest struct {
 	Input           string `json:"input"`
 	Workspace       string `json:"workspace"`
-	DatasetToolRepo string `json:"dataset_tool_repo"`
+	DatasetToolRepo string `json:"datasetToolRepo"`
 }
 
 func (r datasetRequest) validate(requireInput bool) error {
@@ -81,8 +81,8 @@ func (s *server) listDatasets(w http.ResponseWriter, r *http.Request) {
 }
 
 type createDatasetArgs struct {
-	Name        string `json:"dataset_name"`
-	Description string `json:"dataset_description"`
+	Name        string `json:"datasetName"`
+	Description string `json:"datasetDescription"`
 }
 
 func (a createDatasetArgs) validate() error {
@@ -142,10 +142,10 @@ func (s *server) createDataset(w http.ResponseWriter, r *http.Request) {
 }
 
 type addDatasetElementArgs struct {
-	DatasetID          string `json:"dataset_id"`
-	ElementName        string `json:"element_name"`
-	ElementDescription string `json:"element_description"`
-	ElementContent     string `json:"element_content"`
+	DatasetID          string `json:"datasetID"`
+	ElementName        string `json:"elementName"`
+	ElementDescription string `json:"elementDescription"`
+	ElementContent     string `json:"elementContent"`
 }
 
 func (a addDatasetElementArgs) validate() error {
@@ -210,7 +210,7 @@ func (s *server) addDatasetElement(w http.ResponseWriter, r *http.Request) {
 }
 
 type listDatasetElementsArgs struct {
-	DatasetID string `json:"dataset_id"`
+	DatasetID string `json:"datasetID"`
 }
 
 func (a listDatasetElementsArgs) validate() error {
@@ -269,7 +269,7 @@ func (s *server) listDatasetElements(w http.ResponseWriter, r *http.Request) {
 }
 
 type getDatasetElementArgs struct {
-	DatasetID string `json:"dataset_id"`
+	DatasetID string `json:"datasetID"`
 	Element   string `json:"element"`
 }
 
