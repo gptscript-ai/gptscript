@@ -66,6 +66,12 @@ func (s *server) addRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /credentials/create", s.createCredential)
 	mux.HandleFunc("POST /credentials/reveal", s.revealCredential)
 	mux.HandleFunc("POST /credentials/delete", s.deleteCredential)
+
+	mux.HandleFunc("POST /datasets", s.listDatasets)
+	mux.HandleFunc("POST /datasets/create", s.createDataset)
+	mux.HandleFunc("POST /datasets/list-elements", s.listDatasetElements)
+	mux.HandleFunc("POST /datasets/get-element", s.getDatasetElement)
+	mux.HandleFunc("POST /datasets/add-element", s.addDatasetElement)
 }
 
 // health just provides an endpoint for checking whether the server is running and accessible.
