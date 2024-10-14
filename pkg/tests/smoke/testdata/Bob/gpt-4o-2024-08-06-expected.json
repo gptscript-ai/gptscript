@@ -1,13 +1,13 @@
 [
     {
-        "time": "2024-08-23T11:30:01.577023-04:00",
+        "time": "2024-10-14T15:00:24.05439-04:00",
         "type": "runStart",
         "usage": {}
     },
     {
-        "time": "2024-08-23T11:30:01.577297-04:00",
+        "time": "2024-10-14T15:00:24.054825-04:00",
         "callContext": {
-            "id": "1724427002",
+            "id": "1728932425",
             "tool": {
                 "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
@@ -41,9 +41,9 @@
         "usage": {}
     },
     {
-        "time": "2024-08-23T11:30:01.577466-04:00",
+        "time": "2024-10-14T15:00:24.054884-04:00",
         "callContext": {
-            "id": "1724427002",
+            "id": "1728932425",
             "tool": {
                 "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
@@ -74,41 +74,17 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1724427003",
+        "chatCompletionId": "1728932426",
         "usage": {},
         "chatRequest": {
-            "model": "gpt-4o-2024-08-06",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "\nYou are task oriented system.\nYou receive input from a user, process the input from the given instructions, and then output the result.\nYour objective is to provide consistent and correct results.\nYou do not need to explain the steps taken, only provide the result to the given instructions.\nYou are referred to as a tool.\nYou don't move to the next step until you have a result.\n\nAsk Bob \"how are you doing\" and repeat his reply exactly."
-                }
-            ],
-            "temperature": 0,
-            "tools": [
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "bob",
-                        "description": "I'm Bob, a friendly guy.",
-                        "parameters": {
-                            "properties": {
-                                "question": {
-                                    "description": "The question to ask Bob.",
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    }
-                }
-            ]
+            "model": "",
+            "messages": null
         }
     },
     {
-        "time": "2024-08-23T11:30:02.103572-04:00",
+        "time": "2024-10-14T15:00:25.474693-04:00",
         "callContext": {
-            "id": "1724427002",
+            "id": "1728932425",
             "tool": {
                 "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
@@ -139,7 +115,7 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1724427003",
+        "chatCompletionId": "1728932426",
         "usage": {
             "promptTokens": 138,
             "completionTokens": 17,
@@ -151,7 +127,7 @@
                 {
                     "toolCall": {
                         "index": 0,
-                        "id": "call_k5gUMCNtxH9gKglmCEkjfWAR",
+                        "id": "call_eVgG6VS6jTHyYl4nPzwWqYnT",
                         "function": {
                             "name": "bob",
                             "arguments": "{\"question\":\"how are you doing\"}"
@@ -167,9 +143,9 @@
         }
     },
     {
-        "time": "2024-08-23T11:30:02.103835-04:00",
+        "time": "2024-10-14T15:00:25.475061-04:00",
         "callContext": {
-            "id": "1724427002",
+            "id": "1728932425",
             "tool": {
                 "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
@@ -200,7 +176,7 @@
             "inputContext": null
         },
         "toolSubCalls": {
-            "call_k5gUMCNtxH9gKglmCEkjfWAR": {
+            "call_eVgG6VS6jTHyYl4nPzwWqYnT": {
                 "toolID": "testdata/Bob/test.gpt:bob",
                 "input": "{\"question\":\"how are you doing\"}"
             }
@@ -209,9 +185,9 @@
         "usage": {}
     },
     {
-        "time": "2024-08-23T11:30:02.103996-04:00",
+        "time": "2024-10-14T15:00:25.475224-04:00",
         "callContext": {
-            "id": "call_k5gUMCNtxH9gKglmCEkjfWAR",
+            "id": "call_eVgG6VS6jTHyYl4nPzwWqYnT",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -241,16 +217,16 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1724427002"
+            "parentID": "1728932425"
         },
         "type": "callStart",
         "usage": {},
         "content": "{\"question\":\"how are you doing\"}"
     },
     {
-        "time": "2024-08-23T11:30:02.104177-04:00",
+        "time": "2024-10-14T15:00:25.475415-04:00",
         "callContext": {
-            "id": "call_k5gUMCNtxH9gKglmCEkjfWAR",
+            "id": "call_eVgG6VS6jTHyYl4nPzwWqYnT",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -280,30 +256,20 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1724427002"
+            "parentID": "1728932425"
         },
         "type": "callChat",
-        "chatCompletionId": "1724427004",
+        "chatCompletionId": "1728932427",
         "usage": {},
         "chatRequest": {
-            "model": "gpt-4o-2024-08-06",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "\nYou are task oriented system.\nYou receive input from a user, process the input from the given instructions, and then output the result.\nYour objective is to provide consistent and correct results.\nYou do not need to explain the steps taken, only provide the result to the given instructions.\nYou are referred to as a tool.\nYou don't move to the next step until you have a result.\n\nWhen asked how I am doing, respond with exactly \"Thanks for asking \"${QUESTION}\", I'm doing great fellow friendly AI tool!\""
-                },
-                {
-                    "role": "user",
-                    "content": "{\"question\":\"how are you doing\"}"
-                }
-            ],
-            "temperature": 0
+            "model": "",
+            "messages": null
         }
     },
     {
-        "time": "2024-08-23T11:30:02.567871-04:00",
+        "time": "2024-10-14T15:00:26.285181-04:00",
         "callContext": {
-            "id": "call_k5gUMCNtxH9gKglmCEkjfWAR",
+            "id": "call_eVgG6VS6jTHyYl4nPzwWqYnT",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -333,10 +299,10 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1724427002"
+            "parentID": "1728932425"
         },
         "type": "callChat",
-        "chatCompletionId": "1724427004",
+        "chatCompletionId": "1728932427",
         "usage": {
             "promptTokens": 122,
             "completionTokens": 14,
@@ -357,9 +323,9 @@
         }
     },
     {
-        "time": "2024-08-23T11:30:02.568006-04:00",
+        "time": "2024-10-14T15:00:26.285293-04:00",
         "callContext": {
-            "id": "call_k5gUMCNtxH9gKglmCEkjfWAR",
+            "id": "call_eVgG6VS6jTHyYl4nPzwWqYnT",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -389,16 +355,16 @@
             "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1724427002"
+            "parentID": "1728932425"
         },
         "type": "callFinish",
         "usage": {},
         "content": "Thanks for asking \"${QUESTION}\", I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-08-23T11:30:02.568167-04:00",
+        "time": "2024-10-14T15:00:26.285444-04:00",
         "callContext": {
-            "id": "1724427002",
+            "id": "1728932425",
             "tool": {
                 "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
@@ -433,9 +399,9 @@
         "usage": {}
     },
     {
-        "time": "2024-08-23T11:30:02.568274-04:00",
+        "time": "2024-10-14T15:00:26.285687-04:00",
         "callContext": {
-            "id": "1724427002",
+            "id": "1728932425",
             "tool": {
                 "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
@@ -466,61 +432,17 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1724427005",
+        "chatCompletionId": "1728932428",
         "usage": {},
         "chatRequest": {
-            "model": "gpt-4o-2024-08-06",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "\nYou are task oriented system.\nYou receive input from a user, process the input from the given instructions, and then output the result.\nYour objective is to provide consistent and correct results.\nYou do not need to explain the steps taken, only provide the result to the given instructions.\nYou are referred to as a tool.\nYou don't move to the next step until you have a result.\n\nAsk Bob \"how are you doing\" and repeat his reply exactly."
-                },
-                {
-                    "role": "assistant",
-                    "content": "",
-                    "tool_calls": [
-                        {
-                            "id": "call_k5gUMCNtxH9gKglmCEkjfWAR",
-                            "type": "function",
-                            "function": {
-                                "name": "bob",
-                                "arguments": "{\"question\":\"how are you doing\"}"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "role": "tool",
-                    "content": "Thanks for asking \"${QUESTION}\", I'm doing great fellow friendly AI tool!",
-                    "name": "bob",
-                    "tool_call_id": "call_k5gUMCNtxH9gKglmCEkjfWAR"
-                }
-            ],
-            "temperature": 0,
-            "tools": [
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "bob",
-                        "description": "I'm Bob, a friendly guy.",
-                        "parameters": {
-                            "properties": {
-                                "question": {
-                                    "description": "The question to ask Bob.",
-                                    "type": "string"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    }
-                }
-            ]
+            "model": "",
+            "messages": null
         }
     },
     {
-        "time": "2024-08-23T11:30:03.052817-04:00",
+        "time": "2024-10-14T15:00:27.147422-04:00",
         "callContext": {
-            "id": "1724427002",
+            "id": "1728932425",
             "tool": {
                 "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
@@ -551,7 +473,7 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1724427005",
+        "chatCompletionId": "1728932428",
         "usage": {
             "promptTokens": 176,
             "completionTokens": 18,
@@ -572,9 +494,9 @@
         }
     },
     {
-        "time": "2024-08-23T11:30:03.05287-04:00",
+        "time": "2024-10-14T15:00:27.147479-04:00",
         "callContext": {
-            "id": "1724427002",
+            "id": "1728932425",
             "tool": {
                 "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
@@ -609,7 +531,7 @@
         "content": "Thanks for asking \"how are you doing\", I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-08-23T11:30:03.052914-04:00",
+        "time": "2024-10-14T15:00:27.147523-04:00",
         "type": "runFinish",
         "usage": {}
     }
