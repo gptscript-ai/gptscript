@@ -18,12 +18,15 @@ func (r *Runner) handleInput(callCtx engine.Context, monitor Monitor, env []stri
 		data := map[string]any{}
 		_ = json.Unmarshal([]byte(input), &data)
 		data["input"] = input
-		inputData, err := json.Marshal(data)
+
+		inputArgs, err := argsForFilters(callCtx.Program, inputToolRef, &State{
+			StartInput: &input,
+		}, data)
 		if err != nil {
 			return "", fmt.Errorf("failed to marshal input: %w", err)
 		}
 
-		res, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, inputToolRef.ToolID, string(inputData), "", engine.InputToolCategory)
+		res, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, inputToolRef.ToolID, inputArgs, "", engine.InputToolCategory)
 		if err != nil {
 			return "", err
 		}

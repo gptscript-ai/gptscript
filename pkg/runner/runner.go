@@ -269,6 +269,9 @@ func getToolRefInput(prg *types.Program, ref types.ToolReference, input string) 
 	outputMap := map[string]interface{}{}
 
 	_ = json.Unmarshal([]byte(input), &inputMap)
+	for k, v := range inputMap {
+		inputMap[strings.ToLower(k)] = v
+	}
 
 	fields := strings.Fields(ref.Arg)
 
@@ -291,7 +294,7 @@ func getToolRefInput(prg *types.Program, ref types.ToolReference, input string) 
 			key := strings.TrimPrefix(field, "$")
 			key = strings.TrimPrefix(key, "{")
 			key = strings.TrimSuffix(key, "}")
-			val = inputMap[key]
+			val = inputMap[strings.ToLower(key)]
 		} else {
 			val = field
 		}
@@ -425,6 +428,7 @@ func (r *Runner) start(callCtx engine.Context, state *State, monitor Monitor, en
 				msg = "Tool call request has been denied"
 			}
 			return &State{
+				StartInput: &input,
 				Continuation: &engine.Return{
 					Result: &msg,
 				},
@@ -438,6 +442,7 @@ func (r *Runner) start(callCtx engine.Context, state *State, monitor Monitor, en
 	}
 
 	return &State{
+		StartInput:   &input,
 		Continuation: ret,
 	}, nil
 }
@@ -446,6 +451,8 @@ type State struct {
 	Continuation       *engine.Return `json:"continuation,omitempty"`
 	ContinuationToolID string         `json:"continuationToolID,omitempty"`
 	Result             *string        `json:"result,omitempty"`
+
+	StartInput *string `json:"startInput,omitempty"`
 
 	ResumeInput *string         `json:"resumeInput,omitempty"`
 	SubCalls    []SubCallResult `json:"subCalls,omitempty"`
@@ -485,14 +492,9 @@ func (s State) ContinuationContent() (string, error) {
 	return "", fmt.Errorf("illegal state: no result message found in chat response")
 }
 
-type Needed struct {
-	Content string `json:"content,omitempty"`
-	Input   string `json:"input,omitempty"`
-}
-
 func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, state *State) (retState *State, retErr error) {
 	defer func() {
-		retState, retErr = r.handleOutput(callCtx, monitor, env, retState, retErr)
+		retState, retErr = r.handleOutput(callCtx, monitor, env, state, retState, retErr)
 	}()
 
 	if state.Continuation == nil {

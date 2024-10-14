@@ -4,12 +4,48 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
+	"strings"
 
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
-func (r *Runner) handleOutput(callCtx engine.Context, monitor Monitor, env []string, state *State, retErr error) (*State, error) {
+func argsForFilters(prg *types.Program, tool types.ToolReference, startState *State, filterDefinedInput map[string]any) (string, error) {
+	startInput := ""
+	if startState.ResumeInput != nil {
+		startInput = *startState.ResumeInput
+	} else if startState.StartInput != nil {
+		startInput = *startState.StartInput
+	}
+
+	parsedArgs, err := getToolRefInput(prg, tool, startInput)
+	if err != nil {
+		return "", err
+	}
+
+	argData := map[string]any{}
+	if strings.HasPrefix(parsedArgs, "{") {
+		if err := json.Unmarshal([]byte(parsedArgs), &argData); err != nil {
+			return "", fmt.Errorf("failed to unmarshal parsedArgs for filter: %w", err)
+		}
+	} else if _, hasInput := filterDefinedInput["input"]; parsedArgs != "" && !hasInput {
+		argData["input"] = parsedArgs
+	}
+
+	resultData := map[string]any{}
+	maps.Copy(resultData, filterDefinedInput)
+	maps.Copy(resultData, argData)
+
+	result, err := json.Marshal(resultData)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal resultData for filter: %w", err)
+	}
+
+	return string(result), nil
+}
+
+func (r *Runner) handleOutput(callCtx engine.Context, monitor Monitor, env []string, startState, state *State, retErr error) (*State, error) {
 	outputToolRefs, err := callCtx.Tool.GetToolsByType(callCtx.Program, types.ToolTypeOutput)
 	if err != nil {
 		return nil, err
@@ -40,7 +76,7 @@ func (r *Runner) handleOutput(callCtx engine.Context, monitor Monitor, env []str
 	}
 
 	for _, outputToolRef := range outputToolRefs {
-		inputData, err := json.Marshal(map[string]any{
+		inputData, err := argsForFilters(callCtx.Program, outputToolRef, startState, map[string]any{
 			"output":       output,
 			"continuation": continuation,
 			"chat":         callCtx.Tool.Chat,
