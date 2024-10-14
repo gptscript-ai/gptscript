@@ -1,20 +1,20 @@
 [
     {
-        "time": "2024-10-14T15:00:27.184787-04:00",
+        "time": "2024-10-14T17:38:25.173529-04:00",
         "type": "runStart",
         "usage": {}
     },
     {
-        "time": "2024-10-14T15:00:27.185109-04:00",
+        "time": "2024-10-14T17:38:25.174285-04:00",
         "callContext": {
-            "id": "1728932428",
+            "id": "1728941906",
             "tool": {
                 "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat the response text exactly as given without saying anything else.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -41,16 +41,16 @@
         "usage": {}
     },
     {
-        "time": "2024-10-14T15:00:27.185153-04:00",
+        "time": "2024-10-14T17:38:25.174351-04:00",
         "callContext": {
-            "id": "1728932428",
+            "id": "1728941906",
             "tool": {
                 "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat the response text exactly as given without saying anything else.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -74,7 +74,7 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1728932429",
+        "chatCompletionId": "1728941907",
         "usage": {},
         "chatRequest": {
             "model": "",
@@ -82,16 +82,16 @@
         }
     },
     {
-        "time": "2024-10-14T15:00:28.310827-04:00",
+        "time": "2024-10-14T17:38:26.165696-04:00",
         "callContext": {
-            "id": "1728932428",
+            "id": "1728941906",
             "tool": {
                 "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat the response text exactly as given without saying anything else.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -115,11 +115,11 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1728932429",
+        "chatCompletionId": "1728941907",
         "usage": {
-            "promptTokens": 138,
+            "promptTokens": 145,
             "completionTokens": 17,
-            "totalTokens": 155
+            "totalTokens": 162
         },
         "chatResponse": {
             "role": "assistant",
@@ -127,7 +127,7 @@
                 {
                     "toolCall": {
                         "index": 0,
-                        "id": "call_c8HV8M6DRtYLd8MEHgaHAWtZ",
+                        "id": "call_95p8Knb4mdiEgxt5iXxnxOKC",
                         "function": {
                             "name": "bob",
                             "arguments": "{\"question\":\"how are you doing\"}"
@@ -136,23 +136,23 @@
                 }
             ],
             "usage": {
-                "promptTokens": 138,
+                "promptTokens": 145,
                 "completionTokens": 17,
-                "totalTokens": 155
+                "totalTokens": 162
             }
         }
     },
     {
-        "time": "2024-10-14T15:00:28.311081-04:00",
+        "time": "2024-10-14T17:38:26.165858-04:00",
         "callContext": {
-            "id": "1728932428",
+            "id": "1728941906",
             "tool": {
                 "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat the response text exactly as given without saying anything else.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -176,7 +176,7 @@
             "inputContext": null
         },
         "toolSubCalls": {
-            "call_c8HV8M6DRtYLd8MEHgaHAWtZ": {
+            "call_95p8Knb4mdiEgxt5iXxnxOKC": {
                 "toolID": "testdata/BobAsShell/test.gpt:bob",
                 "input": "{\"question\":\"how are you doing\"}"
             }
@@ -185,9 +185,9 @@
         "usage": {}
     },
     {
-        "time": "2024-10-14T15:00:28.311186-04:00",
+        "time": "2024-10-14T17:38:26.165964-04:00",
         "callContext": {
-            "id": "call_c8HV8M6DRtYLd8MEHgaHAWtZ",
+            "id": "call_95p8Knb4mdiEgxt5iXxnxOKC",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -210,14 +210,14 @@
                 },
                 "source": {
                     "location": "testdata/BobAsShell/test.gpt",
-                    "lineNo": 7
+                    "lineNo": 6
                 },
                 "workingDir": "testdata/BobAsShell"
             },
             "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1728932428",
+            "parentID": "1728941906",
             "displayText": "Running bob from testdata/BobAsShell/test.gpt"
         },
         "type": "callStart",
@@ -225,9 +225,9 @@
         "content": "{\"question\":\"how are you doing\"}"
     },
     {
-        "time": "2024-10-14T15:00:28.312343-04:00",
+        "time": "2024-10-14T17:38:26.167235-04:00",
         "callContext": {
-            "id": "call_c8HV8M6DRtYLd8MEHgaHAWtZ",
+            "id": "call_95p8Knb4mdiEgxt5iXxnxOKC",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -250,18 +250,18 @@
                 },
                 "source": {
                     "location": "testdata/BobAsShell/test.gpt",
-                    "lineNo": 7
+                    "lineNo": 6
                 },
                 "workingDir": "testdata/BobAsShell"
             },
             "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1728932428",
+            "parentID": "1728941906",
             "displayText": "Running bob from testdata/BobAsShell/test.gpt"
         },
         "type": "callChat",
-        "chatCompletionId": "1728932430",
+        "chatCompletionId": "1728941908",
         "usage": {},
         "chatRequest": {
             "model": "",
@@ -269,9 +269,9 @@
         }
     },
     {
-        "time": "2024-10-14T15:00:28.328987-04:00",
+        "time": "2024-10-14T17:38:26.178131-04:00",
         "callContext": {
-            "id": "call_c8HV8M6DRtYLd8MEHgaHAWtZ",
+            "id": "call_95p8Knb4mdiEgxt5iXxnxOKC",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -294,27 +294,27 @@
                 },
                 "source": {
                     "location": "testdata/BobAsShell/test.gpt",
-                    "lineNo": 7
+                    "lineNo": 6
                 },
                 "workingDir": "testdata/BobAsShell"
             },
             "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1728932428",
+            "parentID": "1728941906",
             "displayText": "Running bob from testdata/BobAsShell/test.gpt"
         },
         "type": "callChat",
-        "chatCompletionId": "1728932430",
+        "chatCompletionId": "1728941908",
         "usage": {},
         "chatResponse": {
             "usage": {}
         }
     },
     {
-        "time": "2024-10-14T15:00:28.329156-04:00",
+        "time": "2024-10-14T17:38:26.178199-04:00",
         "callContext": {
-            "id": "call_c8HV8M6DRtYLd8MEHgaHAWtZ",
+            "id": "call_95p8Knb4mdiEgxt5iXxnxOKC",
             "tool": {
                 "name": "bob",
                 "description": "I'm Bob, a friendly guy.",
@@ -337,14 +337,14 @@
                 },
                 "source": {
                     "location": "testdata/BobAsShell/test.gpt",
-                    "lineNo": 7
+                    "lineNo": 6
                 },
                 "workingDir": "testdata/BobAsShell"
             },
             "currentAgent": {},
             "inputContext": null,
             "toolName": "bob",
-            "parentID": "1728932428",
+            "parentID": "1728941906",
             "displayText": "Running bob from testdata/BobAsShell/test.gpt"
         },
         "type": "callFinish",
@@ -352,16 +352,16 @@
         "content": "Thanks for asking how are you doing, I'm doing great fellow friendly AI tool!\n"
     },
     {
-        "time": "2024-10-14T15:00:28.32924-04:00",
+        "time": "2024-10-14T17:38:26.178356-04:00",
         "callContext": {
-            "id": "1728932428",
+            "id": "1728941906",
             "tool": {
                 "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat the response text exactly as given without saying anything else.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -389,16 +389,16 @@
         "usage": {}
     },
     {
-        "time": "2024-10-14T15:00:28.329393-04:00",
+        "time": "2024-10-14T17:38:26.178539-04:00",
         "callContext": {
-            "id": "1728932428",
+            "id": "1728941906",
             "tool": {
                 "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat the response text exactly as given without saying anything else.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -422,7 +422,7 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1728932431",
+        "chatCompletionId": "1728941909",
         "usage": {},
         "chatRequest": {
             "model": "",
@@ -430,16 +430,16 @@
         }
     },
     {
-        "time": "2024-10-14T15:00:29.437703-04:00",
+        "time": "2024-10-14T17:38:27.001877-04:00",
         "callContext": {
-            "id": "1728932428",
+            "id": "1728941906",
             "tool": {
                 "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat the response text exactly as given without saying anything else.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -463,11 +463,11 @@
             "inputContext": null
         },
         "type": "callChat",
-        "chatCompletionId": "1728932431",
+        "chatCompletionId": "1728941909",
         "usage": {
-            "promptTokens": 178,
+            "promptTokens": 185,
             "completionTokens": 17,
-            "totalTokens": 195
+            "totalTokens": 202
         },
         "chatResponse": {
             "role": "assistant",
@@ -477,23 +477,23 @@
                 }
             ],
             "usage": {
-                "promptTokens": 178,
+                "promptTokens": 185,
                 "completionTokens": 17,
-                "totalTokens": 195
+                "totalTokens": 202
             }
         }
     },
     {
-        "time": "2024-10-14T15:00:29.437754-04:00",
+        "time": "2024-10-14T17:38:27.001903-04:00",
         "callContext": {
-            "id": "1728932428",
+            "id": "1728941906",
             "tool": {
                 "modelName": "gpt-4o-2024-08-06",
                 "internalPrompt": null,
                 "tools": [
                     "bob"
                 ],
-                "instructions": "Ask Bob \"how are you doing\" and repeat his reply exactly.",
+                "instructions": "Ask Bob \"how are you doing\" and repeat the response text exactly as given without saying anything else.",
                 "id": "testdata/BobAsShell/test.gpt:",
                 "toolMapping": {
                     "bob": [
@@ -521,7 +521,7 @@
         "content": "Thanks for asking how are you doing, I'm doing great fellow friendly AI tool!"
     },
     {
-        "time": "2024-10-14T15:00:29.437838-04:00",
+        "time": "2024-10-14T17:38:27.001932-04:00",
         "type": "runFinish",
         "usage": {}
     }
