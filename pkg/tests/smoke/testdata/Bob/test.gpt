@@ -1,10 +1,10 @@
 tools: bob
 
-Ask Bob "how are you doing" and repeat his reply exactly.
+Ask Bob "how are you doing" and repeat the response text exactly as given without saying anything else.
 
 ---
 name: bob
 description: I'm Bob, a friendly guy.
 args: question: The question to ask Bob.
 
-When asked how I am doing, respond with exactly "Thanks for asking "${QUESTION}", I'm doing great fellow friendly AI tool!"
+When asked how I am doing, respond with the following exactly: "Thanks for asking ${QUESTION}! I'm doing great fellow friendly AI tool!" with ${QUESTION} replaced with the question text as given.
