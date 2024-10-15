@@ -72,6 +72,15 @@ func (s *server) addRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /datasets/list-elements", s.listDatasetElements)
 	mux.HandleFunc("POST /datasets/get-element", s.getDatasetElement)
 	mux.HandleFunc("POST /datasets/add-element", s.addDatasetElement)
+
+	mux.HandleFunc("POST /workspaces/create", s.createWorkspace)
+	mux.HandleFunc("POST /workspaces/delete", s.deleteWorkspace)
+	mux.HandleFunc("POST /workspaces/list", s.listWorkspaceContents)
+	mux.HandleFunc("POST /workspaces/mkdir", s.mkDirInWorkspace)
+	mux.HandleFunc("POST /workspaces/rmdir", s.rmDirInWorkspace)
+	mux.HandleFunc("POST /workspaces/write-file", s.writeFileInWorkspace)
+	mux.HandleFunc("POST /workspaces/delete-file", s.removeFileInWorkspace)
+	mux.HandleFunc("POST /workspaces/read-file", s.readFileInWorkspace)
 }
 
 // health just provides an endpoint for checking whether the server is running and accessible.

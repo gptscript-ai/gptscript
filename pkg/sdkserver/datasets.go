@@ -62,7 +62,7 @@ func (s *server) listDatasets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), "List Datasets from "+req.getToolRepo(), "", loader.Options{
+	prg, err := loader.Program(r.Context(), req.getToolRepo(), "List Datasets", loader.Options{
 		Cache: g.Cache,
 	})
 
@@ -123,7 +123,7 @@ func (s *server) createDataset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), "Create Dataset from "+req.getToolRepo(), "", loader.Options{
+	prg, err := loader.Program(r.Context(), req.getToolRepo(), "Create Dataset", loader.Options{
 		Cache: g.Cache,
 	})
 
@@ -192,7 +192,7 @@ func (s *server) addDatasetElement(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), "Add Element from "+req.getToolRepo(), "", loader.Options{
+	prg, err := loader.Program(r.Context(), req.getToolRepo(), "Add Element", loader.Options{
 		Cache: g.Cache,
 	})
 	if err != nil {
@@ -251,7 +251,7 @@ func (s *server) listDatasetElements(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), "List Elements from "+req.getToolRepo(), "", loader.Options{
+	prg, err := loader.Program(r.Context(), req.getToolRepo(), "List Elements", loader.Options{
 		Cache: g.Cache,
 	})
 	if err != nil {
@@ -314,7 +314,7 @@ func (s *server) getDatasetElement(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), "Get Element from "+req.getToolRepo(), "", loader.Options{
+	prg, err := loader.Program(r.Context(), req.getToolRepo(), "Get Element", loader.Options{
 		Cache: g.Cache,
 	})
 	if err != nil {
