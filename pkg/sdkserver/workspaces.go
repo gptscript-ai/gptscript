@@ -4,26 +4,29 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 )
 
 type workspaceCommonRequest struct {
-	ID                string `json:"id"`
-	WorkspaceToolRepo string `json:"workspaceToolRepo"`
+	ID            string `json:"id"`
+	WorkspaceTool string `json:"workspaceTool"`
 }
 
 func (w workspaceCommonRequest) getToolRepo() string {
-	if w.WorkspaceToolRepo != "" {
-		return w.WorkspaceToolRepo
+	if w.WorkspaceTool != "" {
+		return w.WorkspaceTool
 	}
 	return "github.com/gptscript-ai/workspace-provider"
 }
 
 type createWorkspaceRequest struct {
 	workspaceCommonRequest `json:",inline"`
-	ProviderType           string `json:"providerType"`
+	ProviderType           string   `json:"providerType"`
+	DirectoryDataHome      string   `json:"directoryDataHome"`
+	FromWorkspaceIDs       []string `json:"fromWorkspaceIDs"`
 }
 
 func (s *server) createWorkspace(w http.ResponseWriter, r *http.Request) {
@@ -49,8 +52,8 @@ func (s *server) createWorkspace(w http.ResponseWriter, r *http.Request) {
 		prg,
 		s.gptscriptOpts.Env,
 		fmt.Sprintf(
-			`{"provider": "%s"}`,
-			reqObject.ProviderType,
+			`{"provider": "%s", "data_home": "%s", "workspace_ids": "%s"}`,
+			reqObject.ProviderType, reqObject.DirectoryDataHome, strings.Join(reqObject.FromWorkspaceIDs, ","),
 		),
 	)
 	if err != nil {
