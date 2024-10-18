@@ -18,6 +18,11 @@ const DaemonURLSuffix = ".daemon.gptscript.local"
 func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Tool, input string) (cmdRet *Return, cmdErr error) {
 	envMap := map[string]string{}
 
+	for _, env := range appendInputAsEnv(nil, input) {
+		k, v, _ := strings.Cut(env, "=")
+		envMap[k] = v
+	}
+
 	for _, env := range e.Env {
 		k, v, _ := strings.Cut(env, "=")
 		envMap[k] = v
@@ -25,7 +30,7 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 
 	toolURL := strings.Split(tool.Instructions, "\n")[0][2:]
 	toolURL = os.Expand(toolURL, func(s string) string {
-		return envMap[s]
+		return url.PathEscape(envMap[s])
 	})
 
 	parsed, err := url.Parse(toolURL)
@@ -59,6 +64,10 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 		return &Return{
 			Result: &toolURL,
 		}, nil
+	}
+
+	if body, ok := envMap["BODY"]; ok {
+		input = body
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, toolURL, strings.NewReader(input))
