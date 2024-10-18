@@ -17,6 +17,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	"github.com/gptscript-ai/gptscript/pkg/debugcmd"
@@ -34,6 +35,8 @@ const downloadURL = "https://go.dev/dl/"
 type Runtime struct {
 	// version something like "1.22.1"
 	Version string
+
+	runtimeSetupLock sync.Mutex
 }
 
 func (r *Runtime) ID() string {
@@ -355,6 +358,9 @@ func (r *Runtime) binDir(rel string) string {
 }
 
 func (r *Runtime) getRuntime(ctx context.Context, cwd string) (string, error) {
+	r.runtimeSetupLock.Lock()
+	defer r.runtimeSetupLock.Unlock()
+
 	url, sha, err := r.getReleaseAndDigest()
 	if err != nil {
 		return "", err

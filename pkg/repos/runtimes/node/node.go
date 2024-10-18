@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 
 	"github.com/gptscript-ai/gptscript/pkg/debugcmd"
 	runtimeEnv "github.com/gptscript-ai/gptscript/pkg/env"
@@ -34,6 +35,8 @@ type Runtime struct {
 	Version string
 	// If true this is the version that will be used for python or python3
 	Default bool
+
+	runtimeSetupLock sync.Mutex
 }
 
 func (r *Runtime) ID() string {
@@ -175,6 +178,9 @@ func (r *Runtime) binDir(rel string) (string, error) {
 }
 
 func (r *Runtime) getRuntime(ctx context.Context, cwd string) (string, error) {
+	r.runtimeSetupLock.Lock()
+	defer r.runtimeSetupLock.Unlock()
+
 	url, sha, err := r.getReleaseAndDigest()
 	if err != nil {
 		return "", err

@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 
 	runtimeEnv "github.com/gptscript-ai/gptscript/pkg/env"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
@@ -27,6 +28,7 @@ var releasesData []byte
 const downloadURL = "https://github.com/gptscript-ai/busybox-w32/releases/download/%s"
 
 type Runtime struct {
+	runtimeSetupLock sync.Mutex
 }
 
 func (r *Runtime) ID() string {
@@ -75,6 +77,9 @@ func (r *Runtime) getReleaseAndDigest() (string, string, error) {
 }
 
 func (r *Runtime) getRuntime(ctx context.Context, cwd string) (string, error) {
+	r.runtimeSetupLock.Lock()
+	defer r.runtimeSetupLock.Unlock()
+
 	url, sha, err := r.getReleaseAndDigest()
 	if err != nil {
 		return "", err
