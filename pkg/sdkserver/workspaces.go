@@ -26,7 +26,6 @@ func (w workspaceCommonRequest) getToolRepo() string {
 type createWorkspaceRequest struct {
 	workspaceCommonRequest `json:",inline"`
 	ProviderType           string   `json:"providerType"`
-	DirectoryDataHome      string   `json:"directoryDataHome"`
 	FromWorkspaceIDs       []string `json:"fromWorkspaceIDs"`
 }
 
@@ -53,8 +52,8 @@ func (s *server) createWorkspace(w http.ResponseWriter, r *http.Request) {
 		prg,
 		reqObject.Env,
 		fmt.Sprintf(
-			`{"provider": "%s", "data_home": "%s", "workspace_ids": "%s"}`,
-			reqObject.ProviderType, reqObject.DirectoryDataHome, strings.Join(reqObject.FromWorkspaceIDs, ","),
+			`{"provider": "%s", "workspace_ids": "%s"}`,
+			reqObject.ProviderType, strings.Join(reqObject.FromWorkspaceIDs, ","),
 		),
 	)
 	if err != nil {
