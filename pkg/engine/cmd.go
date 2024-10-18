@@ -124,10 +124,10 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 	}
 	cmd, stop, err := e.newCommand(ctx.Ctx, extraEnv, tool, input, true)
 	if err != nil {
-		if toolCategory == NoCategory {
+		if toolCategory == NoCategory && ctx.Parent != nil {
 			return fmt.Sprintf("ERROR: got (%v) while parsing command", err), nil
 		}
-		return "", err
+		return "", fmt.Errorf("got (%v) while parsing command", err)
 	}
 	defer stop()
 
