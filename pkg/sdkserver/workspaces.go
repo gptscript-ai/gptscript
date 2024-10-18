@@ -1,6 +1,7 @@
 package sdkserver
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -175,8 +176,7 @@ func (s *server) removeAllWithPrefixInWorkspace(w http.ResponseWriter, r *http.R
 type writeFileInWorkspaceRequest struct {
 	workspaceCommonRequest `json:",inline"`
 	FilePath               string `json:"filePath"`
-	Contents               string `json:"contents"`
-	Base64EncodedInput     bool   `json:"base64EncodedInput"`
+	Contents               []byte `json:"contents"`
 }
 
 func (s *server) writeFileInWorkspace(w http.ResponseWriter, r *http.Request) {
@@ -198,8 +198,8 @@ func (s *server) writeFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 		prg,
 		reqObject.Env,
 		fmt.Sprintf(
-			`{"workspace_id": "%s", "file_path": "%s", "file_contents": "%s", "write_file_base64_encoded_input": %t}`,
-			reqObject.ID, reqObject.FilePath, reqObject.Contents, reqObject.Base64EncodedInput,
+			`{"workspace_id": "%s", "file_path": "%s", "body": "%s"}`,
+			reqObject.ID, reqObject.FilePath, base64.StdEncoding.EncodeToString(reqObject.Contents),
 		),
 	)
 	if err != nil {
@@ -249,7 +249,6 @@ func (s *server) removeFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 type readFileInWorkspaceRequest struct {
 	workspaceCommonRequest `json:",inline"`
 	FilePath               string `json:"filePath"`
-	Base64EncodeOutput     bool   `json:"base64EncodeOutput"`
 }
 
 func (s *server) readFileInWorkspace(w http.ResponseWriter, r *http.Request) {
@@ -271,8 +270,8 @@ func (s *server) readFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 		prg,
 		reqObject.Env,
 		fmt.Sprintf(
-			`{"workspace_id": "%s", "file_path": "%s", "read_file_base64_encode_output": %t}`,
-			reqObject.ID, reqObject.FilePath, reqObject.Base64EncodeOutput,
+			`{"workspace_id": "%s", "file_path": "%s"}`,
+			reqObject.ID, reqObject.FilePath,
 		),
 	)
 	if err != nil {
