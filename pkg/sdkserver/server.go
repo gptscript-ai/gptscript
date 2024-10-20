@@ -27,6 +27,7 @@ type Options struct {
 	gptscript.Options
 
 	ListenAddress             string
+	WorkspaceTool             string
 	Debug                     bool
 	DisableServerErrorLogging bool
 }
@@ -107,6 +108,7 @@ func run(ctx context.Context, listener net.Listener, opts Options) error {
 		gptscriptOpts:    opts.Options,
 		address:          listener.Addr().String(),
 		token:            token,
+		workspaceTool:    opts.WorkspaceTool,
 		client:           g,
 		events:           events,
 		runtimeManager:   runtimes.Default(opts.Options.Cache.CacheDir), // TODO - do we always want to use runtimes.Default here?
@@ -157,12 +159,17 @@ func complete(opts ...Options) Options {
 	for _, opt := range opts {
 		result.Options = gptscript.Complete(result.Options, opt.Options)
 		result.ListenAddress = types.FirstSet(opt.ListenAddress, result.ListenAddress)
+		result.WorkspaceTool = types.FirstSet(opt.WorkspaceTool, result.WorkspaceTool)
 		result.Debug = types.FirstSet(opt.Debug, result.Debug)
 		result.DisableServerErrorLogging = types.FirstSet(opt.DisableServerErrorLogging, result.DisableServerErrorLogging)
 	}
 
 	if result.ListenAddress == "" {
 		result.ListenAddress = "127.0.0.1:0"
+	}
+
+	if result.WorkspaceTool == "" {
+		result.WorkspaceTool = "github.com/gptscript-ai/workspace-provider"
 	}
 
 	return result

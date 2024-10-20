@@ -11,17 +11,18 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 )
 
+func (s *server) getWorkspaceTool(req workspaceCommonRequest) string {
+	if req.WorkspaceTool != "" {
+		return req.WorkspaceTool
+	}
+
+	return s.workspaceTool
+}
+
 type workspaceCommonRequest struct {
 	ID            string   `json:"id"`
 	WorkspaceTool string   `json:"workspaceTool"`
 	Env           []string `json:"env"`
-}
-
-func (w workspaceCommonRequest) getToolRepo() string {
-	if w.WorkspaceTool != "" {
-		return w.WorkspaceTool
-	}
-	return "github.com/gptscript-ai/workspace-provider"
 }
 
 type createWorkspaceRequest struct {
@@ -38,7 +39,7 @@ func (s *server) createWorkspace(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), reqObject.getToolRepo(), "Create Workspace", loader.Options{Cache: s.client.Cache})
+	prg, err := loader.Program(r.Context(), s.getWorkspaceTool(reqObject.workspaceCommonRequest), "Create Workspace", loader.Options{Cache: s.client.Cache})
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to load program: %w", err))
 		return
@@ -77,7 +78,7 @@ func (s *server) deleteWorkspace(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), reqObject.getToolRepo(), "Delete Workspace", loader.Options{Cache: s.client.Cache})
+	prg, err := loader.Program(r.Context(), s.getWorkspaceTool(reqObject.workspaceCommonRequest), "Delete Workspace", loader.Options{Cache: s.client.Cache})
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to load program: %w", err))
 		return
@@ -114,7 +115,7 @@ func (s *server) listWorkspaceContents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), reqObject.getToolRepo(), "List Workspace Contents", loader.Options{Cache: s.client.Cache})
+	prg, err := loader.Program(r.Context(), s.getWorkspaceTool(reqObject.workspaceCommonRequest), "List Workspace Contents", loader.Options{Cache: s.client.Cache})
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to load program: %w", err))
 		return
@@ -150,7 +151,7 @@ func (s *server) removeAllWithPrefixInWorkspace(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), reqObject.getToolRepo(), "Remove All With Prefix In Workspace", loader.Options{Cache: s.client.Cache})
+	prg, err := loader.Program(r.Context(), s.getWorkspaceTool(reqObject.workspaceCommonRequest), "Remove All With Prefix In Workspace", loader.Options{Cache: s.client.Cache})
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to load program: %w", err))
 		return
@@ -187,7 +188,7 @@ func (s *server) writeFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), reqObject.getToolRepo(), "Write File In Workspace", loader.Options{Cache: s.client.Cache})
+	prg, err := loader.Program(r.Context(), s.getWorkspaceTool(reqObject.workspaceCommonRequest), "Write File In Workspace", loader.Options{Cache: s.client.Cache})
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to load program: %w", err))
 		return
@@ -223,7 +224,7 @@ func (s *server) removeFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), reqObject.getToolRepo(), "Remove File In Workspace", loader.Options{Cache: s.client.Cache})
+	prg, err := loader.Program(r.Context(), s.getWorkspaceTool(reqObject.workspaceCommonRequest), "Remove File In Workspace", loader.Options{Cache: s.client.Cache})
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to load program: %w", err))
 		return
@@ -259,7 +260,7 @@ func (s *server) readFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), reqObject.getToolRepo(), "Read File In Workspace", loader.Options{Cache: s.client.Cache})
+	prg, err := loader.Program(r.Context(), s.getWorkspaceTool(reqObject.workspaceCommonRequest), "Read File In Workspace", loader.Options{Cache: s.client.Cache})
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to load program: %w", err))
 		return

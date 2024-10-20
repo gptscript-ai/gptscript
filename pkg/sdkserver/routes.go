@@ -28,6 +28,7 @@ import (
 type server struct {
 	gptscriptOpts  gptscript.Options
 	address, token string
+	workspaceTool  string
 	client         *gptscript.GPTScript
 	events         *broadcaster.Broadcaster[event]
 

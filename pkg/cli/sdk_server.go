@@ -11,6 +11,7 @@ import (
 
 type SDKServer struct {
 	*GPTScript
+	WorkspaceTool string `usage:"Tool to use for workspace"`
 }
 
 func (c *SDKServer) Customize(cmd *cobra.Command) {
@@ -37,5 +38,6 @@ func (c *SDKServer) Run(cmd *cobra.Command, _ []string) error {
 		Options:       opts,
 		ListenAddress: c.ListenAddress,
 		Debug:         c.Debug,
+		WorkspaceTool: c.WorkspaceTool,
 	})
 }
