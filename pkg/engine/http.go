@@ -96,8 +96,8 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 	defer resp.Body.Close()
 
 	if resp.StatusCode > 299 {
-		_, _ = io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("error in request to [%s] [%d]: %s", toolURL, resp.StatusCode, resp.Status)
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("error in request to [%s] [%d]: %s: %s", toolURL, resp.StatusCode, resp.Status, body)
 	}
 
 	content, err := io.ReadAll(resp.Body)
