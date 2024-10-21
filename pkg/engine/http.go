@@ -75,6 +75,12 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 		return nil, err
 	}
 
+	for _, env := range e.Env {
+		if strings.HasPrefix(env, "GPTSCRIPT_") {
+			req.Header.Add("X-GPTScript-Env", env)
+		}
+	}
+
 	req.Header.Set("X-GPTScript-Tool-Name", tool.Parameters.Name)
 
 	if err := json.Unmarshal([]byte(input), &map[string]any{}); err == nil {

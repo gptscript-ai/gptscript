@@ -168,6 +168,20 @@ func New(ctx context.Context, o ...Options) (*GPTScript, error) {
 }
 
 func (g *GPTScript) getEnv(env []string) ([]string, error) {
+	var (
+		id string
+	)
+
+	scheme, rest, isScheme := strings.Cut(g.WorkspacePath, "://")
+	if isScheme && scheme == "directory" {
+		id = g.WorkspacePath
+		g.WorkspacePath = rest
+	} else if isScheme {
+		id = g.WorkspacePath
+		g.WorkspacePath = ""
+		g.DeleteWorkspaceOnClose = true
+	}
+
 	if g.WorkspacePath == "" {
 		var err error
 		g.WorkspacePath, err = os.MkdirTemp("", "gptscript-workspace-*")
@@ -184,9 +198,12 @@ func (g *GPTScript) getEnv(env []string) ([]string, error) {
 	if err := os.MkdirAll(g.WorkspacePath, 0700); err != nil {
 		return nil, err
 	}
+	if id == "" {
+		id = hash.ID(g.WorkspacePath)
+	}
 	return slices.Concat(g.ExtraEnv, env, []string{
 		fmt.Sprintf("GPTSCRIPT_WORKSPACE_DIR=%s", g.WorkspacePath),
-		fmt.Sprintf("GPTSCRIPT_WORKSPACE_ID=%s", hash.ID(g.WorkspacePath)),
+		fmt.Sprintf("GPTSCRIPT_WORKSPACE_ID=%s", id),
 	}), nil
 }
 
