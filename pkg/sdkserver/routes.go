@@ -73,6 +73,7 @@ func (s *server) addRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /datasets/list-elements", s.listDatasetElements)
 	mux.HandleFunc("POST /datasets/get-element", s.getDatasetElement)
 	mux.HandleFunc("POST /datasets/add-element", s.addDatasetElement)
+	mux.HandleFunc("POST /datasets/add-elements", s.addDatasetElements)
 
 	mux.HandleFunc("POST /workspaces/create", s.createWorkspace)
 	mux.HandleFunc("POST /workspaces/delete", s.deleteWorkspace)
