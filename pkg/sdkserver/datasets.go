@@ -35,7 +35,7 @@ func (r datasetRequest) getToolRepo() string {
 	if r.DatasetToolRepo != "" {
 		return r.DatasetToolRepo
 	}
-	return "github.com/gptscript-ai/datasets"
+	return "github.com/otto8-ai/datasets"
 }
 
 func (s *server) listDatasets(w http.ResponseWriter, r *http.Request) {
