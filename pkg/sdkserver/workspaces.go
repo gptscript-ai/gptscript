@@ -1,7 +1,6 @@
 package sdkserver
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -177,7 +176,7 @@ func (s *server) removeAllWithPrefixInWorkspace(w http.ResponseWriter, r *http.R
 type writeFileInWorkspaceRequest struct {
 	workspaceCommonRequest `json:",inline"`
 	FilePath               string `json:"filePath"`
-	Contents               []byte `json:"contents"`
+	Contents               string `json:"contents"`
 }
 
 func (s *server) writeFileInWorkspace(w http.ResponseWriter, r *http.Request) {
@@ -200,7 +199,7 @@ func (s *server) writeFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 		reqObject.Env,
 		fmt.Sprintf(
 			`{"workspace_id": "%s", "file_path": "%s", "body": "%s"}`,
-			reqObject.ID, reqObject.FilePath, base64.StdEncoding.EncodeToString(reqObject.Contents),
+			reqObject.ID, reqObject.FilePath, reqObject.Contents,
 		),
 	)
 	if err != nil {
