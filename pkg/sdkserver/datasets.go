@@ -22,6 +22,8 @@ func (r datasetRequest) validate(requireInput bool) error {
 		return fmt.Errorf("workspaceID is required")
 	} else if requireInput && r.Input == "" {
 		return fmt.Errorf("input is required")
+	} else if len(r.Env) == 0 {
+		return fmt.Errorf("env is required")
 	}
 	return nil
 }
