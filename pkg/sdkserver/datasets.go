@@ -12,11 +12,14 @@ import (
 
 type datasetRequest struct {
 	Input           string `json:"input"`
+	WorkspaceID     string `json:"workspaceID"`
 	DatasetToolRepo string `json:"datasetToolRepo"`
 }
 
 func (r datasetRequest) validate(requireInput bool) error {
-	if requireInput && r.Input == "" {
+	if r.WorkspaceID == "" {
+		return fmt.Errorf("workspaceID is required")
+	} else if requireInput && r.Input == "" {
 		return fmt.Errorf("input is required")
 	}
 	return nil
@@ -24,9 +27,10 @@ func (r datasetRequest) validate(requireInput bool) error {
 
 func (r datasetRequest) opts(o gptscript.Options) gptscript.Options {
 	opts := gptscript.Options{
-		Cache:   o.Cache,
-		Monitor: o.Monitor,
-		Runner:  o.Runner,
+		Cache:     o.Cache,
+		Monitor:   o.Monitor,
+		Runner:    o.Runner,
+		Workspace: r.WorkspaceID,
 	}
 	return opts
 }
@@ -269,7 +273,7 @@ func (s *server) addDatasetElements(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := g.Run(r.Context(), prg, s.gptscriptOpts.Env, fmt.Sprintf(`{"datasetID":%q, elements:%s}`, args.DatasetID, elementsJSON))
+	result, err := g.Run(r.Context(), prg, s.gptscriptOpts.Env, fmt.Sprintf(`{"datasetID":%q, "elements":%q}`, args.DatasetID, string(elementsJSON)))
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
 		return
