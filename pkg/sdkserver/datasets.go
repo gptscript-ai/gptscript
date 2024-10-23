@@ -11,9 +11,10 @@ import (
 )
 
 type datasetRequest struct {
-	Input           string `json:"input"`
-	WorkspaceID     string `json:"workspaceID"`
-	DatasetToolRepo string `json:"datasetToolRepo"`
+	Input           string   `json:"input"`
+	WorkspaceID     string   `json:"workspaceID"`
+	DatasetToolRepo string   `json:"datasetToolRepo"`
+	Env             []string `json:"env"`
 }
 
 func (r datasetRequest) validate(requireInput bool) error {
@@ -71,7 +72,7 @@ func (s *server) listDatasets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := g.Run(r.Context(), prg, s.gptscriptOpts.Env, req.Input)
+	result, err := g.Run(r.Context(), prg, req.Env, req.Input)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
 		return
@@ -132,7 +133,7 @@ func (s *server) createDataset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := g.Run(r.Context(), prg, s.gptscriptOpts.Env, req.Input)
+	result, err := g.Run(r.Context(), prg, req.Env, req.Input)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
 		return
@@ -200,7 +201,7 @@ func (s *server) addDatasetElement(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := g.Run(r.Context(), prg, s.gptscriptOpts.Env, req.Input)
+	result, err := g.Run(r.Context(), prg, req.Env, req.Input)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
 		return
@@ -273,7 +274,7 @@ func (s *server) addDatasetElements(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := g.Run(r.Context(), prg, s.gptscriptOpts.Env, fmt.Sprintf(`{"datasetID":%q, "elements":%q}`, args.DatasetID, string(elementsJSON)))
+	result, err := g.Run(r.Context(), prg, req.Env, fmt.Sprintf(`{"datasetID":%q, "elements":%q}`, args.DatasetID, string(elementsJSON)))
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
 		return
@@ -332,7 +333,7 @@ func (s *server) listDatasetElements(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := g.Run(r.Context(), prg, s.gptscriptOpts.Env, req.Input)
+	result, err := g.Run(r.Context(), prg, req.Env, req.Input)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
 		return
@@ -395,7 +396,7 @@ func (s *server) getDatasetElement(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := g.Run(r.Context(), prg, s.gptscriptOpts.Env, req.Input)
+	result, err := g.Run(r.Context(), prg, req.Env, req.Input)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
 		return
