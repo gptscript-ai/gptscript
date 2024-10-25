@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"sync"
@@ -58,7 +59,7 @@ type Manager struct {
 	storageDir       string
 	gitDir           string
 	runtimeDir       string
-	systemDir        string
+	systemDirs       []string
 	runtimes         []Runtime
 	credHelperConfig *credHelperConfig
 }
@@ -69,14 +70,22 @@ type credHelperConfig struct {
 	cliCfg      *config.CLIConfig
 }
 
-func New(cacheDir string, runtimes ...Runtime) *Manager {
-	root := filepath.Join(cacheDir, "repos")
+func New(cacheDir, systemDir string, runtimes ...Runtime) *Manager {
+	var (
+		systemDirs []string
+		root       = filepath.Join(cacheDir, "repos")
+	)
+
+	if strings.TrimSpace(systemDir) != "" {
+		systemDirs = regexp.MustCompile("[;:,]").Split(strings.TrimSpace(systemDir), -1)
+	}
+
 	return &Manager{
 		cacheDir:   cacheDir,
 		storageDir: root,
 		gitDir:     filepath.Join(root, "git"),
 		runtimeDir: filepath.Join(root, "runtimes"),
-		systemDir:  filepath.Join(root, "system"),
+		systemDirs: systemDirs,
 		runtimes:   runtimes,
 	}
 }
@@ -273,8 +282,10 @@ func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, e
 }
 
 func (m *Manager) GetContext(ctx context.Context, tool types.Tool, cmd, env []string) (string, []string, error) {
-	if strings.HasPrefix(tool.WorkingDir, m.systemDir) {
-		return tool.WorkingDir, env, nil
+	for _, systemDir := range m.systemDirs {
+		if strings.HasPrefix(tool.WorkingDir, systemDir) {
+			return tool.WorkingDir, env, nil
+		}
 	}
 
 	var isLocal bool

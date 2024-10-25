@@ -30,6 +30,6 @@ var Runtimes = []repos.Runtime{
 	},
 }
 
-func Default(cacheDir string) engine.RuntimeManager {
-	return repos.New(cacheDir, Runtimes...)
+func Default(cacheDir, systemDir string) engine.RuntimeManager {
+	return repos.New(cacheDir, systemDir, Runtimes...)
 }

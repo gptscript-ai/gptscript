@@ -48,7 +48,7 @@ func (c *Credential) Run(cmd *cobra.Command, _ []string) error {
 	}
 	opts = gptscript.Complete(opts)
 	if opts.Runner.RuntimeManager == nil {
-		opts.Runner.RuntimeManager = runtimes.Default(opts.Cache.CacheDir)
+		opts.Runner.RuntimeManager = runtimes.Default(opts.Cache.CacheDir, opts.SystemToolsDir)
 	}
 
 	ctxs := opts.CredentialContexts

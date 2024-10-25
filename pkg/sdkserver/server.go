@@ -111,7 +111,7 @@ func run(ctx context.Context, listener net.Listener, opts Options) error {
 		workspaceTool:    opts.WorkspaceTool,
 		client:           g,
 		events:           events,
-		runtimeManager:   runtimes.Default(opts.Options.Cache.CacheDir), // TODO - do we always want to use runtimes.Default here?
+		runtimeManager:   runtimes.Default(opts.Options.Cache.CacheDir, opts.SystemToolsDir),
 		waitingToConfirm: make(map[string]chan runner.AuthorizerResponse),
 		waitingToPrompt:  make(map[string]chan map[string]string),
 	}

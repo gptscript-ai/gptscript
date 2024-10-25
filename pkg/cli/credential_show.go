@@ -37,7 +37,7 @@ func (c *Show) Run(cmd *cobra.Command, args []string) error {
 
 	opts = gptscript.Complete(opts)
 	if opts.Runner.RuntimeManager == nil {
-		opts.Runner.RuntimeManager = runtimes.Default(opts.Cache.CacheDir)
+		opts.Runner.RuntimeManager = runtimes.Default(opts.Cache.CacheDir, opts.SystemToolsDir)
 	}
 
 	if err = opts.Runner.RuntimeManager.SetUpCredentialHelpers(cmd.Context(), cfg); err != nil {

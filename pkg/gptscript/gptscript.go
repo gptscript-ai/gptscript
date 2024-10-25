@@ -52,6 +52,7 @@ type Options struct {
 	Quiet                *bool
 	Workspace            string
 	DisablePromptServer  bool
+	SystemToolsDir       string
 	Env                  []string
 }
 
@@ -63,6 +64,7 @@ func Complete(opts ...Options) Options {
 		result.Runner = runner.Complete(result.Runner, opt.Runner)
 		result.OpenAI = openai.Complete(result.OpenAI, opt.OpenAI)
 
+		result.SystemToolsDir = types.FirstSet(opt.SystemToolsDir, result.SystemToolsDir)
 		result.CredentialContexts = opt.CredentialContexts
 		result.Quiet = types.FirstSet(opt.Quiet, result.Quiet)
 		result.Workspace = types.FirstSet(opt.Workspace, result.Workspace)
@@ -99,7 +101,7 @@ func New(ctx context.Context, o ...Options) (*GPTScript, error) {
 	}
 
 	if opts.Runner.RuntimeManager == nil {
-		opts.Runner.RuntimeManager = runtimes.Default(cacheClient.CacheDir())
+		opts.Runner.RuntimeManager = runtimes.Default(cacheClient.CacheDir(), opts.SystemToolsDir)
 	}
 
 	if err := opts.Runner.RuntimeManager.SetUpCredentialHelpers(context.Background(), cliCfg); err != nil {
