@@ -43,6 +43,7 @@ gptscript [flags] PROGRAM_FILE [INPUT...]
   -q, --quiet                               No output logging (set --quiet=false to force on even when there is no TTY) ($GPTSCRIPT_QUIET)
       --save-chat-state-file string         A file to save the chat state to so that a conversation can be resumed with --chat-state ($GPTSCRIPT_SAVE_CHAT_STATE_FILE)
       --sub-tool string                     Use tool of this name, not the first tool in file ($GPTSCRIPT_SUB_TOOL)
+      --system-tools-dir string             Directory that contains system managed tool for which GPTScript will not manage the runtime ($GPTSCRIPT_SYSTEM_TOOLS_DIR)
       --ui                                  Launch the UI ($GPTSCRIPT_UI)
       --workspace string                    Directory to use for the workspace, if specified it will not be deleted on exit ($GPTSCRIPT_WORKSPACE)
 ```

@@ -196,7 +196,7 @@ func NewRunner(t *testing.T) *Runner {
 	cacheDir, err := xdg.CacheFile("gptscript-test-cache/runtime")
 	require.NoError(t, err)
 
-	rm := runtimes.Default(cacheDir)
+	rm := runtimes.Default(cacheDir, "")
 
 	run, err := runner.New(c, credentials.NoopStore{}, runner.Options{
 		Sequential:     true,

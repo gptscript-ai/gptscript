@@ -47,6 +47,7 @@ type GPTScript struct {
 	CacheOptions
 	OpenAIOptions
 	DisplayOptions
+	SystemToolsDir string `usage:"Directory that contains system managed tool for which GPTScript will not manage the runtime"`
 	Color          *bool  `usage:"Use color in output (default true)" default:"true"`
 	Confirm        bool   `usage:"Prompt before running potentially dangerous commands"`
 	Debug          bool   `usage:"Enable debug logging"`
@@ -146,6 +147,7 @@ func (r *GPTScript) NewGPTScriptOpts() (gptscript.Options, error) {
 		Workspace:            r.Workspace,
 		DisablePromptServer:  r.UI,
 		DefaultModelProvider: r.DefaultModelProvider,
+		SystemToolsDir:       r.SystemToolsDir,
 	}
 
 	if r.Confirm {

@@ -39,6 +39,7 @@ gptscript getenv [flags] KEY [DEFAULT]
       --openai-org-id string            OpenAI organization ID ($OPENAI_ORG_ID)
   -o, --output string                   Save output to a file, or - for stdout ($GPTSCRIPT_OUTPUT)
   -q, --quiet                           No output logging (set --quiet=false to force on even when there is no TTY) ($GPTSCRIPT_QUIET)
+      --system-tools-dir string         Directory that contains system managed tool for which GPTScript will not manage the runtime ($GPTSCRIPT_SYSTEM_TOOLS_DIR)
       --workspace string                Directory to use for the workspace, if specified it will not be deleted on exit ($GPTSCRIPT_WORKSPACE)
 ```
 

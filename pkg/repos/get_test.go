@@ -19,7 +19,7 @@ var (
 )
 
 func TestManager_GetContext(t *testing.T) {
-	m := New(testCacheHome, &python.Runtime{
+	m := New(testCacheHome, "", &python.Runtime{
 		Version: "3.11",
 	})
 	cwd, env, err := m.GetContext(context.Background(), types.Tool{
