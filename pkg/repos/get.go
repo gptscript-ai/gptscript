@@ -58,6 +58,7 @@ type Manager struct {
 	storageDir       string
 	gitDir           string
 	runtimeDir       string
+	systemDir        string
 	runtimes         []Runtime
 	credHelperConfig *credHelperConfig
 }
@@ -75,6 +76,7 @@ func New(cacheDir string, runtimes ...Runtime) *Manager {
 		storageDir: root,
 		gitDir:     filepath.Join(root, "git"),
 		runtimeDir: filepath.Join(root, "runtimes"),
+		systemDir:  filepath.Join(root, "system"),
 		runtimes:   runtimes,
 	}
 }
@@ -271,6 +273,10 @@ func (m *Manager) setup(ctx context.Context, runtime Runtime, tool types.Tool, e
 }
 
 func (m *Manager) GetContext(ctx context.Context, tool types.Tool, cmd, env []string) (string, []string, error) {
+	if strings.HasPrefix(tool.WorkingDir, m.systemDir) {
+		return tool.WorkingDir, env, nil
+	}
+
 	var isLocal bool
 	if tool.Source.Repo == nil {
 		isLocal = true
