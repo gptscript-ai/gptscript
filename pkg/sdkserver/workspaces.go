@@ -281,3 +281,39 @@ func (s *server) readFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 
 	writeResponse(logger, w, map[string]any{"stdout": out})
 }
+
+type statFileInWorkspaceRequest struct {
+	workspaceCommonRequest `json:",inline"`
+	FilePath               string `json:"filePath"`
+}
+
+func (s *server) statFileInWorkspace(w http.ResponseWriter, r *http.Request) {
+	logger := gcontext.GetLogger(r.Context())
+	var reqObject statFileInWorkspaceRequest
+	if err := json.NewDecoder(r.Body).Decode(&reqObject); err != nil {
+		writeError(logger, w, http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
+		return
+	}
+
+	prg, err := loader.Program(r.Context(), s.getWorkspaceTool(reqObject.workspaceCommonRequest), "Stat File In Workspace", loader.Options{Cache: s.client.Cache})
+	if err != nil {
+		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to load program: %w", err))
+		return
+	}
+
+	out, err := s.client.Run(
+		r.Context(),
+		prg,
+		reqObject.Env,
+		fmt.Sprintf(
+			`{"workspace_id": "%s", "file_path": "%s"}`,
+			reqObject.ID, reqObject.FilePath,
+		),
+	)
+	if err != nil {
+		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
+		return
+	}
+
+	writeResponse(logger, w, map[string]any{"stdout": out})
+}
