@@ -15,7 +15,6 @@ import (
 	context2 "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
-	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/llm"
 	"github.com/gptscript-ai/gptscript/pkg/monitor"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
@@ -201,7 +200,7 @@ func (g *GPTScript) getEnv(env []string) ([]string, error) {
 		return nil, err
 	}
 	if id == "" {
-		id = hash.ID(g.WorkspacePath)
+		id = "directory://" + g.WorkspacePath
 	}
 	return slices.Concat(g.ExtraEnv, env, []string{
 		fmt.Sprintf("GPTSCRIPT_WORKSPACE_DIR=%s", g.WorkspacePath),
