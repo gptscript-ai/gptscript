@@ -22,14 +22,15 @@ const (
 	PassCredHelper          = "pass"
 	FileCredHelper          = "file"
 	SqliteCredHelper        = "sqlite"
+	PostgresCredHelper      = "postgres"
 
 	GPTScriptHelperPrefix = "gptscript-credential-"
 )
 
 var (
-	darwinHelpers  = []string{OsxkeychainCredHelper, FileCredHelper, SqliteCredHelper}
+	darwinHelpers  = []string{OsxkeychainCredHelper, FileCredHelper, SqliteCredHelper, PostgresCredHelper}
 	windowsHelpers = []string{WincredCredHelper, FileCredHelper}
-	linuxHelpers   = []string{SecretserviceCredHelper, PassCredHelper, FileCredHelper, SqliteCredHelper}
+	linuxHelpers   = []string{SecretserviceCredHelper, PassCredHelper, FileCredHelper, SqliteCredHelper, PostgresCredHelper}
 )
 
 func listAsString(helpers []string) string {

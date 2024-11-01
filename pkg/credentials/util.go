@@ -14,8 +14,8 @@ type CredentialHelperDirs struct {
 
 func RepoNameForCredentialStore(store string) string {
 	switch store {
-	case config.SqliteCredHelper:
-		return "gptscript-credential-sqlite"
+	case config.SqliteCredHelper, config.PostgresCredHelper:
+		return "gptscript-credential-database"
 	default:
 		return "gptscript-credential-helpers"
 	}
@@ -23,8 +23,8 @@ func RepoNameForCredentialStore(store string) string {
 
 func GitURLForRepoName(repoName string) (string, error) {
 	switch repoName {
-	case "gptscript-credential-sqlite":
-		return runtimeEnv.VarOrDefault("GPTSCRIPT_CRED_SQLITE_ROOT", "https://github.com/gptscript-ai/gptscript-credential-sqlite.git"), nil
+	case "gptscript-credential-database":
+		return runtimeEnv.VarOrDefault("GPTSCRIPT_CRED_SQLITE_ROOT", "https://github.com/gptscript-ai/gptscript-credential-database.git"), nil
 	case "gptscript-credential-helpers":
 		return runtimeEnv.VarOrDefault("GPTSCRIPT_CRED_HELPERS_ROOT", "https://github.com/gptscript-ai/gptscript-credential-helpers.git"), nil
 	default:
