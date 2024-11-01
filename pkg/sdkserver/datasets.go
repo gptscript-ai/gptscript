@@ -390,7 +390,7 @@ func (s *server) getDatasetElement(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), req.getToolRepo(), "Get Element", loader.Options{
+	prg, err := loader.Program(r.Context(), req.getToolRepo(), "Get Element SDK", loader.Options{
 		Cache: g.Cache,
 	})
 	if err != nil {
