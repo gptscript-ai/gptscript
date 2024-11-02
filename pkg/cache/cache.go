@@ -92,6 +92,7 @@ func (c *Client) CacheDir() string {
 
 func (c *Client) cacheKey(key any) (string, error) {
 	hash := sha256.New()
+	hash.Write([]byte("v2"))
 	if err := json.NewEncoder(hash).Encode(key); err != nil {
 		return "", err
 	}
