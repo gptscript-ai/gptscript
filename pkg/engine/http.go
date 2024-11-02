@@ -76,7 +76,7 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 	}
 
 	for _, env := range e.Env {
-		if strings.HasPrefix(env, "GPTSCRIPT_") {
+		if strings.HasPrefix(env, "GPTSCRIPT_WORKSPACE_") {
 			req.Header.Add("X-GPTScript-Env", env)
 		}
 	}

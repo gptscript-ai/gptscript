@@ -82,7 +82,6 @@ type CompletionStatus struct {
 	Response        any
 	Usage           Usage
 	Cached          bool
-	Chunks          any
 	PartialResponse *CompletionMessage
 }
 
