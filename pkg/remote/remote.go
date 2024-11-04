@@ -10,7 +10,6 @@ import (
 	"sync"
 
 	"github.com/gptscript-ai/gptscript/pkg/cache"
-	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	env2 "github.com/gptscript-ai/gptscript/pkg/env"
@@ -42,13 +41,13 @@ func New(r *runner.Runner, envs []string, cache *cache.Client, credStore credent
 	}
 }
 
-func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error) {
+func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, env []string, status chan<- types.CompletionStatus) (*types.CompletionMessage, error) {
 	_, provider := c.parseModel(messageRequest.Model)
 	if provider == "" {
 		return nil, fmt.Errorf("failed to find remote model %s", messageRequest.Model)
 	}
 
-	client, err := c.load(ctx, provider)
+	client, err := c.load(ctx, provider, env...)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +59,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		modelName = toolName
 	}
 	messageRequest.Model = modelName
-	return client.Call(ctx, messageRequest, status)
+	return client.Call(ctx, messageRequest, env, status)
 }
 
 func (c *Client) ListModels(ctx context.Context, providers ...string) (result []string, _ error) {
@@ -111,7 +110,7 @@ func isHTTPURL(toolName string) bool {
 		strings.HasPrefix(toolName, "https://")
 }
 
-func (c *Client) clientFromURL(ctx context.Context, apiURL string) (*openai.Client, error) {
+func (c *Client) clientFromURL(ctx context.Context, apiURL string, envs []string) (*openai.Client, error) {
 	parsed, err := url.Parse(apiURL)
 	if err != nil {
 		return nil, err
@@ -121,7 +120,7 @@ func (c *Client) clientFromURL(ctx context.Context, apiURL string) (*openai.Clie
 
 	if key == "" && !isLocalhost(apiURL) {
 		var err error
-		key, err = c.retrieveAPIKey(ctx, env, apiURL)
+		key, err = c.retrieveAPIKey(ctx, env, apiURL, envs)
 		if err != nil {
 			return nil, err
 		}
@@ -134,7 +133,7 @@ func (c *Client) clientFromURL(ctx context.Context, apiURL string) (*openai.Clie
 	})
 }
 
-func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, error) {
+func (c *Client) load(ctx context.Context, toolName string, env ...string) (*openai.Client, error) {
 	c.clientsLock.Lock()
 	defer c.clientsLock.Unlock()
 
@@ -144,7 +143,7 @@ func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, err
 	}
 
 	if isHTTPURL(toolName) {
-		remoteClient, err := c.clientFromURL(ctx, toolName)
+		remoteClient, err := c.clientFromURL(ctx, toolName, env)
 		if err != nil {
 			return nil, err
 		}
@@ -183,8 +182,8 @@ func (c *Client) load(ctx context.Context, toolName string) (*openai.Client, err
 	return oClient, nil
 }
 
-func (c *Client) retrieveAPIKey(ctx context.Context, env, url string) (string, error) {
-	return prompt.GetModelProviderCredential(ctx, c.credStore, url, env, fmt.Sprintf("Please provide your API key for %s", url), append(gcontext.GetEnv(ctx), c.envs...))
+func (c *Client) retrieveAPIKey(ctx context.Context, env, url string, envs []string) (string, error) {
+	return prompt.GetModelProviderCredential(ctx, c.credStore, url, env, fmt.Sprintf("Please provide your API key for %s", url), append(envs, c.envs...))
 }
 
 func isLocalhost(url string) bool {

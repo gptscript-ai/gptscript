@@ -13,7 +13,6 @@ import (
 
 	openai "github.com/gptscript-ai/chat-completion-client"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
-	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
@@ -303,9 +302,9 @@ func toMessages(request types.CompletionRequest, compat bool) (result []openai.C
 	return
 }
 
-func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error) {
+func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, env []string, status chan<- types.CompletionStatus) (*types.CompletionMessage, error) {
 	if err := c.ValidAuth(); err != nil {
-		if err := c.RetrieveAPIKey(ctx); err != nil {
+		if err := c.RetrieveAPIKey(ctx, env); err != nil {
 			return nil, err
 		}
 	}
@@ -401,7 +400,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	if err != nil {
 		return nil, err
 	} else if !ok {
-		result, err = c.call(ctx, request, id, status)
+		result, err = c.call(ctx, request, id, env, status)
 
 		// If we got back a context length exceeded error, keep retrying and shrinking the message history until we pass.
 		var apiError *openai.APIError
@@ -409,7 +408,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 			// Decrease maxTokens by 10% to make garbage collection more aggressive.
 			// The retry loop will further decrease maxTokens if needed.
 			maxTokens := decreaseTenPercent(messageRequest.MaxTokens)
-			result, err = c.contextLimitRetryLoop(ctx, request, id, maxTokens, status)
+			result, err = c.contextLimitRetryLoop(ctx, request, id, env, maxTokens, status)
 		}
 		if err != nil {
 			return nil, err
@@ -443,7 +442,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	return &result, nil
 }
 
-func (c *Client) contextLimitRetryLoop(ctx context.Context, request openai.ChatCompletionRequest, id string, maxTokens int, status chan<- types.CompletionStatus) (types.CompletionMessage, error) {
+func (c *Client) contextLimitRetryLoop(ctx context.Context, request openai.ChatCompletionRequest, id string, env []string, maxTokens int, status chan<- types.CompletionStatus) (types.CompletionMessage, error) {
 	var (
 		response types.CompletionMessage
 		err      error
@@ -452,7 +451,7 @@ func (c *Client) contextLimitRetryLoop(ctx context.Context, request openai.ChatC
 	for range 10 { // maximum 10 tries
 		// Try to drop older messages again, with a decreased max tokens.
 		request.Messages = dropMessagesOverCount(maxTokens, request.Messages)
-		response, err = c.call(ctx, request, id, status)
+		response, err = c.call(ctx, request, id, env, status)
 		if err == nil {
 			return response, nil
 		}
@@ -542,7 +541,7 @@ func override(left, right string) string {
 	return left
 }
 
-func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest, transactionID string, partial chan<- types.CompletionStatus) (types.CompletionMessage, error) {
+func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest, transactionID string, env []string, partial chan<- types.CompletionStatus) (types.CompletionMessage, error) {
 	streamResponse := os.Getenv("GPTSCRIPT_INTERNAL_OPENAI_STREAMING") != "false"
 
 	partial <- types.CompletionStatus{
@@ -553,11 +552,27 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 		},
 	}
 
+	var (
+		headers          map[string]string
+		modelProviderEnv []string
+	)
+	for _, e := range env {
+		if strings.HasPrefix(e, "GPTSCRIPT_MODEL_PROVIDER_") {
+			modelProviderEnv = append(modelProviderEnv, e)
+		}
+	}
+
+	if len(modelProviderEnv) > 0 {
+		headers = map[string]string{
+			"X-GPTScript-Env": strings.Join(modelProviderEnv, ","),
+		}
+	}
+
 	slog.Debug("calling openai", "message", request.Messages)
 
 	if !streamResponse {
 		request.StreamOptions = nil
-		resp, err := c.c.CreateChatCompletion(ctx, request)
+		resp, err := c.c.CreateChatCompletion(ctx, request, headers)
 		if err != nil {
 			return types.CompletionMessage{}, err
 		}
@@ -582,7 +597,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 		}), nil
 	}
 
-	stream, err := c.c.CreateChatCompletionStream(ctx, request)
+	stream, err := c.c.CreateChatCompletionStream(ctx, request, headers)
 	if err != nil {
 		return types.CompletionMessage{}, err
 	}
@@ -614,8 +629,8 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 	}
 }
 
-func (c *Client) RetrieveAPIKey(ctx context.Context) error {
-	k, err := prompt.GetModelProviderCredential(ctx, c.credStore, BuiltinCredName, "OPENAI_API_KEY", "Please provide your OpenAI API key:", gcontext.GetEnv(ctx))
+func (c *Client) RetrieveAPIKey(ctx context.Context, env []string) error {
+	k, err := prompt.GetModelProviderCredential(ctx, c.credStore, BuiltinCredName, "OPENAI_API_KEY", "Please provide your OpenAI API key:", env)
 	if err != nil {
 		return err
 	}

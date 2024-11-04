@@ -15,7 +15,7 @@ import (
 )
 
 type Client interface {
-	Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error)
+	Call(ctx context.Context, messageRequest types.CompletionRequest, env []string, status chan<- types.CompletionStatus) (*types.CompletionMessage, error)
 	ListModels(ctx context.Context, providers ...string) (result []string, _ error)
 	Supports(ctx context.Context, modelName string) (bool, error)
 }
@@ -78,7 +78,7 @@ func (r *Registry) fastPath(modelName string) Client {
 	return r.clients[0]
 }
 
-func (r *Registry) getClient(ctx context.Context, modelName string) (Client, error) {
+func (r *Registry) getClient(ctx context.Context, modelName string, env []string) (Client, error) {
 	if c := r.fastPath(modelName); c != nil {
 		return c, nil
 	}
@@ -101,7 +101,7 @@ func (r *Registry) getClient(ctx context.Context, modelName string) (Client, err
 
 	if len(errs) > 0 && oaiClient != nil {
 		// Prompt the user to enter their OpenAI API key and try again.
-		if err := oaiClient.RetrieveAPIKey(ctx); err != nil {
+		if err := oaiClient.RetrieveAPIKey(ctx, env); err != nil {
 			return nil, err
 		}
 		ok, err := oaiClient.Supports(ctx, modelName)
@@ -119,13 +119,13 @@ func (r *Registry) getClient(ctx context.Context, modelName string) (Client, err
 	return nil, errors.Join(errs...)
 }
 
-func (r *Registry) Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error) {
+func (r *Registry) Call(ctx context.Context, messageRequest types.CompletionRequest, env []string, status chan<- types.CompletionStatus) (*types.CompletionMessage, error) {
 	if messageRequest.Model == "" {
 		return nil, fmt.Errorf("model is required")
 	}
 
 	if c := r.fastPath(messageRequest.Model); c != nil {
-		return c.Call(ctx, messageRequest, status)
+		return c.Call(ctx, messageRequest, env, status)
 	}
 
 	var errs []error
@@ -140,20 +140,20 @@ func (r *Registry) Call(ctx context.Context, messageRequest types.CompletionRequ
 
 			errs = append(errs, err)
 		} else if ok {
-			return client.Call(ctx, messageRequest, status)
+			return client.Call(ctx, messageRequest, env, status)
 		}
 	}
 
 	if len(errs) > 0 && oaiClient != nil {
 		// Prompt the user to enter their OpenAI API key and try again.
-		if err := oaiClient.RetrieveAPIKey(ctx); err != nil {
+		if err := oaiClient.RetrieveAPIKey(ctx, env); err != nil {
 			return nil, err
 		}
 		ok, err := oaiClient.Supports(ctx, messageRequest.Model)
 		if err != nil {
 			return nil, err
 		} else if ok {
-			return oaiClient.Call(ctx, messageRequest, status)
+			return oaiClient.Call(ctx, messageRequest, env, status)
 		}
 	}
 
