@@ -54,7 +54,7 @@ func (r *Registry) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	var (
 		model string
-		data  = map[string]any{}
+		data  map[string]any
 	)
 
 	if json.Unmarshal(inBytes, &data) == nil {
@@ -65,7 +65,7 @@ func (r *Registry) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		model = builtin.GetDefaultModel()
 	}
 
-	c, err := r.getClient(req.Context(), model)
+	c, err := r.getClient(req.Context(), model, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

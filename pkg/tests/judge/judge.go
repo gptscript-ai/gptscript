@@ -112,7 +112,7 @@ func (j *Judge[T]) Equal(ctx context.Context, expected, actual T, criteria strin
 			},
 		},
 	}
-	response, err := j.client.CreateChatCompletion(ctx, request)
+	response, err := j.client.CreateChatCompletion(ctx, request, nil)
 	if err != nil {
 		return false, "", fmt.Errorf("failed to create chat completion request: %w", err)
 	}

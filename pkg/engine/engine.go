@@ -8,14 +8,13 @@ import (
 	"sync"
 
 	"github.com/gptscript-ai/gptscript/pkg/config"
-	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
 
 type Model interface {
-	Call(ctx context.Context, messageRequest types.CompletionRequest, status chan<- types.CompletionStatus) (*types.CompletionMessage, error)
+	Call(ctx context.Context, messageRequest types.CompletionRequest, env []string, status chan<- types.CompletionStatus) (*types.CompletionMessage, error)
 	ProxyInfo() (string, string, error)
 }
 
@@ -389,7 +388,7 @@ func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 		}
 	}()
 
-	resp, err := e.Model.Call(gcontext.WithEnv(ctx, e.Env), state.Completion, progress)
+	resp, err := e.Model.Call(ctx, state.Completion, e.Env, progress)
 	if err != nil {
 		return nil, err
 	}

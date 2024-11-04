@@ -84,7 +84,7 @@ func (r *Runner) handleOutput(callCtx engine.Context, monitor Monitor, env []str
 		if err != nil {
 			return nil, fmt.Errorf("marshaling input for output filter: %w", err)
 		}
-		res, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, outputToolRef.ToolID, string(inputData), "", engine.OutputToolCategory)
+		res, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, outputToolRef.ToolID, inputData, "", engine.OutputToolCategory)
 		if err != nil {
 			return nil, err
 		}

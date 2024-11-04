@@ -46,14 +46,3 @@ func GetLogger(ctx context.Context) mvl.Logger {
 
 	return l
 }
-
-type envKey struct{}
-
-func WithEnv(ctx context.Context, env []string) context.Context {
-	return context.WithValue(ctx, envKey{}, env)
-}
-
-func GetEnv(ctx context.Context) []string {
-	l, _ := ctx.Value(envKey{}).([]string)
-	return l
-}
