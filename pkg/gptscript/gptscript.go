@@ -2,6 +2,7 @@ package gptscript
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/user"
@@ -16,6 +17,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/llm"
+	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/monitor"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/openai"
@@ -32,13 +34,15 @@ import (
 var log = mvl.Package()
 
 type GPTScript struct {
-	Registry               *llm.Registry
-	Runner                 *runner.Runner
-	Cache                  *cache.Client
-	WorkspacePath          string
-	DeleteWorkspaceOnClose bool
-	ExtraEnv               []string
-	close                  func()
+	Registry                  *llm.Registry
+	Runner                    *runner.Runner
+	Cache                     *cache.Client
+	CredentialStoreFactory    credentials.StoreFactory
+	DefaultCredentialContexts []string
+	WorkspacePath             string
+	DeleteWorkspaceOnClose    bool
+	ExtraEnv                  []string
+	close                     func()
 }
 
 type Options struct {
@@ -103,11 +107,17 @@ func New(ctx context.Context, o ...Options) (*GPTScript, error) {
 		opts.Runner.RuntimeManager = runtimes.Default(cacheClient.CacheDir(), opts.SystemToolsDir)
 	}
 
-	if err := opts.Runner.RuntimeManager.SetUpCredentialHelpers(context.Background(), cliCfg); err != nil {
+	simplerRunner, err := newSimpleRunner(cacheClient, opts.Runner.RuntimeManager, opts.Env)
+	if err != nil {
 		return nil, err
 	}
 
-	credStore, err := credentials.NewStore(cliCfg, opts.Runner.RuntimeManager, opts.CredentialContexts, cacheClient.CacheDir())
+	storeFactory, err := credentials.NewFactory(ctx, cliCfg, simplerRunner)
+	if err != nil {
+		return nil, err
+	}
+
+	credStore, err := storeFactory.NewStore(opts.CredentialContexts)
 	if err != nil {
 		return nil, err
 	}
@@ -158,13 +168,15 @@ func New(ctx context.Context, o ...Options) (*GPTScript, error) {
 	}
 
 	return &GPTScript{
-		Registry:               registry,
-		Runner:                 runner,
-		Cache:                  cacheClient,
-		WorkspacePath:          opts.Workspace,
-		DeleteWorkspaceOnClose: opts.Workspace == "",
-		ExtraEnv:               extraEnv,
-		close:                  closeServer,
+		Registry:                  registry,
+		Runner:                    runner,
+		Cache:                     cacheClient,
+		CredentialStoreFactory:    storeFactory,
+		DefaultCredentialContexts: opts.CredentialContexts,
+		WorkspacePath:             opts.Workspace,
+		DeleteWorkspaceOnClose:    opts.Workspace == "",
+		ExtraEnv:                  extraEnv,
+		close:                     closeServer,
 	}, nil
 }
 
@@ -265,4 +277,45 @@ func (g *GPTScript) ListTools(_ context.Context, prg types.Program) []types.Tool
 
 func (g *GPTScript) ListModels(ctx context.Context, providers ...string) ([]string, error) {
 	return g.Registry.ListModels(ctx, providers...)
+}
+
+type simpleRunner struct {
+	cache  *cache.Client
+	runner *runner.Runner
+	env    []string
+}
+
+func newSimpleRunner(cache *cache.Client, rm engine.RuntimeManager, env []string) (*simpleRunner, error) {
+	runner, err := runner.New(noopModel{}, credentials.NoopStore{}, runner.Options{
+		RuntimeManager: rm,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &simpleRunner{
+		cache:  cache,
+		runner: runner,
+		env:    env,
+	}, nil
+}
+
+func (s *simpleRunner) Load(ctx context.Context, toolName string) (prg types.Program, err error) {
+	return loader.Program(ctx, toolName, "", loader.Options{
+		Cache: s.cache,
+	})
+}
+
+func (s *simpleRunner) Run(ctx context.Context, prg types.Program, input string) (output string, err error) {
+	return s.runner.Run(ctx, prg, s.env, input)
+}
+
+type noopModel struct {
+}
+
+func (n noopModel) Call(_ context.Context, _ types.CompletionRequest, _ []string, _ chan<- types.CompletionStatus) (*types.CompletionMessage, error) {
+	return nil, errors.New("unsupported")
+}
+
+func (n noopModel) ProxyInfo() (string, string, error) {
+	return "", "", errors.New("unsupported")
 }

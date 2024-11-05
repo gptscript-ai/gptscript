@@ -124,6 +124,12 @@ func isParam(line string, tool *types.Tool, scan *simplescanner) (_ bool, err er
 		tool.Parameters.ExportContext = append(tool.Parameters.ExportContext, csv(scan.AddMultiline(value))...)
 	case "context":
 		tool.Parameters.Context = append(tool.Parameters.Context, csv(scan.AddMultiline(value))...)
+	case "stdin":
+		b, err := toBool(value)
+		if err != nil {
+			return false, err
+		}
+		tool.Parameters.Stdin = b
 	case "metadata":
 		mkey, mvalue, _ := strings.Cut(scan.AddMultiline(value), ":")
 		if tool.MetaData == nil {

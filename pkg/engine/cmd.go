@@ -149,6 +149,9 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 		result *bytes.Buffer
 	)
 
+	if tool.Stdin {
+		cmd.Stdin = strings.NewReader(input)
+	}
 	cmd.Stdout = io.MultiWriter(stdout, stdoutAndErr, progressOut)
 	cmd.Stderr = io.MultiWriter(stdoutAndErr, progressOut, os.Stderr)
 	result = stdout

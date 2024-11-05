@@ -1,6 +1,8 @@
 package credentials
 
-import "context"
+import (
+	"context"
+)
 
 type NoopStore struct{}
 

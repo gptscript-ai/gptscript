@@ -7,25 +7,12 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/gptscript-ai/gptscript/pkg/config"
 	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 )
 
-func (s *server) initializeCredentialStore(ctx context.Context, credCtxs []string) (credentials.CredentialStore, error) {
-	cfg, err := config.ReadCLIConfig(s.gptscriptOpts.OpenAI.ConfigFile)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read CLI config: %w", err)
-	}
-
-	if err := s.runtimeManager.SetUpCredentialHelpers(ctx, cfg); err != nil {
-		return nil, fmt.Errorf("failed to set up credential helpers: %w", err)
-	}
-	if err := s.runtimeManager.EnsureCredentialHelpers(ctx); err != nil {
-		return nil, fmt.Errorf("failed to ensure credential helpers: %w", err)
-	}
-
-	store, err := credentials.NewStore(cfg, s.runtimeManager, credCtxs, s.gptscriptOpts.Cache.CacheDir)
+func (s *server) initializeCredentialStore(_ context.Context, credCtxs []string) (credentials.CredentialStore, error) {
+	store, err := s.client.CredentialStoreFactory.NewStore(credCtxs)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize credential store: %w", err)
 	}
