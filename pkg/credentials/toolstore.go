@@ -10,22 +10,14 @@ import (
 	"github.com/docker/cli/cli/config/types"
 	"github.com/docker/docker-credential-helpers/client"
 	credentials2 "github.com/docker/docker-credential-helpers/credentials"
-	"github.com/gptscript-ai/gptscript/pkg/config"
 )
 
-func NewHelper(c *config.CLIConfig, helper string) (credentials.Store, error) {
-	return &HelperStore{
-		file:    credentials.NewFileStore(c),
-		program: client.NewShellProgramFunc(helper),
-	}, nil
-}
-
-type HelperStore struct {
+type toolCredentialStore struct {
 	file    credentials.Store
 	program client.ProgramFunc
 }
 
-func (h *HelperStore) Erase(serverAddress string) error {
+func (h *toolCredentialStore) Erase(serverAddress string) error {
 	var errs []error
 	if err := client.Erase(h.program, serverAddress); err != nil {
 		errs = append(errs, err)
@@ -36,7 +28,7 @@ func (h *HelperStore) Erase(serverAddress string) error {
 	return errors.Join(errs...)
 }
 
-func (h *HelperStore) Get(serverAddress string) (types.AuthConfig, error) {
+func (h *toolCredentialStore) Get(serverAddress string) (types.AuthConfig, error) {
 	creds, err := client.Get(h.program, serverAddress)
 	if credentials2.IsErrCredentialsNotFound(err) {
 		return h.file.Get(serverAddress)
@@ -50,7 +42,7 @@ func (h *HelperStore) Get(serverAddress string) (types.AuthConfig, error) {
 	}, nil
 }
 
-func (h *HelperStore) GetAll() (map[string]types.AuthConfig, error) {
+func (h *toolCredentialStore) GetAll() (map[string]types.AuthConfig, error) {
 	result := map[string]types.AuthConfig{}
 
 	serverAddresses, err := client.List(h.program)
@@ -103,7 +95,7 @@ func (h *HelperStore) GetAll() (map[string]types.AuthConfig, error) {
 	return result, nil
 }
 
-func (h *HelperStore) Store(authConfig types.AuthConfig) error {
+func (h *toolCredentialStore) Store(authConfig types.AuthConfig) error {
 	return client.Store(h.program, &credentials2.Credentials{
 		ServerURL: authConfig.ServerAddress,
 		Username:  authConfig.Username,

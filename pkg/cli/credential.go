@@ -9,10 +9,7 @@ import (
 	"time"
 
 	cmd2 "github.com/gptscript-ai/cmd"
-	"github.com/gptscript-ai/gptscript/pkg/config"
-	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
-	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes"
 	"github.com/spf13/cobra"
 )
 
@@ -37,33 +34,19 @@ func (c *Credential) Customize(cmd *cobra.Command) {
 }
 
 func (c *Credential) Run(cmd *cobra.Command, _ []string) error {
-	cfg, err := config.ReadCLIConfig(c.root.ConfigFile)
-	if err != nil {
-		return fmt.Errorf("failed to read CLI config: %w", err)
-	}
-
 	opts, err := c.root.NewGPTScriptOpts()
 	if err != nil {
 		return err
 	}
-	opts = gptscript.Complete(opts)
-	if opts.Runner.RuntimeManager == nil {
-		opts.Runner.RuntimeManager = runtimes.Default(opts.Cache.CacheDir, opts.SystemToolsDir)
-	}
-
-	ctxs := opts.CredentialContexts
-	if c.AllContexts {
-		ctxs = []string{credentials.AllCredentialContexts}
-	}
-
-	if err = opts.Runner.RuntimeManager.SetUpCredentialHelpers(cmd.Context(), cfg); err != nil {
+	gptScript, err := gptscript.New(cmd.Context(), opts)
+	if err != nil {
 		return err
 	}
+	defer gptScript.Close(true)
 
-	// Initialize the credential store and get all the credentials.
-	store, err := credentials.NewStore(cfg, opts.Runner.RuntimeManager, ctxs, opts.Cache.CacheDir)
+	store, err := gptScript.CredentialStoreFactory.NewStore(gptScript.DefaultCredentialContexts)
 	if err != nil {
-		return fmt.Errorf("failed to get credentials store: %w", err)
+		return err
 	}
 
 	creds, err := store.List(cmd.Context())

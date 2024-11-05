@@ -7,7 +7,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gptscript-ai/gptscript/pkg/config"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
@@ -20,8 +19,6 @@ type Model interface {
 
 type RuntimeManager interface {
 	GetContext(ctx context.Context, tool types.Tool, cmd, env []string) (string, []string, error)
-	EnsureCredentialHelpers(ctx context.Context) error
-	SetUpCredentialHelpers(ctx context.Context, cliCfg *config.CLIConfig) error
 }
 
 type Engine struct {

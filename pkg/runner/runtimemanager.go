@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gptscript-ai/gptscript/pkg/config"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -39,12 +38,4 @@ func (r runtimeManagerLogger) Infof(msg string, args ...any) {
 
 func (r runtimeManagerLogger) GetContext(ctx context.Context, tool types.Tool, cmd, env []string) (string, []string, error) {
 	return r.rm.GetContext(mvl.WithInfo(ctx, r), tool, cmd, env)
-}
-
-func (r runtimeManagerLogger) EnsureCredentialHelpers(ctx context.Context) error {
-	return r.rm.EnsureCredentialHelpers(mvl.WithInfo(ctx, r))
-}
-
-func (r runtimeManagerLogger) SetUpCredentialHelpers(_ context.Context, _ *config.CLIConfig) error {
-	panic("not implemented")
 }

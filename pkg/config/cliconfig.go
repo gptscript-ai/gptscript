@@ -3,11 +3,9 @@ package config
 import (
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"runtime"
-	"slices"
 	"strings"
 	"sync"
 
@@ -21,27 +19,12 @@ const (
 	SecretserviceCredHelper = "secretservice"
 	PassCredHelper          = "pass"
 	FileCredHelper          = "file"
-	SqliteCredHelper        = "sqlite"
-	PostgresCredHelper      = "postgres"
-
-	GPTScriptHelperPrefix = "gptscript-credential-"
 )
 
 var (
-	darwinHelpers  = []string{OsxkeychainCredHelper, FileCredHelper, SqliteCredHelper, PostgresCredHelper}
-	windowsHelpers = []string{WincredCredHelper, FileCredHelper}
-	linuxHelpers   = []string{SecretserviceCredHelper, PassCredHelper, FileCredHelper, SqliteCredHelper, PostgresCredHelper}
+	// Helpers is a list of all supported credential helpers from github.com/gptscript-ai/gptscript-credential-helpers
+	Helpers = []string{WincredCredHelper, OsxkeychainCredHelper, SecretserviceCredHelper, PassCredHelper}
 )
-
-func listAsString(helpers []string) string {
-	if len(helpers) == 0 {
-		return ""
-	} else if len(helpers) == 1 {
-		return helpers[0]
-	}
-
-	return strings.Join(helpers[:len(helpers)-1], ", ") + " or " + helpers[len(helpers)-1]
-}
 
 type AuthConfig types.AuthConfig
 
@@ -74,8 +57,8 @@ func (a *AuthConfig) UnmarshalJSON(data []byte) error {
 type CLIConfig struct {
 	Auths            map[string]AuthConfig `json:"auths,omitempty"`
 	CredentialsStore string                `json:"credsStore,omitempty"`
-	Integrations     map[string]string     `json:"integrations,omitempty"`
 
+	raw       []byte
 	auths     map[string]types.AuthConfig
 	authsLock *sync.Mutex
 	location  string
@@ -108,7 +91,19 @@ func (c *CLIConfig) Save() error {
 		}
 		c.auths = nil
 	}
-	data, err := json.Marshal(c)
+
+	// This is to not overwrite additional fields that might be the config file
+	out := map[string]any{}
+	if len(c.raw) > 0 {
+		err := json.Unmarshal(c.raw, &out)
+		if err != nil {
+			return err
+		}
+	}
+	out["auths"] = c.Auths
+	out["credsStore"] = c.CredentialsStore
+
+	data, err := json.Marshal(out)
 	if err != nil {
 		return err
 	}
@@ -154,32 +149,20 @@ func ReadCLIConfig(gptscriptConfigFile string) (*CLIConfig, error) {
 	result := &CLIConfig{
 		authsLock: &sync.Mutex{},
 		location:  gptscriptConfigFile,
+		raw:       data,
 	}
 	if err := json.Unmarshal(data, result); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal %s: %v", gptscriptConfigFile, err)
+	}
+
+	if store := os.Getenv("GPTSCRIPT_CREDENTIAL_STORE"); store != "" {
+		result.CredentialsStore = store
 	}
 
 	if result.CredentialsStore == "" {
 		if err := result.setDefaultCredentialsStore(); err != nil {
 			return nil, err
 		}
-	}
-
-	if !isValidCredentialHelper(result.CredentialsStore) {
-		errMsg := fmt.Sprintf("invalid credential store '%s'", result.CredentialsStore)
-		switch runtime.GOOS {
-		case "darwin":
-			errMsg += fmt.Sprintf(" (use %s)", listAsString(darwinHelpers))
-		case "windows":
-			errMsg += fmt.Sprintf(" (use %s)", listAsString(windowsHelpers))
-		case "linux":
-			errMsg += fmt.Sprintf(" (use %s)", listAsString(linuxHelpers))
-		default:
-			errMsg += " (use file)"
-		}
-		errMsg += fmt.Sprintf("\nPlease edit your config file at %s to fix this.", result.location)
-
-		return nil, errors.New(errMsg)
 	}
 
 	return result, nil
@@ -195,19 +178,6 @@ func (c *CLIConfig) setDefaultCredentialsStore() error {
 		c.CredentialsStore = FileCredHelper
 	}
 	return c.Save()
-}
-
-func isValidCredentialHelper(helper string) bool {
-	switch runtime.GOOS {
-	case "darwin":
-		return slices.Contains(darwinHelpers, helper)
-	case "windows":
-		return slices.Contains(windowsHelpers, helper)
-	case "linux":
-		return slices.Contains(linuxHelpers, helper)
-	default:
-		return helper == FileCredHelper
-	}
 }
 
 func readFile(path string) ([]byte, error) {

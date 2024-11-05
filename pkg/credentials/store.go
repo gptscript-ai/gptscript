@@ -3,13 +3,12 @@ package credentials
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 	"regexp"
 	"slices"
-	"strings"
 
 	"github.com/docker/cli/cli/config/credentials"
 	"github.com/docker/cli/cli/config/types"
+	"github.com/docker/docker-credential-helpers/client"
 	credentials2 "github.com/docker/docker-credential-helpers/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	"golang.org/x/exp/maps"
@@ -20,10 +19,6 @@ const (
 	AllCredentialContexts    = "*"
 )
 
-type CredentialBuilder interface {
-	EnsureCredentialHelpers(ctx context.Context) error
-}
-
 type CredentialStore interface {
 	Get(ctx context.Context, toolName string) (*Credential, bool, error)
 	Add(ctx context.Context, cred Credential) error
@@ -33,30 +28,17 @@ type CredentialStore interface {
 }
 
 type Store struct {
-	credCtxs       []string
-	credBuilder    CredentialBuilder
-	credHelperDirs CredentialHelperDirs
-	cfg            *config.CLIConfig
+	credCtxs []string
+	cfg      *config.CLIConfig
+	program  client.ProgramFunc
 }
 
-func NewStore(cfg *config.CLIConfig, credentialBuilder CredentialBuilder, credCtxs []string, cacheDir string) (CredentialStore, error) {
-	if err := validateCredentialCtx(credCtxs); err != nil {
-		return nil, err
-	}
-	return Store{
-		credCtxs:       credCtxs,
-		credBuilder:    credentialBuilder,
-		credHelperDirs: GetCredentialHelperDirs(cacheDir, cfg.CredentialsStore),
-		cfg:            cfg,
-	}, nil
-}
-
-func (s Store) Get(ctx context.Context, toolName string) (*Credential, bool, error) {
-	if first(s.credCtxs) == AllCredentialContexts {
+func (s Store) Get(_ context.Context, toolName string) (*Credential, bool, error) {
+	if len(s.credCtxs) > 0 && s.credCtxs[0] == AllCredentialContexts {
 		return nil, false, fmt.Errorf("cannot get a credential with context %q", AllCredentialContexts)
 	}
 
-	store, err := s.getStore(ctx)
+	store, err := s.getStore()
 	if err != nil {
 		return nil, false, err
 	}
@@ -99,14 +81,14 @@ func (s Store) Get(ctx context.Context, toolName string) (*Credential, bool, err
 
 // Add adds a new credential to the credential store.
 // Any context set on the credential object will be overwritten with the first context of the credential store.
-func (s Store) Add(ctx context.Context, cred Credential) error {
+func (s Store) Add(_ context.Context, cred Credential) error {
 	first := first(s.credCtxs)
 	if first == AllCredentialContexts {
 		return fmt.Errorf("cannot add a credential with context %q", AllCredentialContexts)
 	}
 	cred.Context = first
 
-	store, err := s.getStore(ctx)
+	store, err := s.getStore()
 	if err != nil {
 		return err
 	}
@@ -118,12 +100,12 @@ func (s Store) Add(ctx context.Context, cred Credential) error {
 }
 
 // Refresh updates an existing credential in the credential store.
-func (s Store) Refresh(ctx context.Context, cred Credential) error {
+func (s Store) Refresh(_ context.Context, cred Credential) error {
 	if !slices.Contains(s.credCtxs, cred.Context) {
 		return fmt.Errorf("context %q not in list of valid contexts for this credential store", cred.Context)
 	}
 
-	store, err := s.getStore(ctx)
+	store, err := s.getStore()
 	if err != nil {
 		return err
 	}
@@ -134,13 +116,13 @@ func (s Store) Refresh(ctx context.Context, cred Credential) error {
 	return store.Store(auth)
 }
 
-func (s Store) Remove(ctx context.Context, toolName string) error {
+func (s Store) Remove(_ context.Context, toolName string) error {
 	first := first(s.credCtxs)
 	if len(s.credCtxs) > 1 || first == AllCredentialContexts {
 		return fmt.Errorf("error: credential deletion is not supported when multiple credential contexts are provided")
 	}
 
-	store, err := s.getStore(ctx)
+	store, err := s.getStore()
 	if err != nil {
 		return err
 	}
@@ -148,8 +130,8 @@ func (s Store) Remove(ctx context.Context, toolName string) error {
 	return store.Erase(toolNameWithCtx(toolName, first))
 }
 
-func (s Store) List(ctx context.Context) ([]Credential, error) {
-	store, err := s.getStore(ctx)
+func (s Store) List(_ context.Context) ([]Credential, error) {
+	store, err := s.getStore()
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +161,7 @@ func (s Store) List(ctx context.Context) ([]Credential, error) {
 		}
 	}
 
-	if first(s.credCtxs) == AllCredentialContexts {
+	if len(s.credCtxs) > 0 && s.credCtxs[0] == AllCredentialContexts {
 		return allCreds, nil
 	}
 
@@ -194,25 +176,14 @@ func (s Store) List(ctx context.Context) ([]Credential, error) {
 	return maps.Values(credsByName), nil
 }
 
-func (s *Store) getStore(ctx context.Context) (credentials.Store, error) {
-	return s.getStoreByHelper(ctx, config.GPTScriptHelperPrefix+s.cfg.CredentialsStore)
-}
-
-func (s *Store) getStoreByHelper(ctx context.Context, helper string) (credentials.Store, error) {
-	if helper == "" || helper == config.GPTScriptHelperPrefix+config.FileCredHelper {
-		return credentials.NewFileStore(s.cfg), nil
+func (s *Store) getStore() (credentials.Store, error) {
+	if s.program != nil {
+		return &toolCredentialStore{
+			file:    credentials.NewFileStore(s.cfg),
+			program: s.program,
+		}, nil
 	}
-
-	// If the helper is referencing one of the credential helper programs, then reference the full path.
-	if strings.HasPrefix(helper, "gptscript-credential-") {
-		if err := s.credBuilder.EnsureCredentialHelpers(ctx); err != nil {
-			return nil, err
-		}
-
-		helper = filepath.Join(s.credHelperDirs.BinDir, helper)
-	}
-
-	return NewHelper(s.cfg, helper)
+	return credentials.NewFileStore(s.cfg), nil
 }
 
 func validateCredentialCtx(ctxs []string) error {
@@ -233,4 +204,11 @@ func validateCredentialCtx(ctxs []string) error {
 	}
 
 	return nil
+}
+
+func first(s []string) string {
+	if len(s) == 0 {
+		return ""
+	}
+	return s[0]
 }

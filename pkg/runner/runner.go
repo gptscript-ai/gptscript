@@ -862,11 +862,6 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			refresh          bool
 		)
 
-		rm := runtimeWithLogger(callCtx, monitor, r.runtimeManager)
-		if err := rm.EnsureCredentialHelpers(callCtx.Ctx); err != nil {
-			return nil, fmt.Errorf("failed to setup credential helpers: %w", err)
-		}
-
 		// Only try to look up the cred if the tool is on GitHub or has an alias.
 		// If it is a GitHub tool and has an alias, the alias overrides the tool name, so we use it as the credential name.
 		if isGitHubTool(toolName) && credentialAlias == "" {

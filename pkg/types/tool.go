@@ -141,6 +141,7 @@ type Parameters struct {
 	OutputFilters       []string         `json:"outputFilters,omitempty"`
 	ExportOutputFilters []string         `json:"exportOutputFilters,omitempty"`
 	Blocking            bool             `json:"-"`
+	Stdin               bool             `json:"stdin,omitempty"`
 	Type                ToolType         `json:"type,omitempty"`
 }
 
@@ -444,6 +445,9 @@ func (t ToolDef) String() string {
 	}
 	if t.Parameters.Cache != nil && !*t.Parameters.Cache {
 		_, _ = fmt.Fprintln(buf, "Cache: false")
+	}
+	if t.Parameters.Stdin {
+		_, _ = fmt.Fprintln(buf, "Stdin: true")
 	}
 	if t.Parameters.Temperature != nil {
 		_, _ = fmt.Fprintf(buf, "Temperature: %f\n", *t.Parameters.Temperature)

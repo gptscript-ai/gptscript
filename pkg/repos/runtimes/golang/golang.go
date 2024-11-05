@@ -100,19 +100,6 @@ type tag struct {
 	} `json:"commit"`
 }
 
-func GetLatestTag(tool types.Tool) (string, error) {
-	r, ok, err := getLatestRelease(tool)
-	if err != nil {
-		return "", err
-	}
-
-	if !ok {
-		return "", fmt.Errorf("failed to get latest release for %s", tool.Name)
-	}
-
-	return r.label, nil
-}
-
 func getLatestRelease(tool types.Tool) (*release, bool, error) {
 	if tool.Source.Repo == nil || !strings.HasPrefix(tool.Source.Repo.Root, "https://github.com/") {
 		return nil, false, nil
