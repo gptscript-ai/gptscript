@@ -288,6 +288,7 @@ type simpleRunner struct {
 func newSimpleRunner(cache *cache.Client, rm engine.RuntimeManager, env []string) (*simpleRunner, error) {
 	runner, err := runner.New(noopModel{}, credentials.NoopStore{}, runner.Options{
 		RuntimeManager: rm,
+		MonitorFactory: simpleMonitorFactory{},
 	})
 	if err != nil {
 		return nil, err
@@ -318,4 +319,34 @@ func (n noopModel) Call(_ context.Context, _ types.CompletionRequest, _ []string
 
 func (n noopModel) ProxyInfo() (string, string, error) {
 	return "", "", errors.New("unsupported")
+}
+
+type simpleMonitorFactory struct {
+}
+
+func (s simpleMonitorFactory) Start(_ context.Context, _ *types.Program, _ []string, _ string) (runner.Monitor, error) {
+	return simpleMonitor{}, nil
+}
+
+func (s simpleMonitorFactory) Pause() func() {
+	//TODO implement me
+	panic("implement me")
+}
+
+type simpleMonitor struct {
+}
+
+func (s simpleMonitor) Stop(_ context.Context, _ string, _ error) {
+}
+
+func (s simpleMonitor) Event(event runner.Event) {
+	if event.Type == runner.EventTypeCallProgress {
+		if !strings.HasPrefix(event.Content, "{") {
+			fmt.Println(event.Content)
+		}
+	}
+}
+
+func (s simpleMonitor) Pause() func() {
+	return func() {}
 }
