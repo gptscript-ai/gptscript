@@ -26,10 +26,10 @@ import (
 type Options struct {
 	gptscript.Options
 
-	ListenAddress             string
-	WorkspaceTool             string
-	Debug                     bool
-	DisableServerErrorLogging bool
+	ListenAddress              string
+	DatasetTool, WorkspaceTool string
+	Debug                      bool
+	DisableServerErrorLogging  bool
 }
 
 // Run will start the server and block until the server is shut down.
@@ -108,6 +108,7 @@ func run(ctx context.Context, listener net.Listener, opts Options) error {
 		gptscriptOpts:    opts.Options,
 		address:          listener.Addr().String(),
 		token:            token,
+		datasetTool:      opts.DatasetTool,
 		workspaceTool:    opts.WorkspaceTool,
 		client:           g,
 		events:           events,
@@ -159,6 +160,7 @@ func complete(opts ...Options) Options {
 	for _, opt := range opts {
 		result.Options = gptscript.Complete(result.Options, opt.Options)
 		result.ListenAddress = types.FirstSet(opt.ListenAddress, result.ListenAddress)
+		result.DatasetTool = types.FirstSet(opt.DatasetTool, result.DatasetTool)
 		result.WorkspaceTool = types.FirstSet(opt.WorkspaceTool, result.WorkspaceTool)
 		result.Debug = types.FirstSet(opt.Debug, result.Debug)
 		result.DisableServerErrorLogging = types.FirstSet(opt.DisableServerErrorLogging, result.DisableServerErrorLogging)
@@ -170,6 +172,9 @@ func complete(opts ...Options) Options {
 
 	if result.WorkspaceTool == "" {
 		result.WorkspaceTool = "github.com/gptscript-ai/workspace-provider"
+	}
+	if result.DatasetTool == "" {
+		result.DatasetTool = "github.com/otto8-ai/datasets"
 	}
 
 	return result

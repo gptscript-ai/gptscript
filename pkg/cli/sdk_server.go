@@ -11,6 +11,7 @@ import (
 
 type SDKServer struct {
 	*GPTScript
+	DatasetTool   string `usage:"Tool to use for datasets"`
 	WorkspaceTool string `usage:"Tool to use for workspace"`
 }
 
@@ -38,6 +39,7 @@ func (c *SDKServer) Run(cmd *cobra.Command, _ []string) error {
 		Options:       opts,
 		ListenAddress: c.ListenAddress,
 		Debug:         c.Debug,
+		DatasetTool:   c.DatasetTool,
 		WorkspaceTool: c.WorkspaceTool,
 	})
 }
