@@ -317,7 +317,7 @@ func (n noopModel) Call(_ context.Context, _ types.CompletionRequest, _ []string
 	return nil, errors.New("unsupported")
 }
 
-func (n noopModel) ProxyInfo() (string, string, error) {
+func (n noopModel) ProxyInfo([]string) (string, string, error) {
 	return "", "", errors.New("unsupported")
 }
 

@@ -14,7 +14,7 @@ import (
 
 type Model interface {
 	Call(ctx context.Context, messageRequest types.CompletionRequest, env []string, status chan<- types.CompletionStatus) (*types.CompletionMessage, error)
-	ProxyInfo() (string, string, error)
+	ProxyInfo([]string) (string, string, error)
 }
 
 type RuntimeManager interface {
