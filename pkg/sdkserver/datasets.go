@@ -10,6 +10,14 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 )
 
+func (s *server) getDatasetTool(req datasetRequest) string {
+	if req.DatasetToolRepo != "" {
+		return req.DatasetToolRepo
+	}
+
+	return s.datasetTool
+}
+
 type datasetRequest struct {
 	Input           string   `json:"input"`
 	WorkspaceID     string   `json:"workspaceID"`
@@ -38,13 +46,6 @@ func (r datasetRequest) opts(o gptscript.Options) gptscript.Options {
 	return opts
 }
 
-func (r datasetRequest) getToolRepo() string {
-	if r.DatasetToolRepo != "" {
-		return r.DatasetToolRepo
-	}
-	return "github.com/otto8-ai/datasets"
-}
-
 func (s *server) listDatasets(w http.ResponseWriter, r *http.Request) {
 	logger := gcontext.GetLogger(r.Context())
 
@@ -65,7 +66,7 @@ func (s *server) listDatasets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), req.getToolRepo(), "List Datasets", loader.Options{
+	prg, err := loader.Program(r.Context(), s.getDatasetTool(req), "List Datasets", loader.Options{
 		Cache: g.Cache,
 	})
 
@@ -126,7 +127,7 @@ func (s *server) createDataset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), req.getToolRepo(), "Create Dataset", loader.Options{
+	prg, err := loader.Program(r.Context(), s.getDatasetTool(req), "Create Dataset", loader.Options{
 		Cache: g.Cache,
 	})
 
@@ -195,7 +196,7 @@ func (s *server) addDatasetElement(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), req.getToolRepo(), "Add Element", loader.Options{
+	prg, err := loader.Program(r.Context(), s.getDatasetTool(req), "Add Element", loader.Options{
 		Cache: g.Cache,
 	})
 	if err != nil {
@@ -262,7 +263,7 @@ func (s *server) addDatasetElements(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), req.getToolRepo(), "Add Elements", loader.Options{
+	prg, err := loader.Program(r.Context(), s.getDatasetTool(req), "Add Elements", loader.Options{
 		Cache: g.Cache,
 	})
 	if err != nil {
@@ -327,7 +328,7 @@ func (s *server) listDatasetElements(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), req.getToolRepo(), "List Elements", loader.Options{
+	prg, err := loader.Program(r.Context(), s.getDatasetTool(req), "List Elements", loader.Options{
 		Cache: g.Cache,
 	})
 	if err != nil {
@@ -390,7 +391,7 @@ func (s *server) getDatasetElement(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prg, err := loader.Program(r.Context(), req.getToolRepo(), "Get Element SDK", loader.Options{
+	prg, err := loader.Program(r.Context(), s.getDatasetTool(req), "Get Element SDK", loader.Options{
 		Cache: g.Cache,
 	})
 	if err != nil {
