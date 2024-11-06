@@ -872,7 +872,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 		} else if credentialAlias != "" {
 			c, exists, err = r.credStore.Get(callCtx.Ctx, credentialAlias)
 			if err != nil {
-				return nil, fmt.Errorf("failed to get credentials for tool %s: %w", credentialAlias, err)
+				return nil, fmt.Errorf("failed to get credential %s: %w", credentialAlias, err)
 			}
 		}
 

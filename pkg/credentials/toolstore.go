@@ -30,7 +30,7 @@ func (h *toolCredentialStore) Erase(serverAddress string) error {
 
 func (h *toolCredentialStore) Get(serverAddress string) (types.AuthConfig, error) {
 	creds, err := client.Get(h.program, serverAddress)
-	if credentials2.IsErrCredentialsNotFound(err) {
+	if IsCredentialsNotFoundError(err) {
 		return h.file.Get(serverAddress)
 	} else if err != nil {
 		return types.AuthConfig{}, err

@@ -9,7 +9,6 @@ import (
 	"github.com/docker/cli/cli/config/credentials"
 	"github.com/docker/cli/cli/config/types"
 	"github.com/docker/docker-credential-helpers/client"
-	credentials2 "github.com/docker/docker-credential-helpers/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	"golang.org/x/exp/maps"
 )
@@ -50,7 +49,7 @@ func (s Store) Get(_ context.Context, toolName string) (*Credential, bool, error
 	for _, c := range s.credCtxs {
 		auth, err := store.Get(toolNameWithCtx(toolName, c))
 		if err != nil {
-			if credentials2.IsErrCredentialsNotFound(err) {
+			if IsCredentialsNotFoundError(err) {
 				continue
 			}
 			return nil, false, err
