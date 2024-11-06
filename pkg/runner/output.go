@@ -76,6 +76,9 @@ func (r *Runner) handleOutput(callCtx engine.Context, monitor Monitor, env []str
 	}
 
 	for _, outputToolRef := range outputToolRefs {
+		if callCtx.Program.ToolSet[outputToolRef.ToolID].IsNoop() {
+			continue
+		}
 		inputData, err := argsForFilters(callCtx.Program, outputToolRef, startState, map[string]any{
 			"output":       output,
 			"continuation": continuation,

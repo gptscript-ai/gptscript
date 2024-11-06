@@ -15,6 +15,9 @@ func (r *Runner) handleInput(callCtx engine.Context, monitor Monitor, env []stri
 	}
 
 	for _, inputToolRef := range inputToolRefs {
+		if callCtx.Program.ToolSet[inputToolRef.ToolID].IsNoop() {
+			continue
+		}
 		data := map[string]any{}
 		_ = json.Unmarshal([]byte(input), &data)
 		data["input"] = input
