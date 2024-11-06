@@ -31,7 +31,7 @@ type Result struct {
 	Err     error
 }
 
-func (c *Client) ProxyInfo() (string, string, error) {
+func (c *Client) ProxyInfo([]string) (string, string, error) {
 	return "test-auth", "test-url", nil
 }
 

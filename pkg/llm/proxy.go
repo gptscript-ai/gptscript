@@ -15,7 +15,20 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/openai"
 )
 
-func (r *Registry) ProxyInfo() (string, string, error) {
+func (r *Registry) ProxyInfo(env []string) (string, string, error) {
+	var proxyURL, proxyToken string
+	for _, e := range env {
+		if url, ok := strings.CutPrefix(e, "GPTSCRIPT_MODEL_PROVIDER_PROXY_URL="); ok {
+			proxyURL = url
+		} else if token, ok := strings.CutPrefix(e, "GPTSCRIPT_MODEL_PROVIDER_PROXY_TOKEN="); ok {
+			proxyToken = token
+		}
+	}
+
+	if proxyToken != "" && proxyURL != "" {
+		return proxyToken, proxyURL, nil
+	}
+
 	r.proxyLock.Lock()
 	defer r.proxyLock.Unlock()
 
@@ -77,7 +90,7 @@ func (r *Registry) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	auth, targetURL := oai.ProxyInfo()
+	auth, targetURL := oai.ProxyInfo(nil)
 	if targetURL == "" {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return

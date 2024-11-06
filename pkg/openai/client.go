@@ -132,7 +132,7 @@ func NewClient(ctx context.Context, credStore credentials.CredentialStore, opts 
 	}, nil
 }
 
-func (c *Client) ProxyInfo() (token, urlBase string) {
+func (c *Client) ProxyInfo([]string) (token, urlBase string) {
 	if c.invalidAuth {
 		return "", ""
 	}

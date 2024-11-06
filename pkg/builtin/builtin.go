@@ -695,9 +695,9 @@ func invalidArgument(input string, err error) string {
 	return fmt.Sprintf("Failed to parse arguments %s: %v", input, err)
 }
 
-func SysModelProviderCredential(ctx context.Context, _ []string, _ string, _ chan<- string) (string, error) {
+func SysModelProviderCredential(ctx context.Context, env []string, _ string, _ chan<- string) (string, error) {
 	engineContext, _ := engine.FromContext(ctx)
-	auth, url, err := engineContext.Engine.Model.ProxyInfo()
+	auth, url, err := engineContext.Engine.Model.ProxyInfo(env)
 	if err != nil {
 		return "", err
 	}
