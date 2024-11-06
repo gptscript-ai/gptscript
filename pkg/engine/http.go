@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"net/url"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -75,9 +77,9 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 		return nil, err
 	}
 
-	for _, env := range e.Env {
-		if strings.HasPrefix(env, "GPTSCRIPT_WORKSPACE_") {
-			req.Header.Add("X-GPTScript-Env", env)
+	for _, k := range slices.Sorted(maps.Keys(envMap)) {
+		if strings.HasPrefix(k, "GPTSCRIPT_WORKSPACE_") {
+			req.Header.Add("X-GPTScript-Env", k+"="+envMap[k])
 		}
 	}
 

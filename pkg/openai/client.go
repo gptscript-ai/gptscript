@@ -617,7 +617,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 		}
 		partialMessage = appendMessage(partialMessage, response)
 		if partial != nil {
-			if time.Since(start) > 500*time.Millisecond {
+			if time.Since(start) > 100*time.Millisecond {
 				last = last[:0]
 				partial <- types.CompletionStatus{
 					CompletionID:    transactionID,

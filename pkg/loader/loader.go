@@ -29,6 +29,18 @@ import (
 
 const CacheTimeout = time.Hour
 
+var Remap = map[string]string{}
+
+func init() {
+	remap := os.Getenv("GPTSCRIPT_TOOL_REMAP")
+	for _, pair := range strings.Split(remap, ",") {
+		k, v, ok := strings.Cut(pair, "=")
+		if ok {
+			Remap[k] = v
+		}
+	}
+}
+
 type source struct {
 	// Content The content of the source
 	Content []byte
@@ -68,8 +80,19 @@ func openFile(path string) (io.ReadCloser, bool, error) {
 }
 
 func loadLocal(base *source, name string) (*source, bool, error) {
+	var remapped bool
+	if !strings.HasPrefix(name, ".") {
+		for k, v := range Remap {
+			if strings.HasPrefix(name, k) {
+				name = v + name[len(k):]
+				remapped = true
+				break
+			}
+		}
+	}
+
 	filePath := name
-	if !filepath.IsAbs(name) {
+	if !remapped && !filepath.IsAbs(name) {
 		// We want to keep all strings in / format, and only convert to platform specific when reading
 		// This is why we use path instead of filepath.
 		filePath = path.Join(base.Path, name)

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
@@ -39,6 +40,12 @@ func (r datasetRequest) opts(o gptscript.Options) gptscript.Options {
 		Monitor: o.Monitor,
 		Runner:  o.Runner,
 	}
+	for _, e := range r.Env {
+		v, ok := strings.CutPrefix(e, "GPTSCRIPT_WORKSPACE_ID=")
+		if ok {
+			opts.Workspace = v
+		}
+	}
 	return opts
 }
 
@@ -61,6 +68,7 @@ func (s *server) listDatasets(w http.ResponseWriter, r *http.Request) {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to initialize gptscript: %w", err))
 		return
 	}
+	defer g.Close(false)
 
 	prg, err := loader.Program(r.Context(), s.getDatasetTool(req), "List Datasets", loader.Options{
 		Cache: g.Cache,
@@ -118,6 +126,7 @@ func (s *server) addDatasetElements(w http.ResponseWriter, r *http.Request) {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to initialize gptscript: %w", err))
 		return
 	}
+	defer g.Close(false)
 
 	var args addDatasetElementsArgs
 	if err := json.Unmarshal([]byte(req.Input), &args); err != nil {
@@ -177,6 +186,7 @@ func (s *server) listDatasetElements(w http.ResponseWriter, r *http.Request) {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to initialize gptscript: %w", err))
 		return
 	}
+	defer g.Close(false)
 
 	var args listDatasetElementsArgs
 	if err := json.Unmarshal([]byte(req.Input), &args); err != nil {
@@ -239,6 +249,7 @@ func (s *server) getDatasetElement(w http.ResponseWriter, r *http.Request) {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to initialize gptscript: %w", err))
 		return
 	}
+	defer g.Close(false)
 
 	var args getDatasetElementArgs
 	if err := json.Unmarshal([]byte(req.Input), &args); err != nil {
