@@ -195,7 +195,7 @@ func validateCredentialCtx(ctxs []string) error {
 	}
 
 	// check alphanumeric
-	r := regexp.MustCompile("^[-a-zA-Z0-9]+$")
+	r := regexp.MustCompile("^[-a-zA-Z0-9.]+$")
 	for _, c := range ctxs {
 		if !r.MatchString(c) {
 			return fmt.Errorf("credential contexts must be alphanumeric")
