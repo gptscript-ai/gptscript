@@ -32,7 +32,11 @@ func (s *server) execAndStream(ctx context.Context, programLoader loaderFunc, lo
 	}
 	defer g.Close(false)
 
-	prg, err := programLoader(ctx, toolDef.String(), subTool, loader.Options{Cache: g.Cache})
+	defaultModel := opts.OpenAI.DefaultModel
+	if defaultModel == "" {
+		defaultModel = s.gptscriptOpts.OpenAI.DefaultModel
+	}
+	prg, err := programLoader(ctx, toolDef.String(), subTool, loader.Options{Cache: g.Cache, DefaultModel: defaultModel})
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to load program: %w", err))
 		return

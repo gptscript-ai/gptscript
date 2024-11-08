@@ -277,10 +277,15 @@ func ListTools() (result []types.Tool) {
 }
 
 func Builtin(name string) (types.Tool, bool) {
+	return BuiltinWithDefaultModel(name, "")
+}
+
+func BuiltinWithDefaultModel(name, defaultModel string) (types.Tool, bool) {
 	// Legacy syntax not used anymore
 	name = strings.TrimSuffix(name, "?")
 	t, ok := tools[name]
 	t.Parameters.Name = name
+	t.Parameters.ModelName = defaultModel
 	t.ID = name
 	t.Instructions = "#!" + name
 	return SetDefaults(t), ok
