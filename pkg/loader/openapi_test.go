@@ -26,7 +26,7 @@ func TestLoadOpenAPI(t *testing.T) {
 	}
 	datav3, err := os.ReadFile("testdata/openapi_v3.yaml")
 	require.NoError(t, err)
-	_, err = readTool(context.Background(), nil, &prgv3, &source{Content: datav3}, "")
+	_, err = readTool(context.Background(), nil, &prgv3, &source{Content: datav3}, "", "")
 	require.NoError(t, err, "failed to read openapi v3")
 	require.Equal(t, 3, numOpenAPITools(prgv3.ToolSet), "expected 3 openapi tools")
 
@@ -35,7 +35,7 @@ func TestLoadOpenAPI(t *testing.T) {
 	}
 	datav2, err := os.ReadFile("testdata/openapi_v2.json")
 	require.NoError(t, err)
-	_, err = readTool(context.Background(), nil, &prgv2json, &source{Content: datav2}, "")
+	_, err = readTool(context.Background(), nil, &prgv2json, &source{Content: datav2}, "", "")
 	require.NoError(t, err, "failed to read openapi v2")
 	require.Equal(t, 3, numOpenAPITools(prgv2json.ToolSet), "expected 3 openapi tools")
 
@@ -44,7 +44,7 @@ func TestLoadOpenAPI(t *testing.T) {
 	}
 	datav2, err = os.ReadFile("testdata/openapi_v2.yaml")
 	require.NoError(t, err)
-	_, err = readTool(context.Background(), nil, &prgv2yaml, &source{Content: datav2}, "")
+	_, err = readTool(context.Background(), nil, &prgv2yaml, &source{Content: datav2}, "", "")
 	require.NoError(t, err, "failed to read openapi v2 (yaml)")
 	require.Equal(t, 3, numOpenAPITools(prgv2yaml.ToolSet), "expected 3 openapi tools")
 
@@ -57,7 +57,7 @@ func TestOpenAPIv3(t *testing.T) {
 	}
 	datav3, err := os.ReadFile("testdata/openapi_v3.yaml")
 	require.NoError(t, err)
-	_, err = readTool(context.Background(), nil, &prgv3, &source{Content: datav3}, "")
+	_, err = readTool(context.Background(), nil, &prgv3, &source{Content: datav3}, "", "")
 	require.NoError(t, err)
 
 	autogold.ExpectFile(t, prgv3.ToolSet, autogold.Dir("testdata/openapi"))
@@ -69,7 +69,7 @@ func TestOpenAPIv3NoOperationIDs(t *testing.T) {
 	}
 	datav3, err := os.ReadFile("testdata/openapi_v3_no_operation_ids.yaml")
 	require.NoError(t, err)
-	_, err = readTool(context.Background(), nil, &prgv3, &source{Content: datav3}, "")
+	_, err = readTool(context.Background(), nil, &prgv3, &source{Content: datav3}, "", "")
 	require.NoError(t, err)
 
 	autogold.ExpectFile(t, prgv3.ToolSet, autogold.Dir("testdata/openapi"))
@@ -81,7 +81,7 @@ func TestOpenAPIv2(t *testing.T) {
 	}
 	datav2, err := os.ReadFile("testdata/openapi_v2.yaml")
 	require.NoError(t, err)
-	_, err = readTool(context.Background(), nil, &prgv2, &source{Content: datav2}, "")
+	_, err = readTool(context.Background(), nil, &prgv2, &source{Content: datav2}, "", "")
 	require.NoError(t, err)
 
 	autogold.ExpectFile(t, prgv2.ToolSet, autogold.Dir("testdata/openapi"))
@@ -94,7 +94,7 @@ func TestOpenAPIv3Revamp(t *testing.T) {
 	}
 	datav3, err := os.ReadFile("testdata/openapi_v3.yaml")
 	require.NoError(t, err)
-	_, err = readTool(context.Background(), nil, &prgv3, &source{Content: datav3}, "")
+	_, err = readTool(context.Background(), nil, &prgv3, &source{Content: datav3}, "", "")
 	require.NoError(t, err)
 
 	autogold.ExpectFile(t, prgv3.ToolSet, autogold.Dir("testdata/openapi"))
@@ -107,7 +107,7 @@ func TestOpenAPIv3NoOperationIDsRevamp(t *testing.T) {
 	}
 	datav3, err := os.ReadFile("testdata/openapi_v3_no_operation_ids.yaml")
 	require.NoError(t, err)
-	_, err = readTool(context.Background(), nil, &prgv3, &source{Content: datav3}, "")
+	_, err = readTool(context.Background(), nil, &prgv3, &source{Content: datav3}, "", "")
 	require.NoError(t, err)
 
 	autogold.ExpectFile(t, prgv3.ToolSet, autogold.Dir("testdata/openapi"))
@@ -120,7 +120,7 @@ func TestOpenAPIv2Revamp(t *testing.T) {
 	}
 	datav2, err := os.ReadFile("testdata/openapi_v2.yaml")
 	require.NoError(t, err)
-	_, err = readTool(context.Background(), nil, &prgv2, &source{Content: datav2}, "")
+	_, err = readTool(context.Background(), nil, &prgv2, &source{Content: datav2}, "", "")
 	require.NoError(t, err)
 
 	autogold.ExpectFile(t, prgv2.ToolSet, autogold.Dir("testdata/openapi"))

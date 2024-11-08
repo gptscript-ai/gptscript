@@ -132,7 +132,7 @@ func loadLocal(base *source, name string) (*source, bool, error) {
 	}, true, nil
 }
 
-func loadProgram(data []byte, into *types.Program, targetToolName string) (types.Tool, error) {
+func loadProgram(data []byte, into *types.Program, targetToolName, defaultModel string) (types.Tool, error) {
 	var ext types.Program
 
 	if err := json.Unmarshal(data[len(assemble.Header):], &ext); err != nil {
@@ -141,7 +141,7 @@ func loadProgram(data []byte, into *types.Program, targetToolName string) (types
 
 	into.ToolSet = make(map[string]types.Tool, len(ext.ToolSet))
 	for k, v := range ext.ToolSet {
-		if builtinTool, ok := builtin.Builtin(k); ok {
+		if builtinTool, ok := builtin.BuiltinWithDefaultModel(k, defaultModel); ok {
 			v = builtinTool
 		}
 		into.ToolSet[k] = v
@@ -186,11 +186,11 @@ func loadOpenAPI(prg *types.Program, data []byte) *openapi3.T {
 	return openAPIDocument
 }
 
-func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, targetToolName string) ([]types.Tool, error) {
+func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, targetToolName, defaultModel string) ([]types.Tool, error) {
 	data := base.Content
 
 	if bytes.HasPrefix(data, assemble.Header) {
-		tool, err := loadProgram(data, prg, targetToolName)
+		tool, err := loadProgram(data, prg, targetToolName, defaultModel)
 		if err != nil {
 			return nil, err
 		}
@@ -310,17 +310,17 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 		localTools[strings.ToLower(tool.Parameters.Name)] = tool
 	}
 
-	return linkAll(ctx, cache, prg, base, targetTools, localTools)
+	return linkAll(ctx, cache, prg, base, targetTools, localTools, defaultModel)
 }
 
-func linkAll(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, tools []types.Tool, localTools types.ToolSet) (result []types.Tool, _ error) {
+func linkAll(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, tools []types.Tool, localTools types.ToolSet, defaultModel string) (result []types.Tool, _ error) {
 	localToolsMapping := make(map[string]string, len(tools))
 	for _, localTool := range localTools {
 		localToolsMapping[strings.ToLower(localTool.Parameters.Name)] = localTool.ID
 	}
 
 	for _, tool := range tools {
-		tool, err := link(ctx, cache, prg, base, tool, localTools, localToolsMapping)
+		tool, err := link(ctx, cache, prg, base, tool, localTools, localToolsMapping, defaultModel)
 		if err != nil {
 			return nil, err
 		}
@@ -329,7 +329,7 @@ func linkAll(ctx context.Context, cache *cache.Client, prg *types.Program, base 
 	return
 }
 
-func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, tool types.Tool, localTools types.ToolSet, localToolsMapping map[string]string) (types.Tool, error) {
+func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, tool types.Tool, localTools types.ToolSet, localToolsMapping map[string]string, defaultModel string) (types.Tool, error) {
 	if existing, ok := prg.ToolSet[tool.ID]; ok {
 		return existing, nil
 	}
@@ -354,7 +354,7 @@ func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *so
 				linkedTool = existing
 			} else {
 				var err error
-				linkedTool, err = link(ctx, cache, prg, base, localTool, localTools, localToolsMapping)
+				linkedTool, err = link(ctx, cache, prg, base, localTool, localTools, localToolsMapping, defaultModel)
 				if err != nil {
 					return types.Tool{}, fmt.Errorf("failed linking %s at %s: %w", targetToolName, base, err)
 				}
@@ -364,7 +364,7 @@ func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *so
 			toolNames[targetToolName] = struct{}{}
 		} else {
 			toolName, subTool := types.SplitToolRef(targetToolName)
-			resolvedTools, err := resolve(ctx, cache, prg, base, toolName, subTool)
+			resolvedTools, err := resolve(ctx, cache, prg, base, toolName, subTool, defaultModel)
 			if err != nil {
 				return types.Tool{}, fmt.Errorf("failed resolving %s from %s: %w", targetToolName, base, err)
 			}
@@ -375,6 +375,10 @@ func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *so
 	}
 
 	tool.LocalTools = localToolsMapping
+
+	if tool.ModelName == "" {
+		tool.ModelName = defaultModel
+	}
 
 	tool = builtin.SetDefaults(tool)
 	prg.ToolSet[tool.ID] = tool
@@ -405,7 +409,7 @@ func ProgramFromSource(ctx context.Context, content, subToolName string, opts ..
 		Path:     locationPath,
 		Name:     locationName,
 		Location: opt.Location,
-	}, subToolName)
+	}, subToolName, opt.DefaultModel)
 	if err != nil {
 		return types.Program{}, err
 	}
@@ -414,18 +418,24 @@ func ProgramFromSource(ctx context.Context, content, subToolName string, opts ..
 }
 
 type Options struct {
-	Cache    *cache.Client
-	Location string
+	Cache        *cache.Client
+	Location     string
+	DefaultModel string
 }
 
 func complete(opts ...Options) (result Options) {
 	for _, opt := range opts {
 		result.Cache = types.FirstSet(opt.Cache, result.Cache)
 		result.Location = types.FirstSet(opt.Location, result.Location)
+		result.DefaultModel = types.FirstSet(opt.DefaultModel, result.DefaultModel)
 	}
 
 	if result.Location == "" {
 		result.Location = "inline"
+	}
+
+	if result.DefaultModel == "" {
+		result.DefaultModel = builtin.GetDefaultModel()
 	}
 
 	return
@@ -451,7 +461,7 @@ func Program(ctx context.Context, name, subToolName string, opts ...Options) (ty
 		Name:    name,
 		ToolSet: types.ToolSet{},
 	}
-	tools, err := resolve(ctx, opt.Cache, &prg, &source{}, name, subToolName)
+	tools, err := resolve(ctx, opt.Cache, &prg, &source{}, name, subToolName, opt.DefaultModel)
 	if err != nil {
 		return types.Program{}, err
 	}
@@ -459,9 +469,9 @@ func Program(ctx context.Context, name, subToolName string, opts ...Options) (ty
 	return prg, nil
 }
 
-func resolve(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, name, subTool string) ([]types.Tool, error) {
+func resolve(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, name, subTool, defaultModel string) ([]types.Tool, error) {
 	if subTool == "" {
-		t, ok := builtin.Builtin(name)
+		t, ok := builtin.BuiltinWithDefaultModel(name, defaultModel)
 		if ok {
 			prg.ToolSet[t.ID] = t
 			return []types.Tool{t}, nil
@@ -473,7 +483,7 @@ func resolve(ctx context.Context, cache *cache.Client, prg *types.Program, base 
 		return nil, err
 	}
 
-	result, err := readTool(ctx, cache, prg, s, subTool)
+	result, err := readTool(ctx, cache, prg, s, subTool, defaultModel)
 	if err != nil {
 		return nil, err
 	}
