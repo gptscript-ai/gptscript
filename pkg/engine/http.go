@@ -82,7 +82,8 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 			req.Header.Add("X-GPTScript-Env", k+"="+envMap[k])
 		}
 	}
-	for _, prefix := range strings.Split(os.Getenv("GPTSCRIPT_HTTP_ENV_PREFIX"), ",") {
+
+	for _, prefix := range strings.Split(envMap["GPTSCRIPT_HTTP_ENV_PREFIX"], ",") {
 		if prefix == "" {
 			continue
 		}
@@ -90,6 +91,16 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 			if strings.HasPrefix(k, prefix) {
 				req.Header.Add("X-GPTScript-Env", k+"="+envMap[k])
 			}
+		}
+	}
+
+	for _, k := range strings.Split(envMap["GPTSCRIPT_HTTP_ENV"], ",") {
+		if k == "" {
+			continue
+		}
+		v := envMap[k]
+		if v != "" {
+			req.Header.Add("X-GPTScript-Env", k+"="+v)
 		}
 	}
 
