@@ -82,6 +82,16 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 			req.Header.Add("X-GPTScript-Env", k+"="+envMap[k])
 		}
 	}
+	for _, prefix := range strings.Split(os.Getenv("GPTSCRIPT_HTTP_ENV_PREFIX"), ",") {
+		if prefix == "" {
+			continue
+		}
+		for _, k := range slices.Sorted(maps.Keys(envMap)) {
+			if strings.HasPrefix(k, prefix) {
+				req.Header.Add("X-GPTScript-Env", k+"="+envMap[k])
+			}
+		}
+	}
 
 	req.Header.Set("X-GPTScript-Tool-Name", tool.Parameters.Name)
 
