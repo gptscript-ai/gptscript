@@ -174,7 +174,7 @@ func complete(opts ...Options) Options {
 		result.WorkspaceTool = "github.com/gptscript-ai/workspace-provider"
 	}
 	if result.DatasetTool == "" {
-		result.DatasetTool = "github.com/otto8-ai/datasets"
+		result.DatasetTool = "github.com/gptscript-ai/datasets"
 	}
 
 	return result
