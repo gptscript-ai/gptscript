@@ -387,7 +387,7 @@ func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 
 	resp, err := e.Model.Call(ctx, state.Completion, e.Env, progress)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed calling model for completion: %w", err)
 	}
 
 	state.Completion.Messages = append(state.Completion.Messages, *resp)
