@@ -43,14 +43,12 @@ func (h *toolCredentialStore) Get(serverAddress string) (types.AuthConfig, error
 }
 
 func (h *toolCredentialStore) GetAll() (map[string]types.AuthConfig, error) {
-	result := map[string]types.AuthConfig{}
-
 	serverAddresses, err := client.List(h.program)
 	if err != nil {
 		return nil, err
 	}
 
-	result = make(map[string]types.AuthConfig, len(serverAddresses))
+	result := make(map[string]types.AuthConfig, len(serverAddresses))
 	for serverAddress, val := range serverAddresses {
 		// If the serverAddress contains a port, we need to put it back in the right spot.
 		// For some reason, even when a credential is stored properly as http://hostname:8080///credctx,
