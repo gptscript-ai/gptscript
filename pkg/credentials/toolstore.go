@@ -50,7 +50,7 @@ func (h *toolCredentialStore) GetAll() (map[string]types.AuthConfig, error) {
 		return nil, err
 	}
 
-	newCredAddresses := make(map[string]string, len(serverAddresses))
+	result = make(map[string]types.AuthConfig, len(serverAddresses))
 	for serverAddress, val := range serverAddresses {
 		// If the serverAddress contains a port, we need to put it back in the right spot.
 		// For some reason, even when a credential is stored properly as http://hostname:8080///credctx,
@@ -80,16 +80,10 @@ func (h *toolCredentialStore) GetAll() (map[string]types.AuthConfig, error) {
 			}
 		}
 
-		newCredAddresses[toolNameWithCtx(toolName, ctx)] = val
-		delete(serverAddresses, serverAddress)
-	}
-
-	for serverAddress := range newCredAddresses {
-		ac, err := h.Get(serverAddress)
-		if err != nil {
-			return nil, err
+		result[toolNameWithCtx(toolName, ctx)] = types.AuthConfig{
+			Username:      val,
+			ServerAddress: serverAddress,
 		}
-		result[serverAddress] = ac
 	}
 
 	return result, nil
