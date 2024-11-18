@@ -139,36 +139,60 @@ func (s Store) List(_ context.Context) ([]Credential, error) {
 		return nil, err
 	}
 
-	credsByContext := make(map[string][]Credential)
-	allCreds := make([]Credential, 0)
-	for serverAddress, authCfg := range list {
-		if authCfg.ServerAddress == "" {
-			authCfg.ServerAddress = serverAddress // Not sure why we have to do this, but we do.
+	if len(s.credCtxs) > 0 && s.credCtxs[0] == AllCredentialContexts {
+		allCreds := make([]Credential, len(list))
+		for serverAddress := range list {
+			ac, err := store.Get(serverAddress)
+			if err != nil {
+				return nil, err
+			}
+			ac.ServerAddress = serverAddress
+
+			cred, err := credentialFromDockerAuthConfig(ac)
+			if err != nil {
+				return nil, err
+			}
+			allCreds = append(allCreds, cred)
 		}
 
-		c, err := credentialFromDockerAuthConfig(authCfg)
+		return allCreds, nil
+	}
+
+	serverAddressesByContext := make(map[string][]string)
+	for serverAddress := range list {
+		_, ctx, err := toolNameAndCtxFromAddress(serverAddress)
 		if err != nil {
 			return nil, err
 		}
 
-		allCreds = append(allCreds, c)
-
-		if credsByContext[c.Context] == nil {
-			credsByContext[c.Context] = []Credential{c}
+		if serverAddressesByContext[ctx] == nil {
+			serverAddressesByContext[ctx] = []string{serverAddress}
 		} else {
-			credsByContext[c.Context] = append(credsByContext[c.Context], c)
+			serverAddressesByContext[ctx] = append(serverAddressesByContext[ctx], serverAddress)
 		}
-	}
-
-	if len(s.credCtxs) > 0 && s.credCtxs[0] == AllCredentialContexts {
-		return allCreds, nil
 	}
 
 	// Go through the contexts in reverse order so that higher priority contexts override lower ones.
 	credsByName := make(map[string]Credential)
 	for i := len(s.credCtxs) - 1; i >= 0; i-- {
-		for _, c := range credsByContext[s.credCtxs[i]] {
-			credsByName[c.ToolName] = c
+		for _, serverAddress := range serverAddressesByContext[s.credCtxs[i]] {
+			ac, err := store.Get(serverAddress)
+			if err != nil {
+				return nil, err
+			}
+			ac.ServerAddress = serverAddress
+
+			cred, err := credentialFromDockerAuthConfig(ac)
+			if err != nil {
+				return nil, err
+			}
+
+			toolName, _, err := toolNameAndCtxFromAddress(serverAddress)
+			if err != nil {
+				return nil, err
+			}
+
+			credsByName[toolName] = cred
 		}
 	}
 
