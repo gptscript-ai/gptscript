@@ -11,6 +11,7 @@ import (
 
 	"github.com/adrg/xdg"
 	"github.com/docker/cli/cli/config/types"
+	"github.com/gptscript-ai/gptscript/pkg/mvl"
 )
 
 const (
@@ -24,6 +25,7 @@ const (
 var (
 	// Helpers is a list of all supported credential helpers from github.com/gptscript-ai/gptscript-credential-helpers
 	Helpers = []string{WincredCredHelper, OsxkeychainCredHelper, SecretserviceCredHelper, PassCredHelper}
+	log     = mvl.Package()
 )
 
 type AuthConfig types.AuthConfig
@@ -85,9 +87,9 @@ func (c *CLIConfig) Save() error {
 	}
 
 	if c.auths != nil {
-		c.Auths = map[string]AuthConfig{}
+		c.Auths = make(map[string]AuthConfig, len(c.auths))
 		for k, v := range c.auths {
-			c.Auths[k] = (AuthConfig)(v)
+			c.Auths[k] = AuthConfig(v)
 		}
 		c.auths = nil
 	}
@@ -116,13 +118,21 @@ func (c *CLIConfig) GetAuthConfigs() map[string]types.AuthConfig {
 		defer c.authsLock.Unlock()
 	}
 
-	if c.auths == nil {
-		c.auths = map[string]types.AuthConfig{}
-		for k, v := range c.Auths {
-			authConfig := (types.AuthConfig)(v)
-			c.auths[k] = authConfig
-		}
+	if err := c.readFileIntoConfig(c.location); err != nil {
+		// This is implementing an interface, so we can't return this error.
+		log.Warnf("Failed to read config file: %v", err)
 	}
+
+	if c.auths == nil {
+		c.auths = make(map[string]types.AuthConfig, len(c.Auths))
+	}
+
+	// Assume that whatever was pulled from the file is more recent.
+	// The docker creds framework will save the file after creating or updating a credential.
+	for k, v := range c.Auths {
+		c.auths[k] = types.AuthConfig(v)
+	}
+
 	return c.auths
 }
 
@@ -142,17 +152,13 @@ func ReadCLIConfig(gptscriptConfigFile string) (*CLIConfig, error) {
 		}
 	}
 
-	data, err := readFile(gptscriptConfigFile)
-	if err != nil {
-		return nil, err
-	}
 	result := &CLIConfig{
 		authsLock: &sync.Mutex{},
 		location:  gptscriptConfigFile,
-		raw:       data,
 	}
-	if err := json.Unmarshal(data, result); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal %s: %v", gptscriptConfigFile, err)
+
+	if err := result.readFileIntoConfig(gptscriptConfigFile); err != nil {
+		return nil, err
 	}
 
 	if store := os.Getenv("GPTSCRIPT_CREDENTIAL_STORE"); store != "" {
@@ -180,13 +186,18 @@ func (c *CLIConfig) setDefaultCredentialsStore() error {
 	return c.Save()
 }
 
-func readFile(path string) ([]byte, error) {
+func (c *CLIConfig) readFileIntoConfig(path string) error {
 	data, err := os.ReadFile(path)
 	if os.IsNotExist(err) {
-		return []byte("{}"), nil
+		return nil
 	} else if err != nil {
-		return nil, fmt.Errorf("failed to read user config %s: %w", path, err)
+		return fmt.Errorf("failed to read user config %s: %w", path, err)
 	}
 
-	return data, nil
+	c.raw = data
+	if err := json.Unmarshal(data, c); err != nil {
+		return fmt.Errorf("failed to unmarshal %s: %v", path, err)
+	}
+
+	return nil
 }
