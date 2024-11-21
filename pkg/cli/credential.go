@@ -9,6 +9,7 @@ import (
 	"time"
 
 	cmd2 "github.com/gptscript-ai/cmd"
+	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/spf13/cobra"
 )
@@ -44,7 +45,12 @@ func (c *Credential) Run(cmd *cobra.Command, _ []string) error {
 	}
 	defer gptScript.Close(true)
 
-	store, err := gptScript.CredentialStoreFactory.NewStore(gptScript.DefaultCredentialContexts)
+	credCtxs := gptScript.DefaultCredentialContexts
+	if c.AllContexts {
+		credCtxs = []string{credentials.AllCredentialContexts}
+	}
+
+	store, err := gptScript.CredentialStoreFactory.NewStore(credCtxs)
 	if err != nil {
 		return err
 	}

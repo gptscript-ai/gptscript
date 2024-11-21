@@ -140,7 +140,7 @@ func (s Store) List(_ context.Context) ([]Credential, error) {
 	}
 
 	if len(s.credCtxs) > 0 && s.credCtxs[0] == AllCredentialContexts {
-		allCreds := make([]Credential, len(list))
+		allCreds := make([]Credential, 0, len(list))
 		for serverAddress := range list {
 			ac, err := store.Get(serverAddress)
 			if err != nil {
