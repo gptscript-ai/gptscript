@@ -8,7 +8,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -69,22 +68,18 @@ func Run(operationID, defaultHost, args string, t *openapi3.T, envs []string) (s
 		return "", false, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	// Check for authentication (only if using HTTPS or localhost)
-	if u.Scheme == "https" || u.Hostname() == "localhost" || u.Hostname() == "127.0.0.1" {
-		if len(opInfo.SecurityInfos) > 0 {
-			if err := HandleAuths(req, envMap, opInfo.SecurityInfos); err != nil {
-				return "", false, fmt.Errorf("error setting up authentication: %w", err)
-			}
+	// Check for authentication
+	if len(opInfo.SecurityInfos) > 0 {
+		if err := HandleAuths(req, envMap, opInfo.SecurityInfos); err != nil {
+			return "", false, fmt.Errorf("error setting up authentication: %w", err)
 		}
+	}
 
-		// If there is a bearer token set for the whole server, and no Authorization header has been defined, use it.
-		if token, ok := envMap["GPTSCRIPT_"+env.ToEnvLike(u.Hostname())+"_BEARER_TOKEN"]; ok {
-			if req.Header.Get("Authorization") == "" {
-				req.Header.Set("Authorization", "Bearer "+token)
-			}
+	// If there is a bearer token set for the whole server, and no Authorization header has been defined, use it.
+	if token, ok := envMap["GPTSCRIPT_"+env.ToEnvLike(u.Hostname())+"_BEARER_TOKEN"]; ok {
+		if req.Header.Get("Authorization") == "" {
+			req.Header.Set("Authorization", "Bearer "+token)
 		}
-	} else {
-		fmt.Fprintf(os.Stderr, "no auth")
 	}
 
 	// Handle query parameters
