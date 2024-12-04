@@ -2,6 +2,9 @@ package engine
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"math/rand"
@@ -11,11 +14,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gptscript-ai/gptscript/pkg/certs"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 var ports Ports
+var certificates Certs
 
 type Ports struct {
 	daemonPorts    map[string]int64
@@ -27,6 +32,11 @@ type Ports struct {
 	daemonCtx          context.Context
 	daemonClose        func()
 	daemonWG           sync.WaitGroup
+}
+
+type Certs struct {
+	daemonCerts map[string]certs.CertAndKey
+	daemonLock  sync.Mutex
 }
 
 func IsDaemonRunning(url string) bool {
@@ -128,7 +138,7 @@ func (e *Engine) startDaemon(tool types.Tool) (string, error) {
 	tool.Instructions = types.CommandPrefix + instructions
 
 	port, ok := ports.daemonPorts[tool.ID]
-	url := fmt.Sprintf("http://127.0.0.1:%d%s", port, path)
+	url := fmt.Sprintf("https://127.0.0.1:%d%s", port, path)
 	if ok && ports.daemonsRunning[url] != nil {
 		return url, nil
 	}
@@ -144,11 +154,31 @@ func (e *Engine) startDaemon(tool types.Tool) (string, error) {
 
 	ctx := ports.daemonCtx
 	port = nextPort()
-	url = fmt.Sprintf("http://127.0.0.1:%d%s", port, path)
+	url = fmt.Sprintf("https://127.0.0.1:%d%s", port, path)
+
+	// Generate a certificate for the daemon, unless one already exists.
+	certificates.daemonLock.Lock()
+	defer certificates.daemonLock.Unlock()
+	cert, exists := certificates.daemonCerts[tool.ID]
+	if !exists {
+		var err error
+		cert, err = certs.GenerateSelfSignedCert(tool.ID)
+		if err != nil {
+			return "", fmt.Errorf("failed to generate certificate for daemon: %v", err)
+		}
+
+		if certificates.daemonCerts == nil {
+			certificates.daemonCerts = map[string]certs.CertAndKey{}
+		}
+		certificates.daemonCerts[tool.ID] = cert
+	}
 
 	cmd, stop, err := e.newCommand(ctx, []string{
 		fmt.Sprintf("PORT=%d", port),
+		fmt.Sprintf("CERT=%s", base64.StdEncoding.EncodeToString(cert.Cert)),
+		fmt.Sprintf("PRIVATE_KEY=%s", base64.StdEncoding.EncodeToString(cert.Key)),
 		fmt.Sprintf("GPTSCRIPT_PORT=%d", port),
+		fmt.Sprintf("GPTSCRIPT_CERT=%s", base64.StdEncoding.EncodeToString(e.GPTScriptCert.Cert)),
 	},
 		tool,
 		"{}",
@@ -210,8 +240,30 @@ func (e *Engine) startDaemon(tool types.Tool) (string, error) {
 		ports.daemonWG.Done()
 	}()
 
+	// Build HTTP client for checking the health of the daemon
+	clientCert, err := tls.X509KeyPair(e.GPTScriptCert.Cert, e.GPTScriptCert.Key)
+	if err != nil {
+		return "", fmt.Errorf("failed to create client certificate: %v", err)
+	}
+
+	pool := x509.NewCertPool()
+	if !pool.AppendCertsFromPEM(cert.Cert) {
+		return "", fmt.Errorf("failed to append daemon certificate for [%s]", tool.ID)
+	}
+
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				Certificates:       []tls.Certificate{clientCert},
+				RootCAs:            pool,
+				InsecureSkipVerify: false,
+			},
+		},
+	}
+
+	// Check the health of the daemon
 	for i := 0; i < 120; i++ {
-		resp, err := http.Get(url)
+		resp, err := httpClient.Get(url)
 		if err == nil && resp.StatusCode == http.StatusOK {
 			go func() {
 				_, _ = io.ReadAll(resp.Body)
