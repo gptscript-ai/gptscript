@@ -292,9 +292,8 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 		args = args[1:]
 	}
 
-	var (
-		stop = func() {}
-	)
+	ctx, cancel := context.WithCancel(ctx)
+	stop := cancel
 
 	if strings.TrimSpace(rest) != "" {
 		f, err := os.CreateTemp(env.Getenv("GPTSCRIPT_TMPDIR", envvars), version.ProgramName+requiredFileExtensions[args[0]])
@@ -303,6 +302,7 @@ func (e *Engine) newCommand(ctx context.Context, extraEnv []string, tool types.T
 		}
 		stop = func() {
 			_ = os.Remove(f.Name())
+			cancel()
 		}
 
 		_, err = f.Write([]byte(rest))
