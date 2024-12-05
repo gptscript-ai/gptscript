@@ -270,9 +270,8 @@ func (e *Engine) startDaemon(tool types.Tool) (string, error) {
 				_ = resp.Body.Close()
 			}()
 			return url, nil
-		} else {
-			_ = resp.Body.Close()
 		}
+		_ = resp.Body.Close()
 		select {
 		case <-killedCtx.Done():
 			return url, fmt.Errorf("daemon failed to start: %w", context.Cause(killedCtx))
