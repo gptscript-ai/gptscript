@@ -2,6 +2,8 @@ package engine
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -40,6 +42,7 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 		return nil, err
 	}
 
+	var tlsConfigForDaemonRequest *tls.Config
 	if strings.HasSuffix(parsed.Hostname(), DaemonURLSuffix) {
 		referencedToolName := strings.TrimSuffix(parsed.Hostname(), DaemonURLSuffix)
 		referencedToolRefs, ok := tool.ToolMapping[referencedToolName]
@@ -60,6 +63,33 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 		}
 		parsed.Host = toolURLParsed.Host
 		toolURL = parsed.String()
+
+		// Find the certificate corresponding to this daemon tool
+		certificates.daemonLock.Lock()
+		daemonCert, exists := certificates.daemonCerts[referencedTool.ID]
+		certificates.daemonLock.Unlock()
+
+		if !exists {
+			return nil, fmt.Errorf("missing daemon certificate for [%s]", referencedTool.ID)
+		}
+
+		// Create a pool for the certificate to treat as a CA
+		pool := x509.NewCertPool()
+		if !pool.AppendCertsFromPEM(daemonCert.Cert) {
+			return nil, fmt.Errorf("failed to append daemon certificate for [%s]", referencedTool.ID)
+		}
+
+		clientCert, err := tls.X509KeyPair(e.GPTScriptCert.Cert, e.GPTScriptCert.Key)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create client certificate: %v", err)
+		}
+
+		// Create TLS config for use in the HTTP client later
+		tlsConfigForDaemonRequest = &tls.Config{
+			Certificates:       []tls.Certificate{clientCert},
+			RootCAs:            pool,
+			InsecureSkipVerify: false,
+		}
 	}
 
 	if tool.Blocking {
@@ -112,7 +142,18 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 		req.Header.Set("Content-Type", "text/plain")
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	var httpClient *http.Client
+	if tlsConfigForDaemonRequest != nil {
+		httpClient = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: tlsConfigForDaemonRequest,
+			},
+		}
+	} else {
+		httpClient = http.DefaultClient
+	}
+
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
