@@ -2,6 +2,10 @@ module github.com/gptscript-ai/gptscript
 
 go 1.23.1
 
+replace (
+	github.com/gptscript-ai/chat-completion-client => ../chat-completion-client
+	)
+
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/BurntSushi/locker v0.0.0-20171006230638-a6e239ea1c69
