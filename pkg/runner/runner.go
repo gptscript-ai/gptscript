@@ -493,8 +493,12 @@ func (s State) ContinuationContent() (string, error) {
 }
 
 func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, state *State) (retState *State, retErr error) {
+	handleOutput := true
+
 	defer func() {
-		retState, retErr = r.handleOutput(callCtx, monitor, env, state, retState, retErr)
+		if handleOutput {
+			retState, retErr = r.handleOutput(callCtx, monitor, env, state, retState, retErr)
+		}
 	}()
 
 	if state.Continuation == nil {
@@ -521,21 +525,33 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 
 		if state.Continuation.Result != nil && len(state.Continuation.Calls) == 0 && state.SubCallID == "" && state.ResumeInput == nil {
 			progressClose()
-			monitor.Event(Event{
-				Time:        time.Now(),
-				CallContext: callCtx.GetCallContext(),
-				Type:        EventTypeCallFinish,
-				Content:     getEventContent(*state.Continuation.Result, callCtx),
-			})
 			if callCtx.Tool.Chat {
-				return &State{
+				retState = &State{
 					Continuation:       state.Continuation,
 					ContinuationToolID: callCtx.Tool.ID,
-				}, nil
+				}
+			} else {
+				retState = &State{
+					Result: state.Continuation.Result,
+				}
 			}
-			return &State{
-				Result: state.Continuation.Result,
-			}, nil
+			handleOutput = false
+			retState, retErr = r.handleOutput(callCtx, monitor, env, state, retState, nil)
+			if retErr == nil {
+				var content string
+				if retState.Continuation != nil && retState.Continuation.Result != nil {
+					content = *retState.Continuation.Result
+				} else if retState.Result != nil {
+					content = *retState.Result
+				}
+				monitor.Event(Event{
+					Time:        time.Now(),
+					CallContext: callCtx.GetCallContext(),
+					Type:        EventTypeCallFinish,
+					Content:     getEventContent(content, callCtx),
+				})
+			}
+			return retState, retErr
 		}
 
 		monitor.Event(Event{
