@@ -2,10 +2,6 @@ module github.com/gptscript-ai/gptscript
 
 go 1.23.1
 
-replace (
-	github.com/gptscript-ai/chat-completion-client => ../chat-completion-client
-	)
-
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/BurntSushi/locker v0.0.0-20171006230638-a6e239ea1c69
@@ -19,7 +15,7 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/google/uuid v1.6.0
 	github.com/gptscript-ai/broadcaster v0.0.0-20240625175512-c43682019b86
-	github.com/gptscript-ai/chat-completion-client v0.0.0-20241104122544-5fe75f07c131
+	github.com/gptscript-ai/chat-completion-client v0.0.0-20241216203633-5c0178fb89ed
 	github.com/gptscript-ai/cmd v0.0.0-20240802230653-326b7baf6fcb
 	github.com/gptscript-ai/go-gptscript v0.9.5-rc5.0.20240927213153-2af51434b93e
 	github.com/gptscript-ai/tui v0.0.0-20240923192013-172e51ccf1d6
