@@ -555,10 +555,19 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 	var (
 		headers          map[string]string
 		modelProviderEnv []string
+		retryOpts        = []openai.RetryOptions{
+			{
+				Retries:        5,
+				RetryAboveCode: 499,        // 5xx errors
+				RetryCodes:     []int{429}, // 429 Too Many Requests (ratelimit)
+			},
+		}
 	)
 	for _, e := range env {
 		if strings.HasPrefix(e, "GPTSCRIPT_MODEL_PROVIDER_") {
 			modelProviderEnv = append(modelProviderEnv, e)
+		} else if strings.HasPrefix(e, "GPTSCRIPT_DISABLE_RETRIES") {
+			retryOpts = nil
 		}
 	}
 
@@ -572,7 +581,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 
 	if !streamResponse {
 		request.StreamOptions = nil
-		resp, err := c.c.CreateChatCompletion(ctx, request, headers)
+		resp, err := c.c.CreateChatCompletion(ctx, request, headers, retryOpts...)
 		if err != nil {
 			return types.CompletionMessage{}, err
 		}
@@ -597,7 +606,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 		}), nil
 	}
 
-	stream, err := c.c.CreateChatCompletionStream(ctx, request, headers)
+	stream, err := c.c.CreateChatCompletionStream(ctx, request, headers, retryOpts...)
 	if err != nil {
 		return types.CompletionMessage{}, err
 	}
