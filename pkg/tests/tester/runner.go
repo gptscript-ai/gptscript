@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/adrg/xdg"
-	"github.com/gptscript-ai/gptscript/pkg/certs"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes"
@@ -199,10 +198,7 @@ func NewRunner(t *testing.T) *Runner {
 
 	rm := runtimes.Default(cacheDir, "")
 
-	gptscriptCert, err := certs.GenerateGPTScriptCert()
-	require.NoError(t, err)
-
-	run, err := runner.New(c, credentials.NoopStore{}, gptscriptCert, runner.Options{
+	run, err := runner.New(c, credentials.NoopStore{}, runner.Options{
 		Sequential:     true,
 		RuntimeManager: rm,
 	})

@@ -65,9 +65,10 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 		toolURL = parsed.String()
 
 		// Find the certificate corresponding to this daemon tool
-		certificates.daemonLock.Lock()
+		certificates.lock.Lock()
 		daemonCert, exists := certificates.daemonCerts[referencedTool.ID]
-		certificates.daemonLock.Unlock()
+		clientCert := certificates.clientCert
+		certificates.lock.Unlock()
 
 		if !exists {
 			return nil, fmt.Errorf("missing daemon certificate for [%s]", referencedTool.ID)
@@ -79,14 +80,14 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 			return nil, fmt.Errorf("failed to append daemon certificate for [%s]", referencedTool.ID)
 		}
 
-		clientCert, err := tls.X509KeyPair(e.GPTScriptCert.Cert, e.GPTScriptCert.Key)
+		tlsClientCert, err := tls.X509KeyPair(clientCert.Cert, clientCert.Key)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create client certificate: %v", err)
 		}
 
 		// Create TLS config for use in the HTTP client later
 		tlsConfigForDaemonRequest = &tls.Config{
-			Certificates:       []tls.Certificate{clientCert},
+			Certificates:       []tls.Certificate{tlsClientCert},
 			RootCAs:            pool,
 			InsecureSkipVerify: false,
 		}

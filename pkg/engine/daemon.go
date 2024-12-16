@@ -36,7 +36,8 @@ type Ports struct {
 
 type Certs struct {
 	daemonCerts map[string]certs.CertAndKey
-	daemonLock  sync.Mutex
+	clientCert  certs.CertAndKey
+	lock        sync.Mutex
 }
 
 func IsDaemonRunning(url string) bool {
@@ -157,8 +158,8 @@ func (e *Engine) startDaemon(tool types.Tool) (string, error) {
 	url = fmt.Sprintf("https://127.0.0.1:%d%s", port, path)
 
 	// Generate a certificate for the daemon, unless one already exists.
-	certificates.daemonLock.Lock()
-	defer certificates.daemonLock.Unlock()
+	certificates.lock.Lock()
+	defer certificates.lock.Unlock()
 	cert, exists := certificates.daemonCerts[tool.ID]
 	if !exists {
 		var err error
@@ -173,12 +174,21 @@ func (e *Engine) startDaemon(tool types.Tool) (string, error) {
 		certificates.daemonCerts[tool.ID] = cert
 	}
 
+	// Set the client certificate if there isn't one already.
+	if len(certificates.clientCert.Cert) == 0 {
+		gptscriptCert, err := certs.GenerateGPTScriptCert()
+		if err != nil {
+			return "", fmt.Errorf("failed to generate GPTScript certificate: %v", err)
+		}
+		certificates.clientCert = gptscriptCert
+	}
+
 	cmd, stop, err := e.newCommand(ctx, []string{
 		fmt.Sprintf("PORT=%d", port),
 		fmt.Sprintf("CERT=%s", base64.StdEncoding.EncodeToString(cert.Cert)),
 		fmt.Sprintf("PRIVATE_KEY=%s", base64.StdEncoding.EncodeToString(cert.Key)),
 		fmt.Sprintf("GPTSCRIPT_PORT=%d", port),
-		fmt.Sprintf("GPTSCRIPT_CERT=%s", base64.StdEncoding.EncodeToString(e.GPTScriptCert.Cert)),
+		fmt.Sprintf("GPTSCRIPT_CERT=%s", base64.StdEncoding.EncodeToString(certificates.clientCert.Cert)),
 	},
 		tool,
 		"{}",
@@ -241,7 +251,7 @@ func (e *Engine) startDaemon(tool types.Tool) (string, error) {
 	}()
 
 	// Build HTTP client for checking the health of the daemon
-	clientCert, err := tls.X509KeyPair(e.GPTScriptCert.Cert, e.GPTScriptCert.Key)
+	tlsClientCert, err := tls.X509KeyPair(certificates.clientCert.Cert, certificates.clientCert.Key)
 	if err != nil {
 		return "", fmt.Errorf("failed to create client certificate: %v", err)
 	}
@@ -254,7 +264,7 @@ func (e *Engine) startDaemon(tool types.Tool) (string, error) {
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				Certificates:       []tls.Certificate{clientCert},
+				Certificates:       []tls.Certificate{tlsClientCert},
 				RootCAs:            pool,
 				InsecureSkipVerify: false,
 			},
@@ -271,7 +281,6 @@ func (e *Engine) startDaemon(tool types.Tool) (string, error) {
 			}()
 			return url, nil
 		}
-		_ = resp.Body.Close()
 		select {
 		case <-killedCtx.Done():
 			return url, fmt.Errorf("daemon failed to start: %w", context.Cause(killedCtx))

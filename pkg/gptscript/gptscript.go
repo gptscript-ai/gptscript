@@ -12,7 +12,6 @@ import (
 
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
-	"github.com/gptscript-ai/gptscript/pkg/certs"
 	"github.com/gptscript-ai/gptscript/pkg/config"
 	context2 "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
@@ -108,12 +107,7 @@ func New(ctx context.Context, o ...Options) (*GPTScript, error) {
 		opts.Runner.RuntimeManager = runtimes.Default(cacheClient.CacheDir(), opts.SystemToolsDir)
 	}
 
-	gptscriptCert, err := certs.GenerateGPTScriptCert()
-	if err != nil {
-		return nil, err
-	}
-
-	simplerRunner, err := newSimpleRunner(cacheClient, opts.Runner.RuntimeManager, opts.Env, gptscriptCert)
+	simplerRunner, err := newSimpleRunner(cacheClient, opts.Runner.RuntimeManager, opts.Env)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +140,7 @@ func New(ctx context.Context, o ...Options) (*GPTScript, error) {
 		opts.Runner.MonitorFactory = monitor.NewConsole(opts.Monitor, monitor.Options{DebugMessages: *opts.Quiet})
 	}
 
-	runner, err := runner.New(registry, credStore, gptscriptCert, opts.Runner)
+	runner, err := runner.New(registry, credStore, opts.Runner)
 	if err != nil {
 		return nil, err
 	}
@@ -291,8 +285,8 @@ type simpleRunner struct {
 	env    []string
 }
 
-func newSimpleRunner(cache *cache.Client, rm engine.RuntimeManager, env []string, gptscriptCert certs.CertAndKey) (*simpleRunner, error) {
-	runner, err := runner.New(noopModel{}, credentials.NoopStore{}, gptscriptCert, runner.Options{
+func newSimpleRunner(cache *cache.Client, rm engine.RuntimeManager, env []string) (*simpleRunner, error) {
+	runner, err := runner.New(noopModel{}, credentials.NoopStore{}, runner.Options{
 		RuntimeManager: rm,
 		MonitorFactory: simpleMonitorFactory{},
 	})

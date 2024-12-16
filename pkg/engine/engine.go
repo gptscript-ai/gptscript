@@ -7,7 +7,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gptscript-ai/gptscript/pkg/certs"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
@@ -23,7 +22,6 @@ type RuntimeManager interface {
 }
 
 type Engine struct {
-	GPTScriptCert  certs.CertAndKey
 	Model          Model
 	RuntimeManager RuntimeManager
 	Env            []string

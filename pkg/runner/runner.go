@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
-	"github.com/gptscript-ai/gptscript/pkg/certs"
 	context2 "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
@@ -96,10 +95,9 @@ type Runner struct {
 	credOverrides  []string
 	credStore      credentials.CredentialStore
 	sequential     bool
-	gptscriptCert  certs.CertAndKey
 }
 
-func New(client engine.Model, credStore credentials.CredentialStore, gptscriptCert certs.CertAndKey, opts ...Options) (*Runner, error) {
+func New(client engine.Model, credStore credentials.CredentialStore, opts ...Options) (*Runner, error) {
 	opt := complete(opts...)
 
 	runner := &Runner{
@@ -111,7 +109,6 @@ func New(client engine.Model, credStore credentials.CredentialStore, gptscriptCe
 		credStore:      credStore,
 		sequential:     opt.Sequential,
 		auth:           opt.Authorizer,
-		gptscriptCert:  gptscriptCert,
 	}
 
 	if opt.StartPort != 0 {
@@ -414,7 +411,6 @@ func (r *Runner) start(callCtx engine.Context, state *State, monitor Monitor, en
 		RuntimeManager: runtimeWithLogger(callCtx, monitor, r.runtimeManager),
 		Progress:       progress,
 		Env:            env,
-		GPTScriptCert:  r.gptscriptCert,
 	}
 
 	callCtx.Ctx = context2.AddPauseFuncToCtx(callCtx.Ctx, monitor.Pause)
@@ -597,7 +593,6 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 			RuntimeManager: runtimeWithLogger(callCtx, monitor, r.runtimeManager),
 			Progress:       progress,
 			Env:            env,
-			GPTScriptCert:  r.gptscriptCert,
 		}
 
 		var contentInput string
