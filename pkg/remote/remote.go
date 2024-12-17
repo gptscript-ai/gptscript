@@ -166,10 +166,22 @@ func (c *Client) load(ctx context.Context, toolName string, env ...string) (*ope
 		return nil, err
 	}
 
+	clientCert, err := engine.GetClientCert()
+	if err != nil {
+		return nil, err
+	}
+
+	serverCert, err := engine.GetDaemonCert(prg.EntryToolID)
+	if err != nil {
+		return nil, err
+	}
+
 	oClient, err := openai.NewClient(ctx, c.credStore, openai.Options{
-		BaseURL:  strings.TrimSuffix(url, "/") + "/v1",
-		Cache:    c.cache,
-		CacheKey: prg.EntryToolID,
+		BaseURL:    strings.TrimSuffix(url, "/") + "/v1",
+		Cache:      c.cache,
+		CacheKey:   prg.EntryToolID,
+		ClientCert: clientCert,
+		ServerCert: serverCert,
 	})
 	if err != nil {
 		return nil, err

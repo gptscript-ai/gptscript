@@ -14,6 +14,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/gptscript-ai/gptscript/pkg/certs"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
@@ -74,22 +75,22 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 			return nil, fmt.Errorf("missing daemon certificate for [%s]", referencedTool.ID)
 		}
 
-		// Create a pool for the certificate to treat as a CA
-		pool := x509.NewCertPool()
-		if !pool.AppendCertsFromPEM(daemonCert.Cert) {
-			return nil, fmt.Errorf("failed to append daemon certificate for [%s]", referencedTool.ID)
-		}
-
-		tlsClientCert, err := tls.X509KeyPair(clientCert.Cert, clientCert.Key)
+		tlsConfigForDaemonRequest, err = getTLSConfig(clientCert, daemonCert.Cert)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create client certificate: %v", err)
+			return nil, err
 		}
+	} else if isLocalhostHTTPS(toolURL) {
+		// This sometimes happens when talking to a model provider
+		certificates.lock.Lock()
+		daemonCert, exists := certificates.daemonCerts[tool.ID]
+		clientCert := certificates.clientCert
+		certificates.lock.Unlock()
 
-		// Create TLS config for use in the HTTP client later
-		tlsConfigForDaemonRequest = &tls.Config{
-			Certificates:       []tls.Certificate{tlsClientCert},
-			RootCAs:            pool,
-			InsecureSkipVerify: false,
+		if exists {
+			tlsConfigForDaemonRequest, err = getTLSConfig(clientCert, daemonCert.Cert)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -183,5 +184,32 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 	s := string(content)
 	return &Return{
 		Result: &s,
+	}, nil
+}
+
+func isLocalhostHTTPS(u string) bool {
+	parsed, err := url.Parse(u)
+	if err != nil {
+		return false
+	}
+
+	return parsed.Scheme == "https" && (parsed.Hostname() == "localhost" || parsed.Hostname() == "127.0.0.1")
+}
+
+func getTLSConfig(clientCert certs.CertAndKey, daemonCert []byte) (*tls.Config, error) {
+	pool := x509.NewCertPool()
+	if !pool.AppendCertsFromPEM(daemonCert) {
+		return nil, fmt.Errorf("failed to append daemon certificate")
+	}
+
+	tlsClientCert, err := tls.X509KeyPair(clientCert.Cert, clientCert.Key)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create client certificate: %v", err)
+	}
+
+	return &tls.Config{
+		Certificates:       []tls.Certificate{tlsClientCert},
+		RootCAs:            pool,
+		InsecureSkipVerify: false,
 	}, nil
 }

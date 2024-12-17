@@ -40,6 +40,29 @@ type Certs struct {
 	lock        sync.Mutex
 }
 
+func GetClientCert() (certs.CertAndKey, error) {
+	certificates.lock.Lock()
+	defer certificates.lock.Unlock()
+	if len(certificates.clientCert.Cert) == 0 {
+		cert, err := certs.GenerateGPTScriptCert()
+		if err != nil {
+			return certs.CertAndKey{}, fmt.Errorf("failed to generate GPTScript certificate: %v", err)
+		}
+		certificates.clientCert = cert
+	}
+	return certificates.clientCert, nil
+}
+
+func GetDaemonCert(toolID string) ([]byte, error) {
+	certificates.lock.Lock()
+	defer certificates.lock.Unlock()
+	cert, exists := certificates.daemonCerts[toolID]
+	if !exists {
+		return nil, fmt.Errorf("daemon certificate for [%s] not found", toolID)
+	}
+	return cert.Cert, nil
+}
+
 func IsDaemonRunning(url string) bool {
 	ports.daemonLock.Lock()
 	defer ports.daemonLock.Unlock()

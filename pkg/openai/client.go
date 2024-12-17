@@ -2,9 +2,12 @@ package openai
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"io"
 	"log/slog"
+	"net/http"
 	"os"
 	"slices"
 	"sort"
@@ -13,6 +16,7 @@ import (
 
 	openai "github.com/gptscript-ai/chat-completion-client"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
+	"github.com/gptscript-ai/gptscript/pkg/certs"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
@@ -51,13 +55,15 @@ type Client struct {
 }
 
 type Options struct {
-	BaseURL      string `usage:"OpenAI base URL" name:"openai-base-url" env:"OPENAI_BASE_URL"`
-	APIKey       string `usage:"OpenAI API KEY" name:"openai-api-key" env:"OPENAI_API_KEY"`
-	OrgID        string `usage:"OpenAI organization ID" name:"openai-org-id" env:"OPENAI_ORG_ID"`
-	DefaultModel string `usage:"Default LLM model to use" default:"gpt-4o"`
-	ConfigFile   string `usage:"Path to GPTScript config file" name:"config"`
-	SetSeed      bool   `usage:"-"`
-	CacheKey     string `usage:"-"`
+	BaseURL      string           `usage:"OpenAI base URL" name:"openai-base-url" env:"OPENAI_BASE_URL"`
+	APIKey       string           `usage:"OpenAI API KEY" name:"openai-api-key" env:"OPENAI_API_KEY"`
+	OrgID        string           `usage:"OpenAI organization ID" name:"openai-org-id" env:"OPENAI_ORG_ID"`
+	DefaultModel string           `usage:"Default LLM model to use" default:"gpt-4o"`
+	ConfigFile   string           `usage:"Path to GPTScript config file" name:"config"`
+	SetSeed      bool             `usage:"-"`
+	CacheKey     string           `usage:"-"`
+	ClientCert   certs.CertAndKey `usage:"-"`
+	ServerCert   []byte           `usage:"-"`
 	Cache        *cache.Client
 }
 
@@ -70,6 +76,14 @@ func Complete(opts ...Options) (result Options) {
 		result.DefaultModel = types.FirstSet(opt.DefaultModel, result.DefaultModel)
 		result.SetSeed = types.FirstSet(opt.SetSeed, result.SetSeed)
 		result.CacheKey = types.FirstSet(opt.CacheKey, result.CacheKey)
+
+		if len(opt.ClientCert.Cert) > 0 {
+			result.ClientCert = opt.ClientCert
+		}
+
+		if len(opt.ServerCert) > 0 {
+			result.ServerCert = opt.ServerCert
+		}
 	}
 
 	return result
@@ -115,6 +129,29 @@ func NewClient(ctx context.Context, credStore credentials.CredentialStore, opts 
 	cfg := openai.DefaultConfig(opt.APIKey)
 	cfg.BaseURL = types.FirstSet(opt.BaseURL, cfg.BaseURL)
 	cfg.OrgID = types.FirstSet(opt.OrgID, cfg.OrgID)
+
+	// Set up for mTLS, if configured.
+	if opt.ServerCert != nil && len(opt.ClientCert.Cert) > 0 {
+		pool := x509.NewCertPool()
+		if !pool.AppendCertsFromPEM(opt.ServerCert) {
+			return nil, errors.New("failed to append server cert to pool")
+		}
+
+		clientCert, err := tls.X509KeyPair(opt.ClientCert.Cert, opt.ClientCert.Key)
+		if err != nil {
+			return nil, err
+		}
+
+		cfg.HTTPClient = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					Certificates:       []tls.Certificate{clientCert},
+					RootCAs:            pool,
+					InsecureSkipVerify: false,
+				},
+			},
+		}
+	}
 
 	cacheKeyBase := opt.CacheKey
 	if cacheKeyBase == "" {
