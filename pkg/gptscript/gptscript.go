@@ -10,6 +10,7 @@ import (
 	"slices"
 	"strings"
 
+	openai2 "github.com/gptscript-ai/chat-completion-client"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/config"
@@ -275,7 +276,7 @@ func (g *GPTScript) ListTools(_ context.Context, prg types.Program) []types.Tool
 	return prg.TopLevelTools()
 }
 
-func (g *GPTScript) ListModels(ctx context.Context, providers ...string) ([]string, error) {
+func (g *GPTScript) ListModels(ctx context.Context, providers ...string) ([]openai2.Model, error) {
 	return g.Registry.ListModels(ctx, providers...)
 }
 

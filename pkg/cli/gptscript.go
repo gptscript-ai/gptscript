@@ -276,7 +276,10 @@ func (r *GPTScript) listModels(ctx context.Context, gptScript *gptscript.GPTScri
 	if err != nil {
 		return err
 	}
-	fmt.Println(strings.Join(models, "\n"))
+
+	for _, model := range models {
+		fmt.Println(model.ID)
+	}
 	return nil
 }
 
