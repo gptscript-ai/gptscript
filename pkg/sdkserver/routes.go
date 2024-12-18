@@ -145,7 +145,7 @@ func (s *server) listModels(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeResponse(logger, w, map[string]any{"stdout": strings.Join(out, "\n")})
+	writeResponse(logger, w, map[string]any{"stdout": out})
 }
 
 // execHandler is a general handler for executing tools with gptscript. This is mainly responsible for parsing the request body.

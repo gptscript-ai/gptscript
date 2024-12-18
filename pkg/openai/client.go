@@ -157,10 +157,15 @@ func (c *Client) Supports(ctx context.Context, modelName string) (bool, error) {
 		return false, InvalidAuthError{}
 	}
 
-	return slices.Contains(models, modelName), nil
+	for _, model := range models {
+		if model.ID == modelName {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
-func (c *Client) ListModels(ctx context.Context, providers ...string) (result []string, _ error) {
+func (c *Client) ListModels(ctx context.Context, providers ...string) ([]openai.Model, error) {
 	// Only serve if providers is empty or "" is in the list
 	if len(providers) != 0 && !slices.Contains(providers, "") {
 		return nil, nil
@@ -179,11 +184,10 @@ func (c *Client) ListModels(ctx context.Context, providers ...string) (result []
 	if err != nil {
 		return nil, err
 	}
-	for _, model := range models.Models {
-		result = append(result, model.ID)
-	}
-	sort.Strings(result)
-	return result, nil
+	sort.Slice(models.Models, func(i, j int) bool {
+		return models.Models[i].ID < models.Models[j].ID
+	})
+	return models.Models, nil
 }
 
 func (c *Client) cacheKey(request openai.ChatCompletionRequest) any {

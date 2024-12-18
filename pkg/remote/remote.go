@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	openai2 "github.com/gptscript-ai/chat-completion-client"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
@@ -62,7 +63,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	return client.Call(ctx, messageRequest, env, status)
 }
 
-func (c *Client) ListModels(ctx context.Context, providers ...string) (result []string, _ error) {
+func (c *Client) ListModels(ctx context.Context, providers ...string) (result []openai2.Model, _ error) {
 	for _, provider := range providers {
 		client, err := c.load(ctx, provider)
 		if err != nil {
@@ -72,12 +73,16 @@ func (c *Client) ListModels(ctx context.Context, providers ...string) (result []
 		if err != nil {
 			return nil, err
 		}
-		for _, model := range models {
-			result = append(result, model+" from "+provider)
+		for i := range models {
+			models[i].ID = fmt.Sprintf("%s from %s", models[i].ID, provider)
 		}
+
+		result = append(result, models...)
 	}
 
-	sort.Strings(result)
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].ID < result[j].ID
+	})
 	return
 }
 
