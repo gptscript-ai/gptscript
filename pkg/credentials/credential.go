@@ -15,6 +15,7 @@ const (
 	ctxSeparator                               = "///"
 	CredentialTypeTool          CredentialType = "tool"
 	CredentialTypeModelProvider CredentialType = "modelProvider"
+	CredentialTypeAuthProvider  CredentialType = "authProvider"
 	ExistingCredential                         = "GPTSCRIPT_EXISTING_CREDENTIAL"
 	CredentialExpiration                       = "GPTSCRIPT_CREDENTIAL_EXPIRATION"
 )
