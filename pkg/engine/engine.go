@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"slices"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -11,6 +14,16 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
+
+var maxConsecutiveToolCalls = 10
+
+func init() {
+	if val := os.Getenv("GPTSCRIPT_MAX_CONSECUTIVE_TOOL_CALLS"); val != "" {
+		if i, err := strconv.Atoi(val); err == nil && i > 0 {
+			maxConsecutiveToolCalls = i
+		}
+	}
+}
 
 type Model interface {
 	Call(ctx context.Context, messageRequest types.CompletionRequest, env []string, status chan<- types.CompletionStatus) (*types.CompletionMessage, error)
@@ -386,6 +399,28 @@ func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 			}
 		}
 	}()
+
+	// Limit the number of consecutive tool calls and responses.
+	// We don't want the LLM to call tools unrestricted or get stuck in an error loop.
+	var messagesSinceLastUserMessage int
+	for _, msg := range slices.Backward(state.Completion.Messages) {
+		if msg.Role == types.CompletionMessageRoleTypeUser {
+			break
+		}
+		messagesSinceLastUserMessage++
+	}
+	// Divide by 2 because tool calls come in pairs: call and response.
+	if messagesSinceLastUserMessage/2 > maxConsecutiveToolCalls {
+		msg := fmt.Sprintf("We cannot continue because the number of consecutive tool calls is limited to %d.", maxConsecutiveToolCalls)
+		ret.State.Completion.Messages = append(state.Completion.Messages, types.CompletionMessage{
+			Role:    types.CompletionMessageRoleTypeAssistant,
+			Content: []types.ContentPart{{Text: msg}},
+		})
+		// Setting this ensures that chat continues as expected when we hit this problem.
+		state.Pending = map[string]types.CompletionToolCall{}
+		ret.Result = &msg
+		return &ret, nil
+	}
 
 	resp, err := e.Model.Call(ctx, state.Completion, e.Env, progress)
 	if err != nil {
