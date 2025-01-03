@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"sort"
-	"strings"
 	"sync"
 	"time"
 
@@ -245,92 +244,6 @@ var (
 	EventTypeRunFinish    EventType = "runFinish"
 )
 
-func getToolRefInput(prg *types.Program, ref types.ToolReference, input string) (string, error) {
-	if ref.Arg == "" {
-		return "", nil
-	}
-
-	targetArgs := prg.ToolSet[ref.ToolID].Arguments
-	targetKeys := map[string]string{}
-
-	if ref.Arg == "*" {
-		return input, nil
-	}
-
-	if targetArgs == nil {
-		return "", nil
-	}
-
-	for targetKey := range targetArgs.Properties {
-		targetKeys[strings.ToLower(targetKey)] = targetKey
-	}
-
-	inputMap := map[string]interface{}{}
-	outputMap := map[string]interface{}{}
-
-	_ = json.Unmarshal([]byte(input), &inputMap)
-	for k, v := range inputMap {
-		inputMap[strings.ToLower(k)] = v
-	}
-
-	fields := strings.Fields(ref.Arg)
-
-	for i := 0; i < len(fields); i++ {
-		field := fields[i]
-		if field == "and" {
-			continue
-		}
-		if field == "as" {
-			i++
-			continue
-		}
-
-		var (
-			keyName string
-			val     any
-		)
-
-		if strings.HasPrefix(field, "$") {
-			key := strings.TrimPrefix(field, "$")
-			key = strings.TrimPrefix(key, "{")
-			key = strings.TrimSuffix(key, "}")
-			val = inputMap[strings.ToLower(key)]
-		} else {
-			val = field
-		}
-
-		if len(fields) > i+1 && fields[i+1] == "as" {
-			keyName = strings.ToLower(fields[i+2])
-		}
-
-		if len(targetKeys) == 0 {
-			return "", fmt.Errorf("can not assign arg to context because target tool [%s] has no defined args", ref.ToolID)
-		}
-
-		if keyName == "" {
-			if len(targetKeys) != 1 {
-				return "", fmt.Errorf("can not assign arg to context because target tool [%s] has does not have one args. You must use \"as\" syntax to map the arg to a key %v", ref.ToolID, targetKeys)
-			}
-			for k := range targetKeys {
-				keyName = k
-			}
-		}
-
-		if targetKey, ok := targetKeys[strings.ToLower(keyName)]; ok {
-			outputMap[targetKey] = val
-		} else {
-			return "", fmt.Errorf("can not assign arg to context because target tool [%s] has does not args [%s]", ref.ToolID, keyName)
-		}
-	}
-
-	if len(outputMap) == 0 {
-		return "", nil
-	}
-
-	output, err := json.Marshal(outputMap)
-	return string(output), err
-}
-
 func (r *Runner) getContext(callCtx engine.Context, state *State, monitor Monitor, env []string, input string) (result []engine.InputContext, _ error) {
 	toolRefs, err := callCtx.Tool.GetToolsByType(callCtx.Program, types.ToolTypeContext)
 	if err != nil {
@@ -343,7 +256,7 @@ func (r *Runner) getContext(callCtx engine.Context, state *State, monitor Monito
 			continue
 		}
 
-		contextInput, err := getToolRefInput(callCtx.Program, toolRef, input)
+		contextInput, err := types.GetToolRefInput(callCtx.Program, toolRef, input)
 		if err != nil {
 			return nil, err
 		}
@@ -878,18 +791,9 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			refresh          bool
 		)
 
-		// Only try to look up the cred if the tool is on GitHub or has an alias.
-		// If it is a GitHub tool and has an alias, the alias overrides the tool name, so we use it as the credential name.
-		if isGitHubTool(toolName) && credentialAlias == "" {
-			c, exists, err = r.credStore.Get(callCtx.Ctx, toolName)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get credentials for tool %s: %w", toolName, err)
-			}
-		} else if credentialAlias != "" {
-			c, exists, err = r.credStore.Get(callCtx.Ctx, credentialAlias)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get credential %s: %w", credentialAlias, err)
-			}
+		c, exists, err = r.credStore.Get(callCtx.Ctx, credName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get credentials for tool %s: %w", toolName, err)
 		}
 
 		if c == nil {
@@ -955,22 +859,17 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			}
 
 			if !resultCredential.Ephemeral {
-				// Only store the credential if the tool is on GitHub or has an alias, and the credential is non-empty.
-				if (isGitHubTool(toolName) && callCtx.Program.ToolSet[ref.ToolID].Source.Repo != nil) || credentialAlias != "" {
-					if isEmpty {
-						log.Warnf("Not saving empty credential for tool %s", toolName)
-					} else {
-						if refresh {
-							err = r.credStore.Refresh(callCtx.Ctx, resultCredential)
-						} else {
-							err = r.credStore.Add(callCtx.Ctx, resultCredential)
-						}
-						if err != nil {
-							return nil, fmt.Errorf("failed to save credential for tool %s: %w", toolName, err)
-						}
-					}
+				if isEmpty {
+					log.Warnf("Not saving empty credential for tool %s", toolName)
 				} else {
-					log.Warnf("Not saving credential for tool %s - credentials will only be saved for tools from GitHub, or tools that use aliases.", toolName)
+					if refresh {
+						err = r.credStore.Refresh(callCtx.Ctx, resultCredential)
+					} else {
+						err = r.credStore.Add(callCtx.Ctx, resultCredential)
+					}
+					if err != nil {
+						return nil, fmt.Errorf("failed to save credential for tool %s: %w", toolName, err)
+					}
 				}
 			}
 		} else {
@@ -991,8 +890,4 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 	}
 
 	return env, nil
-}
-
-func isGitHubTool(toolName string) bool {
-	return strings.HasPrefix(toolName, "github.com")
 }

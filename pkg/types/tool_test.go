@@ -94,3 +94,23 @@ func float32Ptr(f float32) *float32 {
 func boolPtr(b bool) *bool {
 	return &b
 }
+
+func TestSplitArg(t *testing.T) {
+	prefix, arg := SplitArg("")
+	autogold.Expect([]string{"", ""}).Equal(t, []string{prefix, arg})
+
+	prefix, arg = SplitArg("toolName")
+	autogold.Expect([]string{"toolName", ""}).Equal(t, []string{prefix, arg})
+
+	prefix, arg = SplitArg("toolName as myAlias")
+	autogold.Expect([]string{"toolName", "as myAlias"}).Equal(t, []string{prefix, arg})
+
+	prefix, arg = SplitArg("toolName with value1 as arg1 and value2 as arg2")
+	autogold.Expect([]string{"toolName", "value1 as arg1 and value2 as arg2"}).Equal(t, []string{prefix, arg})
+
+	prefix, arg = SplitArg("toolName as myAlias with value1 as arg1 and value2 as arg2")
+	autogold.Expect([]string{"toolName", "value1 as arg1 and value2 as arg2"}).Equal(t, []string{prefix, arg})
+
+	prefix, arg = SplitArg("toolName with value1 as arg1 and value2 as arg2 as myAlias")
+	autogold.Expect([]string{"toolName", "value1 as arg1 and value2 as arg2 as myAlias"}).Equal(t, []string{prefix, arg})
+}

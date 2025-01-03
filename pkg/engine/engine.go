@@ -286,6 +286,8 @@ func (e *Engine) runCommandTools(ctx Context, tool types.Tool, input string) (*R
 		return e.runOpenAPI(tool, input)
 	} else if tool.IsEcho() {
 		return e.runEcho(tool)
+	} else if tool.IsCall() {
+		return e.runCall(ctx, tool, input)
 	}
 	s, err := e.runCommand(ctx, tool, input, ctx.ToolCategory)
 	if err != nil {

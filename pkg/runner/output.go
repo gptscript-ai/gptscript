@@ -19,7 +19,7 @@ func argsForFilters(prg *types.Program, tool types.ToolReference, startState *St
 		startInput = *startState.StartInput
 	}
 
-	parsedArgs, err := getToolRefInput(prg, tool, startInput)
+	parsedArgs, err := types.GetToolRefInput(prg, tool, startInput)
 	if err != nil {
 		return "", err
 	}

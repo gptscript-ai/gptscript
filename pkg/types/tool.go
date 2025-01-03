@@ -19,6 +19,7 @@ const (
 	DaemonPrefix  = "#!sys.daemon"
 	OpenAPIPrefix = "#!sys.openapi"
 	EchoPrefix    = "#!sys.echo"
+	CallPrefix    = "#!sys.call"
 	CommandPrefix = "#!"
 )
 
@@ -862,6 +863,10 @@ func (t Tool) IsAgentsOnly() bool {
 
 func (t Tool) IsEcho() bool {
 	return strings.HasPrefix(t.Instructions, EchoPrefix)
+}
+
+func (t Tool) IsCall() bool {
+	return strings.HasPrefix(t.Instructions, CallPrefix)
 }
 
 func (t Tool) IsHTTP() bool {
