@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -791,9 +792,18 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			refresh          bool
 		)
 
-		c, exists, err = r.credStore.Get(callCtx.Ctx, credName)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get credentials for tool %s: %w", toolName, err)
+		// Only try to look up the cred if the tool is on GitHub or has an alias.
+		// If it is a GitHub tool and has an alias, the alias overrides the tool name, so we use it as the credential name.
+		if isGitHubTool(toolName) && credentialAlias == "" {
+			c, exists, err = r.credStore.Get(callCtx.Ctx, toolName)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get credentials for tool %s: %w", toolName, err)
+			}
+		} else if credentialAlias != "" {
+			c, exists, err = r.credStore.Get(callCtx.Ctx, credentialAlias)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get credential %s: %w", credentialAlias, err)
+			}
 		}
 
 		if c == nil {
@@ -859,17 +869,22 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 			}
 
 			if !resultCredential.Ephemeral {
-				if isEmpty {
-					log.Warnf("Not saving empty credential for tool %s", toolName)
-				} else {
-					if refresh {
-						err = r.credStore.Refresh(callCtx.Ctx, resultCredential)
+				// Only store the credential if the tool is on GitHub or has an alias, and the credential is non-empty.
+				if (isGitHubTool(toolName) && callCtx.Program.ToolSet[ref.ToolID].Source.Repo != nil) || credentialAlias != "" {
+					if isEmpty {
+						log.Warnf("Not saving empty credential for tool %s", toolName)
 					} else {
-						err = r.credStore.Add(callCtx.Ctx, resultCredential)
+						if refresh {
+							err = r.credStore.Refresh(callCtx.Ctx, resultCredential)
+						} else {
+							err = r.credStore.Add(callCtx.Ctx, resultCredential)
+						}
+						if err != nil {
+							return nil, fmt.Errorf("failed to save credential for tool %s: %w", toolName, err)
+						}
 					}
-					if err != nil {
-						return nil, fmt.Errorf("failed to save credential for tool %s: %w", toolName, err)
-					}
+				} else {
+					log.Warnf("Not saving credential for tool %s - credentials will only be saved for tools from GitHub, or tools that use aliases.", toolName)
 				}
 			}
 		} else {
@@ -890,4 +905,8 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 	}
 
 	return env, nil
+}
+
+func isGitHubTool(toolName string) bool {
+	return strings.HasPrefix(toolName, "github.com")
 }
