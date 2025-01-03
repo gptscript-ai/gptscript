@@ -49,6 +49,9 @@ func (e *Engine) runCall(ctx Context, tool types.Tool, input string) (*Return, e
 		"TOOL_CALL_ARGS": strings.Join(toolNameArgs, " "),
 		"TOOL_CALL_BODY": body,
 	}))
+	if err != nil {
+		return nil, fmt.Errorf("failed to merge inputs for tool calls: %w", err)
+	}
 
 	newCtx := ctx
 	newCtx.Tool = ctx.Program.ToolSet[ref.ToolID]
