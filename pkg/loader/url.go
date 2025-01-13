@@ -63,6 +63,9 @@ func loadURL(ctx context.Context, cache *cache.Client, base *source, name string
 			}
 		}
 	}
+	if cachedKey.Path == "" {
+		cachedKey.Path = "."
+	}
 
 	if ok, err := cache.Get(ctx, cachedKey, &cachedValue); err != nil {
 		return nil, false, err

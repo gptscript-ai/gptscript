@@ -232,21 +232,22 @@ func (s *server) load(w http.ResponseWriter, r *http.Request) {
 	logger.Debugf("parsing file: file=%s, content=%s", reqObject.File, reqObject.Content)
 
 	var (
-		prg   types.Program
-		err   error
-		cache = s.client.Cache
+		prg types.Program
+		err error
+
+		ctx = r.Context()
 	)
 
 	if reqObject.DisableCache {
-		cache = nil
+		ctx = cache.WithNoCache(ctx)
 	}
 
 	if reqObject.Content != "" {
-		prg, err = loader.ProgramFromSource(r.Context(), reqObject.Content, reqObject.SubTool, loader.Options{Cache: cache})
+		prg, err = loader.ProgramFromSource(ctx, reqObject.Content, reqObject.SubTool, loader.Options{Cache: s.client.Cache})
 	} else if reqObject.File != "" {
-		prg, err = loader.Program(r.Context(), reqObject.File, reqObject.SubTool, loader.Options{Cache: cache})
+		prg, err = loader.Program(ctx, reqObject.File, reqObject.SubTool, loader.Options{Cache: s.client.Cache})
 	} else {
-		prg, err = loader.ProgramFromSource(r.Context(), reqObject.ToolDefs.String(), reqObject.SubTool, loader.Options{Cache: cache})
+		prg, err = loader.ProgramFromSource(ctx, reqObject.ToolDefs.String(), reqObject.SubTool, loader.Options{Cache: s.client.Cache})
 	}
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to load program: %w", err))
