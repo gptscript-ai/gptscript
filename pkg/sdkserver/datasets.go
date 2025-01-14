@@ -79,7 +79,7 @@ func (s *server) listDatasets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := g.Run(r.Context(), prg, req.Env, req.Input)
+	result, err := g.Run(r.Context(), prg, s.getServerToolsEnv(req.Env), req.Input)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
 		return
@@ -147,7 +147,7 @@ func (s *server) addDatasetElements(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := g.Run(r.Context(), prg, req.Env, req.Input)
+	result, err := g.Run(r.Context(), prg, s.getServerToolsEnv(req.Env), req.Input)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
 		return
@@ -207,7 +207,7 @@ func (s *server) listDatasetElements(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := g.Run(r.Context(), prg, req.Env, req.Input)
+	result, err := g.Run(r.Context(), prg, s.getServerToolsEnv(req.Env), req.Input)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
 		return
@@ -270,7 +270,7 @@ func (s *server) getDatasetElement(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := g.Run(r.Context(), prg, req.Env, req.Input)
+	result, err := g.Run(r.Context(), prg, s.getServerToolsEnv(req.Env), req.Input)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
 		return

@@ -28,6 +28,7 @@ type Options struct {
 
 	ListenAddress              string
 	DatasetTool, WorkspaceTool string
+	ServerToolsEnv             []string
 	Debug                      bool
 	DisableServerErrorLogging  bool
 }
@@ -105,11 +106,13 @@ func run(ctx context.Context, listener net.Listener, opts Options) error {
 	}
 
 	s := &server{
-		gptscriptOpts:    opts.Options,
-		address:          listener.Addr().String(),
-		token:            token,
-		datasetTool:      opts.DatasetTool,
-		workspaceTool:    opts.WorkspaceTool,
+		gptscriptOpts:  opts.Options,
+		address:        listener.Addr().String(),
+		token:          token,
+		datasetTool:    opts.DatasetTool,
+		workspaceTool:  opts.WorkspaceTool,
+		serverToolsEnv: opts.ServerToolsEnv,
+
 		client:           g,
 		events:           events,
 		runtimeManager:   runtimes.Default(opts.Options.Cache.CacheDir, opts.SystemToolsDir),
@@ -175,6 +178,9 @@ func complete(opts ...Options) Options {
 	}
 	if result.DatasetTool == "" {
 		result.DatasetTool = "github.com/gptscript-ai/datasets"
+	}
+	if len(result.ServerToolsEnv) == 0 {
+		result.ServerToolsEnv = os.Environ()
 	}
 
 	return result
