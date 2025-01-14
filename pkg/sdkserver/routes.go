@@ -3,7 +3,6 @@ package sdkserver
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"sort"
 	"strings"
@@ -81,6 +80,9 @@ func (s *server) addRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /workspaces/delete-file", s.removeFileInWorkspace)
 	mux.HandleFunc("POST /workspaces/read-file", s.readFileInWorkspace)
 	mux.HandleFunc("POST /workspaces/stat-file", s.statFileInWorkspace)
+	mux.HandleFunc("POST /workspaces/list-revisions", s.listRevisions)
+	mux.HandleFunc("POST /workspaces/get-revision", s.getRevisionForFileInWorkspace)
+	mux.HandleFunc("POST /workspaces/delete-revision", s.deleteRevisionForFileInWorkspace)
 }
 
 // health just provides an endpoint for checking whether the server is running and accessible.
@@ -152,14 +154,9 @@ func (s *server) listModels(w http.ResponseWriter, r *http.Request) {
 // Then the options and tool are passed to the process function.
 func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 	logger := gcontext.GetLogger(r.Context())
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to read request body: %w", err))
-		return
-	}
 
 	reqObject := new(toolOrFileRequest)
-	if err := json.Unmarshal(body, reqObject); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(reqObject); err != nil {
 		writeError(logger, w, http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
 		return
 	}
