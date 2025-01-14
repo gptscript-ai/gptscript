@@ -58,6 +58,8 @@ type Options struct {
 	DisablePromptServer  bool
 	SystemToolsDir       string
 	Env                  []string
+	CredentialStore      string
+	CredentialToolsEnv   []string
 }
 
 func Complete(opts ...Options) Options {
@@ -73,8 +75,10 @@ func Complete(opts ...Options) Options {
 		result.Quiet = types.FirstSet(opt.Quiet, result.Quiet)
 		result.Workspace = types.FirstSet(opt.Workspace, result.Workspace)
 		result.Env = append(result.Env, opt.Env...)
+		result.CredentialToolsEnv = append(result.CredentialToolsEnv, opt.CredentialToolsEnv...)
 		result.DisablePromptServer = types.FirstSet(opt.DisablePromptServer, result.DisablePromptServer)
 		result.DefaultModelProvider = types.FirstSet(opt.DefaultModelProvider, result.DefaultModelProvider)
+		result.CredentialStore = types.FirstSet(opt.CredentialStore, result.CredentialStore)
 	}
 
 	if result.Quiet == nil {
@@ -82,6 +86,9 @@ func Complete(opts ...Options) Options {
 	}
 	if len(result.Env) == 0 {
 		result.Env = os.Environ()
+	}
+	if len(result.CredentialToolsEnv) == 0 {
+		result.CredentialToolsEnv = result.Env
 	}
 	if len(result.CredentialContexts) == 0 {
 		result.CredentialContexts = []string{credentials.DefaultCredentialContext}
@@ -104,11 +111,15 @@ func New(ctx context.Context, o ...Options) (*GPTScript, error) {
 		return nil, err
 	}
 
+	if opts.CredentialStore != "" {
+		cliCfg.CredentialsStore = opts.CredentialStore
+	}
+
 	if opts.Runner.RuntimeManager == nil {
 		opts.Runner.RuntimeManager = runtimes.Default(cacheClient.CacheDir(), opts.SystemToolsDir)
 	}
 
-	simplerRunner, err := newSimpleRunner(cacheClient, opts.Runner.RuntimeManager, opts.Env)
+	simplerRunner, err := newSimpleRunner(cacheClient, opts.Runner.RuntimeManager, opts.CredentialToolsEnv)
 	if err != nil {
 		return nil, err
 	}
