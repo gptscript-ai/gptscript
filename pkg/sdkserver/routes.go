@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -172,7 +171,6 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 		reqObject.ChatState = "null"
 	}
 
-	reqObject.Env = append(os.Environ(), reqObject.Env...)
 	// Don't overwrite the PromptURLEnvVar if it is already set in the environment.
 	var promptTokenAlreadySet bool
 	for _, env := range reqObject.Env {
