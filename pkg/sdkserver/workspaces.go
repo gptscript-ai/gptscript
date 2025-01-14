@@ -30,6 +30,10 @@ type createWorkspaceRequest struct {
 	FromWorkspaceIDs       []string `json:"fromWorkspaceIDs"`
 }
 
+func (s *server) getServerToolsEnv(env []string) []string {
+	return append(s.serverToolsEnv, env...)
+}
+
 func (s *server) createWorkspace(w http.ResponseWriter, r *http.Request) {
 	logger := gcontext.GetLogger(r.Context())
 	var reqObject createWorkspaceRequest
@@ -51,7 +55,7 @@ func (s *server) createWorkspace(w http.ResponseWriter, r *http.Request) {
 	out, err := s.client.Run(
 		r.Context(),
 		prg,
-		reqObject.Env,
+		s.getServerToolsEnv(reqObject.Env),
 		fmt.Sprintf(
 			`{"provider": "%s", "workspace_ids": "%s"}`,
 			reqObject.ProviderType, strings.Join(reqObject.FromWorkspaceIDs, ","),
@@ -86,7 +90,7 @@ func (s *server) deleteWorkspace(w http.ResponseWriter, r *http.Request) {
 	out, err := s.client.Run(
 		r.Context(),
 		prg,
-		reqObject.Env,
+		s.getServerToolsEnv(reqObject.Env),
 		fmt.Sprintf(
 			`{"workspace_id": "%s"}`,
 			reqObject.ID,
@@ -123,7 +127,7 @@ func (s *server) listWorkspaceContents(w http.ResponseWriter, r *http.Request) {
 	out, err := s.client.Run(
 		r.Context(),
 		prg,
-		reqObject.Env,
+		s.getServerToolsEnv(reqObject.Env),
 		fmt.Sprintf(
 			`{"workspace_id": "%s", "ls_prefix": "%s"}`,
 			reqObject.ID, reqObject.Prefix,
@@ -159,7 +163,7 @@ func (s *server) removeAllWithPrefixInWorkspace(w http.ResponseWriter, r *http.R
 	out, err := s.client.Run(
 		r.Context(),
 		prg,
-		reqObject.Env,
+		s.getServerToolsEnv(reqObject.Env),
 		fmt.Sprintf(
 			`{"workspace_id": "%s", "prefix": "%s"}`,
 			reqObject.ID, reqObject.Prefix,
@@ -196,7 +200,7 @@ func (s *server) writeFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 	out, err := s.client.Run(
 		r.Context(),
 		prg,
-		reqObject.Env,
+		s.getServerToolsEnv(reqObject.Env),
 		fmt.Sprintf(
 			`{"workspace_id": "%s", "file_path": "%s", "body": "%s"}`,
 			reqObject.ID, reqObject.FilePath, reqObject.Contents,
@@ -232,7 +236,7 @@ func (s *server) removeFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 	out, err := s.client.Run(
 		r.Context(),
 		prg,
-		reqObject.Env,
+		s.getServerToolsEnv(reqObject.Env),
 		fmt.Sprintf(
 			`{"workspace_id": "%s", "file_path": "%s"}`,
 			reqObject.ID, reqObject.FilePath,
@@ -268,7 +272,7 @@ func (s *server) readFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 	out, err := s.client.Run(
 		r.Context(),
 		prg,
-		reqObject.Env,
+		s.getServerToolsEnv(reqObject.Env),
 		fmt.Sprintf(
 			`{"workspace_id": "%s", "file_path": "%s"}`,
 			reqObject.ID, reqObject.FilePath,
@@ -304,7 +308,7 @@ func (s *server) statFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 	out, err := s.client.Run(
 		r.Context(),
 		prg,
-		reqObject.Env,
+		s.getServerToolsEnv(reqObject.Env),
 		fmt.Sprintf(
 			`{"workspace_id": "%s", "file_path": "%s"}`,
 			reqObject.ID, reqObject.FilePath,

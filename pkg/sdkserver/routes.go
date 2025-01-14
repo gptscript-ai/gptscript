@@ -28,6 +28,7 @@ type server struct {
 	gptscriptOpts              gptscript.Options
 	address, token             string
 	datasetTool, workspaceTool string
+	serverToolsEnv             []string
 	client                     *gptscript.GPTScript
 	events                     *broadcaster.Broadcaster[event]
 
