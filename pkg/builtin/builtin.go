@@ -789,7 +789,7 @@ func SysChatFinish(_ context.Context, _ []string, input string, _ chan<- string)
 	var params struct {
 		Message string `json:"return,omitempty"`
 	}
-	if err := json.Unmarshal([]byte(input), &params); err != nil {
+	if err := json.Unmarshal([]byte(input), &params); err != nil || params.Message == "" {
 		return "", &engine.ErrChatFinish{
 			Message: input,
 		}
