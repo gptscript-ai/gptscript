@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 
 	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
@@ -52,14 +51,20 @@ func (s *server) createWorkspace(w http.ResponseWriter, r *http.Request) {
 		reqObject.ProviderType = "directory"
 	}
 
+	b, err := json.Marshal(map[string]any{
+		"provider":         reqObject.ProviderType,
+		"fromWorkspaceIDs": reqObject.FromWorkspaceIDs,
+	})
+	if err != nil {
+		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to marshal request body: %w", err))
+		return
+	}
+
 	out, err := s.client.Run(
 		r.Context(),
 		prg,
 		s.getServerToolsEnv(reqObject.Env),
-		fmt.Sprintf(
-			`{"provider": "%s", "workspace_ids": "%s"}`,
-			reqObject.ProviderType, strings.Join(reqObject.FromWorkspaceIDs, ","),
-		),
+		string(b),
 	)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
