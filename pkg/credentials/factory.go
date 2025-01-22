@@ -2,6 +2,7 @@ package credentials
 
 import (
 	"context"
+	"strings"
 
 	"github.com/docker/docker-credential-helpers/client"
 	"github.com/gptscript-ai/gptscript/pkg/config"
@@ -13,12 +14,32 @@ type ProgramLoaderRunner interface {
 	Run(ctx context.Context, prg types.Program, input string) (output string, err error)
 }
 
-func NewFactory(ctx context.Context, cfg *config.CLIConfig, plr ProgramLoaderRunner) (StoreFactory, error) {
+func NewFactory(ctx context.Context, cfg *config.CLIConfig, overrides []string, plr ProgramLoaderRunner) (StoreFactory, error) {
+	creds, err := ParseCredentialOverrides(overrides)
+	if err != nil {
+		return StoreFactory{}, err
+	}
+
+	overrideMap := make(map[string]map[string]map[string]string)
+	for k, v := range creds {
+		contextName, toolName, ok := strings.Cut(k, ctxSeparator)
+		if !ok {
+			continue
+		}
+		toolMap, ok := overrideMap[contextName]
+		if !ok {
+			toolMap = make(map[string]map[string]string)
+		}
+		toolMap[toolName] = v
+		overrideMap[contextName] = toolMap
+	}
+
 	toolName := translateToolName(cfg.CredentialsStore)
 	if toolName == config.FileCredHelper {
 		return StoreFactory{
-			file: true,
-			cfg:  cfg,
+			file:      true,
+			cfg:       cfg,
+			overrides: overrideMap,
 		}, nil
 	}
 
@@ -28,10 +49,11 @@ func NewFactory(ctx context.Context, cfg *config.CLIConfig, plr ProgramLoaderRun
 	}
 
 	return StoreFactory{
-		ctx:    ctx,
-		prg:    prg,
-		runner: plr,
-		cfg:    cfg,
+		ctx:       ctx,
+		prg:       prg,
+		runner:    plr,
+		cfg:       cfg,
+		overrides: overrideMap,
 	}, nil
 }
 
@@ -41,6 +63,8 @@ type StoreFactory struct {
 	file   bool
 	runner ProgramLoaderRunner
 	cfg    *config.CLIConfig
+	// That's a lot of maps: context -> toolName -> key -> value
+	overrides map[string]map[string]map[string]string
 }
 
 func (s *StoreFactory) NewStore(credCtxs []string) (CredentialStore, error) {
@@ -48,15 +72,23 @@ func (s *StoreFactory) NewStore(credCtxs []string) (CredentialStore, error) {
 		return nil, err
 	}
 	if s.file {
-		return Store{
-			credCtxs: credCtxs,
-			cfg:      s.cfg,
+		return withOverride{
+			target: Store{
+				credCtxs: credCtxs,
+				cfg:      s.cfg,
+			},
+			overrides:   s.overrides,
+			credContext: credCtxs,
 		}, nil
 	}
-	return Store{
-		credCtxs: credCtxs,
-		cfg:      s.cfg,
-		program:  s.program,
+	return withOverride{
+		target: Store{
+			credCtxs: credCtxs,
+			cfg:      s.cfg,
+			program:  s.program,
+		},
+		overrides:   s.overrides,
+		credContext: credCtxs,
 	}, nil
 }
 

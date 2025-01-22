@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/stretchr/testify/require"
 )
 
@@ -119,7 +120,7 @@ func TestParseCredentialOverrides(t *testing.T) {
 				_ = os.Setenv(k, v)
 			}
 
-			out, err := parseCredentialOverrides(tc.in)
+			out, err := credentials.ParseCredentialOverrides(tc.in)
 			if tc.expectErr {
 				require.Error(t, err)
 				return
