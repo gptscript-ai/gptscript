@@ -124,7 +124,7 @@ func New(ctx context.Context, o ...Options) (*GPTScript, error) {
 		return nil, err
 	}
 
-	storeFactory, err := credentials.NewFactory(ctx, cliCfg, simplerRunner)
+	storeFactory, err := credentials.NewFactory(ctx, cliCfg, opts.Runner.CredentialOverrides, simplerRunner)
 	if err != nil {
 		return nil, err
 	}

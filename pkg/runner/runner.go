@@ -754,7 +754,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 		err           error
 	)
 	if r.credOverrides != nil {
-		credOverrides, err = parseCredentialOverrides(r.credOverrides)
+		credOverrides, err = credentials.ParseCredentialOverrides(r.credOverrides)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse credential overrides: %w", err)
 		}
