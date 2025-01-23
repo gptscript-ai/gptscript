@@ -545,7 +545,7 @@ func override(left, right string) string {
 	return left
 }
 
-func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest, transactionID string, env []string, partial chan<- types.CompletionStatus) (types.CompletionMessage, error) {
+func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest, transactionID string, envs []string, partial chan<- types.CompletionStatus) (types.CompletionMessage, error) {
 	streamResponse := os.Getenv("GPTSCRIPT_INTERNAL_OPENAI_STREAMING") != "false"
 
 	partial <- types.CompletionStatus{
@@ -567,11 +567,13 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 			},
 		}
 	)
-	for _, e := range env {
+	for _, e := range envs {
 		if strings.HasPrefix(e, "GPTSCRIPT_MODEL_PROVIDER_") {
 			modelProviderEnv = append(modelProviderEnv, e)
 		} else if strings.HasPrefix(e, "GPTSCRIPT_DISABLE_RETRIES") {
 			retryOpts = nil
+		} else if e == "GPTSCRIPT_INTERNAL_OPENAI_STREAMING=false" {
+			streamResponse = false
 		}
 	}
 
