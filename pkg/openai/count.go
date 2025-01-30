@@ -15,8 +15,17 @@ func decreaseTenPercent(maxTokens int) int {
 }
 
 func getBudget(maxTokens int) int {
-	if maxTokens <= 0 {
+	if maxTokens == 0 {
 		return DefaultMaxTokens
+	} else if maxTokens <= 0 {
+		// maxTokens was 0 (or some very small number), the tool count pushed it negative
+		// so we can just add that negative number to the default max tokens, to get something lower
+		if DefaultMaxTokens+maxTokens >= 0 {
+			return DefaultMaxTokens + maxTokens
+		}
+
+		// If max tokens was so negative that it was below 128k, then we just return 0 I guess
+		return 0
 	}
 	return maxTokens
 }
