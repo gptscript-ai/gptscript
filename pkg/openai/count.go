@@ -15,7 +15,7 @@ func decreaseTenPercent(maxTokens int) int {
 }
 
 func getBudget(maxTokens int) int {
-	if maxTokens == 0 {
+	if maxTokens <= 0 {
 		return DefaultMaxTokens
 	}
 	return maxTokens
