@@ -1,7 +1,10 @@
 package openai
 
 import (
+	"encoding/json"
+
 	openai "github.com/gptscript-ai/chat-completion-client"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 const DefaultMaxTokens = 128_000
@@ -72,4 +75,30 @@ func countMessage(msg openai.ChatCompletionMessage) (count int) {
 	}
 	count += len(msg.ToolCallID)
 	return count / 3
+}
+
+func countChatCompletionTools(tools []types.ChatCompletionTool) (count int, err error) {
+	for _, t := range tools {
+		count += len(t.Function.Name)
+		count += len(t.Function.Description)
+		paramsJSON, err := json.Marshal(t.Function.Parameters)
+		if err != nil {
+			return 0, err
+		}
+		count += len(paramsJSON)
+	}
+	return count / 3, nil
+}
+
+func countOpenAITools(tools []openai.Tool) (count int, err error) {
+	for _, t := range tools {
+		count += len(t.Function.Name)
+		count += len(t.Function.Description)
+		paramsJSON, err := json.Marshal(t.Function.Parameters)
+		if err != nil {
+			return 0, err
+		}
+		count += len(paramsJSON)
+	}
+	return count / 3, nil
 }

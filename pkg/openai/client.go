@@ -331,7 +331,12 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 			messageRequest.Messages[len(messageRequest.Messages)-1].Content = types.Text(TooLongMessage)
 		}
 
-		msgs = dropMessagesOverCount(messageRequest.MaxTokens, msgs)
+		toolsCount, err := countChatCompletionTools(messageRequest.Tools)
+		if err != nil {
+			return nil, err
+		}
+
+		msgs = dropMessagesOverCount(messageRequest.MaxTokens-toolsCount, msgs)
 	}
 
 	if len(msgs) == 0 {
@@ -447,14 +452,15 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 }
 
 func (c *Client) contextLimitRetryLoop(ctx context.Context, request openai.ChatCompletionRequest, id string, env []string, maxTokens int, status chan<- types.CompletionStatus) (types.CompletionMessage, error) {
-	var (
-		response types.CompletionMessage
-		err      error
-	)
+	toolsCount, err := countOpenAITools(request.Tools)
+	if err != nil {
+		return types.CompletionMessage{}, err
+	}
 
+	var response types.CompletionMessage
 	for range 10 { // maximum 10 tries
 		// Try to drop older messages again, with a decreased max tokens.
-		request.Messages = dropMessagesOverCount(maxTokens, request.Messages)
+		request.Messages = dropMessagesOverCount(maxTokens-toolsCount, request.Messages)
 		response, err = c.call(ctx, request, id, env, status)
 		if err == nil {
 			return response, nil
