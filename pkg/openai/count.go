@@ -1,7 +1,10 @@
 package openai
 
 import (
+	"encoding/json"
+
 	openai "github.com/gptscript-ai/chat-completion-client"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 const DefaultMaxTokens = 128_000
@@ -14,6 +17,15 @@ func decreaseTenPercent(maxTokens int) int {
 func getBudget(maxTokens int) int {
 	if maxTokens == 0 {
 		return DefaultMaxTokens
+	} else if maxTokens <= 0 {
+		// maxTokens was 0 (or some very small number), the tool count pushed it negative
+		// so we can just add that negative number to the default max tokens, to get something lower
+		if DefaultMaxTokens+maxTokens >= 0 {
+			return DefaultMaxTokens + maxTokens
+		}
+
+		// If max tokens was so negative that it was below 128k, then we just return 0 I guess
+		return 0
 	}
 	return maxTokens
 }
@@ -72,4 +84,30 @@ func countMessage(msg openai.ChatCompletionMessage) (count int) {
 	}
 	count += len(msg.ToolCallID)
 	return count / 3
+}
+
+func countChatCompletionTools(tools []types.ChatCompletionTool) (count int, err error) {
+	for _, t := range tools {
+		count += len(t.Function.Name)
+		count += len(t.Function.Description)
+		paramsJSON, err := json.Marshal(t.Function.Parameters)
+		if err != nil {
+			return 0, err
+		}
+		count += len(paramsJSON)
+	}
+	return count / 3, nil
+}
+
+func countOpenAITools(tools []openai.Tool) (count int, err error) {
+	for _, t := range tools {
+		count += len(t.Function.Name)
+		count += len(t.Function.Description)
+		paramsJSON, err := json.Marshal(t.Function.Parameters)
+		if err != nil {
+			return 0, err
+		}
+		count += len(paramsJSON)
+	}
+	return count / 3, nil
 }
