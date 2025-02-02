@@ -41,15 +41,11 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 	}
 
 	if strings.HasSuffix(parsed.Hostname(), DaemonURLSuffix) {
-		referencedToolName := strings.TrimSuffix(parsed.Hostname(), DaemonURLSuffix)
-		referencedToolRefs, ok := tool.ToolMapping[referencedToolName]
-		if !ok || len(referencedToolRefs) != 1 {
-			return nil, fmt.Errorf("invalid reference [%s] to tool [%s] from [%s], missing \"tools: %s\" parameter", toolURL, referencedToolName, tool.Source, referencedToolName)
+		referencedTool, err := DaemonTool(prg, tool, parsed.Hostname())
+		if err != nil {
+			return nil, err
 		}
-		referencedTool, ok := prg.ToolSet[referencedToolRefs[0].ToolID]
-		if !ok {
-			return nil, fmt.Errorf("failed to find tool [%s] for [%s]", referencedToolName, parsed.Hostname())
-		}
+
 		toolURL, err = e.startDaemon(referencedTool)
 		if err != nil {
 			return nil, err
@@ -142,4 +138,18 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 	return &Return{
 		Result: &s,
 	}, nil
+}
+
+func DaemonTool(prg *types.Program, tool types.Tool, daemonHost string) (types.Tool, error) {
+	referencedToolName := strings.TrimSuffix(daemonHost, DaemonURLSuffix)
+	referencedToolRefs, ok := tool.ToolMapping[referencedToolName]
+	if !ok || len(referencedToolRefs) != 1 {
+		return types.Tool{}, fmt.Errorf("invalid reference [%s] to tool [%s] from [%s], missing \"tools: %s\" parameter", daemonHost, referencedToolName, tool.Source, referencedToolName)
+	}
+	referencedTool, ok := prg.ToolSet[referencedToolRefs[0].ToolID]
+	if !ok {
+		return types.Tool{}, fmt.Errorf("failed to find tool [%s] for [%s]", referencedToolName, daemonHost)
+	}
+
+	return referencedTool, nil
 }

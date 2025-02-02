@@ -350,6 +350,17 @@ func (r *Runner) start(callCtx engine.Context, state *State, monitor Monitor, en
 		}
 	}
 
+	if toolName, _, ok := strings.Cut(strings.TrimSpace(callCtx.Tool.Instructions), engine.DaemonURLSuffix); callCtx.Tool.IsHTTP() && ok {
+		referencedTool, err := engine.DaemonTool(callCtx.Program, callCtx.Tool, strings.TrimPrefix(strings.TrimPrefix(toolName, "#!http://"), "#!https://"))
+		if err != nil {
+			return nil, err
+		}
+		res, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, referencedTool.ID, "{}", "", engine.NoCategory)
+		if err != nil {
+			return res, err
+		}
+	}
+
 	ret, err := e.Start(callCtx, input)
 	if err != nil {
 		return nil, err
@@ -548,6 +559,17 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 			engineResults = append(engineResults, engine.CallResult{
 				User: input,
 			})
+		}
+
+		if toolName, _, ok := strings.Cut(strings.TrimSpace(callCtx.Tool.Instructions), engine.DaemonURLSuffix); callCtx.Tool.IsHTTP() && ok {
+			referencedTool, err := engine.DaemonTool(callCtx.Program, callCtx.Tool, strings.TrimPrefix(strings.TrimPrefix(toolName, "#!http://"), "#!https://"))
+			if err != nil {
+				return nil, err
+			}
+			res, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, referencedTool.ID, "{}", "", engine.NoCategory)
+			if err != nil {
+				return res, err
+			}
 		}
 
 		nextContinuation, err := e.Continue(callCtx, state.Continuation.State, engineResults...)
