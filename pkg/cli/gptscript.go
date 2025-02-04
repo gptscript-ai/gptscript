@@ -494,7 +494,6 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 				DisableCache:        r.DisableCache,
 				CredentialOverrides: r.CredentialOverride,
 				Input:               toolInput,
-				CacheDir:            r.CacheDir,
 				SubTool:             r.SubTool,
 				Workspace:           r.Workspace,
 				SaveChatStateFile:   r.SaveChatStateFile,

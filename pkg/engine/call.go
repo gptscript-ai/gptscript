@@ -76,13 +76,13 @@ func mergeInputs(base, overlay string) (string, error) {
 		return base, nil
 	}
 
-	err := json.Unmarshal([]byte(base), &baseMap)
-	if err != nil {
-		return "", fmt.Errorf("failed to unmarshal base input: %w", err)
+	if base != "" {
+		if err := json.Unmarshal([]byte(base), &baseMap); err != nil {
+			return "", fmt.Errorf("failed to unmarshal base input: %w", err)
+		}
 	}
 
-	err = json.Unmarshal([]byte(overlay), &overlayMap)
-	if err != nil {
+	if err := json.Unmarshal([]byte(overlay), &overlayMap); err != nil {
 		return "", fmt.Errorf("failed to unmarshal overlay input: %w", err)
 	}
 

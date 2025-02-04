@@ -52,7 +52,7 @@ func sysPromptHTTP(ctx context.Context, envs []string, url string, prompt types.
 func SysPrompt(ctx context.Context, envs []string, input string, _ chan<- string) (_ string, err error) {
 	var params struct {
 		Message   string            `json:"message,omitempty"`
-		Fields    string            `json:"fields,omitempty"`
+		Fields    types.Fields      `json:"fields,omitempty"`
 		Sensitive string            `json:"sensitive,omitempty"`
 		Metadata  map[string]string `json:"metadata,omitempty"`
 	}
@@ -60,16 +60,11 @@ func SysPrompt(ctx context.Context, envs []string, input string, _ chan<- string
 		return "", err
 	}
 
-	var fields []string
 	for _, env := range envs {
 		if url, ok := strings.CutPrefix(env, types.PromptURLEnvVar+"="); ok {
-			if params.Fields != "" {
-				fields = strings.Split(params.Fields, ",")
-			}
-
 			httpPrompt := types.Prompt{
 				Message:   params.Message,
-				Fields:    fields,
+				Fields:    params.Fields,
 				Sensitive: params.Sensitive == "true",
 				Metadata:  params.Metadata,
 			}
@@ -102,21 +97,25 @@ func sysPrompt(ctx context.Context, req types.Prompt) (_ string, err error) {
 	results := map[string]string{}
 	for _, f := range req.Fields {
 		var (
-			value string
-			msg   = f
+			value     string
+			msg       = f.Name
+			sensitive = req.Sensitive
 		)
+		if f.Sensitive != nil {
+			sensitive = *f.Sensitive
+		}
 		if len(req.Fields) == 1 && req.Message != "" {
 			msg = req.Message
 		}
-		if req.Sensitive {
-			err = survey.AskOne(&survey.Password{Message: msg}, &value, survey.WithStdio(os.Stdin, os.Stderr, os.Stderr))
+		if sensitive {
+			err = survey.AskOne(&survey.Password{Message: msg, Help: f.Description}, &value, survey.WithStdio(os.Stdin, os.Stderr, os.Stderr))
 		} else {
-			err = survey.AskOne(&survey.Input{Message: msg}, &value, survey.WithStdio(os.Stdin, os.Stderr, os.Stderr))
+			err = survey.AskOne(&survey.Input{Message: msg, Help: f.Description}, &value, survey.WithStdio(os.Stdin, os.Stderr, os.Stderr))
 		}
 		if err != nil {
 			return "", err
 		}
-		results[f] = value
+		results[f.Name] = value
 	}
 
 	resultsStr, err := json.Marshal(results)
