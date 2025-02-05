@@ -779,10 +779,6 @@ func (t Tool) IsEcho() bool {
 	return strings.HasPrefix(t.Instructions, EchoPrefix)
 }
 
-func (t Tool) IsBreak() bool {
-	return strings.HasPrefix(t.Instructions, BreakPrefix)
-}
-
 func (t Tool) IsHTTP() bool {
 	return strings.HasPrefix(t.Instructions, "#!http://") ||
 		strings.HasPrefix(t.Instructions, "#!https://")
