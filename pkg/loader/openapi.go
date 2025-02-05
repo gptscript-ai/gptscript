@@ -298,17 +298,6 @@ func getOpenAPITools(t *openapi3.T, defaultHost, source, targetToolName string) 
 				return nil, err
 			}
 
-			if len(infos) > 0 {
-				// Set up credential tools for the first set of infos.
-				for _, info := range infos[0] {
-					operationServerURL, err := url.Parse(operationServer)
-					if err != nil {
-						return nil, fmt.Errorf("failed to parse operation server URL: %w", err)
-					}
-					tool.Credentials = append(tool.Credentials, info.GetCredentialToolStrings(operationServerURL.Hostname())...)
-				}
-			}
-
 			// Register
 			toolNames = append(toolNames, tool.Parameters.Name)
 			tools = append(tools, tool)
