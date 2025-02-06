@@ -40,6 +40,7 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 		return nil, err
 	}
 
+	var requestedEnvVars map[string]struct{}
 	if strings.HasSuffix(parsed.Hostname(), DaemonURLSuffix) {
 		referencedToolName := strings.TrimSuffix(parsed.Hostname(), DaemonURLSuffix)
 		referencedToolRefs, ok := tool.ToolMapping[referencedToolName]
@@ -60,6 +61,14 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 		}
 		parsed.Host = toolURLParsed.Host
 		toolURL = parsed.String()
+
+		metadataEnvVars := strings.Split(referencedTool.MetaData["requestedEnvVars"], ",")
+		requestedEnvVars = make(map[string]struct{}, len(metadataEnvVars))
+		for _, e := range metadataEnvVars {
+			if e != "" {
+				requestedEnvVars[e] = struct{}{}
+			}
+		}
 	}
 
 	if tool.Blocking {
@@ -78,7 +87,7 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 	}
 
 	for _, k := range slices.Sorted(maps.Keys(envMap)) {
-		if strings.HasPrefix(k, "GPTSCRIPT_WORKSPACE_") {
+		if _, ok := requestedEnvVars[k]; ok || strings.HasPrefix(k, "GPTSCRIPT_WORKSPACE_") {
 			req.Header.Add("X-GPTScript-Env", k+"="+envMap[k])
 		}
 	}
