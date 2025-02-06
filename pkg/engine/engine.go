@@ -15,7 +15,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
 
-var maxConsecutiveToolCalls = 10
+var maxConsecutiveToolCalls = 50
 
 func init() {
 	if val := os.Getenv("GPTSCRIPT_MAX_CONSECUTIVE_TOOL_CALLS"); val != "" {
