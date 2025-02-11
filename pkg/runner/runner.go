@@ -655,6 +655,17 @@ func (r *Runner) newDispatcher(ctx context.Context) dispatcher {
 	return newParallelDispatcher(ctx)
 }
 
+func idForToolCall(id string, state *engine.Return) string {
+	if state == nil || state.State == nil {
+		return id
+	}
+	tc, ok := state.State.Pending[id]
+	if !ok || tc.Index == nil {
+		return id
+	}
+	return fmt.Sprintf("%03d", *tc.Index)
+}
+
 func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string, state *State, toolCategory engine.ToolCategory) (*State, []SubCallResult, error) {
 	var (
 		resultLock  sync.Mutex
@@ -698,7 +709,9 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 
 	// Sort the id so if sequential the results are predictable
 	ids := maps.Keys(state.Continuation.Calls)
-	sort.Strings(ids)
+	sort.Slice(ids, func(i, j int) bool {
+		return idForToolCall(ids[i], state.Continuation) < idForToolCall(ids[j], state.Continuation)
+	})
 
 	for _, id := range ids {
 		call := state.Continuation.Calls[id]
