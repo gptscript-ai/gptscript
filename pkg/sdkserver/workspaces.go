@@ -187,6 +187,7 @@ type writeFileInWorkspaceRequest struct {
 	FilePath               string `json:"filePath"`
 	Contents               string `json:"contents"`
 	CreateRevision         *bool  `json:"createRevision"`
+	LatestRevision         string `json:"latestRevision"`
 }
 
 func (s *server) writeFileInWorkspace(w http.ResponseWriter, r *http.Request) {
@@ -208,8 +209,8 @@ func (s *server) writeFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 		prg,
 		s.getServerToolsEnv(reqObject.Env),
 		fmt.Sprintf(
-			`{"workspace_id": "%s", "file_path": "%s", "body": "%s", "create_revision": %t}`,
-			reqObject.ID, reqObject.FilePath, reqObject.Contents, reqObject.CreateRevision == nil || *reqObject.CreateRevision,
+			`{"workspace_id": "%s", "file_path": "%s", "body": "%s", "create_revision": %t, "latest_revision": "%s"}`,
+			reqObject.ID, reqObject.FilePath, reqObject.Contents, reqObject.CreateRevision == nil || *reqObject.CreateRevision, reqObject.LatestRevision,
 		),
 	)
 	if err != nil {
