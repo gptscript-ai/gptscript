@@ -187,7 +187,7 @@ type writeFileInWorkspaceRequest struct {
 	FilePath               string `json:"filePath"`
 	Contents               string `json:"contents"`
 	CreateRevision         *bool  `json:"createRevision"`
-	LatestRevision         string `json:"latestRevision"`
+	LatestRevisionID       string `json:"latestRevisionID"`
 }
 
 func (s *server) writeFileInWorkspace(w http.ResponseWriter, r *http.Request) {
@@ -209,8 +209,8 @@ func (s *server) writeFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 		prg,
 		s.getServerToolsEnv(reqObject.Env),
 		fmt.Sprintf(
-			`{"workspace_id": "%s", "file_path": "%s", "body": "%s", "create_revision": %t, "latest_revision": "%s"}`,
-			reqObject.ID, reqObject.FilePath, reqObject.Contents, reqObject.CreateRevision == nil || *reqObject.CreateRevision, reqObject.LatestRevision,
+			`{"workspace_id": "%s", "file_path": "%s", "body": "%s", "create_revision": %t, "latest_revision_id": "%s"}`,
+			reqObject.ID, reqObject.FilePath, reqObject.Contents, reqObject.CreateRevision == nil || *reqObject.CreateRevision, reqObject.LatestRevisionID,
 		),
 	)
 	if err != nil {
@@ -260,6 +260,7 @@ func (s *server) removeFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 type readFileInWorkspaceRequest struct {
 	workspaceCommonRequest `json:",inline"`
 	FilePath               string `json:"filePath"`
+	WithLatestRevisionID   bool   `json:"withLatestRevisionID"`
 }
 
 func (s *server) readFileInWorkspace(w http.ResponseWriter, r *http.Request) {
@@ -281,8 +282,8 @@ func (s *server) readFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 		prg,
 		s.getServerToolsEnv(reqObject.Env),
 		fmt.Sprintf(
-			`{"workspace_id": "%s", "file_path": "%s"}`,
-			reqObject.ID, reqObject.FilePath,
+			`{"workspace_id": "%s", "file_path": "%s", "with_latest_revision_id": "%v"}`,
+			reqObject.ID, reqObject.FilePath, reqObject.WithLatestRevisionID,
 		),
 	)
 	if err != nil {
@@ -296,6 +297,7 @@ func (s *server) readFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 type statFileInWorkspaceRequest struct {
 	workspaceCommonRequest `json:",inline"`
 	FilePath               string `json:"filePath"`
+	WithLatestRevisionID   bool   `json:"withLatestRevisionID"`
 }
 
 func (s *server) statFileInWorkspace(w http.ResponseWriter, r *http.Request) {
@@ -317,8 +319,8 @@ func (s *server) statFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 		prg,
 		s.getServerToolsEnv(reqObject.Env),
 		fmt.Sprintf(
-			`{"workspace_id": "%s", "file_path": "%s"}`,
-			reqObject.ID, reqObject.FilePath,
+			`{"workspace_id": "%s", "file_path": "%s", "with_latest_revision_id": "%v"}`,
+			reqObject.ID, reqObject.FilePath, reqObject.WithLatestRevisionID,
 		),
 	)
 	if err != nil {
