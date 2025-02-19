@@ -260,7 +260,6 @@ func (s *server) removeFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 type readFileInWorkspaceRequest struct {
 	workspaceCommonRequest `json:",inline"`
 	FilePath               string `json:"filePath"`
-	WithLatestRevisionID   bool   `json:"withLatestRevisionID"`
 }
 
 func (s *server) readFileInWorkspace(w http.ResponseWriter, r *http.Request) {
@@ -282,8 +281,39 @@ func (s *server) readFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 		prg,
 		s.getServerToolsEnv(reqObject.Env),
 		fmt.Sprintf(
-			`{"workspace_id": "%s", "file_path": "%s", "with_latest_revision_id": "%v"}`,
-			reqObject.ID, reqObject.FilePath, reqObject.WithLatestRevisionID,
+			`{"workspace_id": "%s", "file_path": "%s"}`,
+			reqObject.ID, reqObject.FilePath,
+		),
+	)
+	if err != nil {
+		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
+		return
+	}
+
+	writeResponse(logger, w, map[string]any{"stdout": out})
+}
+
+func (s *server) readFileWithRevisionInWorkspace(w http.ResponseWriter, r *http.Request) {
+	logger := gcontext.GetLogger(r.Context())
+	var reqObject readFileInWorkspaceRequest
+	if err := json.NewDecoder(r.Body).Decode(&reqObject); err != nil {
+		writeError(logger, w, http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
+		return
+	}
+
+	prg, err := loader.Program(r.Context(), s.getWorkspaceTool(reqObject.workspaceCommonRequest), "Read File With Revision In Workspace", loader.Options{Cache: s.client.Cache})
+	if err != nil {
+		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to load program: %w", err))
+		return
+	}
+
+	out, err := s.client.Run(
+		r.Context(),
+		prg,
+		s.getServerToolsEnv(reqObject.Env),
+		fmt.Sprintf(
+			`{"workspace_id": "%s", "file_path": "%s", "with_latest_revision_id": "true"}`,
+			reqObject.ID, reqObject.FilePath,
 		),
 	)
 	if err != nil {
