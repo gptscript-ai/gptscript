@@ -15,6 +15,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
+	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/prompt"
@@ -583,10 +584,21 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 
 	slog.Debug("calling openai", "message", request.Messages)
 
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	engineCtx, ok := engine.FromContext(ctx)
+	if ok {
+		engineCtx.OnUserCancel(ctx, cancel)
+	}
+
 	if !streamResponse {
 		request.StreamOptions = nil
 		resp, err := c.c.CreateChatCompletion(ctx, request, headers, retryOpts...)
 		if err != nil {
+			if errors.Is(err, context.Canceled) {
+				err = nil
+			}
 			return types.CompletionMessage{}, err
 		}
 		return appendMessage(types.CompletionMessage{}, openai.ChatCompletionStreamResponse{
@@ -612,6 +624,9 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 
 	stream, err := c.c.CreateChatCompletionStream(ctx, request, headers, retryOpts...)
 	if err != nil {
+		if errors.Is(err, context.Canceled) {
+			err = nil
+		}
 		return types.CompletionMessage{}, err
 	}
 	defer stream.Close()
@@ -619,11 +634,12 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 	var (
 		partialMessage types.CompletionMessage
 		start          = time.Now()
-		last           []string
 	)
 	for {
 		response, err := stream.Recv()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) || errors.Is(err, context.Canceled) {
+			// If the stream is finished, either because we got an EOF or the context was canceled,
+			// then we're done. The cache won't save the response if the context was canceled.
 			return partialMessage, c.cache.Store(ctx, c.cacheKey(request), partialMessage)
 		} else if err != nil {
 			return types.CompletionMessage{}, err
@@ -631,7 +647,6 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 		partialMessage = appendMessage(partialMessage, response)
 		if partial != nil {
 			if time.Since(start) > 100*time.Millisecond {
-				last = last[:0]
 				partial <- types.CompletionStatus{
 					CompletionID:    transactionID,
 					PartialResponse: &partialMessage,

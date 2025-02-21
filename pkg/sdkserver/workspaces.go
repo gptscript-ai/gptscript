@@ -7,6 +7,7 @@ import (
 
 	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/runner"
 )
 
 func (s *server) getWorkspaceTool(req workspaceCommonRequest) string {
@@ -65,6 +66,7 @@ func (s *server) createWorkspace(w http.ResponseWriter, r *http.Request) {
 		prg,
 		s.getServerToolsEnv(reqObject.Env),
 		string(b),
+		runner.RunOptions{},
 	)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
@@ -100,6 +102,7 @@ func (s *server) deleteWorkspace(w http.ResponseWriter, r *http.Request) {
 			`{"workspace_id": "%s"}`,
 			reqObject.ID,
 		),
+		runner.RunOptions{},
 	)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
@@ -137,6 +140,7 @@ func (s *server) listWorkspaceContents(w http.ResponseWriter, r *http.Request) {
 			`{"workspace_id": "%s", "ls_prefix": "%s"}`,
 			reqObject.ID, reqObject.Prefix,
 		),
+		runner.RunOptions{},
 	)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
@@ -173,6 +177,7 @@ func (s *server) removeAllWithPrefixInWorkspace(w http.ResponseWriter, r *http.R
 			`{"workspace_id": "%s", "prefix": "%s"}`,
 			reqObject.ID, reqObject.Prefix,
 		),
+		runner.RunOptions{},
 	)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
@@ -212,6 +217,7 @@ func (s *server) writeFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 			`{"workspace_id": "%s", "file_path": "%s", "body": "%s", "create_revision": %t, "latest_revision_id": "%s"}`,
 			reqObject.ID, reqObject.FilePath, reqObject.Contents, reqObject.CreateRevision == nil || *reqObject.CreateRevision, reqObject.LatestRevisionID,
 		),
+		runner.RunOptions{},
 	)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
@@ -248,6 +254,7 @@ func (s *server) removeFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 			`{"workspace_id": "%s", "file_path": "%s"}`,
 			reqObject.ID, reqObject.FilePath,
 		),
+		runner.RunOptions{},
 	)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
@@ -284,6 +291,7 @@ func (s *server) readFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 			`{"workspace_id": "%s", "file_path": "%s"}`,
 			reqObject.ID, reqObject.FilePath,
 		),
+		runner.RunOptions{},
 	)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
@@ -315,6 +323,7 @@ func (s *server) readFileWithRevisionInWorkspace(w http.ResponseWriter, r *http.
 			`{"workspace_id": "%s", "file_path": "%s", "with_latest_revision_id": "true"}`,
 			reqObject.ID, reqObject.FilePath,
 		),
+		runner.RunOptions{},
 	)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
@@ -352,6 +361,7 @@ func (s *server) statFileInWorkspace(w http.ResponseWriter, r *http.Request) {
 			`{"workspace_id": "%s", "file_path": "%s", "with_latest_revision_id": "%v"}`,
 			reqObject.ID, reqObject.FilePath, reqObject.WithLatestRevisionID,
 		),
+		runner.RunOptions{},
 	)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
@@ -387,6 +397,7 @@ func (s *server) listRevisions(w http.ResponseWriter, r *http.Request) {
 			`{"workspace_id": "%s", "file_path": "%s"}`,
 			reqObject.ID, reqObject.FilePath,
 		),
+		runner.RunOptions{},
 	)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
@@ -424,6 +435,7 @@ func (s *server) getRevisionForFileInWorkspace(w http.ResponseWriter, r *http.Re
 			`{"workspace_id": "%s", "file_path": "%s", "revision_id": "%s"}`,
 			reqObject.ID, reqObject.FilePath, reqObject.RevisionID,
 		),
+		runner.RunOptions{},
 	)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
@@ -461,6 +473,7 @@ func (s *server) deleteRevisionForFileInWorkspace(w http.ResponseWriter, r *http
 			`{"workspace_id": "%s", "file_path": "%s", "revision_id": "%s"}`,
 			reqObject.ID, reqObject.FilePath, reqObject.RevisionID,
 		),
+		runner.RunOptions{},
 	)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))

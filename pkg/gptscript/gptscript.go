@@ -244,22 +244,22 @@ func makeAbsolute(path string) (string, error) {
 	return filepath.Abs(path)
 }
 
-func (g *GPTScript) Chat(ctx context.Context, prevState runner.ChatState, prg types.Program, envs []string, input string) (runner.ChatResponse, error) {
+func (g *GPTScript) Chat(ctx context.Context, prevState runner.ChatState, prg types.Program, envs []string, input string, opts runner.RunOptions) (runner.ChatResponse, error) {
 	envs, err := g.getEnv(envs)
 	if err != nil {
 		return runner.ChatResponse{}, err
 	}
 
-	return g.Runner.Chat(ctx, prevState, prg, envs, input)
+	return g.Runner.Chat(ctx, prevState, prg, envs, input, opts)
 }
 
-func (g *GPTScript) Run(ctx context.Context, prg types.Program, envs []string, input string) (string, error) {
+func (g *GPTScript) Run(ctx context.Context, prg types.Program, envs []string, input string, opts runner.RunOptions) (string, error) {
 	envs, err := g.getEnv(envs)
 	if err != nil {
 		return "", err
 	}
 
-	return g.Runner.Run(ctx, prg, envs, input)
+	return g.Runner.Run(ctx, prg, envs, input, opts)
 }
 
 func (g *GPTScript) Close(closeDaemons bool) {
@@ -319,7 +319,7 @@ func (s *simpleRunner) Load(ctx context.Context, toolName string) (prg types.Pro
 }
 
 func (s *simpleRunner) Run(ctx context.Context, prg types.Program, input string) (output string, err error) {
-	return s.runner.Run(ctx, prg, s.env, input)
+	return s.runner.Run(ctx, prg, s.env, input, runner.RunOptions{})
 }
 
 type noopModel struct {

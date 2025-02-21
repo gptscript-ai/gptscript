@@ -166,7 +166,7 @@ func (c *Client) load(ctx context.Context, toolName string, env ...string) (*ope
 		return nil, err
 	}
 
-	url, err := c.runner.Run(engine.WithToolCategory(ctx, engine.ProviderToolCategory), prg.SetBlocking(), c.envs, "")
+	url, err := c.runner.Run(engine.WithToolCategory(ctx, engine.ProviderToolCategory), prg.SetBlocking(), c.envs, "", runner.RunOptions{})
 	if err != nil {
 		return nil, err
 	}

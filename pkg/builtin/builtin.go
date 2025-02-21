@@ -269,18 +269,14 @@ func ListTools() (result []types.Tool) {
 
 	sort.Strings(keys)
 	for _, key := range keys {
-		t, _ := Builtin(key)
+		t, _ := DefaultModel(key, "")
 		result = append(result, t)
 	}
 
 	return
 }
 
-func Builtin(name string) (types.Tool, bool) {
-	return BuiltinWithDefaultModel(name, "")
-}
-
-func BuiltinWithDefaultModel(name, defaultModel string) (types.Tool, bool) {
+func DefaultModel(name, defaultModel string) (types.Tool, bool) {
 	// Legacy syntax not used anymore
 	name = strings.TrimSuffix(name, "?")
 	t, ok := tools[name]
@@ -332,7 +328,7 @@ func SysFind(_ context.Context, _ []string, input string, _ chan<- string) (stri
 	return strings.Join(result, "\n"), nil
 }
 
-func SysExec(_ context.Context, env []string, input string, progress chan<- string) (string, error) {
+func SysExec(ctx context.Context, env []string, input string, progress chan<- string) (string, error) {
 	var params struct {
 		Command   string `json:"command,omitempty"`
 		Directory string `json:"directory,omitempty"`
@@ -345,14 +341,20 @@ func SysExec(_ context.Context, env []string, input string, progress chan<- stri
 		params.Directory = "."
 	}
 
+	commandCtx, _ := engine.FromContext(ctx)
+
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	commandCtx.OnUserCancel(ctx, cancel)
+
 	log.Debugf("Running %s in %s", params.Command, params.Directory)
 
 	var cmd *exec.Cmd
-
 	if runtime.GOOS == "windows" {
-		cmd = exec.Command("cmd.exe", "/c", params.Command)
+		cmd = exec.CommandContext(ctx, "cmd.exe", "/c", params.Command)
 	} else {
-		cmd = exec.Command("/bin/sh", "-c", params.Command)
+		cmd = exec.CommandContext(ctx, "/bin/sh", "-c", params.Command)
 	}
 
 	var (
@@ -371,7 +373,8 @@ func SysExec(_ context.Context, env []string, input string, progress chan<- stri
 	cmd.Dir = params.Directory
 	cmd.Stdout = combined
 	cmd.Stderr = combined
-	if err := cmd.Run(); err != nil {
+	if err := cmd.Run(); err != nil && (ctx.Err() == nil || commandCtx.Ctx.Err() != nil) {
+		// If the command failed and the context hasn't been canceled, then return the error.
 		return fmt.Sprintf("ERROR: %s\nOUTPUT:\n%s", err, &out), nil
 	}
 	return out.String(), nil
@@ -420,7 +423,6 @@ func getWorkspaceEnvFileContents(envs []string) ([]string, error) {
 	}
 
 	return envContents, nil
-
 }
 
 func getWorkspaceDir(envs []string) (string, error) {
@@ -665,6 +667,7 @@ func DiscardProgress() (progress chan<- string, closeFunc func()) {
 	ch := make(chan string)
 	go func() {
 		for range ch {
+			continue
 		}
 	}()
 	return ch, func() {

@@ -159,7 +159,7 @@ func (r *Runner) Run(script, input string) (string, error) {
 		return "", err
 	}
 
-	return r.Runner.Run(context.Background(), prg, os.Environ(), input)
+	return r.Runner.Run(context.Background(), prg, os.Environ(), input, runner.RunOptions{})
 }
 
 func (r *Runner) AssertResponded(t *testing.T) {

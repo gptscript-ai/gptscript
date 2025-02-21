@@ -39,6 +39,10 @@ type Options struct {
 	Authorizer          AuthorizerFunc        `usage:"-"`
 }
 
+type RunOptions struct {
+	UserCancel <-chan struct{}
+}
+
 type AuthorizerResponse struct {
 	Accept  bool
 	Message string
@@ -130,7 +134,7 @@ type ChatResponse struct {
 
 type ChatState interface{}
 
-func (r *Runner) Chat(ctx context.Context, prevState ChatState, prg types.Program, env []string, input string) (resp ChatResponse, err error) {
+func (r *Runner) Chat(ctx context.Context, prevState ChatState, prg types.Program, env []string, input string, opts RunOptions) (resp ChatResponse, err error) {
 	var state *State
 
 	defer func() {
@@ -167,7 +171,7 @@ func (r *Runner) Chat(ctx context.Context, prevState ChatState, prg types.Progra
 		monitor.Stop(ctx, resp.Content, err)
 	}()
 
-	callCtx, err := engine.NewContext(ctx, &prg, input)
+	callCtx, err := engine.NewContext(ctx, &prg, input, opts.UserCancel)
 	if err != nil {
 		return resp, err
 	}
@@ -210,8 +214,8 @@ func (r *Runner) Chat(ctx context.Context, prevState ChatState, prg types.Progra
 	}, nil
 }
 
-func (r *Runner) Run(ctx context.Context, prg types.Program, env []string, input string) (output string, err error) {
-	resp, err := r.Chat(ctx, nil, prg, env, input)
+func (r *Runner) Run(ctx context.Context, prg types.Program, env []string, input string, opts RunOptions) (output string, err error) {
+	resp, err := r.Chat(ctx, nil, prg, env, input, opts)
 	if err != nil {
 		return "", err
 	}
@@ -651,8 +655,11 @@ func (r *Runner) newDispatcher(ctx context.Context) dispatcher {
 	return newParallelDispatcher(ctx)
 }
 
-func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string, state *State, toolCategory engine.ToolCategory) (_ *State, callResults []SubCallResult, _ error) {
-	var resultLock sync.Mutex
+func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string, state *State, toolCategory engine.ToolCategory) (*State, []SubCallResult, error) {
+	var (
+		resultLock  sync.Mutex
+		callResults []SubCallResult
+	)
 
 	if state.Continuation != nil {
 		callCtx.LastReturn = state.Continuation
@@ -666,8 +673,6 @@ func (r *Runner) subCalls(callCtx engine.Context, monitor Monitor, env []string,
 		for _, subCall := range state.SubCalls {
 			if subCall.CallID == state.SubCallID {
 				found = true
-				subState := *subCall.State
-				subState.ResumeInput = state.ResumeInput
 				result, err := r.subCallResume(callCtx.Ctx, callCtx, monitor, env, subCall.ToolID, subCall.CallID, subCall.State.WithResumeInput(state.ResumeInput), toolCategory)
 				if err != nil {
 					return nil, nil, err

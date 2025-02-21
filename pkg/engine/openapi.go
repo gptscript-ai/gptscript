@@ -145,7 +145,7 @@ func (e *Engine) runOpenAPIRevamp(tool types.Tool, input string) (*Return, error
 		}
 
 		res = &Return{
-			Result: ptr(result),
+			Result: &result,
 		}
 	}
 
@@ -156,7 +156,7 @@ func (e *Engine) runOpenAPIRevamp(tool types.Tool, input string) (*Return, error
 // The tool itself will have instructions regarding the HTTP request that needs to be made.
 // The tools Instructions field will be in the format "#!sys.openapi '{Instructions JSON}'",
 // where {Instructions JSON} is a JSON string of type OpenAPIInstructions.
-func (e *Engine) runOpenAPI(tool types.Tool, input string) (*Return, error) {
+func (e *Engine) runOpenAPI(ctx Context, tool types.Tool, input string) (*Return, error) {
 	if os.Getenv("GPTSCRIPT_OPENAPI_REVAMP") == "true" {
 		return e.runOpenAPIRevamp(tool, input)
 	}
@@ -264,6 +264,13 @@ func (e *Engine) runOpenAPI(tool types.Tool, input string) (*Return, error) {
 			return nil, fmt.Errorf("unsupported MIME type: %s", instructions.BodyContentMIME)
 		}
 		req.Body = io.NopCloser(&body)
+	}
+
+	// If the user canceled the run, then don't make the request.
+	select {
+	case <-ctx.userCancel:
+		return &Return{}, nil
+	default:
 	}
 
 	// Make the request

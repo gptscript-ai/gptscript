@@ -24,7 +24,7 @@ func loaderWithLocation(f loaderFunc, loc string) loaderFunc {
 	}
 }
 
-func (s *server) execAndStream(ctx context.Context, programLoader loaderFunc, logger mvl.Logger, w http.ResponseWriter, opts gptscript.Options, chatState, input, subTool string, toolDef fmt.Stringer) {
+func (s *server) execAndStream(ctx context.Context, programLoader loaderFunc, logger mvl.Logger, w http.ResponseWriter, opts gptscript.Options, chatState, input, subTool string, toolDef fmt.Stringer, cancel <-chan struct{}) {
 	g, err := gptscript.New(ctx, s.gptscriptOpts, opts)
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to initialize gptscript: %w", err))
@@ -48,7 +48,9 @@ func (s *server) execAndStream(ctx context.Context, programLoader loaderFunc, lo
 	defer events.Close()
 
 	go func() {
-		run, err := g.Chat(ctx, chatState, prg, opts.Env, input)
+		run, err := g.Chat(ctx, chatState, prg, opts.Env, input, runner.RunOptions{
+			UserCancel: cancel,
+		})
 		if err != nil {
 			errChan <- err
 		} else {
@@ -58,21 +60,19 @@ func (s *server) execAndStream(ctx context.Context, programLoader loaderFunc, lo
 		close(programOutput)
 	}()
 
-	processEventStreamOutput(ctx, logger, w, gserver.RunIDFromContext(ctx), events.C, programOutput, errChan)
+	processEventStreamOutput(logger, w, gserver.RunIDFromContext(ctx), events.C, programOutput, errChan)
 }
 
 // processEventStreamOutput will stream the events of the tool to the response as server sent events.
 // If an error occurs, then an event with the error will also be sent.
-func processEventStreamOutput(ctx context.Context, logger mvl.Logger, w http.ResponseWriter, id string, events <-chan event, output <-chan runner.ChatResponse, errChan chan error) {
+func processEventStreamOutput(logger mvl.Logger, w http.ResponseWriter, id string, events <-chan event, output <-chan runner.ChatResponse, errChan chan error) {
 	run := newRun(id)
 	setStreamingHeaders(w)
 
-	streamEvents(ctx, logger, w, run, events)
+	streamEvents(logger, w, run, events)
 
-	var out runner.ChatResponse
 	select {
-	case <-ctx.Done():
-	case out = <-output:
+	case out := <-output:
 		run.processStdout(out)
 
 		writeServerSentEvent(logger, w, map[string]any{
@@ -85,47 +85,27 @@ func processEventStreamOutput(ctx context.Context, logger mvl.Logger, w http.Res
 	}
 
 	// Now that we have received all events, send the DONE event.
-	_, err := w.Write([]byte("data: [DONE]\n\n"))
-	if err == nil {
-		if f, ok := w.(http.Flusher); ok {
-			f.Flush()
-		}
-	}
+	writeServerSentEvent(logger, w, "[DONE]")
 
 	logger.Debugf("wrote DONE event")
 }
 
 // streamEvents will stream the events of the tool to the response as server sent events.
-func streamEvents(ctx context.Context, logger mvl.Logger, w http.ResponseWriter, run *runInfo, events <-chan event) {
+func streamEvents(logger mvl.Logger, w http.ResponseWriter, run *runInfo, events <-chan event) {
 	logger.Debugf("receiving events")
-	for {
-		select {
-		case <-ctx.Done():
-			logger.Debugf("context canceled while receiving events")
-			go func() {
-				//nolint:revive
-				for range events {
-				}
-			}()
-			return
-		case e, ok := <-events:
-			if ok && e.RunID != run.ID {
-				continue
-			}
+	for e := range events {
+		if e.RunID != run.ID {
+			continue
+		}
 
-			if !ok {
-				logger.Debugf("done receiving events")
-				return
-			}
+		writeServerSentEvent(logger, w, run.process(e))
 
-			writeServerSentEvent(logger, w, run.process(e))
-
-			if e.Type == runner.EventTypeRunFinish {
-				logger.Debugf("finished receiving events")
-				return
-			}
+		if e.Type == runner.EventTypeRunFinish {
+			break
 		}
 	}
+
+	logger.Debugf("done receiving events")
 }
 
 func writeResponse(logger mvl.Logger, w http.ResponseWriter, v any) {

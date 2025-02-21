@@ -469,7 +469,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 
 	// This chat in a stateless mode
 	if r.SaveChatStateFile == "-" || r.SaveChatStateFile == "stdout" {
-		resp, err := gptScript.Chat(cmd.Context(), chatState, prg, gptOpt.Env, toolInput)
+		resp, err := gptScript.Chat(cmd.Context(), chatState, prg, gptOpt.Env, toolInput, runner.RunOptions{})
 		if err != nil {
 			return err
 		}
@@ -511,7 +511,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 		gptScript.ExtraEnv = nil
 	}
 
-	s, err := gptScript.Run(cmd.Context(), prg, gptOpt.Env, toolInput)
+	s, err := gptScript.Run(cmd.Context(), prg, gptOpt.Env, toolInput, runner.RunOptions{})
 	if err != nil {
 		return err
 	}

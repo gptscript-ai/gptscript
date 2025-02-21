@@ -12,6 +12,7 @@ import (
 
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/tests/tester"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/hexops/autogold/v2"
@@ -143,7 +144,7 @@ func TestDualSubChat(t *testing.T) {
 	prg, err := r.Load("")
 	require.NoError(t, err)
 
-	resp, err := r.Chat(context.Background(), nil, prg, os.Environ(), "User 1")
+	resp, err := r.Chat(context.Background(), nil, prg, os.Environ(), "User 1", runner.RunOptions{})
 	require.NoError(t, err)
 	r.AssertResponded(t)
 	assert.False(t, resp.Done)
@@ -157,7 +158,7 @@ func TestDualSubChat(t *testing.T) {
 		},
 	})
 
-	resp, err = r.Chat(context.Background(), resp.State, prg, os.Environ(), "User 2")
+	resp, err = r.Chat(context.Background(), resp.State, prg, os.Environ(), "User 2", runner.RunOptions{})
 	require.NoError(t, err)
 	r.AssertResponded(t)
 	assert.False(t, resp.Done)
@@ -168,7 +169,7 @@ func TestDualSubChat(t *testing.T) {
 		Text: "Assistant 3",
 	})
 
-	resp, err = r.Chat(context.Background(), resp.State, prg, os.Environ(), "User 3")
+	resp, err = r.Chat(context.Background(), resp.State, prg, os.Environ(), "User 3", runner.RunOptions{})
 	require.NoError(t, err)
 	r.AssertResponded(t)
 	assert.False(t, resp.Done)
@@ -184,7 +185,7 @@ func TestDualSubChat(t *testing.T) {
 		Text: "And we're done",
 	})
 
-	resp, err = r.Chat(context.Background(), resp.State, prg, os.Environ(), "User 4")
+	resp, err = r.Chat(context.Background(), resp.State, prg, os.Environ(), "User 4", runner.RunOptions{})
 	require.NoError(t, err)
 	r.AssertResponded(t)
 	assert.True(t, resp.Done)
@@ -213,7 +214,7 @@ func TestContextSubChat(t *testing.T) {
 	prg, err := r.Load("")
 	require.NoError(t, err)
 
-	_, err = r.Chat(context.Background(), nil, prg, os.Environ(), "User 1")
+	_, err = r.Chat(context.Background(), nil, prg, os.Environ(), "User 1", runner.RunOptions{})
 	autogold.Expect("invalid state: context tool [testdata/TestContextSubChat/test.gpt:subtool] can not result in a continuation").Equal(t, err.Error())
 }
 
@@ -232,7 +233,7 @@ func TestSubChat(t *testing.T) {
 	prg, err := r.Load("")
 	require.NoError(t, err)
 
-	resp, err := r.Chat(context.Background(), nil, prg, os.Environ(), "Hello")
+	resp, err := r.Chat(context.Background(), nil, prg, os.Environ(), "Hello", runner.RunOptions{})
 	require.NoError(t, err)
 
 	autogold.Expect(`{
@@ -357,7 +358,7 @@ func TestSubChat(t *testing.T) {
   }
 }`).Equal(t, toJSONString(t, resp))
 
-	resp, err = r.Chat(context.Background(), resp.State, prg, os.Environ(), "User 1")
+	resp, err = r.Chat(context.Background(), resp.State, prg, os.Environ(), "User 1", runner.RunOptions{})
 	require.NoError(t, err)
 
 	autogold.Expect(`{
@@ -512,7 +513,7 @@ func TestChat(t *testing.T) {
 	prg, err := r.Load("")
 	require.NoError(t, err)
 
-	resp, err := r.Chat(context.Background(), nil, prg, os.Environ(), "Hello")
+	resp, err := r.Chat(context.Background(), nil, prg, os.Environ(), "Hello", runner.RunOptions{})
 	require.NoError(t, err)
 
 	autogold.Expect(`{
@@ -564,7 +565,7 @@ func TestChat(t *testing.T) {
   }
 }`).Equal(t, toJSONString(t, resp))
 
-	resp, err = r.Chat(context.Background(), resp.State, prg, os.Environ(), "User 1")
+	resp, err = r.Chat(context.Background(), resp.State, prg, os.Environ(), "User 1", runner.RunOptions{})
 	require.NoError(t, err)
 
 	autogold.Expect(`{
@@ -740,7 +741,7 @@ func TestAgentOnly(t *testing.T) {
 		},
 	})
 
-	resp, err := r.Chat(context.Background(), nil, prg, nil, "Input 1")
+	resp, err := r.Chat(context.Background(), nil, prg, nil, "Input 1", runner.RunOptions{})
 	require.NoError(t, err)
 	r.AssertResponded(t)
 	assert.False(t, resp.Done)
@@ -767,7 +768,7 @@ func TestAgents(t *testing.T) {
 		},
 	})
 
-	resp, err := r.Chat(context.Background(), nil, prg, nil, "Input 1")
+	resp, err := r.Chat(context.Background(), nil, prg, nil, "Input 1", runner.RunOptions{})
 	require.NoError(t, err)
 	r.AssertResponded(t)
 	assert.False(t, resp.Done)
@@ -785,14 +786,14 @@ func TestInput(t *testing.T) {
 	prg, err := r.Load("")
 	require.NoError(t, err)
 
-	resp, err := r.Chat(context.Background(), nil, prg, nil, "You're stupid")
+	resp, err := r.Chat(context.Background(), nil, prg, nil, "You're stupid", runner.RunOptions{})
 	require.NoError(t, err)
 	r.AssertResponded(t)
 	assert.False(t, resp.Done)
 	autogold.Expect("TEST RESULT CALL: 1").Equal(t, resp.Content)
 	autogold.ExpectFile(t, toJSONString(t, resp), autogold.Name(t.Name()+"/step1"))
 
-	resp, err = r.Chat(context.Background(), resp.State, prg, nil, "You're ugly")
+	resp, err = r.Chat(context.Background(), resp.State, prg, nil, "You're ugly", runner.RunOptions{})
 	require.NoError(t, err)
 	r.AssertResponded(t)
 	assert.False(t, resp.Done)
@@ -813,7 +814,7 @@ func TestOutput(t *testing.T) {
 	prg, err := r.Load("")
 	require.NoError(t, err)
 
-	resp, err := r.Chat(context.Background(), nil, prg, nil, "Input 1")
+	resp, err := r.Chat(context.Background(), nil, prg, nil, "Input 1", runner.RunOptions{})
 	require.NoError(t, err)
 	r.AssertResponded(t)
 	assert.False(t, resp.Done)
@@ -824,7 +825,7 @@ func TestOutput(t *testing.T) {
 	r.RespondWith(tester.Result{
 		Text: "Response 2",
 	})
-	resp, err = r.Chat(context.Background(), resp.State, prg, nil, "Input 2")
+	resp, err = r.Chat(context.Background(), resp.State, prg, nil, "Input 2", runner.RunOptions{})
 	require.NoError(t, err)
 	r.AssertResponded(t)
 	assert.False(t, resp.Done)
@@ -837,7 +838,7 @@ func TestOutput(t *testing.T) {
 			Message: "Chat Done",
 		},
 	})
-	resp, err = r.Chat(context.Background(), resp.State, prg, nil, "Input 3")
+	resp, err = r.Chat(context.Background(), resp.State, prg, nil, "Input 3", runner.RunOptions{})
 	require.NoError(t, err)
 	r.AssertResponded(t)
 	assert.True(t, resp.Done)
@@ -885,7 +886,7 @@ func TestSysContext(t *testing.T) {
 	prg, err := r.Load("")
 	require.NoError(t, err)
 
-	resp, err := r.Chat(context.Background(), nil, prg, nil, "input 1")
+	resp, err := r.Chat(context.Background(), nil, prg, nil, "input 1", runner.RunOptions{})
 	require.NoError(t, err)
 	r.AssertResponded(t)
 	assert.False(t, resp.Done)
@@ -977,7 +978,7 @@ tools: sys.ls, sys.read, sys.write
 `, "")
 	require.NoError(t, err)
 
-	resp, err := r.Chat(context.Background(), nil, prg, nil, "input 1")
+	resp, err := r.Chat(context.Background(), nil, prg, nil, "input 1", runner.RunOptions{})
 	require.NoError(t, err)
 	r.AssertResponded(t)
 	assert.False(t, resp.Done)
@@ -991,7 +992,7 @@ tools: sys.ls, sys.write
 `, "")
 	require.NoError(t, err)
 
-	resp, err = r.Chat(context.Background(), resp.State, prg, nil, "input 2")
+	resp, err = r.Chat(context.Background(), resp.State, prg, nil, "input 2", runner.RunOptions{})
 	require.NoError(t, err)
 	r.AssertResponded(t)
 	assert.False(t, resp.Done)
