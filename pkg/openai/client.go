@@ -281,10 +281,7 @@ func toMessages(request types.CompletionRequest, compat bool) (result []openai.C
 				chatMessage.ToolCalls = append(chatMessage.ToolCalls, toToolCall(*content.ToolCall))
 			}
 			if content.Text != "" {
-				chatMessage.MultiContent = append(chatMessage.MultiContent, openai.ChatMessagePart{
-					Type: openai.ChatMessagePartTypeText,
-					Text: content.Text,
-				})
+				chatMessage.MultiContent = append(chatMessage.MultiContent, textToMultiContent(content.Text)...)
 			}
 		}
 
@@ -304,6 +301,35 @@ func toMessages(request types.CompletionRequest, compat bool) (result []openai.C
 	}
 
 	return
+}
+
+const imagePrefix = "data:image/png;base64,"
+
+func textToMultiContent(text string) []openai.ChatMessagePart {
+	var chatParts []openai.ChatMessagePart
+	parts := strings.Split(text, "\n")
+	for i := len(parts) - 1; i >= 0; i-- {
+		if strings.HasPrefix(parts[i], imagePrefix) {
+			chatParts = append(chatParts, openai.ChatMessagePart{
+				Type: openai.ChatMessagePartTypeImageURL,
+				ImageURL: &openai.ChatMessageImageURL{
+					URL: parts[i],
+				},
+			})
+			parts = parts[:i]
+		} else {
+			break
+		}
+	}
+	if len(parts) > 0 {
+		chatParts = append(chatParts, openai.ChatMessagePart{
+			Type: openai.ChatMessagePartTypeText,
+			Text: strings.Join(parts, "\n"),
+		})
+	}
+
+	slices.Reverse(chatParts)
+	return chatParts
 }
 
 func (c *Client) Call(ctx context.Context, messageRequest types.CompletionRequest, env []string, status chan<- types.CompletionStatus) (*types.CompletionMessage, error) {
