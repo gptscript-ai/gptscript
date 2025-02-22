@@ -79,6 +79,7 @@ func (s *server) addRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /workspaces/write-file", s.writeFileInWorkspace)
 	mux.HandleFunc("POST /workspaces/delete-file", s.removeFileInWorkspace)
 	mux.HandleFunc("POST /workspaces/read-file", s.readFileInWorkspace)
+	mux.HandleFunc("POST /workspaces/read-file-with-revision", s.readFileWithRevisionInWorkspace)
 	mux.HandleFunc("POST /workspaces/stat-file", s.statFileInWorkspace)
 	mux.HandleFunc("POST /workspaces/list-revisions", s.listRevisions)
 	mux.HandleFunc("POST /workspaces/get-revision", s.getRevisionForFileInWorkspace)
