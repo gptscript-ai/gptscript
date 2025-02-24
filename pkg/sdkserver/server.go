@@ -118,6 +118,7 @@ func run(ctx context.Context, listener net.Listener, opts Options) error {
 		runtimeManager:   runtimes.Default(opts.Options.Cache.CacheDir, opts.SystemToolsDir),
 		waitingToConfirm: make(map[string]chan runner.AuthorizerResponse),
 		waitingToPrompt:  make(map[string]chan map[string]string),
+		running:          make(map[string]chan struct{}),
 	}
 	defer s.close()
 

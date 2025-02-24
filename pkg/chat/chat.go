@@ -17,7 +17,7 @@ type Prompter interface {
 }
 
 type Chatter interface {
-	Chat(ctx context.Context, prevState runner.ChatState, prg types.Program, env []string, input string) (resp runner.ChatResponse, err error)
+	Chat(ctx context.Context, prevState runner.ChatState, prg types.Program, env []string, input string, opts runner.RunOptions) (resp runner.ChatResponse, err error)
 }
 
 type GetProgram func() (types.Program, error)
@@ -74,7 +74,7 @@ func Start(ctx context.Context, prevState runner.ChatState, chatter Chatter, prg
 			}
 		}
 
-		resp, err = chatter.Chat(ctx, prevState, prog, env, input)
+		resp, err = chatter.Chat(ctx, prevState, prog, env, input, runner.RunOptions{})
 		if err != nil {
 			return err
 		}

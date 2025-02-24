@@ -119,10 +119,14 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 		instructions = append(instructions, inputContext.Content)
 	}
 
-	var extraEnv = []string{
+	extraEnv := []string{
 		strings.TrimSpace("GPTSCRIPT_CONTEXT=" + strings.Join(instructions, "\n")),
 	}
-	cmd, stop, err := e.newCommand(ctx.Ctx, extraEnv, tool, input, true)
+
+	commandCtx, cancel := context.WithCancel(ctx.Ctx)
+	defer cancel()
+
+	cmd, stop, err := e.newCommand(commandCtx, extraEnv, tool, input, true)
 	if err != nil {
 		if toolCategory == NoCategory && ctx.Parent != nil {
 			return fmt.Sprintf("ERROR: got (%v) while parsing command", err), nil
@@ -155,18 +159,22 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 	cmd.Stdout = io.MultiWriter(stdout, stdoutAndErr, progressOut)
 	cmd.Stderr = io.MultiWriter(stdoutAndErr, progressOut, os.Stderr)
 	result = stdout
+	defer func() {
+		combinedOutput = stdoutAndErr.String()
+	}()
 
-	if err := cmd.Run(); err != nil {
+	ctx.OnUserCancel(commandCtx, cancel)
+
+	if err := cmd.Run(); err != nil && (commandCtx.Err() == nil || ctx.Ctx.Err() != nil) {
+		// If the command failed and the context hasn't been canceled, then return the error.
 		if toolCategory == NoCategory && ctx.Parent != nil {
 			// If this is a sub-call, then don't return the error; return the error as a message so that the LLM can retry.
 			return fmt.Sprintf("ERROR: got (%v) while running tool, OUTPUT: %s", err, stdoutAndErr), nil
 		}
 		log.Errorf("failed to run tool [%s] cmd %v: %v", tool.Parameters.Name, cmd.Args, err)
-		combinedOutput = stdoutAndErr.String()
 		return "", fmt.Errorf("ERROR: %s: %w", stdoutAndErr, err)
 	}
 
-	combinedOutput = stdoutAndErr.String()
 	return result.String(), IsChatFinishMessage(result.String())
 }
 

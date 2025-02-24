@@ -36,6 +36,9 @@ type server struct {
 	lock             sync.RWMutex
 	waitingToConfirm map[string]chan runner.AuthorizerResponse
 	waitingToPrompt  map[string]chan map[string]string
+
+	runningLock sync.Mutex
+	running     map[string]chan struct{}
 }
 
 func (s *server) addRoutes(mux *http.ServeMux) {
@@ -52,6 +55,7 @@ func (s *server) addRoutes(mux *http.ServeMux) {
 
 	mux.HandleFunc("POST /run", s.execHandler)
 	mux.HandleFunc("POST /evaluate", s.execHandler)
+	mux.HandleFunc("POST /abort/{run_id}", s.abort)
 
 	mux.HandleFunc("POST /load", s.load)
 
@@ -164,6 +168,17 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := gserver.ContextWithNewRunID(r.Context())
 	runID := gserver.RunIDFromContext(ctx)
+	cancel := make(chan struct{})
+	s.runningLock.Lock()
+	s.running[runID] = cancel
+	s.runningLock.Unlock()
+
+	defer func() {
+		s.runningLock.Lock()
+		delete(s.running, runID)
+		s.runningLock.Unlock()
+		close(cancel)
+	}()
 
 	// Ensure chat state is not empty.
 	if reqObject.ChatState == "" {
@@ -214,7 +229,30 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 		opts.Runner.Authorizer = s.authorize
 	}
 
-	s.execAndStream(ctx, programLoader, logger, w, opts, reqObject.ChatState, reqObject.Input, reqObject.SubTool, def)
+	s.execAndStream(ctx, programLoader, logger, w, opts, reqObject.ChatState, reqObject.Input, reqObject.SubTool, def, cancel)
+}
+
+// abort will abort the run in a way such that the chat state will be returned.
+func (s *server) abort(w http.ResponseWriter, r *http.Request) {
+	logger := gcontext.GetLogger(r.Context())
+	runID := r.PathValue("run_id")
+	if runID == "" {
+		writeError(logger, w, http.StatusBadRequest, fmt.Errorf("run_id is required"))
+		return
+	}
+
+	s.runningLock.Lock()
+	cancel := s.running[runID]
+	delete(s.running, runID)
+	s.runningLock.Unlock()
+
+	if cancel == nil {
+		writeResponse(logger, w, "run not found")
+		return
+	}
+
+	close(cancel)
+	writeResponse(logger, w, "run aborted")
 }
 
 // load will load the file and return the corresponding Program.

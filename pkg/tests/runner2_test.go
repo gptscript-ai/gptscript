@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/tests/tester"
 	"github.com/hexops/autogold/v2"
 	"github.com/stretchr/testify/require"
@@ -28,10 +29,10 @@ echo This is the input: ${GPTSCRIPT_INPUT}
 `, "")
 	require.NoError(t, err)
 
-	resp, err := r.Chat(context.Background(), nil, prg, nil, "input 1")
+	resp, err := r.Chat(context.Background(), nil, prg, nil, "input 1", runner.RunOptions{})
 	r.AssertStep(t, resp, err)
 
-	resp, err = r.Chat(context.Background(), resp.State, prg, nil, "input 2")
+	resp, err = r.Chat(context.Background(), resp.State, prg, nil, "input 2", runner.RunOptions{})
 	r.AssertStep(t, resp, err)
 }
 
@@ -54,7 +55,7 @@ name: realcontext
 Yo dawg`, "")
 	require.NoError(t, err)
 
-	resp, err := r.Chat(context.Background(), nil, prg, nil, "input 1")
+	resp, err := r.Chat(context.Background(), nil, prg, nil, "input 1", runner.RunOptions{})
 	r.AssertStep(t, resp, err)
 }
 
@@ -76,9 +77,9 @@ echo ${FOO}:${INPUT}
 `, "")
 	require.NoError(t, err)
 
-	resp, err := r.Chat(context.Background(), nil, prg, nil, `{"foo":"123"}`)
+	resp, err := r.Chat(context.Background(), nil, prg, nil, `{"foo":"123"}`, runner.RunOptions{})
 	r.AssertStep(t, resp, err)
-	resp, err = r.Chat(context.Background(), nil, prg, nil, `"foo":"123"}`)
+	resp, err = r.Chat(context.Background(), nil, prg, nil, `"foo":"123"}`, runner.RunOptions{})
 	r.AssertStep(t, resp, err)
 }
 
@@ -110,7 +111,7 @@ echo '{"env": {"CRED2": "that also worked"}}'
 `, "")
 	require.NoError(t, err)
 
-	resp, err := r.Chat(context.Background(), nil, prg, nil, "")
+	resp, err := r.Chat(context.Background(), nil, prg, nil, "", runner.RunOptions{})
 	r.AssertStep(t, resp, err)
 }
 
@@ -144,7 +145,7 @@ echo "${GPTSCRIPT_INPUT}"
 `, "")
 	require.NoError(t, err)
 
-	resp, err := r.Chat(context.Background(), nil, prg, nil, `{"foo":"baz", "start": true}`)
+	resp, err := r.Chat(context.Background(), nil, prg, nil, `{"foo":"baz", "start": true}`, runner.RunOptions{})
 	r.AssertStep(t, resp, err)
 
 	data := map[string]any{}

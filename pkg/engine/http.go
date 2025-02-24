@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -17,7 +16,7 @@ import (
 
 const DaemonURLSuffix = ".daemon.gptscript.local"
 
-func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Tool, input string) (cmdRet *Return, cmdErr error) {
+func (e *Engine) runHTTP(ctx Context, tool types.Tool, input string) (cmdRet *Return, cmdErr error) {
 	envMap := map[string]string{}
 
 	for _, env := range appendInputAsEnv(nil, input) {
@@ -47,7 +46,7 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 		if !ok || len(referencedToolRefs) != 1 {
 			return nil, fmt.Errorf("invalid reference [%s] to tool [%s] from [%s], missing \"tools: %s\" parameter", toolURL, referencedToolName, tool.Source, referencedToolName)
 		}
-		referencedTool, ok := prg.ToolSet[referencedToolRefs[0].ToolID]
+		referencedTool, ok := ctx.Program.ToolSet[referencedToolRefs[0].ToolID]
 		if !ok {
 			return nil, fmt.Errorf("failed to find tool [%s] for [%s]", referencedToolName, parsed.Hostname())
 		}
@@ -81,7 +80,7 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 		input = body
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, toolURL, strings.NewReader(input))
+	req, err := http.NewRequestWithContext(ctx.Ctx, http.MethodPost, toolURL, strings.NewReader(input))
 	if err != nil {
 		return nil, err
 	}
@@ -119,6 +118,13 @@ func (e *Engine) runHTTP(ctx context.Context, prg *types.Program, tool types.Too
 		req.Header.Set("Content-Type", "application/json")
 	} else {
 		req.Header.Set("Content-Type", "text/plain")
+	}
+
+	// If the user canceled the run, then don't make the request.
+	select {
+	case <-ctx.userCancel:
+		return &Return{}, nil
+	default:
 	}
 
 	resp, err := http.DefaultClient.Do(req)

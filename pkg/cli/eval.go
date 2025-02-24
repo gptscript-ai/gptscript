@@ -10,6 +10,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/input"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/spf13/cobra"
 )
@@ -56,13 +57,13 @@ func (e *Eval) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	runner, err := gptscript.New(cmd.Context(), opts)
+	g, err := gptscript.New(cmd.Context(), opts)
 	if err != nil {
 		return err
 	}
 
 	prg, err := loader.ProgramFromSource(cmd.Context(), tool.String(), "", loader.Options{
-		Cache: runner.Cache,
+		Cache: g.Cache,
 	})
 	if err != nil {
 		return err
@@ -74,14 +75,14 @@ func (e *Eval) Run(cmd *cobra.Command, args []string) error {
 	}
 
 	if e.Chat {
-		return chat.Start(cmd.Context(), nil, runner, func() (types.Program, error) {
+		return chat.Start(cmd.Context(), nil, g, func() (types.Program, error) {
 			return loader.ProgramFromSource(cmd.Context(), tool.String(), "", loader.Options{
-				Cache: runner.Cache,
+				Cache: g.Cache,
 			})
 		}, os.Environ(), toolInput, "")
 	}
 
-	toolOutput, err := runner.Run(cmd.Context(), prg, opts.Env, toolInput)
+	toolOutput, err := g.Run(cmd.Context(), prg, opts.Env, toolInput, runner.RunOptions{})
 	if err != nil {
 		return err
 	}

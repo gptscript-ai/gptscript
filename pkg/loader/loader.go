@@ -141,7 +141,7 @@ func loadProgram(data []byte, into *types.Program, targetToolName, defaultModel 
 
 	into.ToolSet = make(map[string]types.Tool, len(ext.ToolSet))
 	for k, v := range ext.ToolSet {
-		if builtinTool, ok := builtin.BuiltinWithDefaultModel(k, defaultModel); ok {
+		if builtinTool, ok := builtin.DefaultModel(k, defaultModel); ok {
 			v = builtinTool
 		}
 		into.ToolSet[k] = v
@@ -471,7 +471,7 @@ func Program(ctx context.Context, name, subToolName string, opts ...Options) (ty
 
 func resolve(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, name, subTool, defaultModel string) ([]types.Tool, error) {
 	if subTool == "" {
-		t, ok := builtin.BuiltinWithDefaultModel(name, defaultModel)
+		t, ok := builtin.DefaultModel(name, defaultModel)
 		if ok {
 			prg.ToolSet[t.ID] = t
 			return []types.Tool{t}, nil

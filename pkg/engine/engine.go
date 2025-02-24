@@ -92,7 +92,8 @@ type Context struct {
 	Engine        *Engine
 	Program       *types.Program
 	// Input is saved only so that we can render display text, don't use otherwise
-	Input string
+	Input      string
+	userCancel <-chan struct{}
 }
 
 type ChatHistory struct {
@@ -188,6 +189,18 @@ func (c *Context) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c.GetCallContext())
 }
 
+func (c *Context) OnUserCancel(ctx context.Context, cancel func()) {
+	go func() {
+		select {
+		case <-ctx.Done():
+			// If the context is canceled, then nothing to do.
+		case <-c.userCancel:
+			// If the user is requesting a cancel, then cancel the context.
+			cancel()
+		}
+	}()
+}
+
 type toolCategoryKey struct{}
 
 func WithToolCategory(ctx context.Context, toolCategory ToolCategory) context.Context {
@@ -199,7 +212,7 @@ func ToolCategoryFromContext(ctx context.Context) ToolCategory {
 	return category
 }
 
-func NewContext(ctx context.Context, prg *types.Program, input string) (Context, error) {
+func NewContext(ctx context.Context, prg *types.Program, input string, userCancel <-chan struct{}) (Context, error) {
 	category := ToolCategoryFromContext(ctx)
 
 	callCtx := Context{
@@ -208,9 +221,10 @@ func NewContext(ctx context.Context, prg *types.Program, input string) (Context,
 			Tool:         prg.ToolSet[prg.EntryToolID],
 			ToolCategory: category,
 		},
-		Ctx:     ctx,
-		Program: prg,
-		Input:   input,
+		Ctx:        ctx,
+		Program:    prg,
+		Input:      input,
+		userCancel: userCancel,
 	}
 
 	agentGroup, err := callCtx.Tool.GetToolsByType(prg, types.ToolTypeAgent)
@@ -251,6 +265,7 @@ func (c *Context) SubCallContext(ctx context.Context, input, toolID, callID stri
 		Program:       c.Program,
 		CurrentReturn: c.CurrentReturn,
 		Input:         input,
+		userCancel:    c.userCancel,
 	}, nil
 }
 
@@ -292,31 +307,36 @@ func populateMessageParams(ctx Context, completion *types.CompletionRequest, too
 
 func (e *Engine) runCommandTools(ctx Context, tool types.Tool, input string) (*Return, error) {
 	if tool.IsHTTP() {
-		return e.runHTTP(ctx.Ctx, ctx.Program, tool, input)
+		return e.runHTTP(ctx, tool, input)
 	} else if tool.IsDaemon() {
-		return e.runDaemon(ctx.Ctx, ctx.Program, tool, input)
+		return e.runDaemon(ctx, tool, input)
 	} else if tool.IsOpenAPI() {
-		return e.runOpenAPI(tool, input)
+		return e.runOpenAPI(ctx, tool, input)
 	} else if tool.IsEcho() {
 		return e.runEcho(tool)
 	} else if tool.IsCall() {
 		return e.runCall(ctx, tool, input)
 	}
 	s, err := e.runCommand(ctx, tool, input, ctx.ToolCategory)
-	if err != nil {
-		return nil, err
-	}
 	return &Return{
 		Result: &s,
-	}, nil
+	}, err
 }
 
-func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
+func (e *Engine) Start(ctx Context, input string) (ret *Return, err error) {
 	tool := ctx.Tool
 
 	defer func() {
 		if ret != nil && ret.State != nil {
 			ret.State.Input = input
+		}
+		select {
+		case <-ctx.userCancel:
+			if ret.Result == nil {
+				ret.Result = new(string)
+			}
+			*ret.Result += "\n\nABORTED BY USER"
+		default:
 		}
 	}()
 
@@ -344,7 +364,7 @@ func (e *Engine) Start(ctx Context, input string) (ret *Return, _ error) {
 		})
 	}
 
-	return e.complete(ctx.Ctx, &State{
+	return e.complete(ctx, &State{
 		Completion: completion,
 	})
 }
@@ -376,7 +396,7 @@ func addUpdateSystem(ctx Context, tool types.Tool, msgs []types.CompletionMessag
 	return append([]types.CompletionMessage{msg}, msgs...)
 }
 
-func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
+func (e *Engine) complete(ctx Context, state *State) (*Return, error) {
 	var (
 		progress = make(chan types.CompletionStatus)
 		ret      = Return{
@@ -429,7 +449,7 @@ func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 		return &ret, nil
 	}
 
-	resp, err := e.Model.Call(ctx, state.Completion, e.Env, progress)
+	resp, err := e.Model.Call(ctx.WrappedContext(e), state.Completion, e.Env, progress)
 	if err != nil {
 		return nil, fmt.Errorf("failed calling model for completion: %w", err)
 	}
@@ -474,7 +494,17 @@ func (e *Engine) complete(ctx context.Context, state *State) (*Return, error) {
 	return &ret, nil
 }
 
-func (e *Engine) Continue(ctx Context, state *State, results ...CallResult) (*Return, error) {
+func (e *Engine) Continue(ctx Context, state *State, results ...CallResult) (ret *Return, _ error) {
+	defer func() {
+		select {
+		case <-ctx.userCancel:
+			if ret.Result == nil {
+				ret.Result = new(string)
+			}
+			*ret.Result += "\n\nABORTED BY USER"
+		default:
+		}
+	}()
 	if ctx.Tool.IsCommand() {
 		var input string
 		if len(results) == 1 {
@@ -508,7 +538,7 @@ func (e *Engine) Continue(ctx Context, state *State, results ...CallResult) (*Re
 		}
 	}
 
-	ret := Return{
+	ret = &Return{
 		State: state,
 		Calls: map[string]Call{},
 	}
@@ -524,7 +554,7 @@ func (e *Engine) Continue(ctx Context, state *State, results ...CallResult) (*Re
 
 	if len(ret.Calls) > 0 {
 		// Outstanding tool calls still pending
-		return &ret, nil
+		return ret, nil
 	}
 
 	for _, content := range state.Completion.Messages[len(state.Completion.Messages)-1].Content {
@@ -559,5 +589,5 @@ func (e *Engine) Continue(ctx Context, state *State, results ...CallResult) (*Re
 		return nil, err
 	}
 
-	return e.complete(ctx.Ctx, state)
+	return e.complete(ctx, state)
 }

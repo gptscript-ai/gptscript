@@ -229,7 +229,7 @@ func (e *Engine) startDaemon(tool types.Tool) (string, error) {
 	return url, fmt.Errorf("timeout waiting for 200 response from GET %s", url)
 }
 
-func (e *Engine) runDaemon(ctx context.Context, prg *types.Program, tool types.Tool, input string) (cmdRet *Return, cmdErr error) {
+func (e *Engine) runDaemon(ctx Context, tool types.Tool, input string) (cmdRet *Return, cmdErr error) {
 	url, err := e.startDaemon(tool)
 	if err != nil {
 		return nil, err
@@ -238,5 +238,5 @@ func (e *Engine) runDaemon(ctx context.Context, prg *types.Program, tool types.T
 	tool.Instructions = strings.Join(append([]string{
 		types.CommandPrefix + url,
 	}, strings.Split(tool.Instructions, "\n")[1:]...), "\n")
-	return e.runHTTP(ctx, prg, tool, input)
+	return e.runHTTP(ctx, tool, input)
 }

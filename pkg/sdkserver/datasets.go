@@ -9,6 +9,7 @@ import (
 	gcontext "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/runner"
 )
 
 func (s *server) getDatasetTool(req datasetRequest) string {
@@ -79,7 +80,7 @@ func (s *server) listDatasets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := g.Run(r.Context(), prg, s.getServerToolsEnv(req.Env), req.Input)
+	result, err := g.Run(r.Context(), prg, s.getServerToolsEnv(req.Env), req.Input, runner.RunOptions{})
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
 		return
@@ -147,7 +148,7 @@ func (s *server) addDatasetElements(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := g.Run(r.Context(), prg, s.getServerToolsEnv(req.Env), req.Input)
+	result, err := g.Run(r.Context(), prg, s.getServerToolsEnv(req.Env), req.Input, runner.RunOptions{})
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
 		return
@@ -207,7 +208,7 @@ func (s *server) listDatasetElements(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := g.Run(r.Context(), prg, s.getServerToolsEnv(req.Env), req.Input)
+	result, err := g.Run(r.Context(), prg, s.getServerToolsEnv(req.Env), req.Input, runner.RunOptions{})
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
 		return
@@ -270,7 +271,7 @@ func (s *server) getDatasetElement(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := g.Run(r.Context(), prg, s.getServerToolsEnv(req.Env), req.Input)
+	result, err := g.Run(r.Context(), prg, s.getServerToolsEnv(req.Env), req.Input, runner.RunOptions{})
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to run program: %w", err))
 		return

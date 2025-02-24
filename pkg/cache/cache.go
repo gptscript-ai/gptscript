@@ -105,6 +105,13 @@ func (c *Client) Store(ctx context.Context, key, value any) error {
 		return nil
 	}
 
+	select {
+	// If the context has been canceled, then don't try to save.
+	case <-ctx.Done():
+		return nil
+	default:
+	}
+
 	if c.noop || IsNoCache(ctx) {
 		keyValue, err := c.cacheKey(key)
 		if err == nil {
