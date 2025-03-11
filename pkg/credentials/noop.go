@@ -25,3 +25,7 @@ func (s NoopStore) Remove(context.Context, string) error {
 func (s NoopStore) List(context.Context) ([]Credential, error) {
 	return nil, nil
 }
+
+func (s NoopStore) RecreateAll(context.Context) error {
+	return nil
+}

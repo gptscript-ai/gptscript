@@ -70,6 +70,7 @@ func (s *server) addRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /credentials/create", s.createCredential)
 	mux.HandleFunc("POST /credentials/reveal", s.revealCredential)
 	mux.HandleFunc("POST /credentials/delete", s.deleteCredential)
+	mux.HandleFunc("POST /credentials/recreate-all", s.recreateAllCredentials)
 
 	mux.HandleFunc("POST /datasets", s.listDatasets)
 	mux.HandleFunc("POST /datasets/list-elements", s.listDatasetElements)

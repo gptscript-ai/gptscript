@@ -20,6 +20,23 @@ func (s *server) initializeCredentialStore(_ context.Context, credCtxs []string)
 	return store, nil
 }
 
+func (s *server) recreateAllCredentials(w http.ResponseWriter, r *http.Request) {
+	logger := gcontext.GetLogger(r.Context())
+
+	store, err := s.initializeCredentialStore(r.Context(), []string{credentials.AllCredentialContexts})
+	if err != nil {
+		writeError(logger, w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := store.RecreateAll(r.Context()); err != nil {
+		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to recreate all credentials: %w", err))
+		return
+	}
+
+	writeResponse(logger, w, map[string]any{"stdout": "All credentials recreated successfully"})
+}
+
 func (s *server) listCredentials(w http.ResponseWriter, r *http.Request) {
 	logger := gcontext.GetLogger(r.Context())
 	req := new(credentialsRequest)
