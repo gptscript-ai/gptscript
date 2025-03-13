@@ -223,12 +223,8 @@ func (s *Store) RecreateAll(_ context.Context) error {
 		return err
 	}
 
-	// We repeatedly lock and unlock the mutex in this function to give other threads a chance to talk to the credential store.
-	// It can take several minutes to recreate the credentials if there are hundreds of them, and we don't want to
-	// block all other threads while we do that.
 	// New credentials might be created after our GetAll, but they will be created with the current encryption configuration,
 	// so it's okay that they are skipped by this function.
-
 	s.recreateAllLock.Lock()
 	all, err := store.GetAll()
 	s.recreateAllLock.Unlock()
@@ -238,28 +234,33 @@ func (s *Store) RecreateAll(_ context.Context) error {
 
 	// Loop through and recreate each individual credential.
 	for serverAddress := range all {
-		s.recreateAllLock.Lock()
-		authConfig, err := store.Get(serverAddress)
-		if err != nil {
-			s.recreateAllLock.Unlock()
-
-			if IsCredentialsNotFoundError(err) {
-				// This can happen if the credential was deleted between the GetAll and the Get by another thread.
-				continue
-			}
+		if err := s.recreateCredential(store, serverAddress); err != nil {
 			return err
 		}
+	}
 
-		if err := store.Erase(serverAddress); err != nil {
-			s.recreateAllLock.Unlock()
-			return err
-		}
+	return nil
+}
 
-		if err := store.Store(authConfig); err != nil {
-			s.recreateAllLock.Unlock()
-			return err
+func (s *Store) recreateCredential(store credentials.Store, serverAddress string) error {
+	s.recreateAllLock.Lock()
+	defer s.recreateAllLock.Unlock()
+
+	authConfig, err := store.Get(serverAddress)
+	if err != nil {
+		if IsCredentialsNotFoundError(err) {
+			// This can happen if the credential was deleted between the GetAll and the Get by another thread.
+			return nil
 		}
-		s.recreateAllLock.Unlock()
+		return err
+	}
+
+	if err := store.Erase(serverAddress); err != nil {
+		return err
+	}
+
+	if err := store.Store(authConfig); err != nil {
+		return err
 	}
 
 	return nil
