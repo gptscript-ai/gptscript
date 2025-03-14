@@ -72,8 +72,8 @@ func (s *StoreFactory) NewStore(credCtxs []string) (CredentialStore, error) {
 		return nil, err
 	}
 	if s.file {
-		return withOverride{
-			target: Store{
+		return &withOverride{
+			target: &Store{
 				credCtxs: credCtxs,
 				cfg:      s.cfg,
 			},
@@ -81,8 +81,8 @@ func (s *StoreFactory) NewStore(credCtxs []string) (CredentialStore, error) {
 			credContext: credCtxs,
 		}, nil
 	}
-	return withOverride{
-		target: Store{
+	return &withOverride{
+		target: &Store{
 			credCtxs: credCtxs,
 			cfg:      s.cfg,
 			program:  s.program,

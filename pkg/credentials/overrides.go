@@ -147,3 +147,7 @@ func (w withOverride) List(ctx context.Context) ([]Credential, error) {
 
 	return creds, nil
 }
+
+func (w withOverride) RecreateAll(ctx context.Context) error {
+	return w.target.RecreateAll(ctx)
+}

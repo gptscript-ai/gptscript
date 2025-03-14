@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"slices"
+	"sync"
 
 	"github.com/docker/cli/cli/config/credentials"
 	"github.com/docker/cli/cli/config/types"
@@ -24,15 +25,20 @@ type CredentialStore interface {
 	Refresh(ctx context.Context, cred Credential) error
 	Remove(ctx context.Context, toolName string) error
 	List(ctx context.Context) ([]Credential, error)
+	RecreateAll(ctx context.Context) error
 }
 
 type Store struct {
-	credCtxs []string
-	cfg      *config.CLIConfig
-	program  client.ProgramFunc
+	credCtxs        []string
+	cfg             *config.CLIConfig
+	program         client.ProgramFunc
+	recreateAllLock sync.RWMutex
 }
 
-func (s Store) Get(_ context.Context, toolName string) (*Credential, bool, error) {
+func (s *Store) Get(_ context.Context, toolName string) (*Credential, bool, error) {
+	s.recreateAllLock.RLock()
+	defer s.recreateAllLock.RUnlock()
+
 	if len(s.credCtxs) > 0 && s.credCtxs[0] == AllCredentialContexts {
 		return nil, false, fmt.Errorf("cannot get a credential with context %q", AllCredentialContexts)
 	}
@@ -80,7 +86,10 @@ func (s Store) Get(_ context.Context, toolName string) (*Credential, bool, error
 
 // Add adds a new credential to the credential store.
 // Any context set on the credential object will be overwritten with the first context of the credential store.
-func (s Store) Add(_ context.Context, cred Credential) error {
+func (s *Store) Add(_ context.Context, cred Credential) error {
+	s.recreateAllLock.RLock()
+	defer s.recreateAllLock.RUnlock()
+
 	first := first(s.credCtxs)
 	if first == AllCredentialContexts {
 		return fmt.Errorf("cannot add a credential with context %q", AllCredentialContexts)
@@ -99,7 +108,10 @@ func (s Store) Add(_ context.Context, cred Credential) error {
 }
 
 // Refresh updates an existing credential in the credential store.
-func (s Store) Refresh(_ context.Context, cred Credential) error {
+func (s *Store) Refresh(_ context.Context, cred Credential) error {
+	s.recreateAllLock.RLock()
+	defer s.recreateAllLock.RUnlock()
+
 	if !slices.Contains(s.credCtxs, cred.Context) {
 		return fmt.Errorf("context %q not in list of valid contexts for this credential store", cred.Context)
 	}
@@ -115,7 +127,10 @@ func (s Store) Refresh(_ context.Context, cred Credential) error {
 	return store.Store(auth)
 }
 
-func (s Store) Remove(_ context.Context, toolName string) error {
+func (s *Store) Remove(_ context.Context, toolName string) error {
+	s.recreateAllLock.RLock()
+	defer s.recreateAllLock.RUnlock()
+
 	first := first(s.credCtxs)
 	if len(s.credCtxs) > 1 || first == AllCredentialContexts {
 		return fmt.Errorf("error: credential deletion is not supported when multiple credential contexts are provided")
@@ -129,7 +144,10 @@ func (s Store) Remove(_ context.Context, toolName string) error {
 	return store.Erase(toolNameWithCtx(toolName, first))
 }
 
-func (s Store) List(_ context.Context) ([]Credential, error) {
+func (s *Store) List(_ context.Context) ([]Credential, error) {
+	s.recreateAllLock.RLock()
+	defer s.recreateAllLock.RUnlock()
+
 	store, err := s.getStore()
 	if err != nil {
 		return nil, err
@@ -197,6 +215,55 @@ func (s Store) List(_ context.Context) ([]Credential, error) {
 	}
 
 	return maps.Values(credsByName), nil
+}
+
+func (s *Store) RecreateAll(_ context.Context) error {
+	store, err := s.getStore()
+	if err != nil {
+		return err
+	}
+
+	// New credentials might be created after our GetAll, but they will be created with the current encryption configuration,
+	// so it's okay that they are skipped by this function.
+	s.recreateAllLock.Lock()
+	all, err := store.GetAll()
+	s.recreateAllLock.Unlock()
+	if err != nil {
+		return err
+	}
+
+	// Loop through and recreate each individual credential.
+	for serverAddress := range all {
+		if err := s.recreateCredential(store, serverAddress); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *Store) recreateCredential(store credentials.Store, serverAddress string) error {
+	s.recreateAllLock.Lock()
+	defer s.recreateAllLock.Unlock()
+
+	authConfig, err := store.Get(serverAddress)
+	if err != nil {
+		if IsCredentialsNotFoundError(err) {
+			// This can happen if the credential was deleted between the GetAll and the Get by another thread.
+			return nil
+		}
+		return err
+	}
+
+	if err := store.Erase(serverAddress); err != nil {
+		return err
+	}
+
+	if err := store.Store(authConfig); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *Store) getStore() (credentials.Store, error) {
