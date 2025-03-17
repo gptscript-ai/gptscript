@@ -546,6 +546,8 @@ func override(left, right string) string {
 	return left
 }
 
+const WaitingMessage = "Waiting for model response..."
+
 func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest, transactionID string, env []string, partial chan<- types.CompletionStatus) (types.CompletionMessage, error) {
 	streamResponse := os.Getenv("GPTSCRIPT_INTERNAL_OPENAI_STREAMING") != "false"
 
@@ -553,7 +555,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 		CompletionID: transactionID,
 		PartialResponse: &types.CompletionMessage{
 			Role:    types.CompletionMessageRoleTypeAssistant,
-			Content: types.Text("Waiting for model response..."),
+			Content: types.Text(WaitingMessage),
 		},
 	}
 
