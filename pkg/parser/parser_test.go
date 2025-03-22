@@ -304,7 +304,7 @@ body
 !metadata:first:package.json
 foo=base
 f
-`).Equal(t, tools[0].String())
+`).Equal(t, tools[0].Print())
 }
 
 func TestFormatWithBadInstruction(t *testing.T) {
@@ -316,9 +316,9 @@ func TestFormatWithBadInstruction(t *testing.T) {
 			Instructions: "foo: bar",
 		},
 	}
-	autogold.Expect("Name: foo\n===\nfoo: bar\n").Equal(t, input.String())
+	autogold.Expect("Name: foo\n===\nfoo: bar\n").Equal(t, input.Print())
 
-	tools, err := ParseTools(strings.NewReader(input.String()))
+	tools, err := ParseTools(strings.NewReader(input.Print()))
 	require.NoError(t, err)
 	if reflect.DeepEqual(input, tools[0]) {
 		t.Errorf("expected %v, got %v", input, tools[0])

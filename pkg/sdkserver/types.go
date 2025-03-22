@@ -1,8 +1,8 @@
 package sdkserver
 
 import (
+	"encoding/json"
 	"maps"
-	"strings"
 	"time"
 
 	"github.com/gptscript-ai/gptscript/pkg/cache"
@@ -30,15 +30,12 @@ const (
 type toolDefs []types.ToolDef
 
 func (t toolDefs) String() string {
-	s := new(strings.Builder)
-	for i, tool := range t {
-		s.WriteString(tool.String())
-		if i != len(t)-1 {
-			s.WriteString("\n\n---\n\n")
-		}
+	data, err := json.Marshal(t)
+	if err != nil {
+		panic(err)
 	}
 
-	return s.String()
+	return "#!GPTSCRIPT" + string(data)
 }
 
 type (

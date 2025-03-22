@@ -17,7 +17,6 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gptscript-ai/gptscript/internal"
-	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
@@ -132,36 +131,6 @@ func loadLocal(base *source, name string) (*source, bool, error) {
 	}, true, nil
 }
 
-func loadProgram(data []byte, into *types.Program, targetToolName, defaultModel string) (types.Tool, error) {
-	var ext types.Program
-
-	if err := json.Unmarshal(data[len(assemble.Header):], &ext); err != nil {
-		return types.Tool{}, err
-	}
-
-	into.ToolSet = make(map[string]types.Tool, len(ext.ToolSet))
-	for k, v := range ext.ToolSet {
-		if builtinTool, ok := builtin.DefaultModel(k, defaultModel); ok {
-			v = builtinTool
-		}
-		into.ToolSet[k] = v
-	}
-
-	tool := into.ToolSet[ext.EntryToolID]
-	if targetToolName == "" {
-		return tool, nil
-	}
-
-	tool, ok := into.ToolSet[tool.LocalTools[strings.ToLower(targetToolName)]]
-	if !ok {
-		return tool, &types.ErrToolNotFound{
-			ToolName: targetToolName,
-		}
-	}
-
-	return tool, nil
-}
-
 func loadOpenAPI(prg *types.Program, data []byte) *openapi3.T {
 	var (
 		openAPICacheKey     = hash.Digest(data)
@@ -188,14 +157,6 @@ func loadOpenAPI(prg *types.Program, data []byte) *openapi3.T {
 
 func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, targetToolName, defaultModel string) ([]types.Tool, error) {
 	data := base.Content
-
-	if bytes.HasPrefix(data, assemble.Header) {
-		tool, err := loadProgram(data, prg, targetToolName, defaultModel)
-		if err != nil {
-			return nil, err
-		}
-		return []types.Tool{tool}, nil
-	}
 
 	var (
 		tools     []types.Tool
@@ -231,11 +192,19 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 	// If we didn't get any tools from trying to parse it as OpenAPI, try to parse it as a GPTScript
 	if len(tools) == 0 {
 		var err error
-		tools, err = parser.ParseTools(bytes.NewReader(data), parser.Options{
-			AssignGlobals: true,
-		})
-		if err != nil {
-			return nil, err
+		_, marshaled, ok := strings.Cut(string(data), "#!GPTSCRIPT")
+		if ok {
+			err = json.Unmarshal([]byte(marshaled), &tools)
+			if err != nil {
+				return nil, fmt.Errorf("error parsing marshalled script: %w", err)
+			}
+		} else {
+			tools, err = parser.ParseTools(bytes.NewReader(data), parser.Options{
+				AssignGlobals: true,
+			})
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
