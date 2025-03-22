@@ -389,6 +389,14 @@ func (t Tool) GetToolRefsFromNames(names []string) (result []ToolReference, _ er
 }
 
 func (t ToolDef) String() string {
+	data, err := json.Marshal([]any{t})
+	if err != nil {
+		panic(err)
+	}
+	return "#!GPTSCRIPT" + string(data)
+}
+
+func (t ToolDef) Print() string {
 	buf := &strings.Builder{}
 	if t.Parameters.GlobalModelName != "" {
 		_, _ = fmt.Fprintf(buf, "Global Model Name: %s\n", t.Parameters.GlobalModelName)

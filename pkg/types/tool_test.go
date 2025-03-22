@@ -6,7 +6,7 @@ import (
 	"github.com/hexops/autogold/v2"
 )
 
-func TestToolDef_String(t *testing.T) {
+func TestToolDef_Print(t *testing.T) {
 	tool := ToolDef{
 		Parameters: Parameters{
 			Name:                "Tool Sample",
@@ -82,7 +82,7 @@ This is a sample instruction
 // blah blah some ugly JSON
 }
 
-`).Equal(t, tool.String())
+`).Equal(t, tool.Print())
 }
 
 // float32Ptr is used to return a pointer to a given float32 value
