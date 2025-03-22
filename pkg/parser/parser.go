@@ -263,7 +263,7 @@ func writeSep(buf *strings.Builder, lastText bool) {
 	}
 }
 
-func (d Document) String() string {
+func (d Document) Print() string {
 	buf := strings.Builder{}
 	lastText := false
 	for _, node := range d.Nodes {
@@ -274,7 +274,7 @@ func (d Document) String() string {
 		}
 		if node.ToolNode != nil {
 			writeSep(&buf, lastText)
-			buf.WriteString(node.ToolNode.Tool.String())
+			buf.WriteString(node.ToolNode.Tool.Print())
 			lastText = false
 		}
 	}

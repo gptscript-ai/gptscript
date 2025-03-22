@@ -114,7 +114,7 @@ func (s *server) listTools(w http.ResponseWriter, r *http.Request) {
 		// Don't print instructions
 		tool.Instructions = ""
 
-		lines = append(lines, tool.String())
+		lines = append(lines, tool.Print())
 	}
 
 	writeResponse(logger, w, map[string]any{"stdout": strings.Join(lines, "\n---\n")})
@@ -339,5 +339,5 @@ func (s *server) fmtDocument(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeResponse(logger, w, map[string]string{"stdout": doc.String()})
+	writeResponse(logger, w, map[string]string{"stdout": doc.Print()})
 }
