@@ -14,7 +14,6 @@ import (
 	"github.com/fatih/color"
 	"github.com/gptscript-ai/cmd"
 	gptscript2 "github.com/gptscript-ai/go-gptscript"
-	"github.com/gptscript-ai/gptscript/pkg/assemble"
 	"github.com/gptscript-ai/gptscript/pkg/auth"
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
@@ -58,7 +57,6 @@ type GPTScript struct {
 	// Input should not be using GPTSCRIPT_INPUT env var because that is the same value that is set in tool executions
 	Input                    string   `usage:"Read input from a file (\"-\" for stdin)" short:"f" env:"GPTSCRIPT_INPUT_FILE"`
 	SubTool                  string   `usage:"Use tool of this name, not the first tool in file" local:"true"`
-	Assemble                 bool     `usage:"Assemble tool to a single artifact, saved to --output" hidden:"true" local:"true"`
 	ListModels               bool     `usage:"List the models available and exit" local:"true"`
 	ListTools                bool     `usage:"List built-in tools and exit" local:"true"`
 	ListenAddress            string   `usage:"Server listen address" default:"127.0.0.1:0" hidden:"true"`
@@ -437,20 +435,6 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 
 	if len(args) == 0 {
 		return cmd.Help()
-	}
-
-	if r.Assemble {
-		var out io.Writer = os.Stdout
-		if r.Output != "" && r.Output != "-" {
-			f, err := os.Create(r.Output)
-			if err != nil {
-				return fmt.Errorf("opening %s: %w", r.Output, err)
-			}
-			defer f.Close()
-			out = f
-		}
-
-		return assemble.Assemble(prg, out)
 	}
 
 	toolInput, err := input.FromCLI(r.Input, args)

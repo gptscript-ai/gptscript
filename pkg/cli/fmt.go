@@ -43,9 +43,9 @@ func (e *Fmt) Run(_ *cobra.Command, args []string) error {
 	}
 
 	if e.Write && loc != "" {
-		return os.WriteFile(loc, []byte(doc.String()), 0644)
+		return os.WriteFile(loc, []byte(doc.Print()), 0644)
 	}
 
-	fmt.Print(doc.String())
+	fmt.Print(doc.Print())
 	return nil
 }

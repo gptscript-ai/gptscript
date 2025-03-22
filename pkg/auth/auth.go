@@ -23,7 +23,7 @@ func Authorize(ctx engine.Context, input string) (runner.AuthorizerResponse, err
 
 	var result bool
 	err := survey.AskOne(&survey.Confirm{
-		Help:    fmt.Sprintf("The full source of the tools is as follows:\n\n%s", ctx.Tool.String()),
+		Help:    fmt.Sprintf("The full source of the tools is as follows:\n\n%s", ctx.Tool.Print()),
 		Default: true,
 		Message: ConfirmMessage(ctx, input),
 	}, &result)
