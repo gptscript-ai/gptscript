@@ -17,6 +17,8 @@ import (
 
 var maxConsecutiveToolCalls = 50
 
+const AbortedSuffix = "\n\nABORTED BY USER"
+
 func init() {
 	if val := os.Getenv("GPTSCRIPT_MAX_CONSECUTIVE_TOOL_CALLS"); val != "" {
 		if i, err := strconv.Atoi(val); err == nil && i > 0 {
@@ -335,7 +337,7 @@ func (e *Engine) Start(ctx Context, input string) (ret *Return, err error) {
 			if ret.Result == nil {
 				ret.Result = new(string)
 			}
-			*ret.Result += "\n\nABORTED BY USER"
+			*ret.Result += AbortedSuffix
 		default:
 		}
 	}()
@@ -501,7 +503,7 @@ func (e *Engine) Continue(ctx Context, state *State, results ...CallResult) (ret
 			if ret.Result == nil {
 				ret.Result = new(string)
 			}
-			*ret.Result += "\n\nABORTED BY USER"
+			*ret.Result += AbortedSuffix
 		default:
 		}
 	}()
