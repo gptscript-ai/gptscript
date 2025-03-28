@@ -18,9 +18,10 @@ type Prompt struct {
 }
 
 type Field struct {
-	Name        string `json:"name,omitempty"`
-	Sensitive   *bool  `json:"sensitive,omitempty"`
-	Description string `json:"description,omitempty"`
+	Name        string   `json:"name,omitempty"`
+	Sensitive   *bool    `json:"sensitive,omitempty"`
+	Description string   `json:"description,omitempty"`
+	Options     []string `json:"options,omitempty"`
 }
 
 type Fields []Field
