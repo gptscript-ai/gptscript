@@ -864,6 +864,10 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 				continue
 			}
 
+			if strings.HasSuffix(*res.Result, engine.AbortedSuffix) {
+				continue
+			}
+
 			if err := json.Unmarshal([]byte(*res.Result), &resultCredential); err != nil {
 				return nil, fmt.Errorf("failed to unmarshal credential tool %s response: %w", ref.Reference, err)
 			}
