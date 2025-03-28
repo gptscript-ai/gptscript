@@ -176,9 +176,13 @@ func (s *server) execHandler(w http.ResponseWriter, r *http.Request) {
 
 	defer func() {
 		s.runningLock.Lock()
+		// Need to check if the cancel is still in map. In case when user abort, the channel will be deleted from map and closed already, and closing it again will panic
+		_, ok := s.running[runID]
+		if ok {
+			close(cancel)
+		}
 		delete(s.running, runID)
 		s.runningLock.Unlock()
-		close(cancel)
 	}()
 
 	// Ensure chat state is not empty.
