@@ -70,11 +70,6 @@ const config = {
             label: "Contact Us",
             position: "right",
           },
-          {
-            href: "https://tools.gptscript.ai/",
-            label: "Tool Search",
-            position: "right",
-          },
         ],
       },
       footer: {

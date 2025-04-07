@@ -90,15 +90,3 @@ Here are the supported languages and examples of tools written in those language
 | `Python`  | [Image Generation](https://github.com/gptscript-ai/dalle-image-generation) - Generate images based on a prompt |
 | `Node.js` | [Vision](https://github.com/gptscript-ai/gpt4-v-vision) - Analyze and interpret images                         |
 | `Golang`  | [Search](https://github.com/gptscript-ai/search) - Use various providers to search the internet                |
-
-
-## Automatic Documentation
-
-Each GPTScript tool is self-documented using the `tool.gpt` file.
-You can automatically generate documentation for your tools by visiting `https://tools.gptscript.ai/<github repo url>`.
-This documentation site allows others to easily search and explore the tools that have been created. 
-
-You can add more information about how to use your tool by adding an `examples` directory to your repository and adding a collection of `.gpt` files that demonstrate how to use your tool.
-These examples will be automatically included in the documentation.
-
-For more information and to explore existing tools, visit [tools.gptscript.ai](https://tools.gptscript.ai).
