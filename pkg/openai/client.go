@@ -349,16 +349,29 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		return nil, err
 	}
 
+	toolTokenCount, err := countTools(messageRequest.Tools)
+	if err != nil {
+		return nil, err
+	}
+
 	if messageRequest.Chat {
 		// Check the last message. If it is from a tool call, and if it takes up more than 80% of the budget on its own, reject it.
 		lastMessage := msgs[len(msgs)-1]
-		if lastMessage.Role == string(types.CompletionMessageRoleTypeTool) && countMessage(lastMessage) > int(float64(getBudget(messageRequest.MaxTokens))*0.8) {
+		lastMessageCount, err := countMessage(lastMessage)
+		if err != nil {
+			return nil, err
+		}
+
+		if lastMessage.Role == string(types.CompletionMessageRoleTypeTool) && lastMessageCount+toolTokenCount > int(float64(getBudget(messageRequest.MaxTokens))*0.8) {
 			// We need to update it in the msgs slice for right now and in the messageRequest for future calls.
 			msgs[len(msgs)-1].Content = TooLongMessage
 			messageRequest.Messages[len(messageRequest.Messages)-1].Content = types.Text(TooLongMessage)
 		}
 
-		msgs = dropMessagesOverCount(messageRequest.MaxTokens, msgs)
+		msgs, err = dropMessagesOverCount(messageRequest.MaxTokens, toolTokenCount, msgs)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if len(msgs) == 0 {
@@ -439,7 +452,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 			// Decrease maxTokens by 10% to make garbage collection more aggressive.
 			// The retry loop will further decrease maxTokens if needed.
 			maxTokens := decreaseTenPercent(messageRequest.MaxTokens)
-			result, err = c.contextLimitRetryLoop(ctx, request, id, env, maxTokens, status)
+			result, err = c.contextLimitRetryLoop(ctx, request, id, env, maxTokens, toolTokenCount, status)
 		}
 		if err != nil {
 			return nil, err
@@ -473,7 +486,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 	return &result, nil
 }
 
-func (c *Client) contextLimitRetryLoop(ctx context.Context, request openai.ChatCompletionRequest, id string, env []string, maxTokens int, status chan<- types.CompletionStatus) (types.CompletionMessage, error) {
+func (c *Client) contextLimitRetryLoop(ctx context.Context, request openai.ChatCompletionRequest, id string, env []string, maxTokens int, toolTokenCount int, status chan<- types.CompletionStatus) (types.CompletionMessage, error) {
 	var (
 		response types.CompletionMessage
 		err      error
@@ -481,7 +494,11 @@ func (c *Client) contextLimitRetryLoop(ctx context.Context, request openai.ChatC
 
 	for range 10 { // maximum 10 tries
 		// Try to drop older messages again, with a decreased max tokens.
-		request.Messages = dropMessagesOverCount(maxTokens, request.Messages)
+		request.Messages, err = dropMessagesOverCount(maxTokens, toolTokenCount, request.Messages)
+		if err != nil {
+			return types.CompletionMessage{}, err
+		}
+
 		response, err = c.call(ctx, request, id, env, status)
 		if err == nil {
 			return response, nil

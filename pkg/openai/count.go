@@ -1,7 +1,12 @@
 package openai
 
 import (
+	"encoding/json"
+
 	openai "github.com/gptscript-ai/chat-completion-client"
+	"github.com/gptscript-ai/gptscript/pkg/types"
+	"github.com/pkoukk/tiktoken-go"
+	tiktoken_loader "github.com/pkoukk/tiktoken-go-loader"
 )
 
 const DefaultMaxTokens = 128_000
@@ -12,22 +17,26 @@ func decreaseTenPercent(maxTokens int) int {
 }
 
 func getBudget(maxTokens int) int {
-	if maxTokens == 0 {
+	if maxTokens <= 0 {
 		return DefaultMaxTokens
 	}
 	return maxTokens
 }
 
-func dropMessagesOverCount(maxTokens int, msgs []openai.ChatCompletionMessage) (result []openai.ChatCompletionMessage) {
+func dropMessagesOverCount(maxTokens, toolTokenCount int, msgs []openai.ChatCompletionMessage) (result []openai.ChatCompletionMessage, err error) {
 	var (
 		lastSystem   int
 		withinBudget int
-		budget       = getBudget(maxTokens)
+		budget       = getBudget(maxTokens) - toolTokenCount
 	)
 
 	for i, msg := range msgs {
 		if msg.Role == openai.ChatMessageRoleSystem {
-			budget -= countMessage(msg)
+			count, err := countMessage(msg)
+			if err != nil {
+				return nil, err
+			}
+			budget -= count
 			lastSystem = i
 			result = append(result, msg)
 		} else {
@@ -37,7 +46,11 @@ func dropMessagesOverCount(maxTokens int, msgs []openai.ChatCompletionMessage) (
 
 	for i := len(msgs) - 1; i > lastSystem; i-- {
 		withinBudget = i
-		budget -= countMessage(msgs[i])
+		count, err := countMessage(msgs[i])
+		if err != nil {
+			return nil, err
+		}
+		budget -= count
 		if budget <= 0 {
 			break
 		}
@@ -54,22 +67,44 @@ func dropMessagesOverCount(maxTokens int, msgs []openai.ChatCompletionMessage) (
 	if withinBudget == len(msgs)-1 {
 		// We are going to drop all non system messages, which seems useless, so just return them
 		// all and let it fail
-		return msgs
+		return msgs, nil
 	}
 
-	return append(result, msgs[withinBudget:]...)
+	return append(result, msgs[withinBudget:]...), nil
 }
 
-func countMessage(msg openai.ChatCompletionMessage) (count int) {
-	count += len(msg.Role)
-	count += len(msg.Content)
+func countMessage(msg openai.ChatCompletionMessage) (int, error) {
+	tiktoken.SetBpeLoader(tiktoken_loader.NewOfflineLoader())
+	encoding, err := tiktoken.GetEncoding("o200k_base")
+	if err != nil {
+		return 0, err
+	}
+
+	count := len(encoding.Encode(msg.Role, nil, nil))
+	count += len(encoding.Encode(msg.Content, nil, nil))
 	for _, content := range msg.MultiContent {
-		count += len(content.Text)
+		count += len(encoding.Encode(content.Text, nil, nil))
 	}
 	for _, tool := range msg.ToolCalls {
-		count += len(tool.Function.Name)
-		count += len(tool.Function.Arguments)
+		count += len(encoding.Encode(tool.Function.Name, nil, nil))
+		count += len(encoding.Encode(tool.Function.Arguments, nil, nil))
 	}
-	count += len(msg.ToolCallID)
-	return count / 3
+	count += len(encoding.Encode(msg.ToolCallID, nil, nil))
+
+	return count, nil
+}
+
+func countTools(tools []types.ChatCompletionTool) (int, error) {
+	tiktoken.SetBpeLoader(tiktoken_loader.NewOfflineLoader())
+	encoding, err := tiktoken.GetEncoding("o200k_base")
+	if err != nil {
+		return 0, err
+	}
+
+	toolJSON, err := json.Marshal(tools)
+	if err != nil {
+		return 0, err
+	}
+
+	return len(encoding.Encode(string(toolJSON), nil, nil)), nil
 }
