@@ -9,6 +9,10 @@ import (
 	tiktoken_loader "github.com/pkoukk/tiktoken-go-loader"
 )
 
+func init() {
+	tiktoken.SetBpeLoader(tiktoken_loader.NewOfflineLoader())
+}
+
 const DefaultMaxTokens = 128_000
 
 func decreaseTenPercent(maxTokens int) int {
@@ -74,7 +78,6 @@ func dropMessagesOverCount(maxTokens, toolTokenCount int, msgs []openai.ChatComp
 }
 
 func countMessage(msg openai.ChatCompletionMessage) (int, error) {
-	tiktoken.SetBpeLoader(tiktoken_loader.NewOfflineLoader())
 	encoding, err := tiktoken.GetEncoding("o200k_base")
 	if err != nil {
 		return 0, err
@@ -95,7 +98,6 @@ func countMessage(msg openai.ChatCompletionMessage) (int, error) {
 }
 
 func countTools(tools []types.ChatCompletionTool) (int, error) {
-	tiktoken.SetBpeLoader(tiktoken_loader.NewOfflineLoader())
 	encoding, err := tiktoken.GetEncoding("o200k_base")
 	if err != nil {
 		return 0, err
