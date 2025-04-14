@@ -80,7 +80,7 @@ func processEventStreamOutput(logger mvl.Logger, w http.ResponseWriter, id strin
 		})
 	case err := <-errChan:
 		writeServerSentEvent(logger, w, map[string]any{
-			"stderr": fmt.Sprintf("failed to run: %v", err),
+			"stderr": err.Error(),
 		})
 	}
 
