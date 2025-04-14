@@ -853,7 +853,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 
 			res, err := r.subCall(callCtx.Ctx, callCtx, monitor, env, ref.ToolID, input, "", engine.CredentialToolCategory)
 			if err != nil {
-				return nil, fmt.Errorf("failed to run credential tool %s: %w", ref.Reference, err)
+				return nil, err
 			}
 
 			if res.Result == nil {
