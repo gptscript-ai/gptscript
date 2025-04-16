@@ -366,7 +366,7 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 
 			// If the file is external, then set the SCRIPTS_PATH to the current working directory. Otherwise,
 			// set it to the directory of the script and set the file to the base.
-			if !(strings.HasPrefix(file, "http://") || strings.HasPrefix(file, "https://") || strings.HasPrefix(file, "github.com")) {
+			if !strings.HasPrefix(file, "http://") && !strings.HasPrefix(file, "https://") && !strings.HasPrefix(file, "github.com") {
 				absPathToScript, err := filepath.Abs(file)
 				if err != nil {
 					return fmt.Errorf("cannot determine absolute path to script %s: %v", file, err)
@@ -469,8 +469,8 @@ func (r *GPTScript) Run(cmd *cobra.Command, args []string) (retErr error) {
 			// Don't use cmd.Context() because then sigint will cancel everything
 			return tui.Run(context.Background(), args[0], tui.RunOptions{
 				ClientOpts: &gptscript2.GlobalOptions{
-					OpenAIAPIKey:         r.OpenAIOptions.APIKey,
-					OpenAIBaseURL:        r.OpenAIOptions.BaseURL,
+					OpenAIAPIKey:         r.APIKey,
+					OpenAIBaseURL:        r.BaseURL,
 					DefaultModel:         r.DefaultModel,
 					DefaultModelProvider: r.DefaultModelProvider,
 				},

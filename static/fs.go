@@ -1,9 +1,6 @@
 package static
 
-import (
-	"embed"
-	_ "embed"
-)
+import "embed"
 
 //go:embed * ui/_nuxt/*
 var UI embed.FS

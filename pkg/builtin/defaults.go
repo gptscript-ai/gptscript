@@ -18,8 +18,8 @@ func SetDefaultModel(model string) {
 }
 
 func SetDefaults(tool types.Tool) types.Tool {
-	if tool.Parameters.ModelName == "" {
-		tool.Parameters.ModelName = GetDefaultModel()
+	if tool.ModelName == "" {
+		tool.ModelName = GetDefaultModel()
 	}
 	return tool
 }

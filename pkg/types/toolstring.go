@@ -50,9 +50,8 @@ func ToSysDisplayString(id string, args map[string]string) (string, error) {
 	case "sys.download":
 		if location := args["location"]; location != "" {
 			return fmt.Sprintf("Downloading `%s` to `%s`", args["url"], location), nil
-		} else {
-			return fmt.Sprintf("Downloading `%s` to workspace", args["url"]), nil
 		}
+		return fmt.Sprintf("Downloading `%s` to workspace", args["url"]), nil
 	case "sys.exec":
 		return fmt.Sprintf("Running `%s`", args["command"]), nil
 	case "sys.find":

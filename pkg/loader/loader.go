@@ -225,15 +225,15 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 		// Probably a better way to come up with an ID
 		tool.ID = tool.Source.Location + ":" + tool.Name
 
-		if i != 0 && tool.Parameters.Name == "" {
+		if i != 0 && tool.Name == "" {
 			return nil, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have no name"))
 		}
 
-		if i != 0 && tool.Parameters.GlobalModelName != "" {
+		if i != 0 && tool.GlobalModelName != "" {
 			return nil, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have global model name"))
 		}
 
-		if i != 0 && len(tool.Parameters.GlobalTools) > 0 {
+		if i != 0 && len(tool.GlobalTools) > 0 {
 			return nil, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, fmt.Errorf("only the first tool in a file can have global tools"))
 		}
 
@@ -245,8 +245,8 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 				targetTools = append(targetTools, tool)
 			}
 
-			if targetToolName != "" && tool.Parameters.Name != "" {
-				if strings.EqualFold(tool.Parameters.Name, targetToolName) {
+			if targetToolName != "" && tool.Name != "" {
+				if strings.EqualFold(tool.Name, targetToolName) {
 					targetTools = append(targetTools, tool)
 				} else if strings.Contains(targetToolName, "*") {
 					var patterns []string
@@ -257,7 +257,7 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 					}
 
 					for _, pattern := range patterns {
-						match, err := filepath.Match(strings.ToLower(pattern), strings.ToLower(tool.Parameters.Name))
+						match, err := filepath.Match(strings.ToLower(pattern), strings.ToLower(tool.Name))
 						if err != nil {
 							return nil, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo, err)
 						}
@@ -270,13 +270,13 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 			}
 		}
 
-		if existing, ok := localTools[strings.ToLower(tool.Parameters.Name)]; ok {
+		if existing, ok := localTools[strings.ToLower(tool.Name)]; ok {
 			return nil, parser.NewErrLine(tool.Source.Location, tool.Source.LineNo,
-				fmt.Errorf("duplicate tool name [%s] in %s found at lines %d and %d", tool.Parameters.Name, tool.Source.Location,
+				fmt.Errorf("duplicate tool name [%s] in %s found at lines %d and %d", tool.Name, tool.Source.Location,
 					tool.Source.LineNo, existing.Source.LineNo))
 		}
 
-		localTools[strings.ToLower(tool.Parameters.Name)] = tool
+		localTools[strings.ToLower(tool.Name)] = tool
 	}
 
 	return linkAll(ctx, cache, prg, base, targetTools, localTools, defaultModel)
@@ -285,7 +285,7 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 func linkAll(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, tools []types.Tool, localTools types.ToolSet, defaultModel string) (result []types.Tool, _ error) {
 	localToolsMapping := make(map[string]string, len(tools))
 	for _, localTool := range localTools {
-		localToolsMapping[strings.ToLower(localTool.Parameters.Name)] = localTool.ID
+		localToolsMapping[strings.ToLower(localTool.Name)] = localTool.ID
 	}
 
 	for _, tool := range tools {
@@ -314,7 +314,7 @@ func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *so
 	// The below is done in two loops so that local names stay as the tool names
 	// and don't get mangled by external references
 
-	for _, targetToolName := range tool.Parameters.ToolRefNames() {
+	for _, targetToolName := range tool.ToolRefNames() {
 		noArgs, _ := types.SplitArg(targetToolName)
 		localTool, ok := localTools[strings.ToLower(noArgs)]
 		if ok {

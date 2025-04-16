@@ -112,7 +112,7 @@ func (e *Engine) runHTTP(ctx Context, tool types.Tool, input string) (cmdRet *Re
 		}
 	}
 
-	req.Header.Set("X-GPTScript-Tool-Name", tool.Parameters.Name)
+	req.Header.Set("X-GPTScript-Tool-Name", tool.Name)
 
 	if err := json.Unmarshal([]byte(input), &map[string]any{}); err == nil {
 		req.Header.Set("Content-Type", "application/json")

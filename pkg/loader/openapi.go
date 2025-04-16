@@ -174,11 +174,11 @@ func getOpenAPITools(t *openapi3.T, defaultHost, source, targetToolName string) 
 				}
 
 				// Add the new arg to the tool's arguments
-				tool.Parameters.Arguments.Properties[param.Value.Name] = &openapi3.SchemaRef{Value: arg}
+				tool.Arguments.Properties[param.Value.Name] = &openapi3.SchemaRef{Value: arg}
 
 				// Check whether it is required
 				if param.Value.Required {
-					tool.Parameters.Arguments.Required = append(tool.Parameters.Arguments.Required, param.Value.Name)
+					tool.Arguments.Required = append(tool.Arguments.Required, param.Value.Name)
 				}
 
 				// Add the parameter to the appropriate list for the tool's instructions
@@ -227,7 +227,7 @@ func getOpenAPITools(t *openapi3.T, defaultHost, source, targetToolName string) 
 					}
 					// Unfortunately, the request body doesn't contain any good descriptor for it,
 					// so we just use "requestBodyContent" as the name of the arg.
-					tool.Parameters.Arguments.Properties["requestBodyContent"] = &openapi3.SchemaRef{Value: arg}
+					tool.Arguments.Properties["requestBodyContent"] = &openapi3.SchemaRef{Value: arg}
 					break
 				}
 
@@ -310,7 +310,7 @@ func getOpenAPITools(t *openapi3.T, defaultHost, source, targetToolName string) 
 			}
 
 			// Register
-			toolNames = append(toolNames, tool.Parameters.Name)
+			toolNames = append(toolNames, tool.Name)
 			tools = append(tools, tool)
 			operationNum++
 		}
@@ -457,7 +457,7 @@ func getOpenAPIToolsRevamp(t *openapi3.T, source, targetToolName string) ([]type
 	exportTool := types.Tool{
 		ToolDef: types.ToolDef{
 			Parameters: types.Parameters{
-				Export: []string{list.Parameters.Name, getSchema.Parameters.Name, run.Parameters.Name},
+				Export: []string{list.Name, getSchema.Name, run.Name},
 			},
 		},
 	}

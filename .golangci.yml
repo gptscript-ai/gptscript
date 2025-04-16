@@ -1,24 +1,41 @@
+version: "2"
 run:
   timeout: 5m
-
 output:
   formats:
-  - format: colored-line-number
-
+    text:
+      path: stdout
 linters:
-  disable-all: true
+  default: none
   enable:
-  - errcheck
-  - gofmt
-  - gosimple
-  - govet
-  - ineffassign
-  - staticcheck
-  - typecheck
-  - thelper
-  - unused
-  - goimports
-  - whitespace
-  - revive
-  fast: false
+    - errcheck
+    - govet
+    - ineffassign
+    - revive
+    - staticcheck
+    - thelper
+    - unused
+    - whitespace
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+issues:
   max-same-issues: 50
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

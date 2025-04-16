@@ -285,13 +285,13 @@ func (c *Context) WrappedContext(e *Engine) context.Context {
 }
 
 func populateMessageParams(ctx Context, completion *types.CompletionRequest, tool types.Tool) error {
-	completion.Model = tool.Parameters.ModelName
-	completion.MaxTokens = tool.Parameters.MaxTokens
-	completion.JSONResponse = tool.Parameters.JSONResponse
-	completion.Cache = tool.Parameters.Cache
-	completion.Chat = tool.Parameters.Chat
-	completion.Temperature = tool.Parameters.Temperature
-	completion.InternalSystemPrompt = tool.Parameters.InternalPrompt
+	completion.Model = tool.ModelName
+	completion.MaxTokens = tool.MaxTokens
+	completion.JSONResponse = tool.JSONResponse
+	completion.Cache = tool.Cache
+	completion.Chat = tool.Chat
+	completion.Temperature = tool.Temperature
+	completion.InternalSystemPrompt = tool.InternalPrompt
 
 	if tool.Chat && completion.InternalSystemPrompt == nil {
 		completion.InternalSystemPrompt = new(bool)
