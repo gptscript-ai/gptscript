@@ -280,8 +280,8 @@ func DefaultModel(name, defaultModel string) (types.Tool, bool) {
 	// Legacy syntax not used anymore
 	name = strings.TrimSuffix(name, "?")
 	t, ok := tools[name]
-	t.Parameters.Name = name
-	t.Parameters.ModelName = defaultModel
+	t.Name = name
+	t.ModelName = defaultModel
 	t.ID = name
 	t.Instructions = "#!" + name
 	return SetDefaults(t), ok

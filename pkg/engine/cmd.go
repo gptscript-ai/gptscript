@@ -171,7 +171,7 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 			// If this is a sub-call, then don't return the error; return the error as a message so that the LLM can retry.
 			return fmt.Sprintf("ERROR: got (%v) while running tool, OUTPUT: %s", err, stdoutAndErr), nil
 		}
-		log.Errorf("failed to run tool [%s] cmd %v: %v", tool.Parameters.Name, cmd.Args, err)
+		log.Errorf("failed to run tool [%s] cmd %v: %v", tool.Name, cmd.Args, err)
 		return "", fmt.Errorf("ERROR: %s: %w", stdoutAndErr, err)
 	}
 

@@ -131,7 +131,7 @@ func writeError(logger mvl.Logger, w http.ResponseWriter, code int, err error) {
 
 	b, err := json.Marshal(resp)
 	if err != nil {
-		_, _ = w.Write([]byte(fmt.Sprintf(`{"stderr": "%s"}`, err.Error())))
+		_, _ = fmt.Fprintf(w, `{"stderr": "%s"}`, err.Error())
 		return
 	}
 
@@ -148,7 +148,7 @@ func writeServerSentEvent(logger mvl.Logger, w http.ResponseWriter, event any) {
 		return
 	}
 
-	_, err = w.Write([]byte(fmt.Sprintf("data: %s\n\n", ev)))
+	_, err = fmt.Fprintf(w, "data: %s\n\n", ev)
 	if err == nil {
 		if f, ok := w.(http.Flusher); ok {
 			f.Flush()

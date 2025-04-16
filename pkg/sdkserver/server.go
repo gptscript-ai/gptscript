@@ -92,7 +92,7 @@ func run(ctx context.Context, listener net.Listener, opts Options) error {
 	}
 
 	events := broadcaster.New[event]()
-	opts.Options.Runner.MonitorFactory = NewSessionFactory(events)
+	opts.Runner.MonitorFactory = NewSessionFactory(events)
 	go events.Start(ctx)
 
 	token := uuid.NewString()
@@ -115,7 +115,7 @@ func run(ctx context.Context, listener net.Listener, opts Options) error {
 
 		client:           g,
 		events:           events,
-		runtimeManager:   runtimes.Default(opts.Options.Cache.CacheDir, opts.SystemToolsDir),
+		runtimeManager:   runtimes.Default(opts.Cache.CacheDir, opts.SystemToolsDir),
 		waitingToConfirm: make(map[string]chan runner.AuthorizerResponse),
 		waitingToPrompt:  make(map[string]chan map[string]string),
 		running:          make(map[string]chan struct{}),

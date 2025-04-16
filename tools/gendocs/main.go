@@ -40,7 +40,7 @@ func main() {
 func filePrepender(filename string) string {
 	name := filepath.Base(filename)
 	base := strings.TrimSuffix(name, path.Ext(name))
-	return fmt.Sprintf(fmTemplate, strings.Replace(base, "_", " ", -1))
+	return fmt.Sprintf(fmTemplate, strings.ReplaceAll(base, "_", " "))
 }
 
 func linkHandler(name string) string {

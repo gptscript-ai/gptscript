@@ -386,7 +386,7 @@ func (c callName) String() string {
 
 	for {
 		tool := c.prg.ToolSet[currentCall.ToolID]
-		name := tool.Parameters.Name
+		name := tool.Name
 		if name == "" {
 			name = tool.Source.Location
 		}

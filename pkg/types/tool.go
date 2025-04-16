@@ -398,94 +398,94 @@ func (t ToolDef) String() string {
 
 func (t ToolDef) Print() string {
 	buf := &strings.Builder{}
-	if t.Parameters.GlobalModelName != "" {
-		_, _ = fmt.Fprintf(buf, "Global Model Name: %s\n", t.Parameters.GlobalModelName)
+	if t.GlobalModelName != "" {
+		_, _ = fmt.Fprintf(buf, "Global Model Name: %s\n", t.GlobalModelName)
 	}
-	if len(t.Parameters.GlobalTools) != 0 {
-		_, _ = fmt.Fprintf(buf, "Global Tools: %s\n", strings.Join(t.Parameters.GlobalTools, ", "))
+	if len(t.GlobalTools) != 0 {
+		_, _ = fmt.Fprintf(buf, "Global Tools: %s\n", strings.Join(t.GlobalTools, ", "))
 	}
-	if t.Parameters.Name != "" {
-		_, _ = fmt.Fprintf(buf, "Name: %s\n", t.Parameters.Name)
+	if t.Name != "" {
+		_, _ = fmt.Fprintf(buf, "Name: %s\n", t.Name)
 	}
-	if t.Parameters.Description != "" {
-		_, _ = fmt.Fprintf(buf, "Description: %s\n", t.Parameters.Description)
+	if t.Description != "" {
+		_, _ = fmt.Fprintf(buf, "Description: %s\n", t.Description)
 	}
-	if t.Parameters.Type != ToolTypeDefault {
+	if t.Type != ToolTypeDefault {
 		_, _ = fmt.Fprintf(buf, "Type: %s\n", strings.ToUpper(string(t.Type[0]))+string(t.Type[1:]))
 	}
-	if len(t.Parameters.Agents) != 0 {
-		_, _ = fmt.Fprintf(buf, "Agents: %s\n", strings.Join(t.Parameters.Agents, ", "))
+	if len(t.Agents) != 0 {
+		_, _ = fmt.Fprintf(buf, "Agents: %s\n", strings.Join(t.Agents, ", "))
 	}
-	if len(t.Parameters.Tools) != 0 {
-		_, _ = fmt.Fprintf(buf, "Tools: %s\n", strings.Join(t.Parameters.Tools, ", "))
+	if len(t.Tools) != 0 {
+		_, _ = fmt.Fprintf(buf, "Tools: %s\n", strings.Join(t.Tools, ", "))
 	}
-	if len(t.Parameters.Export) != 0 {
-		_, _ = fmt.Fprintf(buf, "Share Tools: %s\n", strings.Join(t.Parameters.Export, ", "))
+	if len(t.Export) != 0 {
+		_, _ = fmt.Fprintf(buf, "Share Tools: %s\n", strings.Join(t.Export, ", "))
 	}
-	if len(t.Parameters.Context) != 0 {
-		_, _ = fmt.Fprintf(buf, "Context: %s\n", strings.Join(t.Parameters.Context, ", "))
+	if len(t.Context) != 0 {
+		_, _ = fmt.Fprintf(buf, "Context: %s\n", strings.Join(t.Context, ", "))
 	}
-	if len(t.Parameters.ExportContext) != 0 {
-		_, _ = fmt.Fprintf(buf, "Share Context: %s\n", strings.Join(t.Parameters.ExportContext, ", "))
+	if len(t.ExportContext) != 0 {
+		_, _ = fmt.Fprintf(buf, "Share Context: %s\n", strings.Join(t.ExportContext, ", "))
 	}
-	if len(t.Parameters.InputFilters) != 0 {
-		_, _ = fmt.Fprintf(buf, "Input Filters: %s\n", strings.Join(t.Parameters.InputFilters, ", "))
+	if len(t.InputFilters) != 0 {
+		_, _ = fmt.Fprintf(buf, "Input Filters: %s\n", strings.Join(t.InputFilters, ", "))
 	}
-	if len(t.Parameters.ExportInputFilters) != 0 {
-		_, _ = fmt.Fprintf(buf, "Share Input Filters: %s\n", strings.Join(t.Parameters.ExportInputFilters, ", "))
+	if len(t.ExportInputFilters) != 0 {
+		_, _ = fmt.Fprintf(buf, "Share Input Filters: %s\n", strings.Join(t.ExportInputFilters, ", "))
 	}
-	if len(t.Parameters.OutputFilters) != 0 {
-		_, _ = fmt.Fprintf(buf, "Output Filters: %s\n", strings.Join(t.Parameters.OutputFilters, ", "))
+	if len(t.OutputFilters) != 0 {
+		_, _ = fmt.Fprintf(buf, "Output Filters: %s\n", strings.Join(t.OutputFilters, ", "))
 	}
-	if len(t.Parameters.ExportOutputFilters) != 0 {
-		_, _ = fmt.Fprintf(buf, "Share Output Filters: %s\n", strings.Join(t.Parameters.ExportOutputFilters, ", "))
+	if len(t.ExportOutputFilters) != 0 {
+		_, _ = fmt.Fprintf(buf, "Share Output Filters: %s\n", strings.Join(t.ExportOutputFilters, ", "))
 	}
-	if t.Parameters.MaxTokens != 0 {
-		_, _ = fmt.Fprintf(buf, "Max Tokens: %d\n", t.Parameters.MaxTokens)
+	if t.MaxTokens != 0 {
+		_, _ = fmt.Fprintf(buf, "Max Tokens: %d\n", t.MaxTokens)
 	}
-	if t.Parameters.ModelName != "" {
-		_, _ = fmt.Fprintf(buf, "Model: %s\n", t.Parameters.ModelName)
+	if t.ModelName != "" {
+		_, _ = fmt.Fprintf(buf, "Model: %s\n", t.ModelName)
 	}
-	if t.Parameters.ModelProvider {
+	if t.ModelProvider {
 		_, _ = fmt.Fprintf(buf, "Model Provider: true\n")
 	}
-	if t.Parameters.JSONResponse {
+	if t.JSONResponse {
 		_, _ = fmt.Fprintln(buf, "JSON Response: true")
 	}
-	if t.Parameters.Cache != nil && !*t.Parameters.Cache {
+	if t.Cache != nil && !*t.Cache {
 		_, _ = fmt.Fprintln(buf, "Cache: false")
 	}
-	if t.Parameters.Stdin {
+	if t.Stdin {
 		_, _ = fmt.Fprintln(buf, "Stdin: true")
 	}
-	if t.Parameters.Temperature != nil {
-		_, _ = fmt.Fprintf(buf, "Temperature: %f\n", *t.Parameters.Temperature)
+	if t.Temperature != nil {
+		_, _ = fmt.Fprintf(buf, "Temperature: %f\n", *t.Temperature)
 	}
-	if t.Parameters.Arguments != nil {
+	if t.Arguments != nil {
 		var keys []string
-		for k := range t.Parameters.Arguments.Properties {
+		for k := range t.Arguments.Properties {
 			keys = append(keys, k)
 		}
 		sort.Strings(keys)
 		for _, key := range keys {
-			prop := t.Parameters.Arguments.Properties[key]
+			prop := t.Arguments.Properties[key]
 			_, _ = fmt.Fprintf(buf, "Parameter: %s: %s\n", key, prop.Value.Description)
 		}
 	}
-	if t.Parameters.InternalPrompt != nil {
-		_, _ = fmt.Fprintf(buf, "Internal Prompt: %v\n", *t.Parameters.InternalPrompt)
+	if t.InternalPrompt != nil {
+		_, _ = fmt.Fprintf(buf, "Internal Prompt: %v\n", *t.InternalPrompt)
 	}
-	if len(t.Parameters.Credentials) > 0 {
-		for _, cred := range t.Parameters.Credentials {
+	if len(t.Credentials) > 0 {
+		for _, cred := range t.Credentials {
 			_, _ = fmt.Fprintf(buf, "Credential: %s\n", cred)
 		}
 	}
-	if len(t.Parameters.ExportCredentials) > 0 {
-		for _, exportCred := range t.Parameters.ExportCredentials {
+	if len(t.ExportCredentials) > 0 {
+		for _, exportCred := range t.ExportCredentials {
 			_, _ = fmt.Fprintf(buf, "Share Credential: %s\n", exportCred)
 		}
 	}
-	if t.Parameters.Chat {
+	if t.Chat {
 		_, _ = fmt.Fprintf(buf, "Chat: true\n")
 	}
 
@@ -618,10 +618,11 @@ func (t Tool) getAgents(prg *Program) (result []ToolReference, _ error) {
 }
 
 func (t Tool) GetToolsByType(prg *Program, toolType ToolType) ([]ToolReference, error) {
-	if toolType == ToolTypeAgent {
+	switch toolType {
+	case ToolTypeAgent:
 		// Agents are special, they can only be sourced from direct references and not the generic 'tool:' or shared by references
 		return t.getAgents(prg)
-	} else if toolType == ToolTypeCredential {
+	case ToolTypeCredential:
 		// Credentials are special too, you can only get shared credentials from directly referenced credentials
 		return t.getCredentials(prg)
 	}
@@ -784,7 +785,7 @@ func toolRefsToCompletionTools(completionTools []ToolReference, prg Program) (re
 			subToolName = subToolRef.Named
 		}
 
-		args := subTool.Parameters.Arguments
+		args := subTool.Arguments
 		if args == nil && !subTool.IsCommand() && !subTool.Chat {
 			args = &system.DefaultToolSchema
 		} else if args == nil && !subTool.IsCommand() {
@@ -798,7 +799,7 @@ func toolRefsToCompletionTools(completionTools []ToolReference, prg Program) (re
 				Function: CompletionFunctionDefinition{
 					ToolID:      subTool.ID,
 					Name:        PickToolName(subToolName, toolNames),
-					Description: subTool.Parameters.Description,
+					Description: subTool.Description,
 					Parameters:  args,
 				},
 			})

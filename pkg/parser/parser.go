@@ -53,8 +53,8 @@ func csv(line string) (result []string) {
 }
 
 func addArg(line string, tool *types.Tool) error {
-	if tool.Parameters.Arguments == nil {
-		tool.Parameters.Arguments = &openapi3.Schema{
+	if tool.Arguments == nil {
+		tool.Arguments = &openapi3.Schema{
 			Type:       &openapi3.Types{"object"},
 			Properties: openapi3.Schemas{},
 		}
@@ -65,7 +65,7 @@ func addArg(line string, tool *types.Tool) error {
 		return fmt.Errorf("invalid arg format: %s", line)
 	}
 
-	tool.Parameters.Arguments.Properties[key] = &openapi3.SchemaRef{
+	tool.Arguments.Properties[key] = &openapi3.SchemaRef{
 		Value: &openapi3.Schema{
 			Description: strings.TrimSpace(value),
 			Type:        &openapi3.Types{"string"},
@@ -83,53 +83,53 @@ func isParam(line string, tool *types.Tool, scan *simplescanner) (_ bool, err er
 	value = strings.TrimSpace(value)
 	switch normalize(key) {
 	case "name":
-		tool.Parameters.Name = value
+		tool.Name = value
 	case "modelprovider":
-		tool.Parameters.ModelProvider = true
+		tool.ModelProvider = true
 	case "model", "modelname":
-		tool.Parameters.ModelName = value
+		tool.ModelName = value
 	case "globalmodel", "globalmodelname":
-		tool.Parameters.GlobalModelName = value
+		tool.GlobalModelName = value
 	case "description":
-		tool.Parameters.Description = scan.AddMultiline(value)
+		tool.Description = scan.AddMultiline(value)
 	case "internalprompt":
 		v, err := toBool(value)
 		if err != nil {
 			return false, err
 		}
-		tool.Parameters.InternalPrompt = &v
+		tool.InternalPrompt = &v
 	case "chat":
 		v, err := toBool(value)
 		if err != nil {
 			return false, err
 		}
-		tool.Parameters.Chat = v
+		tool.Chat = v
 	case "export", "exporttool", "exports", "exporttools", "sharetool", "sharetools", "sharedtool", "sharedtools":
-		tool.Parameters.Export = append(tool.Parameters.Export, csv(scan.AddMultiline(value))...)
+		tool.Export = append(tool.Export, csv(scan.AddMultiline(value))...)
 	case "tool", "tools":
-		tool.Parameters.Tools = append(tool.Parameters.Tools, csv(scan.AddMultiline(value))...)
+		tool.Tools = append(tool.Tools, csv(scan.AddMultiline(value))...)
 	case "inputfilter", "inputfilters":
-		tool.Parameters.InputFilters = append(tool.Parameters.InputFilters, csv(scan.AddMultiline(value))...)
+		tool.InputFilters = append(tool.InputFilters, csv(scan.AddMultiline(value))...)
 	case "shareinputfilter", "shareinputfilters", "sharedinputfilter", "sharedinputfilters":
-		tool.Parameters.ExportInputFilters = append(tool.Parameters.ExportInputFilters, csv(scan.AddMultiline(value))...)
+		tool.ExportInputFilters = append(tool.ExportInputFilters, csv(scan.AddMultiline(value))...)
 	case "outputfilter", "outputfilters":
-		tool.Parameters.OutputFilters = append(tool.Parameters.OutputFilters, csv(scan.AddMultiline(value))...)
+		tool.OutputFilters = append(tool.OutputFilters, csv(scan.AddMultiline(value))...)
 	case "shareoutputfilter", "shareoutputfilters", "sharedoutputfilter", "sharedoutputfilters":
-		tool.Parameters.ExportOutputFilters = append(tool.Parameters.ExportOutputFilters, csv(scan.AddMultiline(value))...)
+		tool.ExportOutputFilters = append(tool.ExportOutputFilters, csv(scan.AddMultiline(value))...)
 	case "agent", "agents":
-		tool.Parameters.Agents = append(tool.Parameters.Agents, csv(scan.AddMultiline(value))...)
+		tool.Agents = append(tool.Agents, csv(scan.AddMultiline(value))...)
 	case "globaltool", "globaltools":
-		tool.Parameters.GlobalTools = append(tool.Parameters.GlobalTools, csv(scan.AddMultiline(value))...)
+		tool.GlobalTools = append(tool.GlobalTools, csv(scan.AddMultiline(value))...)
 	case "exportcontext", "exportcontexts", "sharecontext", "sharecontexts", "sharedcontext", "sharedcontexts":
-		tool.Parameters.ExportContext = append(tool.Parameters.ExportContext, csv(scan.AddMultiline(value))...)
+		tool.ExportContext = append(tool.ExportContext, csv(scan.AddMultiline(value))...)
 	case "context":
-		tool.Parameters.Context = append(tool.Parameters.Context, csv(scan.AddMultiline(value))...)
+		tool.Context = append(tool.Context, csv(scan.AddMultiline(value))...)
 	case "stdin":
 		b, err := toBool(value)
 		if err != nil {
 			return false, err
 		}
-		tool.Parameters.Stdin = b
+		tool.Stdin = b
 	case "metadata":
 		mkey, mvalue, _ := strings.Cut(scan.AddMultiline(value), ":")
 		if tool.MetaData == nil {
@@ -141,7 +141,7 @@ func isParam(line string, tool *types.Tool, scan *simplescanner) (_ bool, err er
 			return false, err
 		}
 	case "maxtoken", "maxtokens":
-		tool.Parameters.MaxTokens, err = strconv.Atoi(value)
+		tool.MaxTokens, err = strconv.Atoi(value)
 		if err != nil {
 			return false, err
 		}
@@ -150,21 +150,21 @@ func isParam(line string, tool *types.Tool, scan *simplescanner) (_ bool, err er
 		if err != nil {
 			return false, err
 		}
-		tool.Parameters.Cache = &b
+		tool.Cache = &b
 	case "jsonmode", "json", "jsonoutput", "jsonformat", "jsonresponse":
-		tool.Parameters.JSONResponse, err = toBool(value)
+		tool.JSONResponse, err = toBool(value)
 		if err != nil {
 			return false, err
 		}
 	case "temperature":
-		tool.Parameters.Temperature, err = toFloatPtr(value)
+		tool.Temperature, err = toFloatPtr(value)
 		if err != nil {
 			return false, err
 		}
 	case "credentials", "creds", "credential", "cred":
-		tool.Parameters.Credentials = append(tool.Parameters.Credentials, csv(scan.AddMultiline(value))...)
+		tool.Credentials = append(tool.Credentials, csv(scan.AddMultiline(value))...)
 	case "sharecredentials", "sharecreds", "sharecredential", "sharecred", "sharedcredentials", "sharedcreds", "sharedcredential", "sharedcred":
-		tool.Parameters.ExportCredentials = append(tool.Parameters.ExportCredentials, scan.AddMultiline(value))
+		tool.ExportCredentials = append(tool.ExportCredentials, scan.AddMultiline(value))
 	case "type":
 		tool.Type = types.ToolType(strings.ToLower(value))
 	default:
@@ -211,7 +211,7 @@ type context struct {
 func (c *context) finish(tools *[]Node) {
 	c.tool.Instructions = strings.TrimSpace(strings.Join(c.instructions, ""))
 	if c.tool.Instructions != "" ||
-		c.tool.Parameters.Name != "" ||
+		c.tool.Name != "" ||
 		len(c.tool.Export) > 0 ||
 		len(c.tool.Tools) > 0 ||
 		c.tool.GlobalModelName != "" ||

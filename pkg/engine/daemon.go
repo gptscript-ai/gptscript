@@ -175,7 +175,7 @@ func (e *Engine) startDaemon(tool types.Tool) (string, error) {
 		return w.Close()
 	}
 
-	log.Infof("launched [%s][%s] port [%d] %v", tool.Parameters.Name, tool.ID, port, cmd.Args)
+	log.Infof("launched [%s][%s] port [%d] %v", tool.Name, tool.ID, port, cmd.Args)
 	if err := cmd.Start(); err != nil {
 		stop()
 		return url, err
@@ -195,7 +195,7 @@ func (e *Engine) startDaemon(tool types.Tool) (string, error) {
 	go func() {
 		err := cmd.Wait()
 		if err != nil {
-			log.Debugf("daemon exited tool [%s] %v: %v", tool.Parameters.Name, cmd.Args, err)
+			log.Debugf("daemon exited tool [%s] %v: %v", tool.Name, cmd.Args, err)
 		}
 		_ = r.Close()
 		_ = w.Close()
