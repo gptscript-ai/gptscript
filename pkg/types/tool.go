@@ -16,11 +16,14 @@ import (
 )
 
 const (
-	DaemonPrefix  = "#!sys.daemon"
-	OpenAPIPrefix = "#!sys.openapi"
-	EchoPrefix    = "#!sys.echo"
-	CallPrefix    = "#!sys.call"
-	CommandPrefix = "#!"
+	DaemonPrefix    = "#!sys.daemon"
+	OpenAPIPrefix   = "#!sys.openapi"
+	EchoPrefix      = "#!sys.echo"
+	CallPrefix      = "#!sys.call"
+	MCPPrefix       = "#!mcp"
+	MCPInvokePrefix = "#!sys.mcp.invoke"
+	CommandPrefix   = "#!"
+	PromptPrefix    = "!!"
 )
 
 var (
@@ -860,6 +863,14 @@ func (t Tool) IsCommand() bool {
 
 func (t Tool) IsDaemon() bool {
 	return strings.HasPrefix(t.Instructions, DaemonPrefix)
+}
+
+func (t Tool) IsMCP() bool {
+	return strings.HasPrefix(t.Instructions, MCPPrefix)
+}
+
+func (t Tool) IsMCPInvoke() bool {
+	return strings.HasPrefix(t.Instructions, MCPInvokePrefix)
 }
 
 func (t Tool) IsOpenAPI() bool {

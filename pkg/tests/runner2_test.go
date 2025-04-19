@@ -8,6 +8,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/loader"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
 	"github.com/gptscript-ai/gptscript/pkg/tests/tester"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/hexops/autogold/v2"
 	"github.com/stretchr/testify/require"
 )
@@ -202,4 +203,355 @@ echo "${GPTSCRIPT_INPUT}"
 	err = json.Unmarshal([]byte(val), &data)
 	require.NoError(t, err)
 	autogold.Expect(map[string]interface{}{"foo": "baz", "start": true}).Equal(t, data)
+}
+
+func TestMCPLoad(t *testing.T) {
+	r := tester.NewRunner(t)
+	prg, err := loader.ProgramFromSource(context.Background(), `
+name: mcp
+
+#!mcp
+
+{
+	"mcpServers": {
+	  "sqlite": {
+		"command": "docker",
+		"args": [
+		  "run",
+		  "--rm",
+		  "-i",
+		  "-v",
+		  "mcp-test:/mcp",
+		  "mcp/sqlite@sha256:007ccae941a6f6db15b26ee41d92edda50ce157176d9273449e8b3f51d979c70",
+		  "--db-path",
+		  "/mcp/test.db"
+		]
+	  }
+	}
+}
+`, "")
+	require.NoError(t, err)
+
+	autogold.Expect(types.Tool{
+		ToolDef: types.ToolDef{
+			Parameters: types.Parameters{
+				Name:        "mcp",
+				Description: "sqlite",
+				ModelName:   "gpt-4o",
+				Export: []string{
+					"read_query",
+					"write_query",
+					"create_table",
+					"list_tables",
+					"describe_table",
+					"append_insight",
+				},
+			},
+			MetaData: map[string]string{"bundle": "true"},
+		},
+		ID: "inline:mcp",
+		ToolMapping: map[string][]types.ToolReference{
+			"append_insight": {{
+				Reference: "append_insight",
+				ToolID:    "inline:append_insight",
+			}},
+			"create_table": {{
+				Reference: "create_table",
+				ToolID:    "inline:create_table",
+			}},
+			"describe_table": {{
+				Reference: "describe_table",
+				ToolID:    "inline:describe_table",
+			}},
+			"list_tables": {{
+				Reference: "list_tables",
+				ToolID:    "inline:list_tables",
+			}},
+			"read_query": {{
+				Reference: "read_query",
+				ToolID:    "inline:read_query",
+			}},
+			"write_query": {{
+				Reference: "write_query",
+				ToolID:    "inline:write_query",
+			}},
+		},
+		LocalTools: map[string]string{
+			"append_insight": "inline:append_insight",
+			"create_table":   "inline:create_table",
+			"describe_table": "inline:describe_table",
+			"list_tables":    "inline:list_tables",
+			"mcp":            "inline:mcp",
+			"read_query":     "inline:read_query",
+			"write_query":    "inline:write_query",
+		},
+		Source:     types.ToolSource{Location: "inline"},
+		WorkingDir: ".",
+	}).Equal(t, prg.ToolSet[prg.EntryToolID])
+	autogold.Expect(7).Equal(t, len(prg.ToolSet[prg.EntryToolID].LocalTools))
+	data, _ := json.MarshalIndent(prg.ToolSet, "", "  ")
+	autogold.Expect(`{
+  "inline:append_insight": {
+    "name": "append_insight",
+    "description": "Add a business insight to the memo",
+    "modelName": "gpt-4o",
+    "internalPrompt": null,
+    "arguments": {
+      "properties": {
+        "insight": {
+          "description": "Business insight discovered from data analysis",
+          "type": "string"
+        }
+      },
+      "required": [
+        "insight"
+      ],
+      "type": "object"
+    },
+    "instructions": "#!sys.mcp.invoke 441826308787ad271e84a381e90d8eccc3fce0fe94503636e679bd0984c79f2f append_insight",
+    "id": "inline:append_insight",
+    "localTools": {
+      "append_insight": "inline:append_insight",
+      "create_table": "inline:create_table",
+      "describe_table": "inline:describe_table",
+      "list_tables": "inline:list_tables",
+      "mcp": "inline:mcp",
+      "read_query": "inline:read_query",
+      "write_query": "inline:write_query"
+    },
+    "source": {
+      "location": "inline"
+    },
+    "workingDir": "."
+  },
+  "inline:create_table": {
+    "name": "create_table",
+    "description": "Create a new table in the SQLite database",
+    "modelName": "gpt-4o",
+    "internalPrompt": null,
+    "arguments": {
+      "properties": {
+        "query": {
+          "description": "CREATE TABLE SQL statement",
+          "type": "string"
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "type": "object"
+    },
+    "instructions": "#!sys.mcp.invoke 441826308787ad271e84a381e90d8eccc3fce0fe94503636e679bd0984c79f2f create_table",
+    "id": "inline:create_table",
+    "localTools": {
+      "append_insight": "inline:append_insight",
+      "create_table": "inline:create_table",
+      "describe_table": "inline:describe_table",
+      "list_tables": "inline:list_tables",
+      "mcp": "inline:mcp",
+      "read_query": "inline:read_query",
+      "write_query": "inline:write_query"
+    },
+    "source": {
+      "location": "inline"
+    },
+    "workingDir": "."
+  },
+  "inline:describe_table": {
+    "name": "describe_table",
+    "description": "Get the schema information for a specific table",
+    "modelName": "gpt-4o",
+    "internalPrompt": null,
+    "arguments": {
+      "properties": {
+        "table_name": {
+          "description": "Name of the table to describe",
+          "type": "string"
+        }
+      },
+      "required": [
+        "table_name"
+      ],
+      "type": "object"
+    },
+    "instructions": "#!sys.mcp.invoke 441826308787ad271e84a381e90d8eccc3fce0fe94503636e679bd0984c79f2f describe_table",
+    "id": "inline:describe_table",
+    "localTools": {
+      "append_insight": "inline:append_insight",
+      "create_table": "inline:create_table",
+      "describe_table": "inline:describe_table",
+      "list_tables": "inline:list_tables",
+      "mcp": "inline:mcp",
+      "read_query": "inline:read_query",
+      "write_query": "inline:write_query"
+    },
+    "source": {
+      "location": "inline"
+    },
+    "workingDir": "."
+  },
+  "inline:list_tables": {
+    "name": "list_tables",
+    "description": "List all tables in the SQLite database",
+    "modelName": "gpt-4o",
+    "internalPrompt": null,
+    "arguments": {
+      "type": "object"
+    },
+    "instructions": "#!sys.mcp.invoke 441826308787ad271e84a381e90d8eccc3fce0fe94503636e679bd0984c79f2f list_tables",
+    "id": "inline:list_tables",
+    "localTools": {
+      "append_insight": "inline:append_insight",
+      "create_table": "inline:create_table",
+      "describe_table": "inline:describe_table",
+      "list_tables": "inline:list_tables",
+      "mcp": "inline:mcp",
+      "read_query": "inline:read_query",
+      "write_query": "inline:write_query"
+    },
+    "source": {
+      "location": "inline"
+    },
+    "workingDir": "."
+  },
+  "inline:mcp": {
+    "name": "mcp",
+    "description": "sqlite",
+    "modelName": "gpt-4o",
+    "internalPrompt": null,
+    "export": [
+      "read_query",
+      "write_query",
+      "create_table",
+      "list_tables",
+      "describe_table",
+      "append_insight"
+    ],
+    "metaData": {
+      "bundle": "true"
+    },
+    "id": "inline:mcp",
+    "toolMapping": {
+      "append_insight": [
+        {
+          "reference": "append_insight",
+          "toolID": "inline:append_insight"
+        }
+      ],
+      "create_table": [
+        {
+          "reference": "create_table",
+          "toolID": "inline:create_table"
+        }
+      ],
+      "describe_table": [
+        {
+          "reference": "describe_table",
+          "toolID": "inline:describe_table"
+        }
+      ],
+      "list_tables": [
+        {
+          "reference": "list_tables",
+          "toolID": "inline:list_tables"
+        }
+      ],
+      "read_query": [
+        {
+          "reference": "read_query",
+          "toolID": "inline:read_query"
+        }
+      ],
+      "write_query": [
+        {
+          "reference": "write_query",
+          "toolID": "inline:write_query"
+        }
+      ]
+    },
+    "localTools": {
+      "append_insight": "inline:append_insight",
+      "create_table": "inline:create_table",
+      "describe_table": "inline:describe_table",
+      "list_tables": "inline:list_tables",
+      "mcp": "inline:mcp",
+      "read_query": "inline:read_query",
+      "write_query": "inline:write_query"
+    },
+    "source": {
+      "location": "inline"
+    },
+    "workingDir": "."
+  },
+  "inline:read_query": {
+    "name": "read_query",
+    "description": "Execute a SELECT query on the SQLite database",
+    "modelName": "gpt-4o",
+    "internalPrompt": null,
+    "arguments": {
+      "properties": {
+        "query": {
+          "description": "SELECT SQL query to execute",
+          "type": "string"
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "type": "object"
+    },
+    "instructions": "#!sys.mcp.invoke 441826308787ad271e84a381e90d8eccc3fce0fe94503636e679bd0984c79f2f read_query",
+    "id": "inline:read_query",
+    "localTools": {
+      "append_insight": "inline:append_insight",
+      "create_table": "inline:create_table",
+      "describe_table": "inline:describe_table",
+      "list_tables": "inline:list_tables",
+      "mcp": "inline:mcp",
+      "read_query": "inline:read_query",
+      "write_query": "inline:write_query"
+    },
+    "source": {
+      "location": "inline"
+    },
+    "workingDir": "."
+  },
+  "inline:write_query": {
+    "name": "write_query",
+    "description": "Execute an INSERT, UPDATE, or DELETE query on the SQLite database",
+    "modelName": "gpt-4o",
+    "internalPrompt": null,
+    "arguments": {
+      "properties": {
+        "query": {
+          "description": "SQL query to execute",
+          "type": "string"
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "type": "object"
+    },
+    "instructions": "#!sys.mcp.invoke 441826308787ad271e84a381e90d8eccc3fce0fe94503636e679bd0984c79f2f write_query",
+    "id": "inline:write_query",
+    "localTools": {
+      "append_insight": "inline:append_insight",
+      "create_table": "inline:create_table",
+      "describe_table": "inline:describe_table",
+      "list_tables": "inline:list_tables",
+      "mcp": "inline:mcp",
+      "read_query": "inline:read_query",
+      "write_query": "inline:write_query"
+    },
+    "source": {
+      "location": "inline"
+    },
+    "workingDir": "."
+  }
+}`).Equal(t, string(data))
+
+	prg.EntryToolID = prg.ToolSet[prg.EntryToolID].LocalTools["read_query"]
+	resp, err := r.Chat(context.Background(), nil, prg, nil, `{"query": "SELECT 1"}`, runner.RunOptions{})
+	r.AssertStep(t, resp, err)
 }
