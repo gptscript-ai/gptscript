@@ -18,10 +18,11 @@ require (
 	github.com/gptscript-ai/chat-completion-client v0.0.0-20250224164718-139cb4507b1d
 	github.com/gptscript-ai/cmd v0.0.0-20240802230653-326b7baf6fcb
 	github.com/gptscript-ai/go-gptscript v0.9.6-0.20250204133419-744b25b84a61
-	github.com/gptscript-ai/tui v0.0.0-20250204145344-33cd15de4cee
+	github.com/gptscript-ai/tui v0.0.0-20250419050840-5e79e16786c9
 	github.com/hexops/autogold/v2 v2.2.1
 	github.com/hexops/valast v1.4.4
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
+	github.com/mark3labs/mcp-go v0.21.1
 	github.com/mholt/archives v0.1.0
 	github.com/pkoukk/tiktoken-go v0.1.7
 	github.com/pkoukk/tiktoken-go-loader v0.0.2-0.20240522064338-c17e8bc0f699
@@ -122,6 +123,7 @@ require (
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
+	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	github.com/yuin/goldmark v1.5.4 // indirect
 	github.com/yuin/goldmark-emoji v1.0.2 // indirect
 	go4.org v0.0.0-20230225012048-214862532bf5 // indirect

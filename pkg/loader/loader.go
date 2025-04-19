@@ -20,6 +20,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/builtin"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
+	"github.com/gptscript-ai/gptscript/pkg/mcp"
 	"github.com/gptscript-ai/gptscript/pkg/openapi"
 	"github.com/gptscript-ai/gptscript/pkg/parser"
 	"github.com/gptscript-ai/gptscript/pkg/system"
@@ -155,7 +156,23 @@ func loadOpenAPI(prg *types.Program, data []byte) *openapi3.T {
 	return openAPIDocument
 }
 
-func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, targetToolName, defaultModel string) ([]types.Tool, error) {
+func processMCP(ctx context.Context, tool []types.Tool, mcpLoader MCPLoader) (result []types.Tool, _ error) {
+	for _, t := range tool {
+		if t.IsMCP() {
+			mcpTools, err := mcpLoader.Load(ctx, t)
+			if err != nil {
+				return nil, fmt.Errorf("error loading MCP tools: %w", err)
+			}
+			result = append(result, mcpTools...)
+		} else {
+			result = append(result, t)
+		}
+	}
+
+	return result, nil
+}
+
+func readTool(ctx context.Context, cache *cache.Client, mcp MCPLoader, prg *types.Program, base *source, targetToolName, defaultModel string) ([]types.Tool, error) {
 	data := base.Content
 
 	var (
@@ -210,6 +227,11 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 
 	if len(tools) == 0 {
 		return nil, fmt.Errorf("no tools found in %s", base)
+	}
+
+	tools, err := processMCP(ctx, tools, mcp)
+	if err != nil {
+		return nil, err
 	}
 
 	var (
@@ -279,17 +301,17 @@ func readTool(ctx context.Context, cache *cache.Client, prg *types.Program, base
 		localTools[strings.ToLower(tool.Name)] = tool
 	}
 
-	return linkAll(ctx, cache, prg, base, targetTools, localTools, defaultModel)
+	return linkAll(ctx, cache, mcp, prg, base, targetTools, localTools, defaultModel)
 }
 
-func linkAll(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, tools []types.Tool, localTools types.ToolSet, defaultModel string) (result []types.Tool, _ error) {
+func linkAll(ctx context.Context, cache *cache.Client, mcp MCPLoader, prg *types.Program, base *source, tools []types.Tool, localTools types.ToolSet, defaultModel string) (result []types.Tool, _ error) {
 	localToolsMapping := make(map[string]string, len(tools))
 	for _, localTool := range localTools {
 		localToolsMapping[strings.ToLower(localTool.Name)] = localTool.ID
 	}
 
 	for _, tool := range tools {
-		tool, err := link(ctx, cache, prg, base, tool, localTools, localToolsMapping, defaultModel)
+		tool, err := link(ctx, cache, mcp, prg, base, tool, localTools, localToolsMapping, defaultModel)
 		if err != nil {
 			return nil, err
 		}
@@ -298,7 +320,7 @@ func linkAll(ctx context.Context, cache *cache.Client, prg *types.Program, base 
 	return
 }
 
-func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, tool types.Tool, localTools types.ToolSet, localToolsMapping map[string]string, defaultModel string) (types.Tool, error) {
+func link(ctx context.Context, cache *cache.Client, mcp MCPLoader, prg *types.Program, base *source, tool types.Tool, localTools types.ToolSet, localToolsMapping map[string]string, defaultModel string) (types.Tool, error) {
 	if existing, ok := prg.ToolSet[tool.ID]; ok {
 		return existing, nil
 	}
@@ -323,7 +345,7 @@ func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *so
 				linkedTool = existing
 			} else {
 				var err error
-				linkedTool, err = link(ctx, cache, prg, base, localTool, localTools, localToolsMapping, defaultModel)
+				linkedTool, err = link(ctx, cache, mcp, prg, base, localTool, localTools, localToolsMapping, defaultModel)
 				if err != nil {
 					return types.Tool{}, fmt.Errorf("failed linking %s at %s: %w", targetToolName, base, err)
 				}
@@ -333,7 +355,7 @@ func link(ctx context.Context, cache *cache.Client, prg *types.Program, base *so
 			toolNames[targetToolName] = struct{}{}
 		} else {
 			toolName, subTool := types.SplitToolRef(targetToolName)
-			resolvedTools, err := resolve(ctx, cache, prg, base, toolName, subTool, defaultModel)
+			resolvedTools, err := resolve(ctx, cache, mcp, prg, base, toolName, subTool, defaultModel)
 			if err != nil {
 				return types.Tool{}, fmt.Errorf("failed resolving %s from %s: %w", targetToolName, base, err)
 			}
@@ -373,7 +395,7 @@ func ProgramFromSource(ctx context.Context, content, subToolName string, opts ..
 	prg := types.Program{
 		ToolSet: types.ToolSet{},
 	}
-	tools, err := readTool(ctx, opt.Cache, &prg, &source{
+	tools, err := readTool(ctx, opt.Cache, opt.MCPLoader, &prg, &source{
 		Content:  []byte(content),
 		Path:     locationPath,
 		Name:     locationName,
@@ -390,6 +412,11 @@ type Options struct {
 	Cache        *cache.Client
 	Location     string
 	DefaultModel string
+	MCPLoader    MCPLoader
+}
+
+type MCPLoader interface {
+	Load(ctx context.Context, tool types.Tool) ([]types.Tool, error)
 }
 
 func complete(opts ...Options) (result Options) {
@@ -397,6 +424,7 @@ func complete(opts ...Options) (result Options) {
 		result.Cache = types.FirstSet(opt.Cache, result.Cache)
 		result.Location = types.FirstSet(opt.Location, result.Location)
 		result.DefaultModel = types.FirstSet(opt.DefaultModel, result.DefaultModel)
+		result.MCPLoader = types.FirstSet(opt.MCPLoader, result.MCPLoader)
 	}
 
 	if result.Location == "" {
@@ -405,6 +433,10 @@ func complete(opts ...Options) (result Options) {
 
 	if result.DefaultModel == "" {
 		result.DefaultModel = builtin.GetDefaultModel()
+	}
+
+	if result.MCPLoader == nil {
+		result.MCPLoader = mcp.DefaultLoader
 	}
 
 	return
@@ -430,7 +462,7 @@ func Program(ctx context.Context, name, subToolName string, opts ...Options) (ty
 		Name:    name,
 		ToolSet: types.ToolSet{},
 	}
-	tools, err := resolve(ctx, opt.Cache, &prg, &source{}, name, subToolName, opt.DefaultModel)
+	tools, err := resolve(ctx, opt.Cache, opt.MCPLoader, &prg, &source{}, name, subToolName, opt.DefaultModel)
 	if err != nil {
 		return types.Program{}, err
 	}
@@ -438,7 +470,7 @@ func Program(ctx context.Context, name, subToolName string, opts ...Options) (ty
 	return prg, nil
 }
 
-func resolve(ctx context.Context, cache *cache.Client, prg *types.Program, base *source, name, subTool, defaultModel string) ([]types.Tool, error) {
+func resolve(ctx context.Context, cache *cache.Client, mcp MCPLoader, prg *types.Program, base *source, name, subTool, defaultModel string) ([]types.Tool, error) {
 	if subTool == "" {
 		t, ok := builtin.DefaultModel(name, defaultModel)
 		if ok {
@@ -452,7 +484,7 @@ func resolve(ctx context.Context, cache *cache.Client, prg *types.Program, base 
 		return nil, err
 	}
 
-	result, err := readTool(ctx, cache, prg, s, subTool, defaultModel)
+	result, err := readTool(ctx, cache, mcp, prg, s, subTool, defaultModel)
 	if err != nil {
 		return nil, err
 	}
