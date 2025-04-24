@@ -272,9 +272,9 @@ func SplitArg(hasArg string) (prefix, arg string) {
 // - toolName: "toolName with ${var1} as arg1 and ${var2} as arg2"
 // - input: `{"var1": "value1", "var2": "value2"}`
 // result: toolName, "", map[string]any{"arg1": "value1", "arg2": "value2"}, nil
-func ParseCredentialArgs(toolName string, input string) (string, string, map[string]any, error) {
+func ParseCredentialArgs(toolName string, input string) (string, string, string, map[string]any, error) {
 	if toolName == "" {
-		return "", "", nil, nil
+		return "", "", "", nil, nil
 	}
 
 	inputMap := make(map[string]any)
@@ -287,12 +287,12 @@ func ParseCredentialArgs(toolName string, input string) (string, string, map[str
 
 	fields, err := shlex.Split(toolName)
 	if err != nil {
-		return "", "", nil, err
+		return "", "", "", nil, err
 	}
 
 	// If it's just the tool name, return it
 	if len(fields) == 1 {
-		return toolName, "", nil, nil
+		return toolName, "", "", nil, nil
 	}
 
 	// Next field is "as" if there is an alias, otherwise it should be "with"
@@ -301,25 +301,39 @@ func ParseCredentialArgs(toolName string, input string) (string, string, map[str
 	fields = fields[1:]
 	if fields[0] == "as" {
 		if len(fields) < 2 {
-			return "", "", nil, fmt.Errorf("expected alias after 'as'")
+			return "", "", "", nil, fmt.Errorf("expected alias after 'as'")
 		}
 		alias = fields[1]
 		fields = fields[2:]
 	}
 
 	if len(fields) == 0 { // Nothing left, so just return
-		return originalName, alias, nil, nil
+		return originalName, alias, "", nil, nil
+	}
+
+	var checkParam string
+	if fields[0] == "checked" {
+		if len(fields) < 3 || fields[1] != "with" {
+			return "", "", "", nil, fmt.Errorf("expected 'checked with some_value' but got %v", fields)
+		}
+
+		checkParam = fields[2]
+		fields = fields[3:]
+	}
+
+	if len(fields) == 0 { // Nothing left, so just return
+		return originalName, alias, checkParam, nil, nil
 	}
 
 	// Next we should have "with" followed by the args
 	if fields[0] != "with" {
-		return "", "", nil, fmt.Errorf("expected 'with' but got %s", fields[0])
+		return "", "", "", nil, fmt.Errorf("expected 'with' but got %s", fields[0])
 	}
 	fields = fields[1:]
 
 	// If there are no args, return an error
 	if len(fields) == 0 {
-		return "", "", nil, fmt.Errorf("expected args after 'with'")
+		return "", "", "", nil, fmt.Errorf("expected args after 'with'")
 	}
 
 	args := make(map[string]any)
@@ -332,7 +346,7 @@ func ParseCredentialArgs(toolName string, input string) (string, string, map[str
 			prev = "value"
 		case "value":
 			if field != "as" {
-				return "", "", nil, fmt.Errorf("expected 'as' but got %s", field)
+				return "", "", "", nil, fmt.Errorf("expected 'as' but got %s", field)
 			}
 			prev = "as"
 		case "as":
@@ -340,14 +354,14 @@ func ParseCredentialArgs(toolName string, input string) (string, string, map[str
 			prev = "name"
 		case "name":
 			if field != "and" {
-				return "", "", nil, fmt.Errorf("expected 'and' but got %s", field)
+				return "", "", "", nil, fmt.Errorf("expected 'and' but got %s", field)
 			}
 			prev = "and"
 		}
 	}
 
 	if prev == "and" {
-		return "", "", nil, fmt.Errorf("expected arg name after 'and'")
+		return "", "", "", nil, fmt.Errorf("expected arg name after 'and'")
 	}
 
 	// Check and see if any of the arg values are references to an input
@@ -360,7 +374,7 @@ func ParseCredentialArgs(toolName string, input string) (string, string, map[str
 		}
 	}
 
-	return originalName, alias, args, nil
+	return originalName, alias, checkParam, args, nil
 }
 
 func (t Tool) GetToolRefsFromNames(names []string) (result []ToolReference, _ error) {

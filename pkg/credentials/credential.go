@@ -20,13 +20,16 @@ const (
 )
 
 type Credential struct {
-	Context      string            `json:"context"`
-	ToolName     string            `json:"toolName"`
-	Type         CredentialType    `json:"type"`
-	Env          map[string]string `json:"env"`
-	Ephemeral    bool              `json:"ephemeral,omitempty"`
-	ExpiresAt    *time.Time        `json:"expiresAt"`
-	RefreshToken string            `json:"refreshToken"`
+	Context  string            `json:"context"`
+	ToolName string            `json:"toolName"`
+	Type     CredentialType    `json:"type"`
+	Env      map[string]string `json:"env"`
+	// If the CheckParam that is stored is different from the param on the tool,
+	// then the credential will be re-authed as if it does not exist.
+	CheckParam   string     `json:"checkParam"`
+	Ephemeral    bool       `json:"ephemeral,omitempty"`
+	ExpiresAt    *time.Time `json:"expiresAt"`
+	RefreshToken string     `json:"refreshToken"`
 }
 
 func (c Credential) IsExpired() bool {
@@ -82,6 +85,7 @@ func credentialFromDockerAuthConfig(authCfg types.AuthConfig) (Credential, error
 		Context:      ctx,
 		ToolName:     tool,
 		Type:         CredentialType(credType),
+		CheckParam:   cred.CheckParam,
 		Env:          cred.Env,
 		ExpiresAt:    cred.ExpiresAt,
 		RefreshToken: cred.RefreshToken,

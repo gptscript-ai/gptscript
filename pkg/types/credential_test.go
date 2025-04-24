@@ -9,13 +9,14 @@ import (
 
 func TestParseCredentialArgs(t *testing.T) {
 	tests := []struct {
-		name          string
-		toolName      string
-		input         string
-		expectedName  string
-		expectedAlias string
-		expectedArgs  map[string]string
-		wantErr       bool
+		name               string
+		toolName           string
+		input              string
+		expectedName       string
+		expectedAlias      string
+		expectedCheckParam string
+		expectedArgs       map[string]string
+		wantErr            bool
 	}{
 		{
 			name:          "empty",
@@ -95,6 +96,40 @@ func TestParseCredentialArgs(t *testing.T) {
 			},
 		},
 		{
+			name:               "tool name with check parameter",
+			toolName:           `myCredentialTool checked with myCheckParam`,
+			expectedName:       "myCredentialTool",
+			expectedCheckParam: "myCheckParam",
+		},
+		{
+			name:               "tool name with alias and check parameter",
+			toolName:           `myCredentialTool as myAlias checked with myCheckParam`,
+			expectedName:       "myCredentialTool",
+			expectedAlias:      "myAlias",
+			expectedCheckParam: "myCheckParam",
+		},
+		{
+			name:               "tool name with alias, check parameter, and args",
+			toolName:           `myCredentialTool as myAlias checked with myCheckParam with value1 as arg1 and value2 as arg2`,
+			expectedName:       "myCredentialTool",
+			expectedAlias:      "myAlias",
+			expectedCheckParam: "myCheckParam",
+			expectedArgs: map[string]string{
+				"arg1": "value1",
+				"arg2": "value2",
+			},
+		},
+		{
+			name:     "check parameter without with",
+			toolName: `myCredentialTool checked myCheckParam`,
+			wantErr:  true,
+		},
+		{
+			name:     "invalid check parameter",
+			toolName: `myCredentialTool checked with`,
+			wantErr:  true,
+		},
+		{
 			name:     "tool name with alias but no 'as' (invalid)",
 			toolName: "myCredentialTool myAlias",
 			wantErr:  true,
@@ -136,7 +171,7 @@ func TestParseCredentialArgs(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			originalName, alias, args, err := ParseCredentialArgs(tt.toolName, tt.input)
+			originalName, alias, checkParam, args, err := ParseCredentialArgs(tt.toolName, tt.input)
 			if tt.wantErr {
 				require.Error(t, err, "expected an error but got none")
 				return
@@ -145,6 +180,7 @@ func TestParseCredentialArgs(t *testing.T) {
 			require.NoError(t, err, "did not expect an error but got one")
 			require.Equal(t, tt.expectedName, originalName, "unexpected original name")
 			require.Equal(t, tt.expectedAlias, alias, "unexpected alias")
+			require.Equal(t, tt.expectedCheckParam, checkParam, "unexpected checkParam")
 			require.Equal(t, len(tt.expectedArgs), len(args), "unexpected number of args")
 
 			for k, v := range tt.expectedArgs {
