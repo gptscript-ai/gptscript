@@ -215,7 +215,7 @@ func (r *GPTScript) listTools(ctx context.Context, gptScript *gptscript.GPTScrip
 		// Don't print instructions
 		tool.Instructions = ""
 
-		lines = append(lines, tool.String())
+		lines = append(lines, tool.Print())
 	}
 	fmt.Println(strings.Join(lines, "\n---\n"))
 	return nil
