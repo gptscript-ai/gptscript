@@ -780,7 +780,7 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 
 	var nearestExpiration *time.Time
 	for _, ref := range credToolRefs {
-		toolName, credentialAlias, args, err := types.ParseCredentialArgs(ref.Reference, callCtx.Input)
+		toolName, credentialAlias, checkParam, args, err := types.ParseCredentialArgs(ref.Reference, callCtx.Input)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse credential tool %q: %w", ref.Reference, err)
 		}
@@ -830,9 +830,10 @@ func (r *Runner) handleCredentials(callCtx engine.Context, monitor Monitor, env 
 
 		// If the credential doesn't already exist in the store, run the credential tool in order to get the value,
 		// and save it in the store.
-		if !exists || c.IsExpired() {
+		if !exists || c.IsExpired() || checkParam != c.CheckParam {
 			// If the existing credential is expired, we need to provide it to the cred tool through the environment.
-			if exists && c.IsExpired() {
+			// If the check parameter is different, then we don't refresh. We should re-auth below.
+			if exists && c.IsExpired() && checkParam == c.CheckParam {
 				refresh = true
 				credJSON, err := json.Marshal(c)
 				if err != nil {
