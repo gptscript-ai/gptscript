@@ -44,7 +44,7 @@ func ToDisplayText(tool Tool, input string) string {
 }
 
 func ToSysDisplayString(id string, args map[string]string) (string, error) {
-	if suffix, ok := strings.CutPrefix(id, "sys.mcp.invoke."); ok {
+	if suffix, ok := strings.CutPrefix(id, MCPInvokePrefix); ok {
 		return fmt.Sprintf("Invoking MCP `%s`", suffix), nil
 	}
 

@@ -142,7 +142,7 @@ func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName s
 					Description: tool.Description,
 					Arguments:   &schema,
 				},
-				Instructions: types.MCPInvokePrefix + "." + tool.Name + " " + session.ID + " " + tool.Name,
+				Instructions: types.MCPInvokePrefix + tool.Name + " " + session.ID,
 			},
 		}
 

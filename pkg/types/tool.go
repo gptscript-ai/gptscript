@@ -21,7 +21,7 @@ const (
 	EchoPrefix      = "#!sys.echo"
 	CallPrefix      = "#!sys.call"
 	MCPPrefix       = "#!mcp"
-	MCPInvokePrefix = "#!sys.mcp.invoke"
+	MCPInvokePrefix = "#!sys.mcp.invoke."
 	CommandPrefix   = "#!"
 	PromptPrefix    = "!!"
 )

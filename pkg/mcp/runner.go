@@ -12,12 +12,16 @@ import (
 
 func (l *Local) Run(ctx context.Context, _ chan<- types.CompletionStatus, tool types.Tool, input string) (string, error) {
 	fields := strings.Fields(tool.Instructions)
-	if len(fields) < 3 {
+	if len(fields) < 2 {
 		return "", fmt.Errorf("invalid mcp call, invalid number of fields in %s", tool.Instructions)
 	}
 
 	id := fields[1]
-	toolName := fields[2]
+	toolName, ok := strings.CutPrefix(fields[0], types.MCPInvokePrefix)
+	if !ok {
+		return "", fmt.Errorf("invalid mcp call, invalid tool name in %s", tool.Instructions)
+	}
+
 	arguments := map[string]any{}
 
 	if input != "" {
