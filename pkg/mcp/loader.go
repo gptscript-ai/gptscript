@@ -23,7 +23,6 @@ var (
 )
 
 type Local struct {
-	nextID   int64
 	lock     sync.Mutex
 	sessions map[string]*Session
 }
@@ -39,15 +38,17 @@ type Config struct {
 	MCPServers map[string]ServerConfig `json:"mcpServers"`
 }
 
+// ServerConfig represents an MCP server configuration for tools calls.
+// It is important that this type doesn't have any maps.
 type ServerConfig struct {
-	DisableInstruction bool              `json:"disableInstruction"`
-	Command            string            `json:"command"`
-	Args               []string          `json:"args"`
-	Env                map[string]string `json:"env"`
-	Server             string            `json:"server"`
-	URL                string            `json:"url"`
-	BaseURL            string            `json:"baseURL,omitempty"`
-	Headers            map[string]string `json:"headers"`
+	DisableInstruction bool     `json:"disableInstruction"`
+	Command            string   `json:"command"`
+	Args               []string `json:"args"`
+	Env                []string `json:"env"`
+	Server             string   `json:"server"`
+	URL                string   `json:"url"`
+	BaseURL            string   `json:"baseURL,omitempty"`
+	Headers            []string `json:"headers"`
 }
 
 func (s *ServerConfig) GetBaseURL() string {
@@ -62,12 +63,12 @@ func (s *ServerConfig) GetBaseURL() string {
 
 func (l *Local) Load(ctx context.Context, tool types.Tool) (result []types.Tool, _ error) {
 	if !tool.IsMCP() {
-		return []types.Tool{tool}, nil
+		return nil, nil
 	}
 
 	_, configData, _ := strings.Cut(tool.Instructions, "\n")
-	var servers Config
 
+	var servers Config
 	if err := json.Unmarshal([]byte(strings.TrimSpace(configData)), &servers); err != nil {
 		return nil, fmt.Errorf("failed to parse MCP configuration: %w\n%s", err, configData)
 	}
@@ -87,10 +88,10 @@ func (l *Local) Load(ctx context.Context, tool types.Tool) (result []types.Tool,
 	}
 
 	if len(servers.MCPServers) > 1 {
-		return nil, fmt.Errorf("only a single MCP server definition is support")
+		return nil, fmt.Errorf("only a single MCP server definition is supported")
 	}
 
-	for _, server := range slices.Sorted(maps.Keys(servers.MCPServers)) {
+	for server := range maps.Keys(servers.MCPServers) {
 		session, err := l.loadSession(ctx, servers.MCPServers[server])
 		if err != nil {
 			return nil, fmt.Errorf("failed to load MCP session for server %s: %w", server, err)
@@ -202,6 +203,7 @@ func (l *Local) loadSession(ctx context.Context, server ServerConfig) (*Session,
 	l.lock.Lock()
 	existing, ok := l.sessions[id]
 	l.lock.Unlock()
+
 	if ok {
 		return existing, nil
 	}
@@ -210,13 +212,8 @@ func (l *Local) loadSession(ctx context.Context, server ServerConfig) (*Session,
 		c   client.MCPClient
 		err error
 	)
-
 	if server.Command != "" {
-		env := make([]string, 0, len(server.Env))
-		for k, v := range server.Env {
-			env = append(env, fmt.Sprintf("%s=%s", k, v))
-		}
-		c, err = client.NewStdioMCPClient(server.Command, env, server.Args...)
+		c, err = client.NewStdioMCPClient(server.Command, server.Env, server.Args...)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create MCP stdio client: %w", err)
 		}
@@ -225,7 +222,13 @@ func (l *Local) loadSession(ctx context.Context, server ServerConfig) (*Session,
 		if url == "" {
 			url = server.Server
 		}
-		c, err = client.NewSSEMCPClient(url, client.WithHeaders(server.Headers))
+
+		headers := make(map[string]string, len(server.Headers))
+		for _, h := range server.Headers {
+			k, v, _ := strings.Cut(h, "=")
+			headers[k] = v
+		}
+		c, err = client.NewSSEMCPClient(url, client.WithHeaders(headers))
 		if err != nil {
 			return nil, fmt.Errorf("failed to create MCP HTTP client: %w", err)
 		}
@@ -252,7 +255,7 @@ func (l *Local) loadSession(ctx context.Context, server ServerConfig) (*Session,
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
-	if existing, ok := l.sessions[id]; ok {
+	if existing, ok = l.sessions[id]; ok {
 		return existing, c.Close()
 	}
 
