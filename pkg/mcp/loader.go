@@ -27,8 +27,10 @@ var (
 )
 
 type Local struct {
-	lock     sync.Mutex
-	sessions map[string]*Session
+	lock       sync.Mutex
+	sessions   map[string]*Session
+	sessionCtx context.Context
+	cancel     context.CancelFunc
 }
 
 type Session struct {
@@ -97,7 +99,7 @@ func (l *Local) Load(ctx context.Context, tool types.Tool) (result []types.Tool,
 	}
 
 	for server := range maps.Keys(servers.MCPServers) {
-		session, err := l.loadSession(ctx, servers.MCPServers[server])
+		session, err := l.loadSession(servers.MCPServers[server])
 		if err != nil {
 			return nil, fmt.Errorf("failed to load MCP session for server %s: %w", server, err)
 		}
@@ -116,6 +118,15 @@ func (l *Local) Close() error {
 
 	l.lock.Lock()
 	defer l.lock.Unlock()
+
+	if l.sessionCtx == nil {
+		return nil
+	}
+
+	defer func() {
+		l.cancel()
+		l.sessionCtx = nil
+	}()
 
 	var errs []error
 	for id, session := range l.sessions {
@@ -222,10 +233,14 @@ func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName s
 	return toolDefs, nil
 }
 
-func (l *Local) loadSession(ctx context.Context, server ServerConfig) (*Session, error) {
+func (l *Local) loadSession(server ServerConfig) (*Session, error) {
 	id := hash.Digest(server)
 	l.lock.Lock()
 	existing, ok := l.sessions[id]
+	if l.sessionCtx == nil {
+		l.sessionCtx, l.cancel = context.WithCancel(context.Background())
+	}
+	ctx := l.sessionCtx
 	l.lock.Unlock()
 
 	if ok {
@@ -259,7 +274,7 @@ func (l *Local) loadSession(ctx context.Context, server ServerConfig) (*Session,
 		}
 
 		// We expect the client to outlive this one request.
-		if err = c.Start(context.Background()); err != nil {
+		if err = c.Start(ctx); err != nil {
 			return nil, fmt.Errorf("failed to start MCP client: %w", err)
 		}
 	}
