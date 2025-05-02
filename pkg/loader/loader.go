@@ -417,6 +417,7 @@ type Options struct {
 
 type MCPLoader interface {
 	Load(ctx context.Context, tool types.Tool) ([]types.Tool, error)
+	Close() error
 }
 
 func complete(opts ...Options) (result Options) {

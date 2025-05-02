@@ -131,3 +131,7 @@ type fakeMCPLoader struct{}
 func (fakeMCPLoader) Load(context.Context, types.Tool) ([]types.Tool, error) {
 	return nil, nil
 }
+
+func (fakeMCPLoader) Close() error {
+	return nil
+}

@@ -3,6 +3,7 @@ package mcp
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"maps"
 	"slices"
@@ -49,6 +50,7 @@ type ServerConfig struct {
 	URL                string   `json:"url"`
 	BaseURL            string   `json:"baseURL,omitempty"`
 	Headers            []string `json:"headers"`
+	Scope              string   `json:"scope"`
 }
 
 func (s *ServerConfig) GetBaseURL() string {
@@ -102,6 +104,24 @@ func (l *Local) Load(ctx context.Context, tool types.Tool) (result []types.Tool,
 
 	// This should never happen, but just in case
 	return nil, fmt.Errorf("no MCP server configuration found in tool instructions: %s", configData)
+}
+
+func (l *Local) Close() error {
+	if l == nil {
+		return nil
+	}
+
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	var errs []error
+	for id, session := range l.sessions {
+		if err := session.Client.Close(); err != nil {
+			errs = append(errs, fmt.Errorf("failed to close MCP client %s: %w", id, err))
+		}
+	}
+
+	return errors.Join(errs...)
 }
 
 func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName string) ([]types.Tool, error) {
