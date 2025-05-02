@@ -12,6 +12,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
+	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 	"github.com/mark3labs/mcp-go/client"
@@ -21,6 +22,8 @@ import (
 var (
 	DefaultLoader = &Local{}
 	DefaultRunner = DefaultLoader
+
+	logger = mvl.Package()
 )
 
 type Local struct {
@@ -116,6 +119,7 @@ func (l *Local) Close() error {
 
 	var errs []error
 	for id, session := range l.sessions {
+		logger.Infof("closing MCP session %s", id)
 		if err := session.Client.Close(); err != nil {
 			errs = append(errs, fmt.Errorf("failed to close MCP client %s: %w", id, err))
 		}
@@ -229,7 +233,7 @@ func (l *Local) loadSession(ctx context.Context, server ServerConfig) (*Session,
 	}
 
 	var (
-		c   client.MCPClient
+		c   *client.Client
 		err error
 	)
 	if server.Command != "" {
@@ -248,9 +252,15 @@ func (l *Local) loadSession(ctx context.Context, server ServerConfig) (*Session,
 			k, v, _ := strings.Cut(h, "=")
 			headers[k] = v
 		}
+
 		c, err = client.NewSSEMCPClient(url, client.WithHeaders(headers))
 		if err != nil {
 			return nil, fmt.Errorf("failed to create MCP HTTP client: %w", err)
+		}
+
+		// We expect the client to outlive this one request.
+		if err = c.Start(context.Background()); err != nil {
+			return nil, fmt.Errorf("failed to start MCP client: %w", err)
 		}
 	}
 
