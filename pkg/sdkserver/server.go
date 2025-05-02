@@ -16,6 +16,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/gptscript-ai/broadcaster"
 	"github.com/gptscript-ai/gptscript/pkg/gptscript"
+	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/mcp"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/repos/runtimes"
 	"github.com/gptscript-ai/gptscript/pkg/runner"
@@ -26,6 +28,7 @@ import (
 type Options struct {
 	gptscript.Options
 
+	MCPLoader                  loader.MCPLoader
 	ListenAddress              string
 	DatasetTool, WorkspaceTool string
 	ServerToolsEnv             []string
@@ -114,6 +117,7 @@ func run(ctx context.Context, listener net.Listener, opts Options) error {
 		serverToolsEnv: opts.ServerToolsEnv,
 
 		client:           g,
+		mcpLoader:        opts.MCPLoader,
 		events:           events,
 		runtimeManager:   runtimes.Default(opts.Cache.CacheDir, opts.SystemToolsDir),
 		waitingToConfirm: make(map[string]chan runner.AuthorizerResponse),
@@ -168,6 +172,7 @@ func complete(opts ...Options) Options {
 		result.WorkspaceTool = types.FirstSet(opt.WorkspaceTool, result.WorkspaceTool)
 		result.Debug = types.FirstSet(opt.Debug, result.Debug)
 		result.DisableServerErrorLogging = types.FirstSet(opt.DisableServerErrorLogging, result.DisableServerErrorLogging)
+		result.MCPLoader = types.FirstSet(opt.MCPLoader, result.MCPLoader)
 	}
 
 	if result.ListenAddress == "" {
@@ -182,6 +187,9 @@ func complete(opts ...Options) Options {
 	}
 	if len(result.ServerToolsEnv) == 0 {
 		result.ServerToolsEnv = os.Environ()
+	}
+	if result.MCPLoader == nil {
+		result.MCPLoader = mcp.DefaultLoader
 	}
 
 	return result

@@ -11,7 +11,6 @@ import (
 	"sync"
 
 	"github.com/gptscript-ai/gptscript/pkg/counter"
-	"github.com/gptscript-ai/gptscript/pkg/mcp"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
 )
@@ -314,11 +313,7 @@ func populateMessageParams(ctx Context, completion *types.CompletionRequest, too
 }
 
 func (e *Engine) runMCPInvoke(ctx Context, tool types.Tool, input string) (*Return, error) {
-	runner := e.MCPRunner
-	if runner == nil {
-		runner = mcp.DefaultRunner
-	}
-	output, err := runner.Run(ctx.Ctx, e.Progress, tool, input)
+	output, err := e.MCPRunner.Run(ctx.Ctx, e.Progress, tool, input)
 	if err != nil {
 		return nil, fmt.Errorf("failed to run MCP invoke: %w", err)
 	}
