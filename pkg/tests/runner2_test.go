@@ -3,6 +3,7 @@ package tests
 import (
 	"context"
 	"encoding/json"
+	"runtime"
 	"testing"
 
 	"github.com/gptscript-ai/gptscript/pkg/loader"
@@ -206,6 +207,10 @@ echo "${GPTSCRIPT_INPUT}"
 }
 
 func TestMCPLoad(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping test on Windows")
+	}
+
 	r := tester.NewRunner(t)
 	prg, err := loader.ProgramFromSource(context.Background(), `
 name: mcp
