@@ -29,6 +29,7 @@ type server struct {
 	datasetTool, workspaceTool string
 	serverToolsEnv             []string
 	client                     *gptscript.GPTScript
+	mcpLoader                  loader.MCPLoader
 	events                     *broadcaster.Broadcaster[event]
 
 	runtimeManager engine.RuntimeManager
@@ -283,11 +284,20 @@ func (s *server) load(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if reqObject.Content != "" {
-		prg, err = loader.ProgramFromSource(ctx, reqObject.Content, reqObject.SubTool, loader.Options{Cache: s.client.Cache})
+		prg, err = loader.ProgramFromSource(ctx, reqObject.Content, reqObject.SubTool, loader.Options{
+			Cache:     s.client.Cache,
+			MCPLoader: s.mcpLoader,
+		})
 	} else if reqObject.File != "" {
-		prg, err = loader.Program(ctx, reqObject.File, reqObject.SubTool, loader.Options{Cache: s.client.Cache})
+		prg, err = loader.Program(ctx, reqObject.File, reqObject.SubTool, loader.Options{
+			Cache:     s.client.Cache,
+			MCPLoader: s.mcpLoader,
+		})
 	} else {
-		prg, err = loader.ProgramFromSource(ctx, reqObject.ToolDefs.String(), reqObject.SubTool, loader.Options{Cache: s.client.Cache})
+		prg, err = loader.ProgramFromSource(ctx, reqObject.ToolDefs.String(), reqObject.SubTool, loader.Options{
+			Cache:     s.client.Cache,
+			MCPLoader: s.mcpLoader,
+		})
 	}
 	if err != nil {
 		writeError(logger, w, http.StatusInternalServerError, fmt.Errorf("failed to load program: %w", err))

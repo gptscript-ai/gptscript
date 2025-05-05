@@ -44,6 +44,10 @@ func ToDisplayText(tool Tool, input string) string {
 }
 
 func ToSysDisplayString(id string, args map[string]string) (string, error) {
+	if suffix, ok := strings.CutPrefix(id, MCPInvokePrefix); ok {
+		return fmt.Sprintf("Invoking MCP `%s`", suffix), nil
+	}
+
 	switch id {
 	case "sys.append":
 		return fmt.Sprintf("Appending to file `%s`", args["filename"]), nil

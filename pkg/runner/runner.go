@@ -14,6 +14,7 @@ import (
 	context2 "github.com/gptscript-ai/gptscript/pkg/context"
 	"github.com/gptscript-ai/gptscript/pkg/credentials"
 	"github.com/gptscript-ai/gptscript/pkg/engine"
+	"github.com/gptscript-ai/gptscript/pkg/mcp"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"golang.org/x/exp/maps"
 )
@@ -37,6 +38,7 @@ type Options struct {
 	CredentialOverrides []string              `usage:"-"`
 	Sequential          bool                  `usage:"-"`
 	Authorizer          AuthorizerFunc        `usage:"-"`
+	MCPRunner           engine.MCPRunner      `usage:"-"`
 }
 
 type RunOptions struct {
@@ -69,6 +71,9 @@ func Complete(opts ...Options) (result Options) {
 		if opt.CredentialOverrides != nil {
 			result.CredentialOverrides = append(result.CredentialOverrides, opt.CredentialOverrides...)
 		}
+		if opt.MCPRunner != nil {
+			result.MCPRunner = opt.MCPRunner
+		}
 	}
 	return
 }
@@ -87,6 +92,9 @@ func complete(opts ...Options) Options {
 	if result.Authorizer == nil {
 		result.Authorizer = DefaultAuthorizer
 	}
+	if result.MCPRunner == nil {
+		result.MCPRunner = mcp.DefaultRunner
+	}
 	return result
 }
 
@@ -99,6 +107,7 @@ type Runner struct {
 	credOverrides  []string
 	credStore      credentials.CredentialStore
 	sequential     bool
+	mcpRunner      engine.MCPRunner
 }
 
 func New(client engine.Model, credStore credentials.CredentialStore, opts ...Options) (*Runner, error) {
@@ -113,6 +122,7 @@ func New(client engine.Model, credStore credentials.CredentialStore, opts ...Opt
 		credStore:      credStore,
 		sequential:     opt.Sequential,
 		auth:           opt.Authorizer,
+		mcpRunner:      opt.MCPRunner,
 	}
 
 	if opt.StartPort != 0 {
@@ -326,6 +336,7 @@ func (r *Runner) start(callCtx engine.Context, state *State, monitor Monitor, en
 
 	e := engine.Engine{
 		Model:          r.c,
+		MCPRunner:      r.mcpRunner,
 		RuntimeManager: runtimeWithLogger(callCtx, monitor, r.runtimeManager),
 		Progress:       progress,
 		Env:            env,
@@ -524,6 +535,7 @@ func (r *Runner) resume(callCtx engine.Context, monitor Monitor, env []string, s
 
 		e := engine.Engine{
 			Model:          r.c,
+			MCPRunner:      r.mcpRunner,
 			RuntimeManager: runtimeWithLogger(callCtx, monitor, r.runtimeManager),
 			Progress:       progress,
 			Env:            env,

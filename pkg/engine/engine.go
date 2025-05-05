@@ -41,6 +41,11 @@ type Engine struct {
 	RuntimeManager RuntimeManager
 	Env            []string
 	Progress       chan<- types.CompletionStatus
+	MCPRunner      MCPRunner
+}
+
+type MCPRunner interface {
+	Run(ctx context.Context, progress chan<- types.CompletionStatus, tool types.Tool, input string) (string, error)
 }
 
 type State struct {
@@ -307,6 +312,17 @@ func populateMessageParams(ctx Context, completion *types.CompletionRequest, too
 	return nil
 }
 
+func (e *Engine) runMCPInvoke(ctx Context, tool types.Tool, input string) (*Return, error) {
+	output, err := e.MCPRunner.Run(ctx.Ctx, e.Progress, tool, input)
+	if err != nil {
+		return nil, fmt.Errorf("failed to run MCP invoke: %w", err)
+	}
+
+	return &Return{
+		Result: &output,
+	}, nil
+}
+
 func (e *Engine) runCommandTools(ctx Context, tool types.Tool, input string) (*Return, error) {
 	if tool.IsHTTP() {
 		return e.runHTTP(ctx, tool, input)
@@ -341,6 +357,10 @@ func (e *Engine) Start(ctx Context, input string) (ret *Return, err error) {
 		default:
 		}
 	}()
+
+	if tool.IsMCPInvoke() {
+		return e.runMCPInvoke(ctx, tool, input)
+	}
 
 	if tool.IsCommand() {
 		return e.runCommandTools(ctx, tool, input)
@@ -378,6 +398,7 @@ func addUpdateSystem(ctx Context, tool types.Tool, msgs []types.CompletionMessag
 		instructions = append(instructions, context.Content)
 	}
 
+	tool.Instructions = strings.TrimPrefix(tool.Instructions, types.PromptPrefix)
 	if tool.Instructions != "" {
 		instructions = append(instructions, tool.Instructions)
 	}
