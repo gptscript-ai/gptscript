@@ -99,16 +99,25 @@ func (l *Local) Load(ctx context.Context, tool types.Tool) (result []types.Tool,
 	}
 
 	for server := range maps.Keys(servers.MCPServers) {
-		session, err := l.loadSession(servers.MCPServers[server])
+		tools, err := l.LoadSession(ctx, servers.MCPServers[server], tool.Name)
 		if err != nil {
 			return nil, fmt.Errorf("failed to load MCP session for server %s: %w", server, err)
 		}
 
-		return l.sessionToTools(ctx, session, tool.Name)
+		return tools, nil
 	}
 
 	// This should never happen, but just in case
 	return nil, fmt.Errorf("no MCP server configuration found in tool instructions: %s", configData)
+}
+
+func (l *Local) LoadSession(ctx context.Context, server ServerConfig, toolName string) ([]types.Tool, error) {
+	session, err := l.loadSession(server)
+	if err != nil {
+		return nil, err
+	}
+
+	return l.sessionToTools(ctx, session, toolName)
 }
 
 func (l *Local) Close() error {
