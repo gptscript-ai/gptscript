@@ -56,6 +56,7 @@ type ServerConfig struct {
 	BaseURL            string   `json:"baseURL,omitempty"`
 	Headers            []string `json:"headers"`
 	Scope              string   `json:"scope"`
+	AllowedTools       []string `json:"allowedTools"`
 }
 
 func (s *ServerConfig) GetBaseURL() string {
@@ -99,16 +100,29 @@ func (l *Local) Load(ctx context.Context, tool types.Tool) (result []types.Tool,
 	}
 
 	for server := range maps.Keys(servers.MCPServers) {
-		session, err := l.loadSession(servers.MCPServers[server])
+		tools, err := l.LoadTools(ctx, servers.MCPServers[server], tool.Name)
 		if err != nil {
 			return nil, fmt.Errorf("failed to load MCP session for server %s: %w", server, err)
 		}
 
-		return l.sessionToTools(ctx, session, tool.Name)
+		return tools, nil
 	}
 
 	// This should never happen, but just in case
 	return nil, fmt.Errorf("no MCP server configuration found in tool instructions: %s", configData)
+}
+
+func (l *Local) LoadTools(ctx context.Context, server ServerConfig, toolName string) ([]types.Tool, error) {
+	allowedTools := server.AllowedTools
+	// Reset so we don't start a new MCP server, no reason to if one is already running and the allowed tools change.
+	server.AllowedTools = nil
+
+	session, err := l.loadSession(server)
+	if err != nil {
+		return nil, err
+	}
+
+	return l.sessionToTools(ctx, session, toolName, allowedTools)
 }
 
 func (l *Local) Close() error {
@@ -139,7 +153,9 @@ func (l *Local) Close() error {
 	return errors.Join(errs...)
 }
 
-func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName string) ([]types.Tool, error) {
+func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName string, allowedTools []string) ([]types.Tool, error) {
+	allToolsAllowed := len(allowedTools) == 0 || slices.Contains(allowedTools, "*")
+
 	tools, err := session.Client.ListTools(ctx, mcp.ListToolsRequest{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to list tools: %w", err)
@@ -149,6 +165,10 @@ func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName s
 	var toolNames []string
 
 	for _, tool := range tools.Tools {
+		if !allToolsAllowed && !slices.Contains(allowedTools, tool.Name) {
+			continue
+		}
+
 		var schema openapi3.Schema
 
 		schemaData, err := json.Marshal(tool.InputSchema)
