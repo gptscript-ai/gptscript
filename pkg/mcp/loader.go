@@ -125,6 +125,32 @@ func (l *Local) LoadTools(ctx context.Context, server ServerConfig, toolName str
 	return l.sessionToTools(ctx, session, toolName, allowedTools)
 }
 
+func (l *Local) ShutdownServer(server ServerConfig) error {
+	if l == nil {
+		return nil
+	}
+
+	id := hash.Digest(server)
+
+	l.lock.Lock()
+
+	if l.sessionCtx == nil {
+		l.lock.Unlock()
+		return nil
+	}
+
+	session := l.sessions[id]
+	delete(l.sessions, id)
+
+	l.lock.Unlock()
+
+	if session == nil {
+		return nil
+	}
+
+	return session.Client.Close()
+}
+
 func (l *Local) Close() error {
 	if l == nil {
 		return nil

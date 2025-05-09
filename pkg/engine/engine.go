@@ -350,6 +350,9 @@ func (e *Engine) Start(ctx Context, input string) (ret *Return, err error) {
 		}
 		select {
 		case <-ctx.userCancel:
+			if ret == nil {
+				ret = new(Return)
+			}
 			if ret.Result == nil {
 				ret.Result = new(string)
 			}
