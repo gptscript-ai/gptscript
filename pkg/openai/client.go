@@ -388,11 +388,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		MaxTokens: messageRequest.MaxTokens,
 	}
 
-	if messageRequest.Temperature == nil {
-		request.Temperature = new(float32)
-	} else {
-		request.Temperature = messageRequest.Temperature
-	}
+	request.Temperature = messageRequest.Temperature
 
 	if messageRequest.JSONResponse {
 		request.ResponseFormat = &openai.ChatCompletionResponseFormat{
