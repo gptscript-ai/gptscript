@@ -234,11 +234,12 @@ func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName s
 		}
 
 		if tool.Annotations.Title != "" && !slices.Contains(strings.Fields(tool.Annotations.Title), "as") {
-			toolDef.Name = tool.Annotations.Title + " as " + tool.Name
+			toolNames = append(toolNames, tool.Name+" as "+tool.Annotations.Title)
+		} else {
+			toolNames = append(toolNames, tool.Name)
 		}
 
 		toolDefs = append(toolDefs, toolDef)
-		toolNames = append(toolNames, tool.Name)
 	}
 
 	main := types.Tool{
