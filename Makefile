@@ -20,7 +20,7 @@ integration:
 
 smoke: build
 smoke:
-	go test -v -tags='smoke' ./pkg/tests/smoke/...
+	go test -v -tags='smoke' ./pkg/tests/smoke/..
 
 GOLANGCI_LINT_VERSION ?= v2.1.2
 lint:
