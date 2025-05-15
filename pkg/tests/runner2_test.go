@@ -313,7 +313,7 @@ name: mcp
       ],
       "type": "object"
     },
-    "instructions": "#!sys.mcp.invoke.append_insight c358c2eb93fa9a98631cd9e4f324d7b59f56aee11c7ae32a00984ad5844dc32c",
+    "instructions": "#!sys.mcp.invoke.append_insight e592cc0c9483290685611ba70bd8595829cc794f7eae0419eabb3388bf0d3529",
     "id": "inline:append_insight",
     "localTools": {
       "append_insight": "inline:append_insight",
@@ -346,7 +346,7 @@ name: mcp
       ],
       "type": "object"
     },
-    "instructions": "#!sys.mcp.invoke.create_table c358c2eb93fa9a98631cd9e4f324d7b59f56aee11c7ae32a00984ad5844dc32c",
+    "instructions": "#!sys.mcp.invoke.create_table e592cc0c9483290685611ba70bd8595829cc794f7eae0419eabb3388bf0d3529",
     "id": "inline:create_table",
     "localTools": {
       "append_insight": "inline:append_insight",
@@ -379,7 +379,7 @@ name: mcp
       ],
       "type": "object"
     },
-    "instructions": "#!sys.mcp.invoke.describe_table c358c2eb93fa9a98631cd9e4f324d7b59f56aee11c7ae32a00984ad5844dc32c",
+    "instructions": "#!sys.mcp.invoke.describe_table e592cc0c9483290685611ba70bd8595829cc794f7eae0419eabb3388bf0d3529",
     "id": "inline:describe_table",
     "localTools": {
       "append_insight": "inline:append_insight",
@@ -403,7 +403,7 @@ name: mcp
     "arguments": {
       "type": "object"
     },
-    "instructions": "#!sys.mcp.invoke.list_tables c358c2eb93fa9a98631cd9e4f324d7b59f56aee11c7ae32a00984ad5844dc32c",
+    "instructions": "#!sys.mcp.invoke.list_tables e592cc0c9483290685611ba70bd8595829cc794f7eae0419eabb3388bf0d3529",
     "id": "inline:list_tables",
     "localTools": {
       "append_insight": "inline:append_insight",
@@ -505,7 +505,7 @@ name: mcp
       ],
       "type": "object"
     },
-    "instructions": "#!sys.mcp.invoke.read_query c358c2eb93fa9a98631cd9e4f324d7b59f56aee11c7ae32a00984ad5844dc32c",
+    "instructions": "#!sys.mcp.invoke.read_query e592cc0c9483290685611ba70bd8595829cc794f7eae0419eabb3388bf0d3529",
     "id": "inline:read_query",
     "localTools": {
       "append_insight": "inline:append_insight",
@@ -538,7 +538,7 @@ name: mcp
       ],
       "type": "object"
     },
-    "instructions": "#!sys.mcp.invoke.write_query c358c2eb93fa9a98631cd9e4f324d7b59f56aee11c7ae32a00984ad5844dc32c",
+    "instructions": "#!sys.mcp.invoke.write_query e592cc0c9483290685611ba70bd8595829cc794f7eae0419eabb3388bf0d3529",
     "id": "inline:write_query",
     "localTools": {
       "append_insight": "inline:append_insight",

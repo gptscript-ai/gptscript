@@ -2,8 +2,8 @@ package hash
 
 import (
 	"crypto/sha256"
-	"encoding/gob"
 	"encoding/hex"
+	"encoding/json"
 )
 
 func ID(parts ...string) string {
@@ -26,7 +26,7 @@ func Digest(obj any) string {
 	case string:
 		hash.Write([]byte(v))
 	default:
-		if err := gob.NewEncoder(hash).Encode(obj); err != nil {
+		if err := json.NewEncoder(hash).Encode(obj); err != nil {
 			panic(err)
 		}
 	}
