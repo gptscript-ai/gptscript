@@ -39,7 +39,10 @@ func (e *Engine) runHTTP(ctx Context, tool types.Tool, input string) (cmdRet *Re
 		return nil, err
 	}
 
-	var requestedEnvVars map[string]struct{}
+	var (
+		requestedEnvVars map[string]struct{}
+		daemonToken      string
+	)
 	if strings.HasSuffix(parsed.Hostname(), DaemonURLSuffix) {
 		referencedToolName := strings.TrimSuffix(parsed.Hostname(), DaemonURLSuffix)
 		referencedToolRefs, ok := tool.ToolMapping[referencedToolName]
@@ -50,7 +53,7 @@ func (e *Engine) runHTTP(ctx Context, tool types.Tool, input string) (cmdRet *Re
 		if !ok {
 			return nil, fmt.Errorf("failed to find tool [%s] for [%s]", referencedToolName, parsed.Hostname())
 		}
-		toolURL, err = e.startDaemon(referencedTool)
+		toolURL, daemonToken, err = e.startDaemon(referencedTool)
 		if err != nil {
 			return nil, err
 		}
@@ -83,6 +86,10 @@ func (e *Engine) runHTTP(ctx Context, tool types.Tool, input string) (cmdRet *Re
 	req, err := http.NewRequestWithContext(ctx.Ctx, http.MethodPost, toolURL, strings.NewReader(input))
 	if err != nil {
 		return nil, err
+	}
+
+	if daemonToken != "" {
+		req.Header.Add("X-GPTScript-Daemon-Token", daemonToken)
 	}
 
 	for _, k := range slices.Sorted(maps.Keys(envMap)) {
