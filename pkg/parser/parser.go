@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/getkin/kin-openapi/openapi3"
+	humav2 "github.com/danielgtaylor/huma/v2"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
@@ -54,9 +54,9 @@ func csv(line string) (result []string) {
 
 func addArg(line string, tool *types.Tool) error {
 	if tool.Arguments == nil {
-		tool.Arguments = &openapi3.Schema{
-			Type:       &openapi3.Types{"object"},
-			Properties: openapi3.Schemas{},
+		tool.Arguments = &humav2.Schema{
+			Type:       "object",
+			Properties: make(map[string]*humav2.Schema, 1),
 		}
 	}
 
@@ -65,11 +65,9 @@ func addArg(line string, tool *types.Tool) error {
 		return fmt.Errorf("invalid arg format: %s", line)
 	}
 
-	tool.Arguments.Properties[key] = &openapi3.SchemaRef{
-		Value: &openapi3.Schema{
-			Description: strings.TrimSpace(value),
-			Type:        &openapi3.Types{"string"},
-		},
+	tool.Arguments.Properties[key] = &humav2.Schema{
+		Description: strings.TrimSpace(value),
+		Type:        "string",
 	}
 
 	return nil

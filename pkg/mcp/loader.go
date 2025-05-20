@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/getkin/kin-openapi/openapi3"
+	humav2 "github.com/danielgtaylor/huma/v2"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -194,17 +194,16 @@ func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName s
 		if !allToolsAllowed && !slices.Contains(allowedTools, tool.Name) {
 			continue
 		}
+		if tool.Name == "" {
+			// I dunno, bad tool?
+			continue
+		}
 
-		var schema openapi3.Schema
+		var schema humav2.Schema
 
 		schemaData, err := json.Marshal(tool.InputSchema)
 		if err != nil {
 			panic(err)
-		}
-
-		if tool.Name == "" {
-			// I dunno, bad tool?
-			continue
 		}
 
 		if err := json.Unmarshal(schemaData, &schema); err != nil {

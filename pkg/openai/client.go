@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	humav2 "github.com/danielgtaylor/huma/v2"
 	openai "github.com/gptscript-ai/chat-completion-client"
 	"github.com/gptscript-ai/gptscript/pkg/cache"
 	"github.com/gptscript-ai/gptscript/pkg/counter"
@@ -405,7 +406,7 @@ func (c *Client) Call(ctx context.Context, messageRequest types.CompletionReques
 		var params any = tool.Function.Parameters
 		if tool.Function.Parameters == nil || len(tool.Function.Parameters.Properties) == 0 {
 			params = map[string]any{
-				"type":       "object",
+				"type":       humav2.TypeObject,
 				"properties": map[string]any{},
 			}
 		}

@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/getkin/kin-openapi/openapi3"
+	humav2 "github.com/danielgtaylor/huma/v2"
 	"github.com/google/shlex"
 	"github.com/gptscript-ai/gptscript/pkg/system"
 	"golang.org/x/exp/maps"
@@ -120,33 +120,33 @@ func (p Program) SetBlocking() Program {
 type BuiltinFunc func(ctx context.Context, env []string, input string, progress chan<- string) (string, error)
 
 type Parameters struct {
-	Name                string           `json:"name,omitempty"`
-	Description         string           `json:"description,omitempty"`
-	MaxTokens           int              `json:"maxTokens,omitempty"`
-	ModelName           string           `json:"modelName,omitempty"`
-	ModelProvider       bool             `json:"modelProvider,omitempty"`
-	JSONResponse        bool             `json:"jsonResponse,omitempty"`
-	Chat                bool             `json:"chat,omitempty"`
-	Temperature         *float32         `json:"temperature,omitempty"`
-	Cache               *bool            `json:"cache,omitempty"`
-	InternalPrompt      *bool            `json:"internalPrompt"`
-	Arguments           *openapi3.Schema `json:"arguments,omitempty"`
-	Tools               []string         `json:"tools,omitempty"`
-	GlobalTools         []string         `json:"globalTools,omitempty"`
-	GlobalModelName     string           `json:"globalModelName,omitempty"`
-	Context             []string         `json:"context,omitempty"`
-	ExportContext       []string         `json:"exportContext,omitempty"`
-	Export              []string         `json:"export,omitempty"`
-	Agents              []string         `json:"agents,omitempty"`
-	Credentials         []string         `json:"credentials,omitempty"`
-	ExportCredentials   []string         `json:"exportCredentials,omitempty"`
-	InputFilters        []string         `json:"inputFilters,omitempty"`
-	ExportInputFilters  []string         `json:"exportInputFilters,omitempty"`
-	OutputFilters       []string         `json:"outputFilters,omitempty"`
-	ExportOutputFilters []string         `json:"exportOutputFilters,omitempty"`
-	Blocking            bool             `json:"-"`
-	Stdin               bool             `json:"stdin,omitempty"`
-	Type                ToolType         `json:"type,omitempty"`
+	Name                string         `json:"name,omitempty"`
+	Description         string         `json:"description,omitempty"`
+	MaxTokens           int            `json:"maxTokens,omitempty"`
+	ModelName           string         `json:"modelName,omitempty"`
+	ModelProvider       bool           `json:"modelProvider,omitempty"`
+	JSONResponse        bool           `json:"jsonResponse,omitempty"`
+	Chat                bool           `json:"chat,omitempty"`
+	Temperature         *float32       `json:"temperature,omitempty"`
+	Cache               *bool          `json:"cache,omitempty"`
+	InternalPrompt      *bool          `json:"internalPrompt"`
+	Arguments           *humav2.Schema `json:"arguments,omitempty"`
+	Tools               []string       `json:"tools,omitempty"`
+	GlobalTools         []string       `json:"globalTools,omitempty"`
+	GlobalModelName     string         `json:"globalModelName,omitempty"`
+	Context             []string       `json:"context,omitempty"`
+	ExportContext       []string       `json:"exportContext,omitempty"`
+	Export              []string       `json:"export,omitempty"`
+	Agents              []string       `json:"agents,omitempty"`
+	Credentials         []string       `json:"credentials,omitempty"`
+	ExportCredentials   []string       `json:"exportCredentials,omitempty"`
+	InputFilters        []string       `json:"inputFilters,omitempty"`
+	ExportInputFilters  []string       `json:"exportInputFilters,omitempty"`
+	OutputFilters       []string       `json:"outputFilters,omitempty"`
+	ExportOutputFilters []string       `json:"exportOutputFilters,omitempty"`
+	Blocking            bool           `json:"-"`
+	Stdin               bool           `json:"stdin,omitempty"`
+	Type                ToolType       `json:"type,omitempty"`
 }
 
 func (p Parameters) allExports() []string {
@@ -486,7 +486,7 @@ func (t ToolDef) Print() string {
 		sort.Strings(keys)
 		for _, key := range keys {
 			prop := t.Arguments.Properties[key]
-			_, _ = fmt.Fprintf(buf, "Parameter: %s: %s\n", key, prop.Value.Description)
+			_, _ = fmt.Fprintf(buf, "Parameter: %s: %s\n", key, prop.Description)
 		}
 	}
 	if t.InternalPrompt != nil {
