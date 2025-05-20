@@ -65,7 +65,7 @@ func compressEnv(envs []string) (result []string) {
 	return
 }
 
-func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCategory ToolCategory) (cmdOut string, cmdErr error) {
+func (e *Engine) runCommand(ctx Context, tool types.Tool, input string) (cmdOut string, cmdErr error) {
 	id := counter.Next()
 
 	var combinedOutput string
@@ -128,7 +128,7 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 
 	cmd, stop, err := e.newCommand(commandCtx, extraEnv, tool, input, true)
 	if err != nil {
-		if toolCategory == NoCategory && ctx.Parent != nil {
+		if ctx.ToolCategory == NoCategory && ctx.Parent != nil {
 			return fmt.Sprintf("ERROR: got (%v) while parsing command", err), nil
 		}
 		return "", fmt.Errorf("got (%v) while parsing command", err)
@@ -167,7 +167,7 @@ func (e *Engine) runCommand(ctx Context, tool types.Tool, input string, toolCate
 
 	if err := cmd.Run(); err != nil && (commandCtx.Err() == nil || ctx.Ctx.Err() != nil) {
 		// If the command failed and the context hasn't been canceled, then return the error.
-		if toolCategory == NoCategory && ctx.Parent != nil {
+		if ctx.ToolCategory == NoCategory && ctx.Parent != nil {
 			// If this is a sub-call, then don't return the error; return the error as a message so that the LLM can retry.
 			return fmt.Sprintf("ERROR: got (%v) while running tool, OUTPUT: %s", err, stdoutAndErr), nil
 		}

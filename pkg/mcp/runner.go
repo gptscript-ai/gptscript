@@ -1,16 +1,16 @@
 package mcp
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
 
+	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
-func (l *Local) Run(ctx context.Context, _ chan<- types.CompletionStatus, tool types.Tool, input string) (string, error) {
+func (l *Local) Run(ctx engine.Context, _ chan<- types.CompletionStatus, tool types.Tool, input string) (string, error) {
 	fields := strings.Fields(tool.Instructions)
 	if len(fields) < 2 {
 		return "", fmt.Errorf("invalid mcp call, invalid number of fields in %s", tool.Instructions)
@@ -41,8 +41,16 @@ func (l *Local) Run(ctx context.Context, _ chan<- types.CompletionStatus, tool t
 	request.Params.Name = toolName
 	request.Params.Arguments = arguments
 
-	result, err := session.Client.CallTool(ctx, request)
+	result, err := session.Client.CallTool(ctx.Ctx, request)
 	if err != nil {
+		if ctx.ToolCategory == engine.NoCategory && ctx.Parent != nil {
+			var output []byte
+			if result != nil {
+				output, _ = json.Marshal(result)
+			}
+			// If this is a sub-call, then don't return the error; return the error as a message so that the LLM can retry.
+			return fmt.Sprintf("ERROR: got (%v) while running tool, OUTPUT: %s", err, string(output)), nil
+		}
 		return "", fmt.Errorf("failed to call tool %s: %w", toolName, err)
 	}
 
