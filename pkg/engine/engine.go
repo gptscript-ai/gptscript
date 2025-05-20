@@ -45,7 +45,7 @@ type Engine struct {
 }
 
 type MCPRunner interface {
-	Run(ctx context.Context, progress chan<- types.CompletionStatus, tool types.Tool, input string) (string, error)
+	Run(ctx Context, progress chan<- types.CompletionStatus, tool types.Tool, input string) (string, error)
 }
 
 type State struct {
@@ -313,7 +313,7 @@ func populateMessageParams(ctx Context, completion *types.CompletionRequest, too
 }
 
 func (e *Engine) runMCPInvoke(ctx Context, tool types.Tool, input string) (*Return, error) {
-	output, err := e.MCPRunner.Run(ctx.Ctx, e.Progress, tool, input)
+	output, err := e.MCPRunner.Run(ctx, e.Progress, tool, input)
 	if err != nil {
 		return nil, fmt.Errorf("failed to run MCP invoke: %w", err)
 	}
@@ -335,7 +335,7 @@ func (e *Engine) runCommandTools(ctx Context, tool types.Tool, input string) (*R
 	} else if tool.IsCall() {
 		return e.runCall(ctx, tool, input)
 	}
-	s, err := e.runCommand(ctx, tool, input, ctx.ToolCategory)
+	s, err := e.runCommand(ctx, tool, input)
 	return &Return{
 		Result: &s,
 	}, err
