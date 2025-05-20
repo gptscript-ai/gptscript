@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	humav2 "github.com/danielgtaylor/huma/v2"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gptscript-ai/gptscript/pkg/openapi"
 	"github.com/gptscript-ai/gptscript/pkg/types"
@@ -150,10 +151,9 @@ func getOpenAPITools(t *openapi3.T, defaultHost, source, targetToolName string) 
 					Parameters: types.Parameters{
 						Name:        toolName,
 						Description: toolDesc,
-						Arguments: &openapi3.Schema{
-							Type:       &openapi3.Types{"object"},
-							Properties: openapi3.Schemas{},
-							Required:   []string{},
+						Arguments: &humav2.Schema{
+							Type:       humav2.TypeObject,
+							Properties: make(map[string]*humav2.Schema),
 						},
 					},
 				},
@@ -174,7 +174,7 @@ func getOpenAPITools(t *openapi3.T, defaultHost, source, targetToolName string) 
 				}
 
 				// Add the new arg to the tool's arguments
-				tool.Arguments.Properties[param.Value.Name] = &openapi3.SchemaRef{Value: arg}
+				tool.Arguments.Properties[param.Value.Name] = openAPI3SchemaToHumaV2Schema(arg)
 
 				// Check whether it is required
 				if param.Value.Required {
@@ -227,7 +227,7 @@ func getOpenAPITools(t *openapi3.T, defaultHost, source, targetToolName string) 
 					}
 					// Unfortunately, the request body doesn't contain any good descriptor for it,
 					// so we just use "requestBodyContent" as the name of the arg.
-					tool.Arguments.Properties["requestBodyContent"] = &openapi3.SchemaRef{Value: arg}
+					tool.Arguments.Properties["requestBodyContent"] = openAPI3SchemaToHumaV2Schema(arg)
 					break
 				}
 
@@ -373,6 +373,147 @@ func parseServer(server *openapi3.Server) (string, error) {
 	return s, nil
 }
 
+// openAPI3SchemaToHumaV2Schema converts an openapi3.Schema to a humav2.Schema
+func openAPI3SchemaToHumaV2Schema(schema *openapi3.Schema) *humav2.Schema {
+	if schema == nil {
+		return nil
+	}
+
+	result := &humav2.Schema{
+		Title:       schema.Title,
+		Description: schema.Description,
+		Format:      schema.Format,
+		Nullable:    schema.Nullable,
+	}
+
+	// Convert type
+	if schema.Type != nil && len(*schema.Type) > 0 {
+		result.Type = (*schema.Type)[0]
+	}
+
+	// Convert enum
+	if schema.Enum != nil {
+		result.Enum = schema.Enum
+	}
+
+	// Convert min/max
+	if schema.Min != nil {
+		minVal := *schema.Min
+		result.Minimum = &minVal
+
+		// In OpenAPI 3, ExclusiveMin is a boolean flag that applies to Min
+		// In OpenAPI 3.1, ExclusiveMinimum is a separate value
+		if schema.ExclusiveMin {
+			result.ExclusiveMinimum = &minVal
+		}
+	}
+	if schema.Max != nil {
+		maxVal := *schema.Max
+		result.Maximum = &maxVal
+
+		// In OpenAPI 3, ExclusiveMax is a boolean flag that applies to Max
+		// In OpenAPI 3.1, ExclusiveMaximum is a separate value
+		if schema.ExclusiveMax {
+			result.ExclusiveMaximum = &maxVal
+		}
+	}
+
+	// Convert minLength/maxLength
+	if schema.MinLength != 0 {
+		minLength := int(schema.MinLength)
+		result.MinLength = &minLength
+	}
+	if schema.MaxLength != nil {
+		maxLength := int(*schema.MaxLength)
+		result.MaxLength = &maxLength
+	}
+
+	// Convert pattern
+	if schema.Pattern != "" {
+		result.Pattern = schema.Pattern
+	}
+
+	// Convert minItems/maxItems
+	if schema.MinItems != 0 {
+		minItems := int(schema.MinItems)
+		result.MinItems = &minItems
+	}
+	if schema.MaxItems != nil {
+		maxItems := int(*schema.MaxItems)
+		result.MaxItems = &maxItems
+	}
+
+	// Convert uniqueItems
+	result.UniqueItems = schema.UniqueItems
+
+	// Convert minProperties/maxProperties
+	if schema.MinProps != 0 {
+		minProps := int(schema.MinProps)
+		result.MinProperties = &minProps
+	}
+	if schema.MaxProps != nil {
+		maxProps := int(*schema.MaxProps)
+		result.MaxProperties = &maxProps
+	}
+
+	// Convert required
+	if schema.Required != nil {
+		result.Required = schema.Required
+	}
+
+	// Convert properties
+	if schema.Properties != nil {
+		result.Properties = make(map[string]*humav2.Schema, len(schema.Properties))
+		for name, propRef := range schema.Properties {
+			if propRef != nil && propRef.Value != nil {
+				result.Properties[name] = openAPI3SchemaToHumaV2Schema(propRef.Value)
+			}
+		}
+	}
+
+	// Convert items
+	if schema.Items != nil && schema.Items.Value != nil {
+		result.Items = openAPI3SchemaToHumaV2Schema(schema.Items.Value)
+	}
+
+	// Convert oneOf
+	if schema.OneOf != nil {
+		result.OneOf = make([]*humav2.Schema, len(schema.OneOf))
+		for i, oneOfRef := range schema.OneOf {
+			if oneOfRef != nil && oneOfRef.Value != nil {
+				result.OneOf[i] = openAPI3SchemaToHumaV2Schema(oneOfRef.Value)
+			}
+		}
+	}
+
+	// Convert anyOf
+	if schema.AnyOf != nil {
+		result.AnyOf = make([]*humav2.Schema, len(schema.AnyOf))
+		for i, anyOfRef := range schema.AnyOf {
+			if anyOfRef != nil && anyOfRef.Value != nil {
+				result.AnyOf[i] = openAPI3SchemaToHumaV2Schema(anyOfRef.Value)
+			}
+		}
+	}
+
+	// Convert allOf
+	if schema.AllOf != nil {
+		result.AllOf = make([]*humav2.Schema, len(schema.AllOf))
+		for i, allOfRef := range schema.AllOf {
+			if allOfRef != nil && allOfRef.Value != nil {
+				result.AllOf[i] = openAPI3SchemaToHumaV2Schema(allOfRef.Value)
+			}
+		}
+	}
+
+	// Convert not
+	if schema.Not != nil && schema.Not.Value != nil {
+		result.Not = openAPI3SchemaToHumaV2Schema(schema.Not.Value)
+	}
+
+	return result
+}
+
 func getOpenAPIToolsRevamp(t *openapi3.T, source, targetToolName string) ([]types.Tool, error) {
 	if t == nil {
 		return nil, fmt.Errorf("OpenAPI spec is nil")
@@ -402,16 +543,14 @@ func getOpenAPIToolsRevamp(t *openapi3.T, source, targetToolName string) ([]type
 			Parameters: types.Parameters{
 				Name:        types.ToolNormalizer("get-schema-" + t.Info.Title),
 				Description: fmt.Sprintf("Get the JSONSchema for the arguments for an operation for %s. You must do this before you run the operation.", t.Info.Title),
-				Arguments: &openapi3.Schema{
-					Type: &openapi3.Types{openapi3.TypeObject},
-					Properties: openapi3.Schemas{
+				Arguments: &humav2.Schema{
+					Type: humav2.TypeObject,
+					Properties: map[string]*humav2.Schema{
 						"operation": {
-							Value: &openapi3.Schema{
-								Type:        &openapi3.Types{openapi3.TypeString},
-								Title:       "operation",
-								Description: "the name of the operation to get the schema for",
-								Required:    []string{"operation"},
-							},
+							Type:        humav2.TypeString,
+							Title:       "operation",
+							Description: "the name of the operation to get the schema for",
+							Required:    []string{"operation"},
 						},
 					},
 				},
@@ -428,24 +567,20 @@ func getOpenAPIToolsRevamp(t *openapi3.T, source, targetToolName string) ([]type
 			Parameters: types.Parameters{
 				Name:        types.ToolNormalizer("run-operation-" + t.Info.Title),
 				Description: fmt.Sprintf("Run an operation for %s. You MUST call %s for the operation before you use this tool.", t.Info.Title, openapi.GetSchemaTool),
-				Arguments: &openapi3.Schema{
-					Type: &openapi3.Types{openapi3.TypeObject},
-					Properties: openapi3.Schemas{
+				Arguments: &humav2.Schema{
+					Type: humav2.TypeObject,
+					Properties: map[string]*humav2.Schema{
 						"operation": {
-							Value: &openapi3.Schema{
-								Type:        &openapi3.Types{openapi3.TypeString},
-								Title:       "operation",
-								Description: "the name of the operation to run",
-								Required:    []string{"operation"},
-							},
+							Type:        humav2.TypeString,
+							Title:       "operation",
+							Description: "the name of the operation to run",
+							Required:    []string{"operation"},
 						},
 						"args": {
-							Value: &openapi3.Schema{
-								Type:        &openapi3.Types{openapi3.TypeString},
-								Title:       "args",
-								Description: "the JSON string containing arguments; must match the JSONSchema for the operation",
-								Required:    []string{"args"},
-							},
+							Type:        humav2.TypeString,
+							Title:       "args",
+							Description: "the JSON string containing arguments; must match the JSONSchema for the operation",
+							Required:    []string{"args"},
 						},
 					},
 				},

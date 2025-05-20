@@ -36,16 +36,18 @@ types.ToolSet{
 				Name:        "getSchemaSwaggerPetstore",
 				Description: "Get the JSONSchema for the arguments for an operation for Swagger Petstore. You must do this before you run the operation.",
 				ModelName:   "gpt-4o",
-				Arguments: &openapi3.Schema{
-					Type: &openapi3.Types{
-						"object",
+				Arguments: &huma.Schema{
+					Type: "object",
+					Properties: map[string]*huma.Schema{
+						"operation": {
+							Type:        "string",
+							Title:       "operation",
+							Description: "the name of the operation to get the schema for",
+							Required: []string{
+								"operation",
+							},
+						},
 					},
-					Properties: openapi3.Schemas{"operation": &openapi3.SchemaRef{Value: &openapi3.Schema{
-						Type:        &openapi3.Types{"string"},
-						Title:       "operation",
-						Description: "the name of the operation to get the schema for",
-						Required:    []string{"operation"},
-					}}},
 				},
 			},
 			Instructions: "#!sys.openapi get-schema  <none>",
@@ -84,21 +86,21 @@ types.ToolSet{
 				Name:        "runOperationSwaggerPetstore",
 				Description: "Run an operation for Swagger Petstore. You MUST call get-schema for the operation before you use this tool.",
 				ModelName:   "gpt-4o",
-				Arguments: &openapi3.Schema{
-					Type: &openapi3.Types{"object"},
-					Properties: openapi3.Schemas{
-						"args": &openapi3.SchemaRef{Value: &openapi3.Schema{
-							Type:        &openapi3.Types{"string"},
+				Arguments: &huma.Schema{
+					Type: "object",
+					Properties: map[string]*huma.Schema{
+						"args": {
+							Type:        "string",
 							Title:       "args",
 							Description: "the JSON string containing arguments; must match the JSONSchema for the operation",
 							Required:    []string{"args"},
-						}},
-						"operation": &openapi3.SchemaRef{Value: &openapi3.Schema{
-							Type:        &openapi3.Types{"string"},
+						},
+						"operation": {
+							Type:        "string",
 							Title:       "operation",
 							Description: "the name of the operation to run",
 							Required:    []string{"operation"},
-						}},
+						},
 					},
 				},
 			},

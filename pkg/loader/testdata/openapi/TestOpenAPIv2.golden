@@ -56,16 +56,17 @@ types.ToolSet{
 				Name:        "listPets",
 				Description: "List all pets",
 				ModelName:   "gpt-4o",
-				Arguments: &openapi3.Schema{
-					Type: &openapi3.Types{
-						"object",
+				Arguments: &huma.Schema{
+					Type: "object",
+					Properties: map[string]*huma.Schema{
+						"limit": {
+							Type:        "integer",
+							Description: "How many items to return at one time (max 100)",
+							Format:      "int32",
+							Properties:  map[string]*huma.Schema{},
+							AllOf:       []*huma.Schema{},
+						},
 					},
-					Required: []string{},
-					Properties: openapi3.Schemas{"limit": &openapi3.SchemaRef{Value: &openapi3.Schema{
-						Type:        &openapi3.Types{"integer"},
-						Format:      "int32",
-						Description: "How many items to return at one time (max 100)",
-					}}},
 				},
 			},
 			Instructions: `#!sys.openapi '{"server":"http://petstore.swagger.io/v1","path":"/pets","method":"GET","bodyContentMIME":"","securityInfos":null,"queryParameters":[{"name":"limit","style":"","explode":null}],"pathParameters":null,"headerParameters":null,"cookieParameters":null}'`,
@@ -86,13 +87,15 @@ types.ToolSet{
 				Name:        "showPetById",
 				Description: "Info for a specific pet",
 				ModelName:   "gpt-4o",
-				Arguments: &openapi3.Schema{
-					Type:     &openapi3.Types{"object"},
-					Required: []string{"petId"},
-					Properties: openapi3.Schemas{"petId": &openapi3.SchemaRef{Value: &openapi3.Schema{
-						Type:        &openapi3.Types{"string"},
+				Arguments: &huma.Schema{
+					Type: "object",
+					Properties: map[string]*huma.Schema{"petId": {
+						Type:        "string",
 						Description: "The id of the pet to retrieve",
-					}}},
+						Properties:  map[string]*huma.Schema{},
+						AllOf:       []*huma.Schema{},
+					}},
+					Required: []string{"petId"},
 				},
 			},
 			Instructions: `#!sys.openapi '{"server":"http://petstore.swagger.io/v1","path":"/pets/{petId}","method":"GET","bodyContentMIME":"","securityInfos":null,"queryParameters":null,"pathParameters":[{"name":"petId","style":"","explode":null}],"headerParameters":null,"cookieParameters":null}'`,
