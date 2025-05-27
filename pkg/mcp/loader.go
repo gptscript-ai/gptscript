@@ -15,7 +15,8 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/gptscript-ai/gptscript/pkg/version"
-	"github.com/mark3labs/mcp-go/client"
+	mcpclient "github.com/mark3labs/mcp-go/client"
+	"github.com/mark3labs/mcp-go/client/transport"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -36,7 +37,7 @@ type Local struct {
 type Session struct {
 	ID         string
 	InitResult *mcp.InitializeResult
-	Client     client.MCPClient
+	Client     mcpclient.MCPClient
 	Config     ServerConfig
 }
 
@@ -117,7 +118,7 @@ func (l *Local) LoadTools(ctx context.Context, server ServerConfig, toolName str
 	// Reset so we don't start a new MCP server, no reason to if one is already running and the allowed tools change.
 	server.AllowedTools = nil
 
-	session, err := l.loadSession(server)
+	session, err := l.loadSession(server, true)
 	if err != nil {
 		return nil, err
 	}
@@ -279,7 +280,7 @@ func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName s
 	return toolDefs, nil
 }
 
-func (l *Local) loadSession(server ServerConfig) (*Session, error) {
+func (l *Local) loadSession(server ServerConfig, tryHTTPStreaming bool) (*Session, error) {
 	id := hash.Digest(server)
 	l.lock.Lock()
 	existing, ok := l.sessions[id]
@@ -294,11 +295,11 @@ func (l *Local) loadSession(server ServerConfig) (*Session, error) {
 	}
 
 	var (
-		c   *client.Client
+		c   *mcpclient.Client
 		err error
 	)
 	if server.Command != "" {
-		c, err = client.NewStdioMCPClient(server.Command, server.Env, server.Args...)
+		c, err = mcpclient.NewStdioMCPClient(server.Command, server.Env, server.Args...)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create MCP stdio client: %w", err)
 		}
@@ -314,7 +315,11 @@ func (l *Local) loadSession(server ServerConfig) (*Session, error) {
 			headers[k] = v
 		}
 
-		c, err = client.NewSSEMCPClient(url, client.WithHeaders(headers))
+		if tryHTTPStreaming {
+			c, err = mcpclient.NewStreamableHttpClient(url, transport.WithHTTPHeaders(headers))
+		} else {
+			c, err = mcpclient.NewSSEMCPClient(url, mcpclient.WithHeaders(headers))
+		}
 		if err != nil {
 			return nil, fmt.Errorf("failed to create MCP HTTP client: %w", err)
 		}
@@ -333,6 +338,13 @@ func (l *Local) loadSession(server ServerConfig) (*Session, error) {
 
 	initResult, err := c.Initialize(ctx, initRequest)
 	if err != nil {
+		if server.Command == "" && tryHTTPStreaming {
+			// The MCP spec indicates that trying to initialize the client for HTTP streaming and checking for an error
+			// is the recommended way to determine if the server supports HTTP streaming, falling back to SEE.
+			// Ideally, we can check for a 400-level error, but our client implementation doesn't expose that information.
+			// Retrying on any error is harmless.
+			return l.loadSession(server, false)
+		}
 		return nil, fmt.Errorf("failed to initialize MCP client: %w", err)
 	}
 
