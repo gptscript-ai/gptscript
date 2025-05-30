@@ -181,7 +181,7 @@ func (l *Local) Close() error {
 }
 
 func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName string, allowedTools []string) ([]types.Tool, error) {
-	allToolsAllowed := len(allowedTools) == 0 || slices.Contains(allowedTools, "*")
+	allToolsAllowed := allowedTools == nil || slices.Contains(allowedTools, "*")
 
 	tools, err := session.Client.ListTools(ctx, mcp.ListToolsRequest{})
 	if err != nil {
