@@ -5,7 +5,7 @@ Create well formed git commit message based off of the currently staged file
 contents. The message should convey why something was changed and not what
 changed. Use the well known format that has the prefix chore, fix, etc.
 
-Generate commit message based on all staged changes, except for changes to this script itself (commitmessager.gpt).
+Generate commit message based on all staged changes, except for changes to this script itself (git-commit.gpt).
 
 Do not use markdown format for the output.
 
