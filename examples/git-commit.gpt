@@ -1,19 +1,68 @@
-tools: gitstatus, sys.abort
+Tools: gitstatus, gitcommit, sys.abort, sys.read
+Chat: true
 
-Create well formed git commit message based of off the currently staged file
+Create well formed git commit message based off of the currently staged file
 contents. The message should convey why something was changed and not what
 changed. Use the well known format that has the prefix chore, fix, etc.
 
-Only include changed to *.go files and any change to the go.mod file. Exclude
-the go.sum file.
+Generate commit message based on all staged changes, except for changes to this script itself (commitmessager.gpt).
 
 Do not use markdown format for the output.
 
 If there are no changes abort.
 
+After generating the commit message, ask for user approval. Only proceed with
+the git commit if the user responds with 'yes' or 'y' (case insensitive).
+
+First call gitstatus to check for changes. If no changes found, call sys.abort.
+
+Then analyze the output from gitstatus and generate an appropriate conventional commit message.
+
+Display the generated commit message and ask for user confirmation using sys.read.
+
+If user confirms with 'yes' or 'y', call gitcommit with the message parameter.
+
 ---
-name: gitstatus
+Name: gitstatus
 
 #!/bin/sh
 
-git diff --staged
+# Check if there are any staged changes excluding this script
+git diff --staged --name-only | grep -v "git-commit.gpt" > /dev/null
+
+if [ $? -ne 0 ]; then
+    echo "No staged changes found (excluding git-commit.gpt)"
+    exit 1
+fi
+
+# Show staged changes excluding this script
+git diff --staged -- . ':!git-commit.gpt'
+
+---
+Name: gitcommit
+Param: message: The commit message to use
+
+#!/bin/sh
+
+# GPTScript passes parameters as environment variables
+# Try to get the message from different sources
+COMMIT_MESSAGE="${MESSAGE}"
+if [ -z "${COMMIT_MESSAGE}" ]; then
+    COMMIT_MESSAGE="${message}"
+fi
+if [ -z "${COMMIT_MESSAGE}" ]; then
+    COMMIT_MESSAGE="$1"
+fi
+
+# Check if message parameter is empty or unset
+if [ -z "${COMMIT_MESSAGE}" ]; then
+    echo "Error: No commit message provided."
+    echo "Debug: MESSAGE env var: '${MESSAGE}'"
+    echo "Debug: message param: '${message}'"
+    echo "Debug: \$1: '$1'"
+    exit 1
+fi
+
+# Proceed with the commit
+echo "Committing with message: ${COMMIT_MESSAGE}"
+git commit -m "${COMMIT_MESSAGE}"
