@@ -1,6 +1,6 @@
 `{
   "done": true,
-  "content": "{\"content\":[{\"type\":\"text\",\"text\":\"[{'1': 1}]\"}]}",
+  "content": "{\"isError\":false,\"content\":[{\"type\":\"text\",\"text\":\"[{'1': 1}]\"}]}",
   "toolID": "",
   "state": null
 }`

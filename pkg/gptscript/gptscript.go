@@ -19,6 +19,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/llm"
 	"github.com/gptscript-ai/gptscript/pkg/loader"
+	"github.com/gptscript-ai/gptscript/pkg/mcp"
 	"github.com/gptscript-ai/gptscript/pkg/monitor"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/openai"
@@ -262,7 +263,7 @@ func (g *GPTScript) Run(ctx context.Context, prg types.Program, envs []string, i
 	return g.Runner.Run(ctx, prg, envs, input, opts)
 }
 
-func (g *GPTScript) Close(closeDaemons bool) {
+func (g *GPTScript) Close(closeDaemonsAndMCP bool) {
 	if g.DeleteWorkspaceOnClose && g.WorkspacePath != "" {
 		if err := os.RemoveAll(g.WorkspacePath); err != nil {
 			log.Errorf("failed to delete workspace %s: %s", g.WorkspacePath, err)
@@ -271,8 +272,11 @@ func (g *GPTScript) Close(closeDaemons bool) {
 
 	g.close()
 
-	if closeDaemons {
+	if closeDaemonsAndMCP {
 		engine.CloseDaemons()
+		if err := mcp.DefaultLoader.Close(); err != nil {
+			log.Errorf("failed to close MCP loader: %s", err)
+		}
 	}
 }
 

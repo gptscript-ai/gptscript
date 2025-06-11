@@ -14,10 +14,7 @@ import (
 	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/types"
-	"github.com/gptscript-ai/gptscript/pkg/version"
-	mcpclient "github.com/mark3labs/mcp-go/client"
-	"github.com/mark3labs/mcp-go/client/transport"
-	"github.com/mark3labs/mcp-go/mcp"
+	nmcp "github.com/nanobot-ai/nanobot/pkg/mcp"
 )
 
 var (
@@ -35,10 +32,9 @@ type Local struct {
 }
 
 type Session struct {
-	ID         string
-	InitResult *mcp.InitializeResult
-	Client     mcpclient.MCPClient
-	Config     ServerConfig
+	ID     string
+	Client *nmcp.Client
+	Config ServerConfig
 }
 
 type Config struct {
@@ -101,7 +97,7 @@ func (l *Local) Load(ctx context.Context, tool types.Tool) (result []types.Tool,
 	}
 
 	for server := range maps.Keys(servers.MCPServers) {
-		tools, err := l.LoadTools(ctx, servers.MCPServers[server], tool.Name)
+		tools, err := l.LoadTools(ctx, servers.MCPServers[server], server, tool.Name)
 		if err != nil {
 			return nil, fmt.Errorf("failed to load MCP session for server %s: %w", server, err)
 		}
@@ -113,12 +109,12 @@ func (l *Local) Load(ctx context.Context, tool types.Tool) (result []types.Tool,
 	return nil, fmt.Errorf("no MCP server configuration found in tool instructions: %s", configData)
 }
 
-func (l *Local) LoadTools(ctx context.Context, server ServerConfig, toolName string) ([]types.Tool, error) {
+func (l *Local) LoadTools(ctx context.Context, server ServerConfig, serverName, toolName string) ([]types.Tool, error) {
 	allowedTools := server.AllowedTools
 	// Reset so we don't start a new MCP server, no reason to if one is already running and the allowed tools change.
 	server.AllowedTools = nil
 
-	session, err := l.loadSession(server, true)
+	session, err := l.loadSession(server, serverName)
 	if err != nil {
 		return nil, err
 	}
@@ -145,11 +141,12 @@ func (l *Local) ShutdownServer(server ServerConfig) error {
 
 	l.lock.Unlock()
 
-	if session == nil {
-		return nil
+	if session != nil && session.Client != nil {
+		session.Client.Session.Close()
+		session.Client.Session.Wait()
 	}
 
-	return session.Client.Close()
+	return nil
 }
 
 func (l *Local) Close() error {
@@ -172,9 +169,8 @@ func (l *Local) Close() error {
 	var errs []error
 	for id, session := range l.sessions {
 		logger.Infof("closing MCP session %s", id)
-		if err := session.Client.Close(); err != nil {
-			errs = append(errs, fmt.Errorf("failed to close MCP client %s: %w", id, err))
-		}
+		session.Client.Session.Close()
+		session.Client.Session.Wait()
 	}
 
 	return errors.Join(errs...)
@@ -183,7 +179,7 @@ func (l *Local) Close() error {
 func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName string, allowedTools []string) ([]types.Tool, error) {
 	allToolsAllowed := allowedTools == nil || slices.Contains(allowedTools, "*")
 
-	tools, err := session.Client.ListTools(ctx, mcp.ListToolsRequest{})
+	tools, err := session.Client.ListTools(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list tools: %w", err)
 	}
@@ -227,13 +223,13 @@ func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName s
 			},
 		}
 
-		if string(annotations) != "{}" {
+		if string(annotations) != "{}" && string(annotations) != "null" {
 			toolDef.MetaData = map[string]string{
 				"mcp-tool-annotations": string(annotations),
 			}
 		}
 
-		if tool.Annotations.Title != "" && !slices.Contains(strings.Fields(tool.Annotations.Title), "as") {
+		if tool.Annotations != nil && tool.Annotations.Title != "" && !slices.Contains(strings.Fields(tool.Annotations.Title), "as") {
 			toolNames = append(toolNames, tool.Name+" as "+tool.Annotations.Title)
 		} else {
 			toolNames = append(toolNames, tool.Name)
@@ -246,7 +242,7 @@ func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName s
 		ToolDef: types.ToolDef{
 			Parameters: types.Parameters{
 				Name:        toolName,
-				Description: session.InitResult.ServerInfo.Name,
+				Description: session.Client.Session.InitializeResult.ServerInfo.Name,
 				Export:      toolNames,
 			},
 			MetaData: map[string]string{
@@ -255,10 +251,10 @@ func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName s
 		},
 	}
 
-	if session.InitResult.Instructions != "" {
+	if session.Client.Session.InitializeResult.Instructions != "" {
 		data, _ := json.Marshal(map[string]any{
 			"tools":        toolNames,
-			"instructions": session.InitResult.Instructions,
+			"instructions": session.Client.Session.InitializeResult.Instructions,
 		})
 		toolDefs = append(toolDefs, types.Tool{
 			ToolDef: types.ToolDef{
@@ -266,7 +262,7 @@ func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName s
 					Name: session.ID,
 					Type: "context",
 				},
-				Instructions: types.EchoPrefix + "\n" + `# START MCP SERVER INFO: ` + session.InitResult.ServerInfo.Name + "\n" +
+				Instructions: types.EchoPrefix + "\n" + `# START MCP SERVER INFO: ` + session.Client.Session.InitializeResult.ServerInfo.Name + "\n" +
 					`You have available the following tools from an MCP Server that has provided the following additional instructions` + "\n" +
 					string(data) + "\n" +
 					`# END MCP SERVER INFO` + "\n",
@@ -280,91 +276,59 @@ func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName s
 	return toolDefs, nil
 }
 
-func (l *Local) loadSession(server ServerConfig, tryHTTPStreaming bool) (*Session, error) {
+func (l *Local) loadSession(server ServerConfig, serverName string) (*Session, error) {
 	id := hash.Digest(server)
 	l.lock.Lock()
 	existing, ok := l.sessions[id]
 	if l.sessionCtx == nil {
 		l.sessionCtx, l.cancel = context.WithCancel(context.Background())
 	}
-	ctx := l.sessionCtx
 	l.lock.Unlock()
 
 	if ok {
 		return existing, nil
 	}
 
-	var (
-		c   *mcpclient.Client
-		err error
-	)
-	if server.Command != "" {
-		c, err = mcpclient.NewStdioMCPClient(server.Command, server.Env, server.Args...)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create MCP stdio client: %w", err)
-		}
-	} else {
-		url := server.URL
-		if url == "" {
-			url = server.Server
-		}
-
-		headers := make(map[string]string, len(server.Headers))
-		for _, h := range server.Headers {
-			k, v, _ := strings.Cut(h, "=")
-			headers[k] = v
-		}
-
-		if tryHTTPStreaming {
-			c, err = mcpclient.NewStreamableHttpClient(url, transport.WithHTTPHeaders(headers))
-		} else {
-			c, err = mcpclient.NewSSEMCPClient(url, mcpclient.WithHeaders(headers))
-		}
-		if err != nil {
-			return nil, fmt.Errorf("failed to create MCP HTTP client: %w", err)
-		}
-
-		// We expect the client to outlive this one request.
-		if err = c.Start(ctx); err != nil {
-			return nil, fmt.Errorf("failed to start MCP client: %w", err)
-		}
-	}
-
-	var initRequest mcp.InitializeRequest
-	initRequest.Params.ClientInfo = mcp.Implementation{
-		Name:    version.ProgramName,
-		Version: version.Get().String(),
-	}
-
-	initResult, err := c.Initialize(ctx, initRequest)
+	c, err := nmcp.NewClient(l.sessionCtx, serverName, nmcp.Server{
+		Unsandboxed: true,
+		Env:         splitIntoMap(server.Env),
+		Command:     server.Command,
+		Args:        server.Args,
+		BaseURL:     server.GetBaseURL(),
+		Headers:     splitIntoMap(server.Headers),
+	})
 	if err != nil {
-		if server.Command == "" && tryHTTPStreaming {
-			// The MCP spec indicates that trying to initialize the client for HTTP streaming and checking for an error
-			// is the recommended way to determine if the server supports HTTP streaming, falling back to SEE.
-			// Ideally, we can check for a 400-level error, but our client implementation doesn't expose that information.
-			// Retrying on any error is harmless.
-			return l.loadSession(server, false)
-		}
-		return nil, fmt.Errorf("failed to initialize MCP client: %w", err)
+		return nil, fmt.Errorf("failed to create MCP stdio client: %w", err)
 	}
 
 	result := &Session{
-		ID:         id,
-		InitResult: initResult,
-		Client:     c,
-		Config:     server,
+		ID:     id,
+		Client: c,
+		Config: server,
 	}
 
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
 	if existing, ok = l.sessions[id]; ok {
-		return existing, c.Close()
+		c.Session.Close()
+		return existing, nil
 	}
 
 	if l.sessions == nil {
-		l.sessions = make(map[string]*Session)
+		l.sessions = make(map[string]*Session, 1)
 	}
 	l.sessions[id] = result
 	return result, nil
+}
+
+func splitIntoMap(list []string) map[string]string {
+	result := make(map[string]string, len(list))
+	for _, s := range list {
+		k, v, ok := strings.Cut(s, "=")
+		if ok {
+			result[k] = v
+		}
+	}
+	return result
 }

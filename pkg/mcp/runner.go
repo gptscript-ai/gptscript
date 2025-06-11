@@ -7,7 +7,6 @@ import (
 
 	"github.com/gptscript-ai/gptscript/pkg/engine"
 	"github.com/gptscript-ai/gptscript/pkg/types"
-	"github.com/mark3labs/mcp-go/mcp"
 )
 
 func (l *Local) Run(ctx engine.Context, _ chan<- types.CompletionStatus, tool types.Tool, input string) (string, error) {
@@ -37,11 +36,7 @@ func (l *Local) Run(ctx engine.Context, _ chan<- types.CompletionStatus, tool ty
 		return "", fmt.Errorf("session not found for MCP server %s", id)
 	}
 
-	request := mcp.CallToolRequest{}
-	request.Params.Name = toolName
-	request.Params.Arguments = arguments
-
-	result, err := session.Client.CallTool(ctx.Ctx, request)
+	result, err := session.Client.Call(ctx.Ctx, toolName, arguments)
 	if err != nil {
 		if ctx.ToolCategory == engine.NoCategory && ctx.Parent != nil {
 			var output []byte

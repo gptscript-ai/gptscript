@@ -212,7 +212,7 @@ func TestMCPLoad(t *testing.T) {
 	}
 
 	r := tester.NewRunner(t)
-	prg, err := loader.ProgramFromSource(context.Background(), `
+	prg, err := loader.ProgramFromSource(t.Context(), `
 name: mcp
 
 #!mcp
