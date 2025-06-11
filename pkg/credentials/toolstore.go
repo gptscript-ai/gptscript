@@ -46,6 +46,10 @@ func (h *toolCredentialStore) Get(serverAddress string) (types.AuthConfig, error
 	}, nil
 }
 
+// GetAll will list all credentials in the credential store.
+// It MAY (but is not required to) filter the credentials based on the contexts provided.
+// This is only supported by some credential stores, while others will ignore it and return all credentials.
+// The caller of this function is still required to filter the output to only include the contexts requested.
 func (h *toolCredentialStore) GetAll() (map[string]types.AuthConfig, error) {
 	var (
 		serverAddresses map[string]string
