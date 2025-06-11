@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"io"
 	"os"
+	"os/exec"
 	"runtime"
 	"testing"
 
@@ -25,6 +26,17 @@ func toJSONString(t *testing.T, v interface{}) string {
 	x, err := json.MarshalIndent(v, "", "  ")
 	require.NoError(t, err)
 	return string(x)
+}
+
+func TestMain(m *testing.M) {
+	cmd := exec.CommandContext(context.Background(), "go", "build", "-o", "bin/gptscript", "../../main.go")
+	if err := cmd.Run(); err != nil {
+		panic(err)
+	}
+
+	os.Setenv("NANOBOT_BIN", "bin/gptscript")
+	defer os.Unsetenv("NANOBOT_BIN")
+	m.Run()
 }
 
 func TestAsterick(t *testing.T) {

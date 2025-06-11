@@ -1,4 +1,5 @@
 /bin
+/pkg/tests/bin
 /.idea
 /static/ui
 **/node_modules/
