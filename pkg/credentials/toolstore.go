@@ -1,7 +1,10 @@
 package credentials
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"net/url"
 	"regexp"
 	"strings"
@@ -13,8 +16,9 @@ import (
 )
 
 type toolCredentialStore struct {
-	file    credentials.Store
-	program client.ProgramFunc
+	file     credentials.Store
+	program  client.ProgramFunc
+	contexts []string
 }
 
 func (h *toolCredentialStore) Erase(serverAddress string) error {
@@ -43,7 +47,16 @@ func (h *toolCredentialStore) Get(serverAddress string) (types.AuthConfig, error
 }
 
 func (h *toolCredentialStore) GetAll() (map[string]types.AuthConfig, error) {
-	serverAddresses, err := client.List(h.program)
+	var (
+		serverAddresses map[string]string
+		err             error
+	)
+	if len(h.contexts) == 0 {
+		serverAddresses, err = client.List(h.program)
+	} else {
+		serverAddresses, err = listWithContexts(h.program, h.contexts)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -93,4 +106,45 @@ func (h *toolCredentialStore) Store(authConfig types.AuthConfig) error {
 		Username:  authConfig.Username,
 		Secret:    authConfig.Password,
 	})
+}
+
+// listWithContexts is almost an exact copy of the List function in Docker's libraries,
+// the only difference being that we pass the context through as input to the program.
+// This will allow some credential stores, like Postgres, to do an optimized list.
+func listWithContexts(program client.ProgramFunc, contexts []string) (map[string]string, error) {
+	cmd := program(credentials2.ActionList)
+
+	contextsJSON, err := json.Marshal(contexts)
+	if err != nil {
+		return nil, err
+	}
+
+	cmd.Input(bytes.NewReader(contextsJSON))
+	out, err := cmd.Output()
+	if err != nil {
+		t := strings.TrimSpace(string(out))
+
+		if isValidErr := isValidCredsMessage(t); isValidErr != nil {
+			err = isValidErr
+		}
+
+		return nil, fmt.Errorf("error listing credentials - err: %v, out: `%s`", err, t)
+	}
+
+	var resp map[string]string
+	if err = json.NewDecoder(bytes.NewReader(out)).Decode(&resp); err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func isValidCredsMessage(msg string) error {
+	if credentials2.IsCredentialsMissingServerURLMessage(msg) {
+		return credentials2.NewErrCredentialsMissingServerURL()
+	}
+	if credentials2.IsCredentialsMissingUsernameMessage(msg) {
+		return credentials2.NewErrCredentialsMissingUsername()
+	}
+	return nil
 }
