@@ -49,7 +49,7 @@ serve-docs:
 
 # This will initialize the node_modules needed to run the docs dev server. Run this before running serve-docs
 init-docs:
-	docker run --rm --workdir=/docs -v $${PWD}/docs:/docs node:18-buster yarn install
+	docker run --rm --workdir=/docs -v $${PWD}/docs:/docs node:18-buster npm install
 
 # Ensure docs build without errors. Makes sure generated docs are in-sync with CLI.
 validate-docs: gen-docs
