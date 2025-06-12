@@ -55,7 +55,8 @@ func (m *mockProgram) Output() ([]byte, error) {
 	return nil, nil
 }
 
-func NewMockProgram(t *testing.T, mode string) client.ProgramFunc {
+func newMockProgram(t *testing.T, mode string) client.ProgramFunc {
+	t.Helper()
 	return func(args ...string) client.Program {
 		p := &mockProgram{
 			mode: mode,
@@ -68,8 +69,8 @@ func NewMockProgram(t *testing.T, mode string) client.ProgramFunc {
 }
 
 func TestGetAll(t *testing.T) {
-	dbProgram := NewMockProgram(t, "db")
-	normalProgram := NewMockProgram(t, "normal")
+	dbProgram := newMockProgram(t, "db")
+	normalProgram := newMockProgram(t, "normal")
 
 	tests := []struct {
 		name     string
