@@ -269,8 +269,9 @@ func (s *Store) recreateCredential(store credentials.Store, serverAddress string
 func (s *Store) getStore() (credentials.Store, error) {
 	if s.program != nil {
 		return &toolCredentialStore{
-			file:    credentials.NewFileStore(s.cfg),
-			program: s.program,
+			file:     credentials.NewFileStore(s.cfg),
+			program:  s.program,
+			contexts: s.credCtxs,
 		}, nil
 	}
 	return credentials.NewFileStore(s.cfg), nil

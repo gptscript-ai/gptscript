@@ -53,7 +53,7 @@ init-docs:
 
 # Ensure docs build without errors. Makes sure generated docs are in-sync with CLI.
 validate-docs: gen-docs
-	docker run --rm --workdir=/docs -v $${PWD}/docs:/docs node:18-buster yarn build
+	docker run --rm --workdir=/docs -v $${PWD}/docs:/docs node:18-buster npm run build
 	if [ -n "$$(git status --porcelain --untracked-files=no)" ]; then \
 		git status --porcelain --untracked-files=no; \
 		echo "Encountered dirty repo!"; \
