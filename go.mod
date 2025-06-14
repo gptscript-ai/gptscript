@@ -26,7 +26,7 @@ require (
 	github.com/hexops/valast v1.4.4
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
 	github.com/mholt/archives v0.1.0
-	github.com/nanobot-ai/nanobot v0.0.6-0.20250612211144-0a23cf13a10f
+	github.com/nanobot-ai/nanobot v0.0.6-0.20250614013307-b0dcecdd9510
 	github.com/pkoukk/tiktoken-go v0.1.7
 	github.com/pkoukk/tiktoken-go-loader v0.0.2-0.20240522064338-c17e8bc0f699
 	github.com/rs/cors v1.11.0
