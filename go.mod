@@ -4,12 +4,14 @@ go 1.24.2
 
 toolchain go1.24.4
 
+replace github.com/danielgtaylor/huma/v2 => github.com/gptscript-ai/huma v0.0.0-20250617131016-b2081da6c65b
+
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/BurntSushi/locker v0.0.0-20171006230638-a6e239ea1c69
 	github.com/adrg/xdg v0.4.0
 	github.com/chzyer/readline v1.5.1
-	github.com/danielgtaylor/huma/v2 v2.32.0
+	github.com/danielgtaylor/huma/v2 v2.32.1-0.20250509235652-c7ead6f3c67f
 	github.com/docker/cli v26.0.0+incompatible
 	github.com/docker/docker-credential-helpers v0.8.1
 	github.com/fatih/color v1.17.0
@@ -20,7 +22,7 @@ require (
 	github.com/gptscript-ai/broadcaster v0.0.0-20240625175512-c43682019b86
 	github.com/gptscript-ai/chat-completion-client v0.0.0-20250224164718-139cb4507b1d
 	github.com/gptscript-ai/cmd v0.0.0-20250530150401-bc71fddf8070
-	github.com/gptscript-ai/go-gptscript v0.9.6-0.20250520154649-f1616a06f1b0
+	github.com/gptscript-ai/go-gptscript v0.9.6-0.20250617131750-9129819aea51
 	github.com/gptscript-ai/tui v0.0.0-20250419050840-5e79e16786c9
 	github.com/hexops/autogold/v2 v2.2.1
 	github.com/hexops/valast v1.4.4
@@ -95,12 +97,12 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/klauspost/compress v1.17.11 // indirect
+	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/lithammer/fuzzysearch v1.1.8 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
@@ -136,11 +138,11 @@ require (
 	github.com/yuin/goldmark v1.5.4 // indirect
 	github.com/yuin/goldmark-emoji v1.0.2 // indirect
 	go4.org v0.0.0-20230225012048-214862532bf5 // indirect
-	golang.org/x/crypto v0.31.0 // indirect
+	golang.org/x/crypto v0.38.0 // indirect
 	golang.org/x/mod v0.19.0 // indirect
-	golang.org/x/net v0.33.0 // indirect
+	golang.org/x/net v0.40.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/text v0.25.0 // indirect
 	golang.org/x/tools v0.23.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	mvdan.cc/gofumpt v0.6.0 // indirect
