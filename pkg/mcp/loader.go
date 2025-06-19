@@ -276,7 +276,7 @@ func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName s
 	return toolDefs, nil
 }
 
-func (l *Local) loadSession(server ServerConfig, serverName string) (*Session, error) {
+func (l *Local) loadSession(server ServerConfig, serverName string, clientOpts ...nmcp.ClientOption) (*Session, error) {
 	id := hash.Digest(server)
 	l.lock.Lock()
 	existing, ok := l.sessions[id]
@@ -296,7 +296,7 @@ func (l *Local) loadSession(server ServerConfig, serverName string) (*Session, e
 		Args:        server.Args,
 		BaseURL:     server.GetBaseURL(),
 		Headers:     splitIntoMap(server.Headers),
-	})
+	}, clientOpts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create MCP stdio client: %w", err)
 	}

@@ -4,8 +4,8 @@ import (
 	nmcp "github.com/nanobot-ai/nanobot/pkg/mcp"
 )
 
-func (l *Local) Client(server ServerConfig) (*Client, error) {
-	session, err := l.loadSession(server, "default")
+func (l *Local) Client(server ServerConfig, clientOpts ...nmcp.ClientOption) (*Client, error) {
+	session, err := l.loadSession(server, "default", clientOpts...)
 	if err != nil {
 		return nil, err
 	}
