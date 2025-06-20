@@ -290,12 +290,11 @@ func (l *Local) loadSession(server ServerConfig, serverName string, clientOpts .
 	}
 
 	c, err := nmcp.NewClient(l.sessionCtx, serverName, nmcp.Server{
-		Unsandboxed: true,
-		Env:         splitIntoMap(server.Env),
-		Command:     server.Command,
-		Args:        server.Args,
-		BaseURL:     server.GetBaseURL(),
-		Headers:     splitIntoMap(server.Headers),
+		Env:     splitIntoMap(server.Env),
+		Command: server.Command,
+		Args:    server.Args,
+		BaseURL: server.GetBaseURL(),
+		Headers: splitIntoMap(server.Headers),
 	}, clientOpts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create MCP stdio client: %w", err)
