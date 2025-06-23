@@ -147,34 +147,3 @@ jobs:
           echo "Running smoke test for model claude-3-5-sonnet-20240620"
           export PATH="$(pwd)/bin:${PATH}"
           make smoke
-
-  mistral-large-2402:
-    needs: check-label
-    if: ${{ needs.check-label.outputs.run_smoke_tests == 'true' }}
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout base repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-      - name: Checkout PR code if running for a PR
-        if: ${{ github.event_name == 'pull_request_target' }}
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
-      - uses: actions/setup-go@v5
-        with:
-          cache: false
-          go-version: "1.21"
-      - env:
-          OPENAI_API_KEY: ${{ secrets.SMOKE_OPENAI_API_KEY }}
-          GPTSCRIPT_DEFAULT_MODEL: mistral-large-2402 from github.com/gptscript-ai/mistral-laplateforme-provider
-          MISTRAL_API_KEY: ${{ secrets.SMOKE_MISTRAL_API_KEY }}
-          GPTSCRIPT_CREDENTIAL_OVERRIDE: "github.com/gptscript-ai/mistral-laplateforme-provider/credential:MISTRAL_API_KEY"
-        name: Run smoke test for mistral-large-2402
-        run: |
-          echo "Running smoke test for model mistral-large-2402"
-          export PATH="$(pwd)/bin:${PATH}"
-          make smoke
