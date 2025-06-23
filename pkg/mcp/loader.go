@@ -297,7 +297,7 @@ func (l *Local) loadSession(server ServerConfig, serverName string, clientOpts .
 		Headers: splitIntoMap(server.Headers),
 	}, clientOpts...)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create MCP stdio client: %w", err)
+		return nil, fmt.Errorf("failed to create MCP client: %w", err)
 	}
 
 	result := &Session{
