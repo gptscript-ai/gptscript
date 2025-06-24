@@ -1,0 +1,53 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interior Designer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div id="app" class="container is-fluid">
+        <section class="hero is-primary is-medium is-bold" style="background-image: linear-gradient(to right, #dda77b, #945D5E);">
+            <div class="hero-body">
+                <h1 class="title">Interior Designer</h1>
+                <h2 class="subtitle">Are you bored of how your room looks? Want some inspiration to redesign your room? Simply click a picutre of your room, add a prompt and upload it here and see the magic unfold!</h2>
+            </div>
+        </section>
+
+        <div class="box">
+            <div class="field">
+                <label class="label">Image</label>
+                <div class="control">
+                    <input class="input" type="file" accept="image/*" ref="imageInput" @change="handleImageUpload">
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">Describe your desired room style</label>
+                <div class="control">
+                    <textarea class="textarea" placeholder="I want a room that gives me summer chill vibes." v-model="prompt"></textarea>
+                </div>
+            </div>
+            <button class="button is-primary is-medium" style="background-color: #37123C;" @click="getIdeas" :disabled="isLoading">
+                <span v-if="isLoading" class="icon is-medium">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </span>
+                <span v-else>Design My Room</span>
+            </button>
+        </div>
+        <div class="box markdown-body" v-if="showIdeas">
+            <img :src="imageUrl" v-if="imageUrl" class="img-responsive" height="50%" width="50%" alt="Uploaded Image">
+            <div v-html="renderedMarkdown"></div>
+        </div>
+        <div class="gpt-logo"><a href="https://gptscript.ai" target="_blank"><img src="{{url_for('static', filename='made-with-gptscript.png')}}"/></a></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.15.4/js/all.js"></script>
+</body>
+</html>
