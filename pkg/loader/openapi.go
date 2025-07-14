@@ -174,7 +174,7 @@ func getOpenAPITools(t *openapi3.T, defaultHost, source, targetToolName string) 
 				}
 
 				// Add the new arg to the tool's arguments
-				tool.Arguments.Properties[param.Value.Name] = openAPI3SchemaToHumaV2Schema(arg)
+				tool.Arguments.Properties[param.Value.Name] = openAPI3SchemaToJSONSchema(arg)
 
 				// Check whether it is required
 				if param.Value.Required {
@@ -227,7 +227,7 @@ func getOpenAPITools(t *openapi3.T, defaultHost, source, targetToolName string) 
 					}
 					// Unfortunately, the request body doesn't contain any good descriptor for it,
 					// so we just use "requestBodyContent" as the name of the arg.
-					tool.Arguments.Properties["requestBodyContent"] = openAPI3SchemaToHumaV2Schema(arg)
+					tool.Arguments.Properties["requestBodyContent"] = openAPI3SchemaToJSONSchema(arg)
 					break
 				}
 
@@ -373,8 +373,8 @@ func parseServer(server *openapi3.Server) (string, error) {
 	return s, nil
 }
 
-// openAPI3SchemaToHumaV2Schema converts an openapi3.Schema to a jsonschema.Schema
-func openAPI3SchemaToHumaV2Schema(schema *openapi3.Schema) *jsonschema.Schema {
+// openAPI3SchemaToJSONSchema converts an openapi3.Schema to a jsonschema.Schema
+func openAPI3SchemaToJSONSchema(schema *openapi3.Schema) *jsonschema.Schema {
 	if schema == nil {
 		return nil
 	}
@@ -471,14 +471,14 @@ func openAPI3SchemaToHumaV2Schema(schema *openapi3.Schema) *jsonschema.Schema {
 		result.Properties = make(map[string]*jsonschema.Schema, len(schema.Properties))
 		for name, propRef := range schema.Properties {
 			if propRef != nil && propRef.Value != nil {
-				result.Properties[name] = openAPI3SchemaToHumaV2Schema(propRef.Value)
+				result.Properties[name] = openAPI3SchemaToJSONSchema(propRef.Value)
 			}
 		}
 	}
 
 	// Convert items
 	if schema.Items != nil && schema.Items.Value != nil {
-		result.Items = openAPI3SchemaToHumaV2Schema(schema.Items.Value)
+		result.Items = openAPI3SchemaToJSONSchema(schema.Items.Value)
 	}
 
 	// Convert oneOf
@@ -486,7 +486,7 @@ func openAPI3SchemaToHumaV2Schema(schema *openapi3.Schema) *jsonschema.Schema {
 		result.OneOf = make([]*jsonschema.Schema, len(schema.OneOf))
 		for i, oneOfRef := range schema.OneOf {
 			if oneOfRef != nil && oneOfRef.Value != nil {
-				result.OneOf[i] = openAPI3SchemaToHumaV2Schema(oneOfRef.Value)
+				result.OneOf[i] = openAPI3SchemaToJSONSchema(oneOfRef.Value)
 			}
 		}
 	}
@@ -496,7 +496,7 @@ func openAPI3SchemaToHumaV2Schema(schema *openapi3.Schema) *jsonschema.Schema {
 		result.AnyOf = make([]*jsonschema.Schema, len(schema.AnyOf))
 		for i, anyOfRef := range schema.AnyOf {
 			if anyOfRef != nil && anyOfRef.Value != nil {
-				result.AnyOf[i] = openAPI3SchemaToHumaV2Schema(anyOfRef.Value)
+				result.AnyOf[i] = openAPI3SchemaToJSONSchema(anyOfRef.Value)
 			}
 		}
 	}
@@ -506,14 +506,14 @@ func openAPI3SchemaToHumaV2Schema(schema *openapi3.Schema) *jsonschema.Schema {
 		result.AllOf = make([]*jsonschema.Schema, len(schema.AllOf))
 		for i, allOfRef := range schema.AllOf {
 			if allOfRef != nil && allOfRef.Value != nil {
-				result.AllOf[i] = openAPI3SchemaToHumaV2Schema(allOfRef.Value)
+				result.AllOf[i] = openAPI3SchemaToJSONSchema(allOfRef.Value)
 			}
 		}
 	}
 
 	// Convert not
 	if schema.Not != nil && schema.Not.Value != nil {
-		result.Not = openAPI3SchemaToHumaV2Schema(schema.Not.Value)
+		result.Not = openAPI3SchemaToJSONSchema(schema.Not.Value)
 	}
 
 	return result
