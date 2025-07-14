@@ -56,15 +56,17 @@ types.ToolSet{
 				Name:        "listPets",
 				Description: "List all pets",
 				ModelName:   "gpt-4o",
-				Arguments: &huma.Schema{
+				Arguments: &jsonschema.Schema{
 					Type: "object",
-					Properties: map[string]*huma.Schema{
+					Properties: map[string]*jsonschema.Schema{
 						"limit": {
-							Type:        "integer",
 							Description: "How many items to return at one time (max 100)",
-							Format:      "int32",
-							Properties:  map[string]*huma.Schema{},
-							AllOf:       []*huma.Schema{},
+							Types: []string{
+								"integer",
+							},
+							Properties: map[string]*jsonschema.Schema{},
+							AllOf:      []*jsonschema.Schema{},
+							Format:     "int32",
 						},
 					},
 				},
@@ -87,15 +89,15 @@ types.ToolSet{
 				Name:        "showPetById",
 				Description: "Info for a specific pet",
 				ModelName:   "gpt-4o",
-				Arguments: &huma.Schema{
-					Type: "object",
-					Properties: map[string]*huma.Schema{"petId": {
-						Type:        "string",
-						Description: "The id of the pet to retrieve",
-						Properties:  map[string]*huma.Schema{},
-						AllOf:       []*huma.Schema{},
-					}},
+				Arguments: &jsonschema.Schema{
+					Type:     "object",
 					Required: []string{"petId"},
+					Properties: map[string]*jsonschema.Schema{"petId": {
+						Description: "The id of the pet to retrieve",
+						Types:       []string{"string"},
+						Properties:  map[string]*jsonschema.Schema{},
+						AllOf:       []*jsonschema.Schema{},
+					}},
 				},
 			},
 			Instructions: `#!sys.openapi '{"server":"http://petstore.swagger.io/v1","path":"/pets/{petId}","method":"GET","bodyContentMIME":"","securityInfos":null,"queryParameters":null,"pathParameters":[{"name":"petId","style":"","explode":null}],"headerParameters":null,"cookieParameters":null}'`,

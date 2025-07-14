@@ -37,22 +37,26 @@ types.ToolSet{
 				Name:        "createPets",
 				Description: "Create a pet",
 				ModelName:   "gpt-4o",
-				Arguments: &huma.Schema{
+				Arguments: &jsonschema.Schema{
 					Type: "object",
-					Properties: map[string]*huma.Schema{
+					Properties: map[string]*jsonschema.Schema{
 						"requestBodyContent": {
-							Type: "object",
-							Properties: map[string]*huma.Schema{
-								"id": {
-									Type:   "integer",
-									Format: "int64",
-								},
-								"name": {Type: "string"},
-								"tag":  {Type: "string"},
+							Types: []string{
+								"object",
 							},
 							Required: []string{
 								"id",
 								"name",
+							},
+							Properties: map[string]*jsonschema.Schema{
+								"id": {
+									Types: []string{
+										"integer",
+									},
+									Format: "int64",
+								},
+								"name": {Types: []string{"string"}},
+								"tag":  {Types: []string{"string"}},
 							},
 						},
 					},
@@ -76,13 +80,13 @@ types.ToolSet{
 				Name:        "listPets",
 				Description: "List all pets",
 				ModelName:   "gpt-4o",
-				Arguments: &huma.Schema{
+				Arguments: &jsonschema.Schema{
 					Type: "object",
-					Properties: map[string]*huma.Schema{"limit": {
-						Type:        "integer",
+					Properties: map[string]*jsonschema.Schema{"limit": {
 						Description: "How many items to return at one time (max 100)",
-						Format:      "int32",
+						Types:       []string{"integer"},
 						Maximum:     valast.Ptr(float64(100)),
+						Format:      "int32",
 					}},
 				},
 			},
@@ -104,13 +108,13 @@ types.ToolSet{
 				Name:        "showPetById",
 				Description: "Info for a specific pet",
 				ModelName:   "gpt-4o",
-				Arguments: &huma.Schema{
-					Type: "object",
-					Properties: map[string]*huma.Schema{"petId": {
-						Type:        "string",
-						Description: "The id of the pet to retrieve",
-					}},
+				Arguments: &jsonschema.Schema{
+					Type:     "object",
 					Required: []string{"petId"},
+					Properties: map[string]*jsonschema.Schema{"petId": {
+						Description: "The id of the pet to retrieve",
+						Types:       []string{"string"},
+					}},
 				},
 			},
 			Instructions: `#!sys.openapi '{"server":"http://petstore.swagger.io/v1","path":"/pets/{petId}","method":"GET","bodyContentMIME":"","securityInfos":null,"queryParameters":null,"pathParameters":[{"name":"petId","style":"","explode":null}],"headerParameters":null,"cookieParameters":null}'`,

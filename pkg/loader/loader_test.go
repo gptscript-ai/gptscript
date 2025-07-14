@@ -131,13 +131,13 @@ func TestHelloWorld(t *testing.T) {
       "modelName": "gpt-4o",
       "internalPrompt": null,
       "arguments": {
+        "type": "object",
         "properties": {
           "input": {
-            "description": "Any string",
-            "type": "string"
+            "type": "string",
+            "description": "Any string"
           }
-        },
-        "type": "object"
+        }
       },
       "instructions": "echo \"${input}\"",
       "id": "https://get.gptscript.ai/echo.gpt:",

@@ -264,13 +264,13 @@ func TestSubChat(t *testing.T) {
                 "toolID": "testdata/TestSubChat/test.gpt:chatbot",
                 "name": "chatbot",
                 "parameters": {
+                  "type": "object",
                   "properties": {
                     "defaultPromptParameter": {
-                      "description": "Prompt to send to the assistant. This may be an instruction or question.",
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prompt to send to the assistant. This may be an instruction or question."
                     }
-                  },
-                  "type": "object"
+                  }
                 }
               }
             }
@@ -389,13 +389,13 @@ func TestSubChat(t *testing.T) {
                 "toolID": "testdata/TestSubChat/test.gpt:chatbot",
                 "name": "chatbot",
                 "parameters": {
+                  "type": "object",
                   "properties": {
                     "defaultPromptParameter": {
-                      "description": "Prompt to send to the assistant. This may be an instruction or question.",
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prompt to send to the assistant. This may be an instruction or question."
                     }
-                  },
-                  "type": "object"
+                  }
                 }
               }
             }

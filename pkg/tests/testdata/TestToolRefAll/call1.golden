@@ -6,13 +6,13 @@
         "toolID": "testdata/TestToolRefAll/test.gpt:tool",
         "name": "tool",
         "parameters": {
+          "type": "object",
           "properties": {
             "toolArg": {
-              "description": "stuff",
-              "type": "string"
+              "type": "string",
+              "description": "stuff"
             }
-          },
-          "type": "object"
+          }
         }
       }
     },
@@ -21,13 +21,13 @@
         "toolID": "testdata/TestToolRefAll/test.gpt:agentAssistant",
         "name": "agentAssistant",
         "parameters": {
+          "type": "object",
           "properties": {
             "defaultPromptParameter": {
-              "description": "Prompt to send to the tool. This may be an instruction or question.",
-              "type": "string"
+              "type": "string",
+              "description": "Prompt to send to the tool. This may be an instruction or question."
             }
-          },
-          "type": "object"
+          }
         }
       }
     },
@@ -36,13 +36,13 @@
         "toolID": "testdata/TestToolRefAll/test.gpt:none",
         "name": "none",
         "parameters": {
+          "type": "object",
           "properties": {
             "noneArg": {
-              "description": "stuff",
-              "type": "string"
+              "type": "string",
+              "description": "stuff"
             }
-          },
-          "type": "object"
+          }
         }
       }
     }

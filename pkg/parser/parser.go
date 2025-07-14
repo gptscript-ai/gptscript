@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	humav2 "github.com/danielgtaylor/huma/v2"
 	"github.com/gptscript-ai/gptscript/pkg/types"
+	"github.com/modelcontextprotocol/go-sdk/jsonschema"
 )
 
 var (
@@ -54,9 +54,9 @@ func csv(line string) (result []string) {
 
 func addArg(line string, tool *types.Tool) error {
 	if tool.Arguments == nil {
-		tool.Arguments = &humav2.Schema{
+		tool.Arguments = &jsonschema.Schema{
 			Type:       "object",
-			Properties: make(map[string]*humav2.Schema, 1),
+			Properties: make(map[string]*jsonschema.Schema, 1),
 		}
 	}
 
@@ -65,7 +65,7 @@ func addArg(line string, tool *types.Tool) error {
 		return fmt.Errorf("invalid arg format: %s", line)
 	}
 
-	tool.Arguments.Properties[key] = &humav2.Schema{
+	tool.Arguments.Properties[key] = &jsonschema.Schema{
 		Description: strings.TrimSpace(value),
 		Type:        "string",
 	}

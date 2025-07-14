@@ -302,16 +302,16 @@ name: mcp
     "modelName": "gpt-4o",
     "internalPrompt": null,
     "arguments": {
-      "properties": {
-        "insight": {
-          "description": "Business insight discovered from data analysis",
-          "type": "string"
-        }
-      },
+      "type": "object",
       "required": [
         "insight"
       ],
-      "type": "object"
+      "properties": {
+        "insight": {
+          "type": "string",
+          "description": "Business insight discovered from data analysis"
+        }
+      }
     },
     "instructions": "#!sys.mcp.invoke.append_insight e592cc0c9483290685611ba70bd8595829cc794f7eae0419eabb3388bf0d3529",
     "id": "inline:append_insight",
@@ -335,16 +335,16 @@ name: mcp
     "modelName": "gpt-4o",
     "internalPrompt": null,
     "arguments": {
-      "properties": {
-        "query": {
-          "description": "CREATE TABLE SQL statement",
-          "type": "string"
-        }
-      },
+      "type": "object",
       "required": [
         "query"
       ],
-      "type": "object"
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "CREATE TABLE SQL statement"
+        }
+      }
     },
     "instructions": "#!sys.mcp.invoke.create_table e592cc0c9483290685611ba70bd8595829cc794f7eae0419eabb3388bf0d3529",
     "id": "inline:create_table",
@@ -368,16 +368,16 @@ name: mcp
     "modelName": "gpt-4o",
     "internalPrompt": null,
     "arguments": {
-      "properties": {
-        "table_name": {
-          "description": "Name of the table to describe",
-          "type": "string"
-        }
-      },
+      "type": "object",
       "required": [
         "table_name"
       ],
-      "type": "object"
+      "properties": {
+        "table_name": {
+          "type": "string",
+          "description": "Name of the table to describe"
+        }
+      }
     },
     "instructions": "#!sys.mcp.invoke.describe_table e592cc0c9483290685611ba70bd8595829cc794f7eae0419eabb3388bf0d3529",
     "id": "inline:describe_table",
@@ -494,16 +494,16 @@ name: mcp
     "modelName": "gpt-4o",
     "internalPrompt": null,
     "arguments": {
-      "properties": {
-        "query": {
-          "description": "SELECT SQL query to execute",
-          "type": "string"
-        }
-      },
+      "type": "object",
       "required": [
         "query"
       ],
-      "type": "object"
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "SELECT SQL query to execute"
+        }
+      }
     },
     "instructions": "#!sys.mcp.invoke.read_query e592cc0c9483290685611ba70bd8595829cc794f7eae0419eabb3388bf0d3529",
     "id": "inline:read_query",
@@ -527,16 +527,16 @@ name: mcp
     "modelName": "gpt-4o",
     "internalPrompt": null,
     "arguments": {
-      "properties": {
-        "query": {
-          "description": "SQL query to execute",
-          "type": "string"
-        }
-      },
+      "type": "object",
       "required": [
         "query"
       ],
-      "type": "object"
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "SQL query to execute"
+        }
+      }
     },
     "instructions": "#!sys.mcp.invoke.write_query e592cc0c9483290685611ba70bd8595829cc794f7eae0419eabb3388bf0d3529",
     "id": "inline:write_query",

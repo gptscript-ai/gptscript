@@ -10,10 +10,10 @@ import (
 	"strings"
 	"sync"
 
-	humav2 "github.com/danielgtaylor/huma/v2"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
 	"github.com/gptscript-ai/gptscript/pkg/types"
+	"github.com/modelcontextprotocol/go-sdk/jsonschema"
 	nmcp "github.com/nanobot-ai/nanobot/pkg/mcp"
 )
 
@@ -196,7 +196,7 @@ func (l *Local) sessionToTools(ctx context.Context, session *Session, toolName s
 			continue
 		}
 
-		var schema humav2.Schema
+		var schema jsonschema.Schema
 
 		schemaData, err := json.Marshal(tool.InputSchema)
 		if err != nil {

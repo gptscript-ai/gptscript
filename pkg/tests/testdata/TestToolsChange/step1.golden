@@ -16,13 +16,13 @@
                 "name": "ls",
                 "description": "Lists the contents of a directory",
                 "parameters": {
+                  "type": "object",
                   "properties": {
                     "dir": {
-                      "description": "The directory to list",
-                      "type": "string"
+                      "type": "string",
+                      "description": "The directory to list"
                     }
-                  },
-                  "type": "object"
+                  }
                 }
               }
             },
@@ -32,13 +32,13 @@
                 "name": "read",
                 "description": "Reads the contents of a file. Can only read plain text files, not binary files",
                 "parameters": {
+                  "type": "object",
                   "properties": {
                     "filename": {
-                      "description": "The name of the file to read",
-                      "type": "string"
+                      "type": "string",
+                      "description": "The name of the file to read"
                     }
-                  },
-                  "type": "object"
+                  }
                 }
               }
             },
@@ -48,17 +48,17 @@
                 "name": "write",
                 "description": "Write the contents to a file",
                 "parameters": {
+                  "type": "object",
                   "properties": {
                     "content": {
-                      "description": "The content to write",
-                      "type": "string"
+                      "type": "string",
+                      "description": "The content to write"
                     },
                     "filename": {
-                      "description": "The name of the file to write to",
-                      "type": "string"
+                      "type": "string",
+                      "description": "The name of the file to write to"
                     }
-                  },
-                  "type": "object"
+                  }
                 }
               }
             }

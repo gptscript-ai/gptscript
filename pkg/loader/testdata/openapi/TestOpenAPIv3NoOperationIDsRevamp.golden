@@ -36,13 +36,13 @@ types.ToolSet{
 				Name:        "getSchemaSwaggerPetstore",
 				Description: "Get the JSONSchema for the arguments for an operation for Swagger Petstore. You must do this before you run the operation.",
 				ModelName:   "gpt-4o",
-				Arguments: &huma.Schema{
+				Arguments: &jsonschema.Schema{
 					Type: "object",
-					Properties: map[string]*huma.Schema{
+					Properties: map[string]*jsonschema.Schema{
 						"operation": {
-							Type:        "string",
 							Title:       "operation",
 							Description: "the name of the operation to get the schema for",
+							Type:        "string",
 							Required: []string{
 								"operation",
 							},
@@ -86,19 +86,19 @@ types.ToolSet{
 				Name:        "runOperationSwaggerPetstore",
 				Description: "Run an operation for Swagger Petstore. You MUST call get-schema for the operation before you use this tool.",
 				ModelName:   "gpt-4o",
-				Arguments: &huma.Schema{
+				Arguments: &jsonschema.Schema{
 					Type: "object",
-					Properties: map[string]*huma.Schema{
+					Properties: map[string]*jsonschema.Schema{
 						"args": {
-							Type:        "string",
 							Title:       "args",
 							Description: "the JSON string containing arguments; must match the JSONSchema for the operation",
+							Type:        "string",
 							Required:    []string{"args"},
 						},
 						"operation": {
-							Type:        "string",
 							Title:       "operation",
 							Description: "the name of the operation to run",
+							Type:        "string",
 							Required:    []string{"operation"},
 						},
 					},

@@ -6,13 +6,13 @@
         "toolID": "testdata/TestExportContext/test.gpt:subtool",
         "name": "subtool",
         "parameters": {
+          "type": "object",
           "properties": {
             "defaultPromptParameter": {
-              "description": "Prompt to send to the tool. This may be an instruction or question.",
-              "type": "string"
+              "type": "string",
+              "description": "Prompt to send to the tool. This may be an instruction or question."
             }
-          },
-          "type": "object"
+          }
         }
       }
     },
@@ -22,13 +22,13 @@
         "name": "sampletool",
         "description": "sample",
         "parameters": {
+          "type": "object",
           "properties": {
             "foo": {
-              "description": "foo description",
-              "type": "string"
+              "type": "string",
+              "description": "foo description"
             }
-          },
-          "type": "object"
+          }
         }
       }
     }

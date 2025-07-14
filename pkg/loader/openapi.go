@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	humav2 "github.com/danielgtaylor/huma/v2"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gptscript-ai/gptscript/pkg/openapi"
 	"github.com/gptscript-ai/gptscript/pkg/types"
+	"github.com/modelcontextprotocol/go-sdk/jsonschema"
 )
 
 var toolNameRegex = regexp.MustCompile(`[^a-zA-Z0-9_-]+`)
@@ -151,9 +151,9 @@ func getOpenAPITools(t *openapi3.T, defaultHost, source, targetToolName string) 
 					Parameters: types.Parameters{
 						Name:        toolName,
 						Description: toolDesc,
-						Arguments: &humav2.Schema{
-							Type:       humav2.TypeObject,
-							Properties: make(map[string]*humav2.Schema),
+						Arguments: &jsonschema.Schema{
+							Type:       "object",
+							Properties: make(map[string]*jsonschema.Schema),
 						},
 					},
 				},
@@ -373,22 +373,27 @@ func parseServer(server *openapi3.Server) (string, error) {
 	return s, nil
 }
 
-// openAPI3SchemaToHumaV2Schema converts an openapi3.Schema to a humav2.Schema
-func openAPI3SchemaToHumaV2Schema(schema *openapi3.Schema) *humav2.Schema {
+// openAPI3SchemaToHumaV2Schema converts an openapi3.Schema to a jsonschema.Schema
+func openAPI3SchemaToHumaV2Schema(schema *openapi3.Schema) *jsonschema.Schema {
 	if schema == nil {
 		return nil
 	}
 
-	result := &humav2.Schema{
+	result := &jsonschema.Schema{
 		Title:       schema.Title,
 		Description: schema.Description,
 		Format:      schema.Format,
-		Nullable:    schema.Nullable,
 	}
 
 	// Convert type
 	if schema.Type != nil && len(*schema.Type) > 0 {
-		result.Type = (*schema.Type)[0]
+		result.Types = *schema.Type
+	}
+
+	// In OpenAPI v3.0, there is a nullable field.
+	// In OpenAPI v3.1, nullable is specified by providing a separate type.
+	if schema.Nullable && !slices.Contains(result.Types, "null") {
+		result.Types = append(result.Types, "null")
 	}
 
 	// Convert enum
@@ -463,7 +468,7 @@ func openAPI3SchemaToHumaV2Schema(schema *openapi3.Schema) *humav2.Schema {
 
 	// Convert properties
 	if schema.Properties != nil {
-		result.Properties = make(map[string]*humav2.Schema, len(schema.Properties))
+		result.Properties = make(map[string]*jsonschema.Schema, len(schema.Properties))
 		for name, propRef := range schema.Properties {
 			if propRef != nil && propRef.Value != nil {
 				result.Properties[name] = openAPI3SchemaToHumaV2Schema(propRef.Value)
@@ -478,7 +483,7 @@ func openAPI3SchemaToHumaV2Schema(schema *openapi3.Schema) *humav2.Schema {
 
 	// Convert oneOf
 	if schema.OneOf != nil {
-		result.OneOf = make([]*humav2.Schema, len(schema.OneOf))
+		result.OneOf = make([]*jsonschema.Schema, len(schema.OneOf))
 		for i, oneOfRef := range schema.OneOf {
 			if oneOfRef != nil && oneOfRef.Value != nil {
 				result.OneOf[i] = openAPI3SchemaToHumaV2Schema(oneOfRef.Value)
@@ -488,7 +493,7 @@ func openAPI3SchemaToHumaV2Schema(schema *openapi3.Schema) *humav2.Schema {
 
 	// Convert anyOf
 	if schema.AnyOf != nil {
-		result.AnyOf = make([]*humav2.Schema, len(schema.AnyOf))
+		result.AnyOf = make([]*jsonschema.Schema, len(schema.AnyOf))
 		for i, anyOfRef := range schema.AnyOf {
 			if anyOfRef != nil && anyOfRef.Value != nil {
 				result.AnyOf[i] = openAPI3SchemaToHumaV2Schema(anyOfRef.Value)
@@ -498,7 +503,7 @@ func openAPI3SchemaToHumaV2Schema(schema *openapi3.Schema) *humav2.Schema {
 
 	// Convert allOf
 	if schema.AllOf != nil {
-		result.AllOf = make([]*humav2.Schema, len(schema.AllOf))
+		result.AllOf = make([]*jsonschema.Schema, len(schema.AllOf))
 		for i, allOfRef := range schema.AllOf {
 			if allOfRef != nil && allOfRef.Value != nil {
 				result.AllOf[i] = openAPI3SchemaToHumaV2Schema(allOfRef.Value)
@@ -543,11 +548,11 @@ func getOpenAPIToolsRevamp(t *openapi3.T, source, targetToolName string) ([]type
 			Parameters: types.Parameters{
 				Name:        types.ToolNormalizer("get-schema-" + t.Info.Title),
 				Description: fmt.Sprintf("Get the JSONSchema for the arguments for an operation for %s. You must do this before you run the operation.", t.Info.Title),
-				Arguments: &humav2.Schema{
-					Type: humav2.TypeObject,
-					Properties: map[string]*humav2.Schema{
+				Arguments: &jsonschema.Schema{
+					Type: "object",
+					Properties: map[string]*jsonschema.Schema{
 						"operation": {
-							Type:        humav2.TypeString,
+							Type:        "string",
 							Title:       "operation",
 							Description: "the name of the operation to get the schema for",
 							Required:    []string{"operation"},
@@ -567,17 +572,17 @@ func getOpenAPIToolsRevamp(t *openapi3.T, source, targetToolName string) ([]type
 			Parameters: types.Parameters{
 				Name:        types.ToolNormalizer("run-operation-" + t.Info.Title),
 				Description: fmt.Sprintf("Run an operation for %s. You MUST call %s for the operation before you use this tool.", t.Info.Title, openapi.GetSchemaTool),
-				Arguments: &humav2.Schema{
-					Type: humav2.TypeObject,
-					Properties: map[string]*humav2.Schema{
+				Arguments: &jsonschema.Schema{
+					Type: "object",
+					Properties: map[string]*jsonschema.Schema{
 						"operation": {
-							Type:        humav2.TypeString,
+							Type:        "string",
 							Title:       "operation",
 							Description: "the name of the operation to run",
 							Required:    []string{"operation"},
 						},
 						"args": {
-							Type:        humav2.TypeString,
+							Type:        "string",
 							Title:       "args",
 							Description: "the JSON string containing arguments; must match the JSONSchema for the operation",
 							Required:    []string{"args"},
