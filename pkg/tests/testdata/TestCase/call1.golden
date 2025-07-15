@@ -7,13 +7,13 @@
         "name": "Bob",
         "description": "I'm Bob, a friendly guy.",
         "parameters": {
+          "type": "object",
           "properties": {
             "question": {
-              "description": "The question to ask Bob.",
-              "type": "string"
+              "type": "string",
+              "description": "The question to ask Bob."
             }
-          },
-          "type": "object"
+          }
         }
       }
     }

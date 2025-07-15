@@ -14,13 +14,13 @@
                 "toolID": "testdata/TestDualSubChat/test.gpt:chatbot",
                 "name": "chatbot",
                 "parameters": {
+                  "type": "object",
                   "properties": {
                     "defaultPromptParameter": {
-                      "description": "Prompt to send to the assistant. This may be an instruction or question.",
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prompt to send to the assistant. This may be an instruction or question."
                     }
-                  },
-                  "type": "object"
+                  }
                 }
               }
             },
@@ -29,13 +29,13 @@
                 "toolID": "testdata/TestDualSubChat/test.gpt:chatbot2",
                 "name": "chatbot2",
                 "parameters": {
+                  "type": "object",
                   "properties": {
                     "defaultPromptParameter": {
-                      "description": "Prompt to send to the assistant. This may be an instruction or question.",
-                      "type": "string"
+                      "type": "string",
+                      "description": "Prompt to send to the assistant. This may be an instruction or question."
                     }
-                  },
-                  "type": "object"
+                  }
                 }
               }
             }
@@ -135,13 +135,13 @@
                       "name": "chatFinish",
                       "description": "Concludes the conversation. This can not be used to ask a question.",
                       "parameters": {
+                        "type": "object",
                         "properties": {
                           "return": {
-                            "description": "The instructed value to return or a summary of the dialog if no value is instructed",
-                            "type": "string"
+                            "type": "string",
+                            "description": "The instructed value to return or a summary of the dialog if no value is instructed"
                           }
-                        },
-                        "type": "object"
+                        }
                       }
                     }
                   }
@@ -200,13 +200,13 @@
                       "name": "chatFinish",
                       "description": "Concludes the conversation. This can not be used to ask a question.",
                       "parameters": {
+                        "type": "object",
                         "properties": {
                           "return": {
-                            "description": "The instructed value to return or a summary of the dialog if no value is instructed",
-                            "type": "string"
+                            "type": "string",
+                            "description": "The instructed value to return or a summary of the dialog if no value is instructed"
                           }
-                        },
-                        "type": "object"
+                        }
                       }
                     }
                   }

@@ -7,13 +7,13 @@
         "toolID": "testdata/TestSysContext/file.gpt:I am Superman Agent",
         "name": "iAmSuperman",
         "parameters": {
+          "type": "object",
           "properties": {
             "defaultPromptParameter": {
-              "description": "Prompt to send to the tool. This may be an instruction or question.",
-              "type": "string"
+              "type": "string",
+              "description": "Prompt to send to the tool. This may be an instruction or question."
             }
-          },
-          "type": "object"
+          }
         }
       }
     }

@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	humav2 "github.com/danielgtaylor/huma/v2"
+	"github.com/modelcontextprotocol/go-sdk/jsonschema"
 )
 
 // Suffix is default suffix of gptscript files
@@ -26,9 +26,9 @@ You don't move to the next step until you have a result.
 // to just send pure text but the interface required JSON (as that is the fundamental interface of tools in OpenAI)
 var DefaultPromptParameter = "defaultPromptParameter"
 
-var DefaultToolSchema = humav2.Schema{
+var DefaultToolSchema = jsonschema.Schema{
 	Type: "object",
-	Properties: map[string]*humav2.Schema{
+	Properties: map[string]*jsonschema.Schema{
 		DefaultPromptParameter: {
 			Description: "Prompt to send to the tool. This may be an instruction or question.",
 			Type:        "string",
@@ -36,9 +36,9 @@ var DefaultToolSchema = humav2.Schema{
 	},
 }
 
-var DefaultChatSchema = humav2.Schema{
+var DefaultChatSchema = jsonschema.Schema{
 	Type: "object",
-	Properties: map[string]*humav2.Schema{
+	Properties: map[string]*jsonschema.Schema{
 		DefaultPromptParameter: {
 			Description: "Prompt to send to the assistant. This may be an instruction or question.",
 			Type:        "string",

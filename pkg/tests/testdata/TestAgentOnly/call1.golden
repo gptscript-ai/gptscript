@@ -7,13 +7,13 @@
         "toolID": "testdata/TestAgentOnly/test.gpt:agent2",
         "name": "agent2",
         "parameters": {
+          "type": "object",
           "properties": {
             "defaultPromptParameter": {
-              "description": "Prompt to send to the assistant. This may be an instruction or question.",
-              "type": "string"
+              "type": "string",
+              "description": "Prompt to send to the assistant. This may be an instruction or question."
             }
-          },
-          "type": "object"
+          }
         }
       }
     }

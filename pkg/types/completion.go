@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	humav2 "github.com/danielgtaylor/huma/v2"
+	"github.com/modelcontextprotocol/go-sdk/jsonschema"
 )
 
 type CompletionRequest struct {
@@ -31,10 +31,10 @@ type ChatCompletionTool struct {
 }
 
 type CompletionFunctionDefinition struct {
-	ToolID      string         `json:"toolID,omitempty"`
-	Name        string         `json:"name"`
-	Description string         `json:"description,omitempty"`
-	Parameters  *humav2.Schema `json:"parameters"`
+	ToolID      string             `json:"toolID,omitempty"`
+	Name        string             `json:"name"`
+	Description string             `json:"description,omitempty"`
+	Parameters  *jsonschema.Schema `json:"parameters"`
 }
 
 // Chat message role defined by the OpenAI API.

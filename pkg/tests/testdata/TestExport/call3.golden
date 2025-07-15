@@ -6,13 +6,13 @@
         "toolID": "testdata/TestExport/parent.gpt:frommain",
         "name": "frommain",
         "parameters": {
+          "type": "object",
           "properties": {
             "defaultPromptParameter": {
-              "description": "Prompt to send to the tool. This may be an instruction or question.",
-              "type": "string"
+              "type": "string",
+              "description": "Prompt to send to the tool. This may be an instruction or question."
             }
-          },
-          "type": "object"
+          }
         }
       }
     },
@@ -21,13 +21,13 @@
         "toolID": "testdata/TestExport/sub/child.gpt:transient",
         "name": "transient",
         "parameters": {
+          "type": "object",
           "properties": {
             "defaultPromptParameter": {
-              "description": "Prompt to send to the tool. This may be an instruction or question.",
-              "type": "string"
+              "type": "string",
+              "description": "Prompt to send to the tool. This may be an instruction or question."
             }
-          },
-          "type": "object"
+          }
         }
       }
     },
@@ -36,13 +36,13 @@
         "toolID": "testdata/TestExport/parent.gpt:parent-local",
         "name": "parentLocal",
         "parameters": {
+          "type": "object",
           "properties": {
             "defaultPromptParameter": {
-              "description": "Prompt to send to the tool. This may be an instruction or question.",
-              "type": "string"
+              "type": "string",
+              "description": "Prompt to send to the tool. This may be an instruction or question."
             }
-          },
-          "type": "object"
+          }
         }
       }
     }
