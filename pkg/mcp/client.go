@@ -12,11 +12,13 @@ func (l *Local) Client(server ServerConfig, clientOpts ...nmcp.ClientOption) (*C
 
 	return &Client{
 		Client: session.Client,
+		ID:     session.ID,
 	}, nil
 }
 
 type Client struct {
 	*nmcp.Client
+	ID string
 }
 
 func (c *Client) Capabilities() nmcp.ServerCapabilities {
