@@ -13,7 +13,7 @@ func init() {
 	tiktoken.SetBpeLoader(tiktoken_loader.NewOfflineLoader())
 }
 
-const DefaultMaxTokens = 1_000_000 // This is the limit for GPT-4.1
+const DefaultMaxTokens = 400_000 // This is the limit for GPT-5
 
 func decreaseTenPercent(maxTokens int) int {
 	maxTokens = getBudget(maxTokens)
