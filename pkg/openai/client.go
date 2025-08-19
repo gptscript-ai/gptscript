@@ -666,11 +666,17 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 			},
 		}), nil
 	}
-
 	stream, err := c.c.CreateChatCompletionStream(ctx, request, headers, retryOpts...)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
-			err = nil
+			return types.CompletionMessage{
+				Content: []types.ContentPart{
+					{
+						Text: "User aborted the chat before model could respond",
+					},
+				},
+				Role: types.CompletionMessageRoleTypeAssistant,
+			}, nil
 		}
 		return types.CompletionMessage{}, err
 	}
@@ -683,6 +689,11 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 	for {
 		response, err := stream.Recv()
 		if errors.Is(err, io.EOF) || errors.Is(err, context.Canceled) {
+			if len(partialMessage.Content) > 0 && partialMessage.Content[0].Text == "" {
+				// Place a text holder if LLM doesn't respond or user cancel the stream before it can produce any response.
+				// In anthropic models it will yield an error about non-empty message for assistant message
+				partialMessage.Content[0].Text = "User aborted the chat or chat finished before LLM can respond"
+			}
 			// If the stream is finished, either because we got an EOF or the context was canceled,
 			// then we're done. The cache won't save the response if the context was canceled.
 			return partialMessage, c.cache.Store(ctx, c.cacheKey(request), partialMessage)
