@@ -142,7 +142,7 @@ func (l *Local) ShutdownServer(server ServerConfig) error {
 	l.lock.Unlock()
 
 	if session != nil && session.Client != nil {
-		session.Client.Session.Close()
+		session.Client.Session.Close(true)
 		session.Client.Session.Wait()
 	}
 
@@ -169,7 +169,7 @@ func (l *Local) Close() error {
 	var errs []error
 	for id, session := range l.sessions {
 		logger.Infof("closing MCP session %s", id)
-		session.Client.Session.Close()
+		session.Client.Session.Close(false)
 		session.Client.Session.Wait()
 	}
 
@@ -310,7 +310,7 @@ func (l *Local) loadSession(server ServerConfig, serverName string, clientOpts .
 	defer l.lock.Unlock()
 
 	if existing, ok = l.sessions[id]; ok {
-		c.Session.Close()
+		c.Session.Close(true)
 		return existing, nil
 	}
 
