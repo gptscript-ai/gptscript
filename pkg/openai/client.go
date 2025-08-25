@@ -689,7 +689,7 @@ func (c *Client) call(ctx context.Context, request openai.ChatCompletionRequest,
 	for {
 		response, err := stream.Recv()
 		if errors.Is(err, io.EOF) || errors.Is(err, context.Canceled) {
-			if len(partialMessage.Content) > 0 && partialMessage.Content[0].Text == "" {
+			if len(partialMessage.Content) > 0 && partialMessage.Content[0].Text == "" && errors.Is(err, context.Canceled) {
 				// Place a text holder if LLM doesn't respond or user cancel the stream before it can produce any response.
 				// In anthropic models it will yield an error about non-empty message for assistant message
 				partialMessage.Content[0].Text = "User aborted the chat or chat finished before LLM can respond"
