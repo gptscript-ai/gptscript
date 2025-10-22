@@ -126,10 +126,11 @@ func run(ctx context.Context, listener net.Listener, opts Options) error {
 	}
 	defer s.close()
 
-	s.addRoutes(http.DefaultServeMux)
+	mux := http.NewServeMux()
+	s.addRoutes(mux)
 
 	httpServer := &http.Server{
-		Handler: apply(http.DefaultServeMux,
+		Handler: apply(mux,
 			contentType("application/json"),
 			addRequestID,
 			addLogger,
