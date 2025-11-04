@@ -1,3 +1,4 @@
+//nolint:revive
 package types
 
 import "github.com/gptscript-ai/gptscript/pkg/mvl"
