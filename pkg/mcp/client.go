@@ -1,7 +1,7 @@
 package mcp
 
 import (
-	nmcp "github.com/nanobot-ai/nanobot/pkg/mcp"
+	nmcp "github.com/obot-platform/nanobot/pkg/mcp"
 )
 
 func (l *Local) Client(server ServerConfig, clientOpts ...nmcp.ClientOption) (*Client, error) {

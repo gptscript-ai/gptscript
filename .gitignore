@@ -1,6 +1,7 @@
 /bin
 /pkg/tests/bin
 /.idea
+/.zed
 /static/ui
 **/node_modules/
 **/package-lock.json

@@ -119,14 +119,14 @@ func TestHelloWorld(t *testing.T) {
   }
 }`).Equal(t, toString(prg))
 
-	prg, err = Program(context.Background(), "https://get.gptscript.ai/echo.gpt", "")
+	prg, err = Program(context.Background(), "https://raw.githubusercontent.com/gptscript-ai/gptscript/refs/heads/main/examples/echo.gpt", "")
 	require.NoError(t, err)
 
 	autogold.Expect(`{
-  "name": "https://get.gptscript.ai/echo.gpt",
-  "entryToolId": "https://get.gptscript.ai/echo.gpt:",
+  "name": "https://raw.githubusercontent.com/gptscript-ai/gptscript/refs/heads/main/examples/echo.gpt",
+  "entryToolId": "https://raw.githubusercontent.com/gptscript-ai/gptscript/refs/heads/main/examples/echo.gpt:",
   "toolSet": {
-    "https://get.gptscript.ai/echo.gpt:": {
+    "https://raw.githubusercontent.com/gptscript-ai/gptscript/refs/heads/main/examples/echo.gpt:": {
       "description": "Returns back the input of the script",
       "modelName": "gpt-4o",
       "internalPrompt": null,
@@ -140,15 +140,15 @@ func TestHelloWorld(t *testing.T) {
         }
       },
       "instructions": "echo \"${input}\"",
-      "id": "https://get.gptscript.ai/echo.gpt:",
+      "id": "https://raw.githubusercontent.com/gptscript-ai/gptscript/refs/heads/main/examples/echo.gpt:",
       "localTools": {
-        "": "https://get.gptscript.ai/echo.gpt:"
+        "": "https://raw.githubusercontent.com/gptscript-ai/gptscript/refs/heads/main/examples/echo.gpt:"
       },
       "source": {
-        "location": "https://get.gptscript.ai/echo.gpt",
+        "location": "https://raw.githubusercontent.com/gptscript-ai/gptscript/refs/heads/main/examples/echo.gpt",
         "lineNo": 1
       },
-      "workingDir": "https://get.gptscript.ai/"
+      "workingDir": "https://raw.githubusercontent.com/gptscript-ai/gptscript/refs/heads/main/examples"
     }
   }
 }`).Equal(t, toString(prg))

@@ -48,7 +48,7 @@ You can refer to GPTScript tool files that are served on the web or stored local
 This is useful for sharing tools across multiple scripts or for using tools that are not part of the core GPTScript distribution.
 
 ```yaml
-tools: https://get.gptscript.ai/echo.gpt
+tools: https://raw.githubusercontent.com/gptscript-ai/gptscript/refs/heads/main/examples/echo.gpt
 
 Echo the phrase "Hello, World!".
 ```
