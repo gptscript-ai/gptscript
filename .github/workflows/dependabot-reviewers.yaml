@@ -1,0 +1,65 @@
+name: Request reviewers for Dependabot PRs
+
+on:
+  pull_request_target:
+    types: [opened, reopened, ready_for_review]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  request_reviewers:
+    # Only run for Dependabot-authored PRs
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Request reviewers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
+          # --- Configure these ---
+          # Individual users (GitHub usernames), comma-separated
+          REVIEWERS: "njhale,g-linville,thedadams"
+
+          # Teams in your org (team slugs, not display names), comma-separated
+          TEAM_REVIEWERS: ""
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Convert comma-separated strings to JSON arrays
+          reviewers_json=$(python - <<'PY'
+          import os, json
+          s=os.getenv("REVIEWERS","").strip()
+          arr=[x.strip() for x in s.split(",") if x.strip()]
+          print(json.dumps(arr))
+          PY
+          )
+
+          team_reviewers_json=$(python - <<'PY'
+          import os, json
+          s=os.getenv("TEAM_REVIEWERS","").strip()
+          arr=[x.strip() for x in s.split(",") if x.strip()]
+          print(json.dumps(arr))
+          PY
+          )
+
+          payload=$(python - <<PY
+          import json
+          print(json.dumps({
+            "reviewers": json.loads('''$reviewers_json'''),
+            "team_reviewers": json.loads('''$team_reviewers_json'''),
+          }))
+          PY
+          )
+
+          echo "Requesting reviewers for PR #${PR_NUMBER} in ${OWNER}/${REPO}"
+          curl -sS -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${OWNER}/${REPO}/pulls/${PR_NUMBER}/requested_reviewers" \
+            -d "${payload}"
