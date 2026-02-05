@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/modelcontextprotocol/go-sdk/jsonschema"
+	"github.com/google/jsonschema-go/jsonschema"
 )
 
 // Suffix is default suffix of gptscript files

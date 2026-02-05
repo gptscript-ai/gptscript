@@ -10,9 +10,9 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/google/shlex"
 	"github.com/gptscript-ai/gptscript/pkg/system"
-	"github.com/modelcontextprotocol/go-sdk/jsonschema"
 	"golang.org/x/exp/maps"
 )
 
