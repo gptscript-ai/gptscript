@@ -9,7 +9,7 @@ import (
 	"github.com/gptscript-ai/cmd"
 	"github.com/gptscript-ai/gptscript/pkg/daemon"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
-	"github.com/nanobot-ai/nanobot/pkg/supervise"
+	"github.com/gptscript-ai/gptscript/pkg/nanobot/supervise"
 )
 
 func Main() {

@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gptscript-ai/gptscript/pkg/types"
 	"github.com/google/jsonschema-go/jsonschema"
+	"github.com/gptscript-ai/gptscript/pkg/types"
 )
 
 var (

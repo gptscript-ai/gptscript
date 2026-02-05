@@ -10,11 +10,11 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/gptscript-ai/gptscript/pkg/hash"
 	"github.com/gptscript-ai/gptscript/pkg/mvl"
+	nmcp "github.com/gptscript-ai/gptscript/pkg/nanobot/mcp"
 	"github.com/gptscript-ai/gptscript/pkg/types"
-	"github.com/google/jsonschema-go/jsonschema"
-	nmcp "github.com/nanobot-ai/nanobot/pkg/mcp"
 )
 
 var (

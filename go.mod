@@ -2,6 +2,8 @@ module github.com/gptscript-ai/gptscript
 
 go 1.25.5
 
+replace github.com/gptscript-ai/go-gptscript => ../go-gptscript
+
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/BurntSushi/locker v0.0.0-20171006230638-a6e239ea1c69
@@ -9,6 +11,7 @@ require (
 	github.com/chzyer/readline v1.5.1
 	github.com/docker/cli v26.0.0+incompatible
 	github.com/docker/docker-credential-helpers v0.8.1
+	github.com/dop251/goja v0.0.0-20260106131823-651366fbe6e3
 	github.com/fatih/color v1.18.0
 	github.com/getkin/kin-openapi v0.132.0
 	github.com/go-git/go-git/v5 v5.16.3
@@ -24,7 +27,6 @@ require (
 	github.com/hexops/valast v1.5.0
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056
 	github.com/mholt/archives v0.1.5
-	github.com/nanobot-ai/nanobot v0.0.52
 	github.com/pkoukk/tiktoken-go v0.1.7
 	github.com/pkoukk/tiktoken-go-loader v0.0.2-0.20240522064338-c17e8bc0f699
 	github.com/rs/cors v1.11.0
@@ -36,6 +38,7 @@ require (
 	github.com/tidwall/gjson v1.18.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/exp v0.0.0-20260112195511-716be5621a96
+	golang.org/x/oauth2 v0.34.0
 	golang.org/x/sync v0.19.0
 	golang.org/x/term v0.39.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -71,7 +74,6 @@ require (
 	github.com/cyphar/filepath-securejoin v0.4.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
-	github.com/dop251/goja v0.0.0-20260106131823-651366fbe6e3 // indirect
 	github.com/dsnet/compress v0.0.2-0.20230904184137-39efe44ab707 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
@@ -79,7 +81,6 @@ require (
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
-	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/pprof v0.0.0-20260202012954-cb029daf43ef // indirect
@@ -105,7 +106,6 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.26 // indirect
 	github.com/mikelolasagasti/xz v1.0.1 // indirect
 	github.com/minio/minlz v1.0.1 // indirect
-	github.com/modelcontextprotocol/go-sdk v0.2.0 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.16.0 // indirect
@@ -113,7 +113,6 @@ require (
 	github.com/nwaples/rardecode/v2 v2.2.0 // indirect
 	github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
-	github.com/obot-platform/mcp-oauth-proxy v0.0.3-0.20260106135339-3745d9b14a30 // indirect
 	github.com/olekukonko/tablewriter v0.0.6-0.20230925090304-df64c4bbad77 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
@@ -143,7 +142,6 @@ require (
 	golang.org/x/crypto v0.47.0 // indirect
 	golang.org/x/mod v0.32.0 // indirect
 	golang.org/x/net v0.49.0 // indirect
-	golang.org/x/oauth2 v0.34.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/tools v0.41.0 // indirect
