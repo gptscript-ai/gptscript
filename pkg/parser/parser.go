@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/gptscript-ai/gptscript/pkg/types"
-	"github.com/modelcontextprotocol/go-sdk/jsonschema"
+	"github.com/google/jsonschema-go/jsonschema"
 )
 
 var (

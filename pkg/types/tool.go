@@ -12,7 +12,7 @@ import (
 
 	"github.com/google/shlex"
 	"github.com/gptscript-ai/gptscript/pkg/system"
-	"github.com/modelcontextprotocol/go-sdk/jsonschema"
+	"github.com/google/jsonschema-go/jsonschema"
 	"golang.org/x/exp/maps"
 )
 

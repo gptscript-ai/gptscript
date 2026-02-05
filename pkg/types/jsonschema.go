@@ -1,7 +1,7 @@
 //nolint:revive
 package types
 
-import "github.com/modelcontextprotocol/go-sdk/jsonschema"
+import "github.com/google/jsonschema-go/jsonschema"
 
 func ObjectSchema(kv ...string) *jsonschema.Schema {
 	s := &jsonschema.Schema{
