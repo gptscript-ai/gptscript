@@ -303,15 +303,15 @@ name: mcp
     "internalPrompt": null,
     "arguments": {
       "type": "object",
-      "required": [
-        "insight"
-      ],
       "properties": {
         "insight": {
           "type": "string",
           "description": "Business insight discovered from data analysis"
         }
-      }
+      },
+      "required": [
+        "insight"
+      ]
     },
     "instructions": "#!sys.mcp.invoke.append_insight e592cc0c9483290685611ba70bd8595829cc794f7eae0419eabb3388bf0d3529",
     "id": "inline:append_insight",
@@ -336,15 +336,15 @@ name: mcp
     "internalPrompt": null,
     "arguments": {
       "type": "object",
-      "required": [
-        "query"
-      ],
       "properties": {
         "query": {
           "type": "string",
           "description": "CREATE TABLE SQL statement"
         }
-      }
+      },
+      "required": [
+        "query"
+      ]
     },
     "instructions": "#!sys.mcp.invoke.create_table e592cc0c9483290685611ba70bd8595829cc794f7eae0419eabb3388bf0d3529",
     "id": "inline:create_table",
@@ -369,15 +369,15 @@ name: mcp
     "internalPrompt": null,
     "arguments": {
       "type": "object",
-      "required": [
-        "table_name"
-      ],
       "properties": {
         "table_name": {
           "type": "string",
           "description": "Name of the table to describe"
         }
-      }
+      },
+      "required": [
+        "table_name"
+      ]
     },
     "instructions": "#!sys.mcp.invoke.describe_table e592cc0c9483290685611ba70bd8595829cc794f7eae0419eabb3388bf0d3529",
     "id": "inline:describe_table",
@@ -401,7 +401,8 @@ name: mcp
     "modelName": "gpt-4o",
     "internalPrompt": null,
     "arguments": {
-      "type": "object"
+      "type": "object",
+      "properties": {}
     },
     "instructions": "#!sys.mcp.invoke.list_tables e592cc0c9483290685611ba70bd8595829cc794f7eae0419eabb3388bf0d3529",
     "id": "inline:list_tables",
@@ -495,15 +496,15 @@ name: mcp
     "internalPrompt": null,
     "arguments": {
       "type": "object",
-      "required": [
-        "query"
-      ],
       "properties": {
         "query": {
           "type": "string",
           "description": "SELECT SQL query to execute"
         }
-      }
+      },
+      "required": [
+        "query"
+      ]
     },
     "instructions": "#!sys.mcp.invoke.read_query e592cc0c9483290685611ba70bd8595829cc794f7eae0419eabb3388bf0d3529",
     "id": "inline:read_query",
@@ -528,15 +529,15 @@ name: mcp
     "internalPrompt": null,
     "arguments": {
       "type": "object",
-      "required": [
-        "query"
-      ],
       "properties": {
         "query": {
           "type": "string",
           "description": "SQL query to execute"
         }
-      }
+      },
+      "required": [
+        "query"
+      ]
     },
     "instructions": "#!sys.mcp.invoke.write_query e592cc0c9483290685611ba70bd8595829cc794f7eae0419eabb3388bf0d3529",
     "id": "inline:write_query",

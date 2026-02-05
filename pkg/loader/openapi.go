@@ -12,9 +12,9 @@ import (
 	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/gptscript-ai/gptscript/pkg/openapi"
 	"github.com/gptscript-ai/gptscript/pkg/types"
-	"github.com/modelcontextprotocol/go-sdk/jsonschema"
 )
 
 var toolNameRegex = regexp.MustCompile(`[^a-zA-Z0-9_-]+`)
