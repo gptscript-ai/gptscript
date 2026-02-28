@@ -40,9 +40,9 @@ func logRequest(h http.Handler) http.Handler {
 			}
 		}()
 
-		l.Infof("Handling request: method %s, path %s", r.Method, r.URL.Path)
+		l.Debugf("Handling request: method %s, path %s", r.Method, r.URL.Path)
 		h.ServeHTTP(w, r)
-		l.Infof("Handled request: method %s, path %s", r.Method, r.URL.Path)
+		l.Debugf("Handled request: method %s, path %s", r.Method, r.URL.Path)
 	})
 }
 
