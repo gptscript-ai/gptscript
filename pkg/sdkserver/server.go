@@ -65,19 +65,24 @@ func Run(ctx context.Context, opts Options) error {
 
 // EmbeddedStart allows running the server as an embedded process that may use Stdin for input.
 // It returns the address the server is listening on.
-func EmbeddedStart(ctx context.Context, options ...Options) (string, error) {
+func EmbeddedStart(ctx context.Context, options ...Options) (string, func(), error) {
 	opts := complete(options...)
 
 	listener, err := newListener(opts)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
+	start := make(chan struct{})
+
 	go func() {
-		_ = run(ctx, listener, opts)
+		<-start
+		if err := run(ctx, listener, opts); err != nil {
+			log.Fatalf("server error: %v\n", err)
+		}
 	}()
 
-	return listener.Addr().String(), nil
+	return listener.Addr().String(), func() { close(start) }, nil
 }
 
 func (s *server) close() {
